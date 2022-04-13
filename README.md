@@ -46,7 +46,7 @@ DryDeploy.ps1 [-Apply] [-Actions <String[]>] [-ExcludeActions <String[]>] [-Buil
 
 ### SetConfig
 ```
-DryDeploy.ps1 [-EnvConfigPath <String>] [-ModuleConfigPath <String>] [<CommonParameters>]
+DryDeploy.ps1 [-EnvConfigPath <String>] [-ModuleConfig <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -89,7 +89,7 @@ if not
 
 ### EXAMPLE 2
 ```
-.\DryDeploy.ps1 -ModuleConfigPath ..\ModuleConfigs\MyModule -EnvConfigPath ..\EnvConfigs\MyEnvironment
+.\DryDeploy.ps1 -ModuleConfig ..\ModuleConfigs\MyModule -EnvConfigPath ..\EnvConfigs\MyEnvironment
 ```
 
 Creates a configuration combination of a Module Configuration and
@@ -414,7 +414,7 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -ModuleConfigPath
+### -ModuleConfig
 Path to the Directory where the ModuleConfiguration is.
 Use to 
 set the configuration combination (ConfigCombo)

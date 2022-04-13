@@ -8,7 +8,7 @@
 
 ## EnvConfigs
 - `EnvConfig`: is a configuration that describes an environment. If you're DevOpsing, you should have at least 3 environments, a dev, a test, in addition to your production. Even in a home lab, you should have at least 3 envs.
-- `ModuleConfigs`: is a repository that describes how one or multiple `roles`
+- `ModuleConfig`: is a repository that describes how one or multiple `roles`
 
 
 

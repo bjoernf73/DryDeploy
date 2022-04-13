@@ -84,7 +84,7 @@ no Phases are excluded
 Path to the Directory where the EnvConfiguration is. Use to 
 set the configuration combination (ConfigCombo)
 
-.PARAMETER ModuleConfigPath
+.PARAMETER ModuleConfig
 Path to the Directory where the ModuleConfiguration is. Use to 
 set the configuration combination (ConfigCombo)
 
@@ -160,7 +160,7 @@ Make sure to elevate your PowerShell for this one - it will fail
 if not
 
 .EXAMPLE
-.\DryDeploy.ps1 -ModuleConfigPath ..\ModuleConfigs\MyModule -EnvConfigPath ..\EnvConfigs\MyEnvironment
+.\DryDeploy.ps1 -ModuleConfig ..\ModuleConfigs\MyModule -EnvConfigPath ..\EnvConfigs\MyEnvironment
 Creates a configuration combination of a Module Configuration and
 a Env Configuration. The combination (the "ConfigCombo") is stored
 and used on subsequent runs until you change any of them again
@@ -347,7 +347,7 @@ param (
     a ModuleConfig and an InstanceConfig) will be stored and reused  
     for each subsequent action")]
     [String]
-    $EnvConfigPath,
+    $EnvConfig,
 
     [Parameter(ParameterSetName='SetConfig',
     HelpMessage="Path to the directory where the ModuleConfig is. 
@@ -355,7 +355,7 @@ param (
     a ModuleConfig and an InstanceConfig) will be stored and reused  
     for each subsequent action")]
     [String]
-    $ModuleConfigPath,
+    $ModuleConfig,
 
     [Parameter(ParameterSetName='Apply',
     HelpMessage="Specify a hashtable of parameters to splat to 
@@ -712,11 +712,11 @@ try {
     #
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     #! go through - does not make much sense
-    if ($EnvConfigPath -or $ModuleConfigPath) {
+    if ($EnvConfig -or $ModuleConfig) {
         # Resolve the EnvConfig
-        if ($EnvConfigPath) {
-            #Resolve-DryConfigCombo -Path ([IO.Path]::GetFullPath("$EnvConfigPath")) -Type 'Global'
-            Resolve-DryConfigCombo -Path (Resolve-DryFullPath -Path $EnvConfigPath -RootPath $ScriptPath) -Type 'Global'
+        if ($EnvConfig) {
+            #Resolve-DryConfigCombo -Path ([IO.Path]::GetFullPath("$EnvConfig")) -Type 'Global'
+            Resolve-DryConfigCombo -Path (Resolve-DryFullPath -Path $EnvConfig -RootPath $ScriptPath) -Type 'Global'
         }
         else {
             Resolve-DryConfigCombo -Type 'Global' -ErrorAction 'Continue'
@@ -724,8 +724,8 @@ try {
         Save-DryConfigCombo -Path $ConfigComboPath -ConfigCombo $ConfigCombo
 
         # Resolve the ModuleConfig
-        if ($ModuleConfigPath) {
-            Resolve-DryConfigCombo -Path (Resolve-DryFullPath -Path $ModuleConfigPath -RootPath $ScriptPath) -Type 'Module'
+        if ($ModuleConfig) {
+            Resolve-DryConfigCombo -Path (Resolve-DryFullPath -Path $ModuleConfig -RootPath $ScriptPath) -Type 'Module'
         }
         else {
             Resolve-DryConfigCombo -Type 'Module' -ErrorAction 'Continue'
@@ -739,10 +739,10 @@ try {
         # 
         #   ENVIRONMENT CONFIGURATION
         #
-        #   The Env Configuration contains environment specific, common, shared 
+        #   The EnvConfig contains environment specific, common, shared 
         #   configurations that every developer should use as a base config when 
         #   developing or deploying a ModuleConfig. Every environment should  
-        #   have it's own, customized environment config, which is shared among the 
+        #   have it's own, customized EnvConfig, which is shared among the 
         #   Ops team.  
         #
         #   The EnvConfig is a directory or repository containing two directories; 
