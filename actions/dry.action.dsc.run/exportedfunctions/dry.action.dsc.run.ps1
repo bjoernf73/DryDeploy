@@ -7,7 +7,7 @@ Function dry.action.dsc.run {
         [Parameter(Mandatory,HelpMessage="The resolved resource object")]
         [PSObject]$Resource,
 
-        [Parameter(Mandatory,HelpMessage="The resolved global configuration object")]
+        [Parameter(Mandatory,HelpMessage="The resolved environment configuration object")]
         [PSObject]$Configuration,
 
         [Parameter(Mandatory,HelpMessage="ResourceVariables contains resolved variable values from the configurations common_variables and resource_variables combined")]
@@ -331,7 +331,7 @@ Function dry.action.dsc.run {
         #   to deploy the DSC Configuration.
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        $DscTargetSystemPRECredentials = Get-DryCredential -Alias "$($Action.credentials.credential1)" -GlobalConfig $GLOBAL:GlobalConfigName
+        $DscTargetSystemPRECredentials = Get-DryCredential -Alias "$($Action.credentials.credential1)" -EnvConfig $GLOBAL:EnvConfigName
 
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -353,8 +353,8 @@ Function dry.action.dsc.run {
                 $_.type -eq 'winrm'
             }
             If ($Null -eq $SessionConfig) {
-                ol w "Unable to find 'connection' of type 'winrm' in global config"
-                Throw "Unable to find 'connection' of type 'winrm' in global config"
+                ol w "Unable to find 'connection' of type 'winrm' in environment config"
+                Throw "Unable to find 'connection' of type 'winrm' in environment config"
             }
             Else {
                 $GetDryPSSessionParameters += @{ 'SessionConfig'=$SessionConfig}
@@ -435,8 +435,8 @@ Function dry.action.dsc.run {
         }
 
         If ($Null -eq $SessionConfig) {
-            ol v "Unable to find 'connection' of type 'winrm' in global config"
-            Throw "Unable to find 'connection' of type 'winrm' in global config"
+            ol v "Unable to find 'connection' of type 'winrm' in environment config"
+            Throw "Unable to find 'connection' of type 'winrm' in environment config"
         }
         Else {
             $GetDryCIMSessionParameters += @{ 'SessionConfig'=$SessionConfig}
@@ -475,7 +475,7 @@ Function dry.action.dsc.run {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         If ($Action.credentials.credential2) {
             ol i @('Post-Credential',"$($Action.credentials.credential2) (credential2 - specific Post-Credential)")
-            $DscTargetSystemPOSTCredentials = Get-DryCredential -Alias "$($Action.credentials.credential2)" -GlobalConfig $GLOBAL:GlobalConfigName
+            $DscTargetSystemPOSTCredentials = Get-DryCredential -Alias "$($Action.credentials.credential2)" -EnvConfig $GLOBAL:EnvConfigName
             If ($MetaConfigObject.dsc_allow_alternating_post_credentials) {
                 ol i @('Allowing alternating credentials. Alternating between',"'$($Action.credentials.credential1)' and '$($Action.credentials.credential2)'")
                 $DscTargetSystemPOSTCredentialsArray = @($DscTargetSystemPRECredentials,$DscTargetSystemPOSTCredentials)
@@ -487,7 +487,7 @@ Function dry.action.dsc.run {
         }
         Else {
             ol i @('Post-Credential',"$($Action.credentials.credential2) (credential1 - same as Pre-Credential)")
-            $DscTargetSystemPOSTCredentials = Get-DryCredential -Alias "$($Action.credentials.credential1)" -GlobalConfig $GLOBAL:GlobalConfigName
+            $DscTargetSystemPOSTCredentials = Get-DryCredential -Alias "$($Action.credentials.credential1)" -EnvConfig $GLOBAL:EnvConfigName
             $DscTargetSystemPOSTCredentialsArray = @($DscTargetSystemPOSTCredentials)
         }
         

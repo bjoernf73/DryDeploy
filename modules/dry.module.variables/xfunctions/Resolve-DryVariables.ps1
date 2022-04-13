@@ -23,7 +23,7 @@ function Resolve-DryVariables {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory,HelpMessage="The variables to resolve. The variables may be expressions that resolves environment specific values by referencing
-        the global configuration (`$Configuration), the resource object (`$Resource), the action object (`$Action), or any other variable in a scope available
+        the environment configuration (`$Configuration), the resource object (`$Resource), the action object (`$Action), or any other variable in a scope available
         inside the function (for instance the global scope)")]
         [PSObject[]]$Variables,
 
@@ -38,7 +38,7 @@ function Resolve-DryVariables {
         [PSObject]
         $Resource,
 
-        [Parameter(HelpMessage="The resolved global configuration object. Not in use by the function, but may be used by expressions that resolves a value")]
+        [Parameter(HelpMessage="The resolved environment configuration object. Not in use by the function, but may be used by expressions that resolves a value")]
         [PSObject]
         $Configuration,
 

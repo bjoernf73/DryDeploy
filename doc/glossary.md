@@ -6,8 +6,8 @@
 
 - `resource`: Is an instantiation of a `role`. A `resource` is unique. If you delete it, that `resource` is gone, never to surface again in history. Any new instantiation of a `role`, even with the same name, same property values, is a different `resource`. 
 
-## GlobalConfigs
-- `GlobalConfig`: is a configuration that describes an environment. If you're DevOpsing, you should have at least 3 environments, a dev, a test, in addition to your production. Even in a home lab, you should have at least 3 envs.
+## EnvConfigs
+- `EnvConfig`: is a configuration that describes an environment. If you're DevOpsing, you should have at least 3 environments, a dev, a test, in addition to your production. Even in a home lab, you should have at least 3 envs.
 - `ModuleConfigs`: is a repository that describes how one or multiple `roles`
 
 

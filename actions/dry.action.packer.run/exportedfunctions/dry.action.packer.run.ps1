@@ -7,7 +7,7 @@ function dry.action.packer.run {
         [Parameter(Mandatory,HelpMessage="The resolved resource object")]
         [PSObject]$Resource,
 
-        [Parameter(Mandatory,HelpMessage="The resolved global configuration object")]
+        [Parameter(Mandatory,HelpMessage="The resolved environment configuration object")]
         [PSObject]$Configuration,
 
         [Parameter(Mandatory,HelpMessage="ResourceVariables contains resolved variable values from the configurations common_variables and resource_variables combined")]
@@ -61,7 +61,7 @@ function dry.action.packer.run {
         $CredIndex = 1
         while ($Action.credentials."credential$CredIndex") {
             $Credentials.Add([PSObject]@{
-                "credential$CredIndex" = Get-DryCredential -Alias ($Action.credentials."credential$CredIndex") -GlobalConfig $GLOBAL:GlobalConfigName
+                "credential$CredIndex" = Get-DryCredential -Alias ($Action.credentials."credential$CredIndex") -EnvConfig $GLOBAL:EnvConfigName
             })
             $CredIndex++
         }

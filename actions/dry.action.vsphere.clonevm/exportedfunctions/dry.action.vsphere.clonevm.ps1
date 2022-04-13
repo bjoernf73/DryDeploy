@@ -28,7 +28,7 @@ function dry.action.vsphere.clonevm {
         [Parameter(Mandatory,HelpMessage="The resolved resource object")]
         [PSObject]$Resource,
 
-        [Parameter(Mandatory,HelpMessage="The resolved global configuration object")]
+        [Parameter(Mandatory,HelpMessage="The resolved environment configuration object")]
         [PSObject]$Configuration,
 
         [Parameter(Mandatory,HelpMessage="ResourceVariables contains resolved variable values from the configurations common_variables and resource_variables combined")]
@@ -312,7 +312,7 @@ function dry.action.vsphere.clonevm {
         ol i 'Credential alias',"$CredAlias"
         ol i 'Connection URL',"$ConnectionURL"
         
-        $Credential = Get-DryCredential -Alias $CredAlias -GlobalConfig $GLOBAL:GlobalConfigName
+        $Credential = Get-DryCredential -Alias $CredAlias -EnvConfig $GLOBAL:EnvConfigName
         Add-DryVM -vcenter $ConnectionURL -vmspec $VirtualMachine -Credential $Credential
         
         
@@ -334,7 +334,7 @@ function dry.action.vsphere.clonevm {
                 $WaitParameters = @{
                     IP                       = $TargetVMIPAddress
                     Computername             = $Resource.name
-                    Credential               = $(Get-DryCredential -Alias "$($Action.credentials.credential2)" -GlobalConfig "$($GLOBAL:GlobalConfigName)")
+                    Credential               = $(Get-DryCredential -Alias "$($Action.credentials.credential2)" -EnvConfig "$($GLOBAL:EnvConfigName)")
                     SecondsToTry             = 300
                     SecondsToWaitBeforeStart = 30
                 }
@@ -343,13 +343,13 @@ function dry.action.vsphere.clonevm {
             'windows' {
                 $SessionConfig = $Configuration.connections | Where-Object { $_.type -eq 'winrm'} 
                 if ($null -eq $SessionConfig) {
-                    ol v "Unable to find 'connection' of type 'winrm' in global config"
-                    throw "Unable to find 'connection' of type 'winrm' in global config"
+                    ol v "Unable to find 'connection' of type 'winrm' in environment config"
+                    throw "Unable to find 'connection' of type 'winrm' in environment config"
                 }
                 $WaitParameters = @{
                     IP                       = $TargetVMIPAddress
                     Computername             = $Resource.name
-                    Credential               = $(Get-DryCredential -Alias "$($Action.credentials.credential2)" -GlobalConfig "$($GLOBAL:GlobalConfigName)")
+                    Credential               = $(Get-DryCredential -Alias "$($Action.credentials.credential2)" -EnvConfig "$($GLOBAL:EnvConfigName)")
                     SecondsToTry             = 1800
                     SecondsToWaitBeforeStart = 200
                     SessionConfig            = $SessionConfig

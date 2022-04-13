@@ -38,8 +38,8 @@ function Add-DryCredential {
     try {
         $DryCredentials = [Credentials]::New($GLOBAL:CredentialsFile)
         # make sure Global vars exist
-        if ($null -eq $GLOBAL:GlobalConfigName) {
-            throw "Missing global variable 'GlobalConfigName' (defined in DryDeploy.ps1)"
+        if ($null -eq $GLOBAL:EnvConfigName) {
+            throw "Missing global variable 'EnvConfigName' (defined in DryDeploy.ps1)"
         }
         if ($null -eq $GLOBAL:CredentialsType) {
             throw "Missing global variable 'CredentialsType' (defined in DryDeploy.ps1)"
@@ -47,10 +47,10 @@ function Add-DryCredential {
         
         switch ($PsCmdlet.ParameterSetName) {
             "Credential"  { 
-                $DryCredentials.AddCredential($Alias,$GLOBAL:GlobalConfigName,$GLOBAL:CredentialsType,$Credential)
+                $DryCredentials.AddCredential($Alias,$GLOBAL:EnvConfigName,$GLOBAL:CredentialsType,$Credential)
             }
             "UserNameAndPassword"  {
-                $DryCredentials.AddCredential($Alias,$GLOBAL:GlobalConfigName,$GLOBAL:CredentialsType,$UserName,$Password)
+                $DryCredentials.AddCredential($Alias,$GLOBAL:EnvConfigName,$GLOBAL:CredentialsType,$UserName,$Password)
             }
         }
     }

@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
 DryDeploy.ps1 prepares your deployment platform (-Init, -Moduleinit), 
-stores paths to a configuration combination of a GlobalConfig and a 
+stores paths to a configuration combination of a EnvConfig and a 
 ModuleConfig, creates a plan of Actions to perform based on the 
 configurations and any filters specified (-Plan), and applies the 
 plan in the configured order (-Apply). Run DryDeploy.ps1 without any 
@@ -10,7 +10,7 @@ parameters to show the deployment status of the current Plan.
 .DESCRIPTION
 DryDeploy.ps1 needs 2 configuration repositories: 
 
- - GlobalConfig: Contains information on an environment, 
+ - EnvConfig: Contains information on an environment, 
    including variables as key-value-pairs, where values may be 
    expressions to resolve actual values, network information and
    platform definitions. It also contains OS-specific configs, 
@@ -36,7 +36,7 @@ modules are installed for the system.
 
 .PARAMETER Plan
 Plan must be run at least once to combine the ModuleConfiguration 
-and GlobalGonfiguration, and to determine the resources to create 
+and EnvConfiguration, and to determine the resources to create 
 and configure, and the order of the Actions to process. 
 
 .PARAMETER Apply
@@ -80,8 +80,8 @@ Array of one or more Phases (of any Action) to exclude. All other
 Phases (and non-phased actions) are included. If not specified, 
 no Phases are excluded
 
-.PARAMETER GlobalConfigPath
-Path to the Directory where the GlobalConfiguration is. Use to 
+.PARAMETER EnvConfigPath
+Path to the Directory where the EnvConfiguration is. Use to 
 set the configuration combination (ConfigCombo)
 
 .PARAMETER ModuleConfigPath
@@ -160,9 +160,9 @@ Make sure to elevate your PowerShell for this one - it will fail
 if not
 
 .EXAMPLE
-.\DryDeploy.ps1 -ModuleConfigPath ..\ModuleConfigs\MyModule -GlobalConfigPath ..\GlobalConfigs\MyEnvironment
+.\DryDeploy.ps1 -ModuleConfigPath ..\ModuleConfigs\MyModule -EnvConfigPath ..\EnvConfigs\MyEnvironment
 Creates a configuration combination of a Module Configuration and
-a Global Configuration. The combination (the "ConfigCombo") is stored
+a Env Configuration. The combination (the "ConfigCombo") is stored
 and used on subsequent runs until you change any of them again
 
 .EXAMPLE
@@ -342,16 +342,16 @@ param (
     $ExcludePhases,
 
     [Parameter(ParameterSetName='SetConfig',
-    HelpMessage="Path to the directory where the GlobalConfig is. 
-    Once set, the ConfigCombo (the combination of a GlobalConfig, 
+    HelpMessage="Path to the directory where the EnvConfig is. 
+    Once set, the ConfigCombo (the combination of a EnvConfig, 
     a ModuleConfig and an InstanceConfig) will be stored and reused  
     for each subsequent action")]
     [String]
-    $GlobalConfigPath,
+    $EnvConfigPath,
 
     [Parameter(ParameterSetName='SetConfig',
     HelpMessage="Path to the directory where the ModuleConfig is. 
-    Once set, the ConfigCombo (the combination of a GlobalConfig, 
+    Once set, the ConfigCombo (the combination of a EnvConfig, 
     a ModuleConfig and an InstanceConfig) will be stored and reused  
     for each subsequent action")]
     [String]
@@ -658,10 +658,10 @@ try {
     # 
     #   Config Combo 
     #
-    #   The ConfigCombo is a combination of a GlobalConfig and a ModuleConfig. The 
+    #   The ConfigCombo is a combination of a EnvConfig and a ModuleConfig. The 
     #   object stores paths to those configurations, and will reuse the already 
     #   stored values each time you -Plan and -Apply. You may modify the ConfigCombo 
-    #   by specifying -GlobalConfig or -ModuleConfig
+    #   by specifying -EnvConfig or -ModuleConfig
     #
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     $GLOBAL:ConfigCombo = Get-DryConfigCombo -Path $ConfigComboPath
@@ -712,11 +712,11 @@ try {
     #
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     #! go through - does not make much sense
-    if ($GlobalConfigPath -or $ModuleConfigPath) {
-        # Resolve the GlobalConfig
-        if ($GlobalConfigPath) {
-            #Resolve-DryConfigCombo -Path ([IO.Path]::GetFullPath("$GlobalConfigPath")) -Type 'Global'
-            Resolve-DryConfigCombo -Path (Resolve-DryFullPath -Path $GlobalConfigPath -RootPath $ScriptPath) -Type 'Global'
+    if ($EnvConfigPath -or $ModuleConfigPath) {
+        # Resolve the EnvConfig
+        if ($EnvConfigPath) {
+            #Resolve-DryConfigCombo -Path ([IO.Path]::GetFullPath("$EnvConfigPath")) -Type 'Global'
+            Resolve-DryConfigCombo -Path (Resolve-DryFullPath -Path $EnvConfigPath -RootPath $ScriptPath) -Type 'Global'
         }
         else {
             Resolve-DryConfigCombo -Type 'Global' -ErrorAction 'Continue'
@@ -737,15 +737,15 @@ try {
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         # 
-        #   GLOBAL CONFIGURATION
+        #   ENVIRONMENT CONFIGURATION
         #
-        #   The Global Configuration contains environment specific, common, shared 
+        #   The Env Configuration contains environment specific, common, shared 
         #   configurations that every developer should use as a base config when 
         #   developing or deploying a ModuleConfig. Every environment should  
-        #   have it's own, customized global config, which is shared among the 
+        #   have it's own, customized environment config, which is shared among the 
         #   Ops team.  
         #
-        #   The GlobalConfig is a directory or repository containing two directories; 
+        #   The EnvConfig is a directory or repository containing two directories; 
         #   
         #   1. 'Config' which contain common environment specific definitions 
         #      
@@ -753,13 +753,13 @@ try {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     
-        $GlobalConfigDirectory = $ConfigCombo.GlobalConfig.Path
+        $EnvConfigDirectory = $ConfigCombo.EnvConfig.Path
 
-        # Mandatory Global Configuration directories
-        $GlobalConfigDirectoryConfig    = Join-Path -Path $GlobalConfigDirectory -ChildPath 'Config'
-        $GlobalConfigDirectoryOSConfig  = Join-Path -Path $GlobalConfigDirectory -ChildPath 'OSConfig'
+        # Mandatory Env Configuration directories
+        $EnvConfigDirectoryConfig    = Join-Path -Path $EnvConfigDirectory -ChildPath 'Config'
+        $EnvConfigDirectoryOSConfig  = Join-Path -Path $EnvConfigDirectory -ChildPath 'OSConfig'
         
-        @($GlobalConfigDirectoryConfig,$GlobalConfigDirectoryOSConfig).Foreach({
+        @($EnvConfigDirectoryConfig,$EnvConfigDirectoryOSConfig).Foreach({
             try {
                 Test-Path -Path $_ -ErrorAction Stop | Out-Null
             }
@@ -773,8 +773,8 @@ try {
         Remove-Variable -Name Configuration -ErrorAction Ignore
         $Configuration = New-Object PSObject
         
-        $GlobalConfigurationRepoFiles = @(Get-ChildItem -Path (Join-Path -Path $GlobalConfigDirectoryConfig -ChildPath '*') -Include "*.jsonc","*.json" -ErrorAction Stop)
-        foreach ($ConfFile in $GlobalConfigurationRepoFiles) {
+        $EnvConfigurationRepoFiles = @(Get-ChildItem -Path (Join-Path -Path $EnvConfigDirectoryConfig -ChildPath '*') -Include "*.jsonc","*.json" -ErrorAction Stop)
+        foreach ($ConfFile in $EnvConfigurationRepoFiles) {
 
             # $ConfObject = Get-Content -Path $ConfFile.fullname -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
             $ConfObject = Get-DryCommentedJson -Path $ConfFile.FullName -ErrorAction Stop
@@ -784,15 +784,15 @@ try {
 
         # Add the resolved OS Configuration directory to the Configuration so that functions
         # below may use that instead of having to resolve relative paths over and over
-        $Configuration | Add-Member -MemberType NoteProperty -name OSConfigDirectory -value $GlobalConfigDirectoryOSConfig
+        $Configuration | Add-Member -MemberType NoteProperty -name OSConfigDirectory -value $EnvConfigDirectoryOSConfig
 
         # the metaconfiguration should contain a name property used to tag credential aliases for specific environments
-        [String]$GlobalConfigName  = (Get-Content -Path (Join-Path -Path $GlobalConfigDirectory -ChildPath 'Config.json') -ErrorAction Stop | 
+        [String]$EnvConfigName  = (Get-Content -Path (Join-Path -Path $EnvConfigDirectory -ChildPath 'Config.json') -ErrorAction Stop | 
         ConvertFrom-Json -ErrorAction Stop).Name
-        if (($GlobalConfigName.Trim() -eq '') -or ($null -eq $GlobalConfigName)) {
-            throw "The GlobalConfig is missing a 'name' property in root file 'Config.json'"
+        if (($EnvConfigName.Trim() -eq '') -or ($null -eq $EnvConfigName)) {
+            throw "The EnvConfig is missing a 'name' property in root file 'Config.json'"
         }
-        $GLOBAL:GlobalConfigName = $GlobalConfigName
+        $GLOBAL:EnvConfigName = $EnvConfigName
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         # 
@@ -812,8 +812,8 @@ try {
         #   The ModuleConfig should be generic in the sense that it should be able to 
         #   be used as is, without modification, in any environment. When there are 
         #   environmental differences, those differences should be implemented using
-        #   queries against configurations specified in the GlobalConfiguration. The
-        #   GlobalConfiguration must contain some key nodes, but has no finit scheme - 
+        #   queries against configurations specified in the EnvConfiguration. The
+        #   EnvConfiguration must contain some key nodes, but has no finit scheme - 
         #   it may be infinately expanded to support any oject or list needed by a 
         #   module. 
         #
@@ -907,7 +907,7 @@ try {
         # 
         #   Credentials File
         #
-        #   The Global Configuration should supply a template for the credentials 
+        #   The Env Configuration should supply a template for the credentials 
         #   config. 
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -928,7 +928,7 @@ try {
             foreach ($Credential in $Configuration.Credentials) {
                 $AddCredentialPlaceholderParams = @{
                     Alias        = $Credential.Alias
-                    GlobalConfig = $GlobalConfigName
+                    EnvConfig = $EnvConfigName
                     Type         = $CredentialsType
                 }
                 if ($Credential.UserName) {
@@ -1312,7 +1312,7 @@ finally {
         'GlobalPhase',
         'GlobalActionName',
         'GlobalResourceName',
-        'GlobalConfigName',
+        'EnvConfigName',
         'CredentialsType',
         'Force'
     )

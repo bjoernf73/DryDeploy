@@ -25,11 +25,11 @@ function Add-DryCredentialPlaceholder {
         [Parameter(Mandatory,HelpMessage="The Alias of the credential to add")]
         [String]$Alias,
 
-        [Parameter(Mandatory,HelpMessage="The Environment (GlobalConfig) for which the placeholder is added")]
-        [String]$GlobalConfig,
+        [Parameter(Mandatory,HelpMessage="The Environment (EnvConfig) for which the placeholder is added")]
+        [String]$EnvConfig,
 
         [ValidateSet('encryptedstring', 'hashicorpvault', 'ansiblevault')]
-        [Parameter(Mandatory,HelpMessage="The Environment Name (GlobalConfig) for which the credential placeholder is added")]
+        [Parameter(Mandatory,HelpMessage="The Environment Name (EnvConfig) for which the credential placeholder is added")]
         [String]$Type,
 
         [Parameter(HelpMessage="The user name of the credential to add, if specified")]
@@ -39,10 +39,10 @@ function Add-DryCredentialPlaceholder {
     try {
         $DryCredentials = [Credentials]::New($GLOBAL:CredentialsFile)
         if (($UserName) -and ($UserName.Trim() -ne '')) {
-            $DryCredentials.AddCredentialPlaceholder($Alias,$GlobalConfig,$Type,$UserName)
+            $DryCredentials.AddCredentialPlaceholder($Alias,$EnvConfig,$Type,$UserName)
         }
         else {
-            $DryCredentials.AddCredentialPlaceholder($Alias,$GlobalConfig,$Type)
+            $DryCredentials.AddCredentialPlaceholder($Alias,$EnvConfig,$Type)
         }
     }
     catch {

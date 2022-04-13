@@ -13,7 +13,7 @@ git submodule add -b main [URL to Git repo]
 ```
 git submodule update --remote --merge
 ```
-Note: `git submodule update --remote` will only update the branch registered in the .gitmodule, and by default, you will end up with a detached HEAD, unless `--rebase` or `--merge` is specified or the key *submodule.$name.update* is set to *rebase*, *merge* or *none*.
+Note: `git submodule update --remote` will only update the branch registered in the .gitmodule, and by default, you will end up with a detached HEAD, unless `--rebase` or `--merge` is specified or the key *submodule.$name.update* is set to *rebase*, *merge* or *none*. Well, it doesn't seem to be true, though. You'll end up with a detached head in any case it seems. 
 
 ----
 ### Init submodules

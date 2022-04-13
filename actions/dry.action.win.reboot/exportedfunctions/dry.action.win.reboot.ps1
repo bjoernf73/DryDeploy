@@ -26,7 +26,7 @@ Function dry.action.win.reboot {
         [Parameter(Mandatory,HelpMessage="The resolved resource object")]
         [PSObject]$Resource,
 
-        [Parameter(Mandatory,HelpMessage="The resolved global configuration object")]
+        [Parameter(Mandatory,HelpMessage="The resolved environment configuration object")]
         [PSObject]$Configuration,
 
         [Parameter(Mandatory,HelpMessage="ResourceVariables contains resolved variable values from the configurations common_variables and resource_variables combined")]
@@ -93,7 +93,7 @@ Function dry.action.win.reboot {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         $CredCount = 1
         While ($Action.credentials."credential$CredCount") {
-            $Credentials += @(Get-DryCredential -Alias $Action.credentials."credential$CredCount" -GlobalConfig "$($GLOBAL:GlobalConfigName)")
+            $Credentials += @(Get-DryCredential -Alias $Action.credentials."credential$CredCount" -EnvConfig "$($GLOBAL:EnvConfigName)")
             $CredCount++
         }
 
@@ -113,8 +113,8 @@ Function dry.action.win.reboot {
         }
         
         If ($Null -eq $SessionConfig) {
-            ol w "Unable to find 'connection' of type 'winrm' in global config"
-            Throw "Unable to find 'connection' of type 'winrm' in global config"
+            ol w "Unable to find 'connection' of type 'winrm' in environment config"
+            Throw "Unable to find 'connection' of type 'winrm' in environment config"
         }
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #

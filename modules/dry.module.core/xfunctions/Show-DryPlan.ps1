@@ -337,7 +337,7 @@ function Show-DryPlan {
         ol i " "
         ol i $(Get-DryConfigComboString -LongestResourceString $LongestResourceString -RepoType $ConfigComboHeader.RepoType -Path $ConfigComboHeader.Path) -Fore DarkGray
         ol i $(Get-DryConfigComboString -LongestResourceString $LongestResourceString -RepoType $ConfigComboLine.RepoType -Path $ConfigComboLine.Path) -Fore DarkGray
-        ol i $(Get-DryConfigComboString -LongestResourceString $LongestResourceString -RepoType 'Global Config' -Path $ConfigCombo.GlobalConfig.Path) -Fore DarkGray
+        ol i $(Get-DryConfigComboString -LongestResourceString $LongestResourceString -RepoType 'Env Config' -Path $ConfigCombo.EnvConfig.Path) -Fore DarkGray
         ol i $(Get-DryConfigComboString -LongestResourceString $LongestResourceString -RepoType 'Module Config' -Path $ConfigCombo.ModuleConfig.Path) -Fore DarkGray
         ol i " " 
         ol i " "

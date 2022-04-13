@@ -34,7 +34,7 @@ function Set-DryConfigCombo {
 
         switch ($ModuleType) {
             'Global' {
-                $ThisConfig = $ConfigCombo.GlobalConfig
+                $ThisConfig = $ConfigCombo.EnvConfig
             }
             'Module' {
                 $ThisConfig = $ConfigCombo.ModuleConfig

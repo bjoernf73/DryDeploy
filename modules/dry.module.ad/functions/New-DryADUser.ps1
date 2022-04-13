@@ -149,7 +149,7 @@ Function New-DryADUser {
             Else {
                 If ($DryDeploy) {
                     # Using function from DryDeploy to get Credential from it's Credential's Store
-                    [PSCredential]$UserCredential = Get-DryCredential -Alias $User.Name -GlobalConfig $GLOBAL:GlobalConfigName
+                    [PSCredential]$UserCredential = Get-DryCredential -Alias $User.Name -EnvConfig $GLOBAL:EnvConfigName
                 }
                 Else {
                     # Invoking an interactive prompt

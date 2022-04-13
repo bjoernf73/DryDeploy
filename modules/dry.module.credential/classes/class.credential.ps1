@@ -66,24 +66,24 @@ class Credentials {
 
     [Void] AddCredential(
         [String]$Alias,
-        [String]$GlobalConfig,
+        [String]$EnvConfig,
         [String]$Type,
         [PSCredential] $Credential) {
         try {
             $CredObj            = [PSCustomObject]@{
                 Alias           = $Alias
-                GlobalConfig    = $GlobalConfig
+                EnvConfig    = $EnvConfig
                 Type            = $Type
                 UserName        = $Credential.UserName
                 encryptedstring = $Credential.Password | ConvertFrom-SecureString -ErrorAction Stop
             }
     
-            if ($This.TestCredential($Alias,$GlobalConfig)) {
-                ol w "Credential '$Alias' in '$GlobalConfig' exists already - removing, and adding the new instance"
+            if ($This.TestCredential($Alias,$EnvConfig)) {
+                ol w "Credential '$Alias' in '$EnvConfig' exists already - removing, and adding the new instance"
             }
             $This.Credentials = $This.Credentials | 
             Where-Object { 
-                (-not (($_.Alias -eq $Alias) -and ($_.GlobalConfig -eq $GlobalConfig)))
+                (-not (($_.Alias -eq $Alias) -and ($_.EnvConfig -eq $EnvConfig)))
             }
             $This.Credentials += @($CredObj)
             $This.WriteToFile()
@@ -95,7 +95,7 @@ class Credentials {
 
     [Void] AddCredential(
         [String]$Alias,
-        [String]$GlobalConfig,
+        [String]$EnvConfig,
         [String]$Type,
         [String]$UserName, 
         [String]$pw) {
@@ -105,18 +105,18 @@ class Credentials {
             
             $CredObj            = [PSCustomObject]@{
                 Alias           = $Alias
-                GlobalConfig    = $GlobalConfig
+                EnvConfig    = $EnvConfig
                 Type            = $Type
                 UserName        = $Credential.UserName
                 encryptedstring = $Credential.Password | ConvertFrom-SecureString -ErrorAction Stop
             }
 
-            if ($This.TestCredential($Alias,$GlobalConfig)) {
+            if ($This.TestCredential($Alias,$EnvConfig)) {
                 ol w "The Credential '$Alias' exists already - removing it, and adding the new instance"
             }
             $This.Credentials = $This.Credentials | 
             Where-Object { 
-                (-not (($_.Alias -eq $Alias) -and ($_.GlobalConfig -eq $GlobalConfig)))
+                (-not (($_.Alias -eq $Alias) -and ($_.EnvConfig -eq $EnvConfig)))
             }
             $This.Credentials += @($CredObj)
             $This.WriteToFile()
@@ -128,15 +128,15 @@ class Credentials {
 
     [Void] AddCredentialPlaceholder(
         [String]$Alias, 
-        [String]$GlobalConfig, 
+        [String]$EnvConfig, 
         [String]$Type,
         [String]$UserName) {
         try {
-            if (-not ($This.TestCredential($Alias,$GlobalConfig))) {
-                ol v "The Alias '$Alias' in '$GlobalConfig' not found, adding it."
+            if (-not ($This.TestCredential($Alias,$EnvConfig))) {
+                ol v "The Alias '$Alias' in '$EnvConfig' not found, adding it."
                 $CredObj            = [PSCustomObject]@{
                     Alias           = $Alias
-                    GlobalConfig    = $GlobalConfig
+                    EnvConfig    = $EnvConfig
                     Type            = $Type
                     UserName            = $UserName
                 }
@@ -151,14 +151,14 @@ class Credentials {
 
     [Void] AddCredentialPlaceholder(
         [String]$Alias, 
-        [String]$GlobalConfig, 
+        [String]$EnvConfig, 
         [String]$Type) {
         try {
-            if (-not ($This.TestCredential($Alias,$GlobalConfig))) {
-                ol v "The Alias '$Alias' in '$GlobalConfig' not found, adding it."
+            if (-not ($This.TestCredential($Alias,$EnvConfig))) {
+                ol v "The Alias '$Alias' in '$EnvConfig' not found, adding it."
                 $CredObj            = [PSCustomObject]@{
                     Alias           = $Alias
-                    GlobalConfig    = $GlobalConfig
+                    EnvConfig    = $EnvConfig
                     Type            = $Type
                 }
                 $This.Credentials += @($CredObj)
@@ -172,11 +172,11 @@ class Credentials {
 
     [PSCredential] PromptForCredential(
         [String]$Alias,
-        [String]$GlobalConfig,
+        [String]$EnvConfig,
         [String]$Type) {
         try {
-            [PSCredential]$PromptCredential = Get-Credential -Message "Credential '$Alias' in '$GlobalConfig'"
-            $This.AddCredential($Alias,$GlobalConfig,$Type,$PromptCredential)
+            [PSCredential]$PromptCredential = Get-Credential -Message "Credential '$Alias' in '$EnvConfig'"
+            $This.AddCredential($Alias,$EnvConfig,$Type,$PromptCredential)
             return $PromptCredential
         }
         catch {
@@ -186,12 +186,12 @@ class Credentials {
 
     [PSCredential] PromptForCredential(
         [String]$Alias,
-        [String]$GlobalConfig,
+        [String]$EnvConfig,
         [String]$Type,
         [String]$UserName) {
         try {
-            [PSCredential]$PromptCredential = Get-Credential -Message "Credential '$Alias' in '$GlobalConfig'" -UserName $UserName
-            $This.AddCredential($Alias,$GlobalConfig,$Type,$PromptCredential)
+            [PSCredential]$PromptCredential = Get-Credential -Message "Credential '$Alias' in '$EnvConfig'" -UserName $UserName
+            $This.AddCredential($Alias,$EnvConfig,$Type,$PromptCredential)
             return $PromptCredential
         }
         catch {
@@ -201,48 +201,48 @@ class Credentials {
 
     [PSCredential] GetCredential( 
         [String]$Alias,
-        [String]$GlobalConfig) {
+        [String]$EnvConfig) {
         try {
-            if ($This.TestCredential($Alias,$GlobalConfig)) {
-                $CredentialMatch = $This.GetCredentialMatch($Alias,$GlobalConfig)
+            if ($This.TestCredential($Alias,$EnvConfig)) {
+                $CredentialMatch = $This.GetCredentialMatch($Alias,$EnvConfig)
 
                 #! this returns 'not all code paths return value within method'...
                 <#
                  switch ($CredentialMatch.Type) {
                     'hashicorpvault' {
-                        return [PSCredential]($This.GetCredentialFromHashicorpVault($Alias,$GlobalConfig))
+                        return [PSCredential]($This.GetCredentialFromHashicorpVault($Alias,$EnvConfig))
                     }
                     'ansiblevault' {
-                        return [PSCredential]($This.GetCredentialFromAnsibleVault($Alias,$GlobalConfig))
+                        return [PSCredential]($This.GetCredentialFromAnsibleVault($Alias,$EnvConfig))
                     }
                     default {
-                        return [PSCredential]($This.GetCredentialFromEncryptedSecureString($Alias,$GlobalConfig))
+                        return [PSCredential]($This.GetCredentialFromEncryptedSecureString($Alias,$EnvConfig))
                     }
                 }
                 
                 #>
                 if ($CredentialMatch.Type -eq 'hashicorpvault') {
-                    return [PSCredential]($This.GetCredentialFromHashicorpVault($Alias,$GlobalConfig,$CredentialMatch))
+                    return [PSCredential]($This.GetCredentialFromHashicorpVault($Alias,$EnvConfig,$CredentialMatch))
                 }
                 elseif ($CredentialMatch.Type -eq 'ansiblevault') {
-                    return [PSCredential]($This.GetCredentialFromAnsibleVault($Alias,$GlobalConfig,$CredentialMatch))
+                    return [PSCredential]($This.GetCredentialFromAnsibleVault($Alias,$EnvConfig,$CredentialMatch))
                 }
                 elseif ($CredentialMatch.Type -eq 'encryptedstring') {
-                    return [PSCredential]($This.GetCredentialFromEncryptedSecureString($Alias,$GlobalConfig,$CredentialMatch))
+                    return [PSCredential]($This.GetCredentialFromEncryptedSecureString($Alias,$EnvConfig,$CredentialMatch))
                 }
                 else {
                     # defaulting to encryptedsecurestring
                     ol w "Unable to determine the Credential Type - defaulting to 'encryptedstring'"
-                    return [PSCredential]($This.GetCredentialFromEncryptedSecureString($Alias,$GlobalConfig,$CredentialMatch))
+                    return [PSCredential]($This.GetCredentialFromEncryptedSecureString($Alias,$EnvConfig,$CredentialMatch))
                 }       
             }
             else {
                 if ($GLOBAL:SuppressInteractivePrompts) {
-                    throw "Found no credential '$Alias' in '$GlobalConfig'"
+                    throw "Found no credential '$Alias' in '$EnvConfig'"
                 }
                 else {
                     ol w "You may suppress interactive prompts with the -SuppressInteractivePrompts switch"
-                    return [PSCredential]($This.PromptForCredential($Alias,$GlobalConfig,$GLOBAL:CredentialsType))
+                    return [PSCredential]($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:CredentialsType))
                 }
             }
         }
@@ -253,16 +253,16 @@ class Credentials {
 
     [PSCredential] GetCredentialFromEncryptedSecureString(
         [String] $Alias,
-        [String] $GlobalConfig,
+        [String] $EnvConfig,
         [PSCustomObject] $CredObject) {
         try {
             try {
                 if (($null -eq $CredObject.encryptedstring) -or (($CredObject.encryptedstring).Trim() -eq '')) {
                     if (($null -ne $CredObject.UserName) -and ($CredObject.UserName.Trim() -ne '')) {
-                        [PSCredential]$Credential = ($This.PromptForCredential($Alias,$GlobalConfig,$GLOBAL:CredentialsType,$CredObject.UserName))
+                        [PSCredential]$Credential = ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:CredentialsType,$CredObject.UserName))
                     }
                     else {
-                        [PSCredential]$Credential = ($This.PromptForCredential($Alias,$GlobalConfig,$GLOBAL:CredentialsType))
+                        [PSCredential]$Credential = ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:CredentialsType))
                     }
                     
                 }
@@ -272,30 +272,30 @@ class Credentials {
                 }
                 
                 if ($GLOBAL:ShowPasswords) {
-                    ol w @("Credential: $Alias ($GlobalConfig)","$($CredObject.UserName) ==> $($Credential.GetNetworkCredential().Password)")
+                    ol w @("Credential: $Alias ($EnvConfig)","$($CredObject.UserName) ==> $($Credential.GetNetworkCredential().Password)")
                 }
                 else {
-                    ol i @("Credential: $Alias ($GlobalConfig)","$($CredObject.UserName)")
+                    ol i @("Credential: $Alias ($EnvConfig)","$($CredObject.UserName)")
                 }
                 return $Credential
             }
             catch [System.Security.Cryptography.CryptographicException] {
                 if ($GLOBAL:SuppressInteractivePrompts) {
-                    throw "CryptographicException: Credential '$Alias' in '$GlobalConfig' could not be decrypted - probably not created on this system"
+                    throw "CryptographicException: Credential '$Alias' in '$EnvConfig' could not be decrypted - probably not created on this system"
                 }
                 else {
-                    ol w "CryptographicException: Credential '$Alias' in '$GlobalConfig' was probably not created on this system - prompting for correct credential. You may suppress with -SuppressInteractivePrompts"
+                    ol w "CryptographicException: Credential '$Alias' in '$EnvConfig' was probably not created on this system - prompting for correct credential. You may suppress with -SuppressInteractivePrompts"
                     if (($null -ne $CredObject.UserName) -and ($CredObject.UserName.Trim() -ne '')) {
-                        [PSCredential]$Credential = ($This.PromptForCredential($Alias,$GlobalConfig,$GLOBAL:CredentialsType,$CredObject.UserName))
+                        [PSCredential]$Credential = ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:CredentialsType,$CredObject.UserName))
                     }
                     else {
-                        [PSCredential]$Credential = ($This.PromptForCredential($Alias,$GlobalConfig,$GLOBAL:CredentialsType))
+                        [PSCredential]$Credential = ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:CredentialsType))
                     }
                     if ($GLOBAL:ShowPasswords) {
-                        ol w @("Credential: $Alias ($GlobalConfig)","$($CredObject.UserName) ==> $($Credential.GetNetworkCredential().Password)")
+                        ol w @("Credential: $Alias ($EnvConfig)","$($CredObject.UserName) ==> $($Credential.GetNetworkCredential().Password)")
                     }
                     else {
-                        ol i @("Credential: $Alias ($GlobalConfig)","$($CredObject.UserName)")
+                        ol i @("Credential: $Alias ($EnvConfig)","$($CredObject.UserName)")
                     }
                     return $Credential
                 }
@@ -316,36 +316,36 @@ class Credentials {
 
     [PSCredential] GetCredentialFromHashicorpVault(
         [String] $Alias,
-        [String] $GlobalConfig,
+        [String] $EnvConfig,
         [PSCustomObject] $CredObject) {
         #! just a placeholder - not implemented
         try {
             try {
                 if (($CredObject.encryptedstring).Trim() -eq '') {
-                    throw "Empty encryptedstring for '$Alias' in '$GlobalConfig'"
+                    throw "Empty encryptedstring for '$Alias' in '$EnvConfig'"
                 }
                 $SecureString = ConvertTo-SecureString -String $CredObject.encryptedstring -ErrorAction 'Stop'
                 [PSCredential]$Credential = New-Object System.Management.Automation.PSCredential ($CredObject.UserName, $SecureString)
                 
                 if ($GLOBAL:ShowPasswords) {
-                    ol w @("Credential: $Alias ($GlobalConfig)","$($CredObject.UserName) ==> $($Credential.GetNetworkCredential().Password)")
+                    ol w @("Credential: $Alias ($EnvConfig)","$($CredObject.UserName) ==> $($Credential.GetNetworkCredential().Password)")
                 }
                 else {
-                    ol i @("Credential: $Alias ($GlobalConfig)","$($CredObject.UserName)")
+                    ol i @("Credential: $Alias ($EnvConfig)","$($CredObject.UserName)")
                 }
                 return $Credential
             }
             catch [System.Security.Cryptography.CryptographicException] {
                 if ($GLOBAL:SuppressInteractivePrompts) {
-                    throw "CryptographicException: Credential '$Alias' in '$GlobalConfig' could not be decrypted - probably not created on this system"
+                    throw "CryptographicException: Credential '$Alias' in '$EnvConfig' could not be decrypted - probably not created on this system"
                 }
                 else {
-                    ol w "CryptographicException: Credential '$Alias' in '$GlobalConfig' was probably not created on this system - prompting for correct credential. You may suppress with -SuppressInteractivePrompts"
-                    return ($This.PromptForCredential($Alias,$GlobalConfig,$GLOBAL:CredentialsType))
+                    ol w "CryptographicException: Credential '$Alias' in '$EnvConfig' was probably not created on this system - prompting for correct credential. You may suppress with -SuppressInteractivePrompts"
+                    return ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:CredentialsType))
                 }
             }
             catch { 
-                throw "Failed to get credential '$Alias' in '$GlobalConfig'"
+                throw "Failed to get credential '$Alias' in '$EnvConfig'"
             }
         }
         catch {
@@ -360,36 +360,36 @@ class Credentials {
 
     [PSCredential] GetCredentialFromAnsibleVault(
         [String] $Alias,
-        [String] $GlobalConfig,
+        [String] $EnvConfig,
         [PSCustomObject] $CredObject) {
         #! just a placeholder - not implemented
         try {
             try {
                 if (($CredObject.encryptedstring).Trim() -eq '') {
-                    throw "Empty encryptedstring for '$Alias' in '$GlobalConfig'"
+                    throw "Empty encryptedstring for '$Alias' in '$EnvConfig'"
                 }
                 $SecureString = ConvertTo-SecureString -String $CredObject.encryptedstring -ErrorAction 'Stop'
                 [PSCredential]$Credential = New-Object System.Management.Automation.PSCredential ($CredObject.UserName, $SecureString)
                 
                 if ($GLOBAL:ShowPasswords) {
-                    ol w @("Credential: $Alias ($GlobalConfig)","$($CredObject.UserName) ==> $($Credential.GetNetworkCredential().Password)")
+                    ol w @("Credential: $Alias ($EnvConfig)","$($CredObject.UserName) ==> $($Credential.GetNetworkCredential().Password)")
                 }
                 else {
-                    ol i @("Credential: $Alias ($GlobalConfig)","$($CredObject.UserName)")
+                    ol i @("Credential: $Alias ($EnvConfig)","$($CredObject.UserName)")
                 }
                 return $Credential
             }
             catch [System.Security.Cryptography.CryptographicException] {
                 if ($GLOBAL:SuppressInteractivePrompts) {
-                    throw "CryptographicException: Credential '$Alias' in '$GlobalConfig' could not be decrypted - probably not created on this system"
+                    throw "CryptographicException: Credential '$Alias' in '$EnvConfig' could not be decrypted - probably not created on this system"
                 }
                 else {
-                    ol w "CryptographicException: Credential '$Alias' in '$GlobalConfig' was probably not created on this system - prompting for correct credential. You may suppress with -SuppressInteractivePrompts"
-                    return ($This.PromptForCredential($Alias,$GlobalConfig,$GLOBAL:CredentialsType))
+                    ol w "CryptographicException: Credential '$Alias' in '$EnvConfig' was probably not created on this system - prompting for correct credential. You may suppress with -SuppressInteractivePrompts"
+                    return ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:CredentialsType))
                 }
             }
             catch { 
-                throw "Failed to get credential '$Alias' in '$GlobalConfig'"
+                throw "Failed to get credential '$Alias' in '$EnvConfig'"
             }
         }
         catch {
@@ -404,10 +404,10 @@ class Credentials {
 
     [PSCustomObject] GetCredentialMatch(
         [String]$Alias,
-        [String]$GlobalConfig) {
+        [String]$EnvConfig) {
         try {
             return @($This.Credentials | Where-Object {
-                ($_.Alias -eq $Alias) -and ($_.GlobalConfig -eq $GlobalConfig)
+                ($_.Alias -eq $Alias) -and ($_.EnvConfig -eq $EnvConfig)
             })
         }
         catch {
@@ -417,13 +417,13 @@ class Credentials {
 
     [Bool] TestCredential(
         [String]$Alias,
-        [String]$GlobalConfig) {
+        [String]$EnvConfig) {
         try {
             $CredentialMatches = @($This.Credentials | Where-Object {
-                ($_.Alias -eq $Alias) -and ($_.GlobalConfig -eq $GlobalConfig)
+                ($_.Alias -eq $Alias) -and ($_.EnvConfig -eq $EnvConfig)
             })
             if ($CredentialMatches.count -gt 1) {  
-                throw "Multiple credentials '$Alias' in '$GlobalConfig'" 
+                throw "Multiple credentials '$Alias' in '$EnvConfig'" 
             }
             elseif ($CredentialMatches.count -eq 0) { 
                 return $false 

@@ -73,7 +73,7 @@ function Resolve-DryCredential {
         else {
             # Get the credential alias which is <name> in '___pwd___<name>___'
             $CredentialName = $InputString.Substring(10,($InputString.length-13))
-            $CredObject = Get-DryCredential -Alias $CredentialName -GlobalConfig $GLOBAL:GlobalConfigName
+            $CredObject = Get-DryCredential -Alias $CredentialName -EnvConfig $GLOBAL:EnvConfigName
             $CredObject
         }
     }

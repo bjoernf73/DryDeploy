@@ -28,7 +28,7 @@ function New-DryConfigCombo {
     "name": "default",
     "new": true,
     "dependencies_hash": "",
-    "GlobalConfig": {
+    "EnvConfig": {
         "Description": "",
         "Type": "Global",
         "Guid": "",

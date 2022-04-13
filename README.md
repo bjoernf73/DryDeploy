@@ -9,7 +9,7 @@ schema: 2.0.0
 
 ## SYNOPSIS
 DryDeploy.ps1 prepares your deployment platform (-Init, -Moduleinit), 
-stores paths to a configuration combination of a GlobalConfig and a 
+stores paths to a configuration combination of a EnvConfig and a 
 ModuleConfig, creates a plan of Actions to perform based on the 
 configurations and any filters specified (-Plan), and applies the 
 plan in the configured order (-Apply).
@@ -46,13 +46,13 @@ DryDeploy.ps1 [-Apply] [-Actions <String[]>] [-ExcludeActions <String[]>] [-Buil
 
 ### SetConfig
 ```
-DryDeploy.ps1 [-GlobalConfigPath <String>] [-ModuleConfigPath <String>] [<CommonParameters>]
+DryDeploy.ps1 [-EnvConfigPath <String>] [-ModuleConfigPath <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 DryDeploy.ps1 needs 2 configuration repositories: 
 
- - GlobalConfig: Contains information on an environment, 
+ - EnvConfig: Contains information on an environment, 
    including variables as key-value-pairs, where values may be 
    expressions to resolve actual values, network information and
    platform definitions.
@@ -89,11 +89,11 @@ if not
 
 ### EXAMPLE 2
 ```
-.\DryDeploy.ps1 -ModuleConfigPath ..\ModuleConfigs\MyModule -GlobalConfigPath ..\GlobalConfigs\MyEnvironment
+.\DryDeploy.ps1 -ModuleConfigPath ..\ModuleConfigs\MyModule -EnvConfigPath ..\EnvConfigs\MyEnvironment
 ```
 
 Creates a configuration combination of a Module Configuration and
-a Global Configuration.
+a Env Configuration.
 The combination (the "ConfigCombo") is stored
 and used on subsequent runs until you change any of them again
 
@@ -215,7 +215,7 @@ Accept wildcard characters: False
 
 ### -Plan
 Plan must be run at least once to combine the ModuleConfiguration 
-and GlobalGonfiguration, and to determine the resources to create 
+and EnvConfiguration, and to determine the resources to create 
 and configure, and the order of the Actions to process.
 
 ```yaml
@@ -397,8 +397,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -GlobalConfigPath
-Path to the Directory where the GlobalConfiguration is.
+### -EnvConfigPath
+Path to the Directory where the EnvConfiguration is.
 Use to 
 set the configuration combination (ConfigCombo)
 

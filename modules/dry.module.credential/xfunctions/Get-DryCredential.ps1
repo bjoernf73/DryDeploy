@@ -25,17 +25,17 @@ function Get-DryCredential {
         [Parameter(Mandatory,HelpMessage="The Alias of the credential to get")]
         [String]$Alias,
 
-        [Parameter(HelpMessage="The Environment (GlobalConfig) that the Alias to get belongs to")]
-        [String]$GlobalConfig
+        [Parameter(HelpMessage="The Environment (EnvConfig) that the Alias to get belongs to")]
+        [String]$EnvConfig
     )
 
     try {
         $DryCredentials = [Credentials]::New($GLOBAL:CredentialsFile)
-        if ($GlobalConfig) {
-            return [PSCredential] $DryCredentials.GetCredential($Alias,$GlobalConfig)
+        if ($EnvConfig) {
+            return [PSCredential] $DryCredentials.GetCredential($Alias,$EnvConfig)
         }
         else {
-            return [PSCredential] $DryCredentials.GetCredential($Alias,$GLOBAL:GlobalConfigName)
+            return [PSCredential] $DryCredentials.GetCredential($Alias,$GLOBAL:EnvConfigName)
         }
     }
     catch {
