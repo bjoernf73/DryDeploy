@@ -39,14 +39,14 @@ DryDeploy.ps1 [-Plan] [-Actions <String[]>] [-ExcludeActions <String[]>] [-Build
 ```
 DryDeploy.ps1 [-Apply] [-Actions <String[]>] [-ExcludeActions <String[]>] [-BuildOrders <Int32[]>]
  [-ExcludeBuildOrders <Int32[]>] [-Resources <String[]>] [-ExcludeResources <String[]>] [-Phases <Int32[]>]
- [-ExcludePhases <Int32[]>] [-ActionParams <Hashtable>] [-NoLog] [-KeepConfigFiles] [-KeepOnFailedBuilds]
+ [-ExcludePhases <Int32[]>] [-ActionParams <Hashtable>] [-NoLog] [-KeepConfigFiles] [-DestroyOnFailedBuild]
  [-ShowAllErrors] [-ShowPasswords] [-ShowStatus] [-SuppressInteractivePrompts] [-IgnoreDependencies] [-Step]
  [-Quit] [-CmTrace] [-Force] [<CommonParameters>]
 ```
 
 ### SetConfig
 ```
-DryDeploy.ps1 [-EnvConfigPath <String>] [-ModuleConfig <String>] [<CommonParameters>]
+DryDeploy.ps1 [-EnvConfig <String>] [-ModuleConfig <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -397,10 +397,14 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -EnvConfigPath
-Path to the Directory where the EnvConfiguration is.
-Use to 
-set the configuration combination (ConfigCombo)
+### -EnvConfig
+Path to the directory where the EnvConfig is.
+
+Once set, the ConfigCombo (the combination of a EnvConfig,
+
+a ModuleConfig and an InstanceConfig) will be stored and reused
+
+for each subsequent action
 
 ```yaml
 Type: String
@@ -483,11 +487,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -KeepOnFailedBuilds
-If your run builds something, that artifact will be deleted if 
-the build operation fails.
-Use this to keep the artifact of the
-failed build instead of deleting it
+### -DestroyOnFailedBuild
+If your run builds something, for instance with packer, that 
+artifact will be kept if the build fails, so you may examine 
+it's failed state.
+Use to destroy the fail-built artifact instead"
 
 ```yaml
 Type: SwitchParameter
