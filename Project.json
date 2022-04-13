@@ -1,0 +1,160 @@
+{
+    "name": "DryDeploy",
+    "dependencies": {
+        "win32nt": {
+            "desktop": {
+                "git": {
+                },
+                "nuget": {
+                    "sources": [
+                        {
+                            "Name": "PSGallery",
+                            "InstallationPolicy": "Trusted",
+                            "SourceLocation": "https://www.powershellgallery.com/api/v2"
+                        }
+                    ],
+                    "modules": [
+                        {
+                            "Name": "PSnmap",
+                            "MinimumVersion": "1.3.1"
+                        },
+                        {
+                            "Name": "Posh-SSH",
+                            "MinimumVersion": "2.2"
+                        },
+                        {
+                            "Name": "Posh-Git", 
+                            "MinimumVersion": "1.0.0"
+                        },
+                        {
+                            "Name": "Foil",
+                            "MinimumVersion": "0.1.0"
+                        },
+                        {
+                            "Name": "PowershellGet",
+                            "MinimumVersion": "2.2.5"
+                        }
+                    ]
+                },
+                "choco": {
+                    "sources": [
+                        {
+                            "Name": "Chocolatey",
+                            "InstallationPolicy": "Trusted",
+                            "SourceLocation": "https://chocolatey.org/api/v2/"
+                        }
+                    ],
+                    "packages": [
+                        {
+                            "Name": "Git",
+                            "Description": "Git client"
+                        },
+                        {
+                            "Name": "Packer",
+                            "Description": "Hashicorp Packer"
+                        }
+                    ]
+                },
+                "windows_capabilities" : [
+                    {
+                        "Name": "OpenSSH.Client*"
+                    }
+                ]
+            },
+            "Core": {
+                "git": {
+                },
+                "nuget": {
+                    "sources": [
+                        {
+                            "Name": "PSGallery",
+                            "InstallationPolicy": "Trusted",
+                            "SourceLocation": "https://www.powershellgallery.com/api/v2"
+                        }
+                    ],
+                    "modules": [
+                        {
+                            "Name": "PSnmap",
+                            "MinimumVersion": "1.3.1"
+                        },
+                        {
+                            "Name": "Posh-SSH",
+                            "MinimumVersion": "2.2"
+                        },
+                        {
+                            "Name": "Posh-Git", 
+                            "MinimumVersion": "1.0.0"
+                        },
+                        {
+                            "Name": "Foil",
+                            "MinimumVersion": "0.1.0"
+                        },
+                        {
+                            "Name": "PowershellGet",
+                            "MinimumVersion": "2.2.5"
+                        }
+                    ]
+                },
+                "choco": {
+                    "sources": [
+                        {
+                            "Name": "Chocolatey",
+                            "InstallationPolicy": "Trusted",
+                            "SourceLocation": "https://chocolatey.org/api/v2/"
+                        }
+                    ],
+                    "packages": [
+                        {
+                            "Name": "Git",
+                            "Description": "Git client"
+                        },
+                        {
+                            "Name": "Packer",
+                            "Description": "Hashicorp Packer"
+                        }
+                    ]
+                },
+                "windows_capabilities" : [
+                    {
+                        "Name": "OpenSSH.Client*"
+                    }
+                ]
+            }
+
+        },
+        "unix": {
+            "git": {
+            },
+            "nuget": {
+
+            },
+            "apt": {
+
+            }
+        }
+    },
+    "logging": {
+        "log_to_file": true,
+        "file": "DryDeploy.log",
+        "path": "",
+        "left_column_width": 30,
+        "console_width_threshold": 70,
+        "post_buffer": 3,
+        "array_first_element_length": 45,
+        "verbose": {
+            "foreground_color": "Cyan"
+        },
+        "debug": {
+            "foreground_color": "DarkCyan"
+        },
+        "warning": {
+            "foreground_color": "Yellow"
+        },
+        "information": {
+            "foreground_color": "White"
+        },
+        "error": {
+            "foreground_color": "Red"
+        } 
+    }
+}
