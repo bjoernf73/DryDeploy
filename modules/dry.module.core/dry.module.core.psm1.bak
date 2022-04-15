@@ -349,7 +349,7 @@ class Plan {
                             $Dependency_Guid,
                             $CurrentAction.Action_Guid
                         )
-                        [ArrayList]$This.Actions += $Action
+                        $This.Actions += $Action
                     }
                     # Since one or more Action were added to the Plan, Chained actions
                     # in the UnresolvedActionsList may now resolve
@@ -359,7 +359,7 @@ class Plan {
                     $This.UnresolvedActionsList += $Action
                 }
                 else {
-                    [ArrayList]$This.Actions += $Action
+                    $This.Actions += $Action
                     # Since an Action was added to the Plan, Chained actions
                     # in the UnresolvedActionsList may now resolve
                     $ResolveUnresolvedActions = $True
@@ -395,7 +395,7 @@ class Plan {
         $This.OrderCount            = $PlanObject.OrderCount
 
         $PlanObject.Actions.foreach({
-            [ArrayList]$This.Actions += [Action]::New($_)
+            $This.Actions += [Action]::New($_)
         })
     }
 
@@ -415,7 +415,7 @@ class Plan {
                 foreach ($DependentActionGuid in $DependentActionGuids) {
                     # get the ned action guid
                     $InstanceActionGuid = $This.ResolveActionGuid($DependentActionGuid,$ActionGuid) 
-                    [ArrayList]$This.Actions += [Action]::New($_,$InstanceActionGuid)
+                    $This.Actions += [Action]::New($_,$InstanceActionGuid)
                 }
             })
 
@@ -428,7 +428,7 @@ class Plan {
     }
 
     [Void] hidden AddActionOrder() {
-        [ArrayList]$This.Actions = $This.Actions | 
+        $This.Actions = $This.Actions | 
         Sort-Object -Property Action_Guid
         
         $ActionCount = 0
@@ -832,7 +832,7 @@ class Resource {
             $_ | Add-Member -MemberType NoteProperty -Name 'Role' -Value $Role
         })
 
-        [array]$This.ActionOrder = $ResourceBuild.action_order
+        $This.ActionOrder = $ResourceBuild.action_order
     }
 }
 
@@ -942,7 +942,7 @@ class Resources {
         }
 
         if ( $Null -eq $FirstActionGuid ) {
-            throw "No first Action in Resolved Resurces found"
+            throw "No first Action in Resolved Resurces not found"
         }
         elseif ( $FirstActionGuid -eq $ActionGuid ) {
             Remove-Variable -Name FirstActionGuid -ErrorAction Ignore
@@ -1068,8 +1068,9 @@ class Resources {
         }
         
         ol v "Saving resourcesfile '$ResourcesFile'"
-        Set-Content -Path $ResourcesFile -Value (ConvertTo-Json -InputObject $This -Depth 100) -Force
+        Set-Content -Path $ResourcesFile -Value (ConvertTo-Json -InputObject $This -Depth 50) -Force
     }
+
 }
 
 

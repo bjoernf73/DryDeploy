@@ -40,9 +40,9 @@ function Resolve-DryReplacementPatterns {
             return
         } 
         elseif ($InputObject) {
-            # make a copy of the object, so changes don't infect the original
-            $CopyObject = $InputObject.PSObject.Copy()
-            if ($CopyObject -is [Array]) {
+            if ($InputObject -is [Array]) {
+                # make a copy of the object, so changes don't infect the original
+                [Array]$CopyObject = $InputObject.PSObject.Copy()
                 $ResultArray = @()
                 foreach ($arrItem in $CopyObject) {
                     $ResultArray+= Resolve-DryReplacementPatterns -InputObject $arrItem -Variables $Variables
@@ -50,6 +50,8 @@ function Resolve-DryReplacementPatterns {
                 $ResultArray
             }
             else {
+                # make a copy of the object, so changes don't infect the original
+                $CopyObject = $InputObject.PSObject.Copy()
                 $CopyObject.PSObject.Properties | Foreach-Object {
                     $PropertyName  = $_.Name
                     $PropertyValue = $_.Value
@@ -61,10 +63,6 @@ function Resolve-DryReplacementPatterns {
                         # if name is a string, we can replace
                         $PropertyValue = Resolve-DryReplacementPattern -InputText $PropertyValue -Variables $Variables     
                     }
-                    elseif ($PropertyValue -is [PSObject]) {
-                        # nested call
-                        $PropertyValue = Resolve-DryReplacementPatterns -InputObject $PropertyValue -Variables $Variables
-                    } 
                     elseif ($PropertyValue -is [Array]) {
                         # nested call for each element in array
                         $PropertyValue = @($PropertyValue | Foreach-Object { 
@@ -76,6 +74,10 @@ function Resolve-DryReplacementPatterns {
                             }
                         })
                     }
+                    elseif ($PropertyValue -is [PSObject]) {
+                        # nested call
+                        $PropertyValue = Resolve-DryReplacementPatterns -InputObject $PropertyValue -Variables $Variables
+                    } 
                     $CopyObject."$PropertyName" = $PropertyValue
                 }
                 return $CopyObject
