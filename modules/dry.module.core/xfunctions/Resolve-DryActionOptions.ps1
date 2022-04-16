@@ -75,7 +75,7 @@ function Resolve-DryActionOptions {
               the Action is non-typed, 'TypeFilesSourcePath' = 'PhaseFilesSourcePath'. If the 
               Action is non-Phased, 'TypeFilesSourcePath' = 'ActionFilesSourcePath'
         #>
-        [String]$ModuleFilesSourcePath = Resolve-DryFullPath -Path "..$($slash)..$($slash)Files" -RootPath $ConfigSourcePath
+        [String]$ModuleFilesSourcePath = Resolve-DryFullPath -Path "..$($slash)..$($slash)..$($slash)Files" -RootPath $ConfigSourcePath
         if (Test-Path -Path $ModuleFilesSourcePath -ErrorAction Ignore) {
             $LeafFilesSourcePath = $ModuleFilesSourcePath
         }

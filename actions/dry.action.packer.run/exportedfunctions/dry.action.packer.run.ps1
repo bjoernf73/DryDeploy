@@ -39,7 +39,7 @@ function dry.action.packer.run {
         #   Resolve sources, temporary target folders, and other options 
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        $OptionsObject       = Resolve-DryActionOptions -Resource $Resource -Action $Action
+        $GLOBAL:OptionsObject = Resolve-DryActionOptions -Resource $Resource -Action $Action
         $ConfigSourcePath    = $OptionsObject.ConfigSourcePath
         $ConfigTargetPath    = $OptionsObject.ConfigTargetPath
         
@@ -84,8 +84,7 @@ function dry.action.packer.run {
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   Variables
-        #   All vars except secrets are put in a *.vars.json together with the 
-        #   tf-file and automatically picked up at run time. Secrets are passed as  
+        #   All vars except secrets are put in a *.vars.json Secrets are passed as  
         #   command line options 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         If ($MetaConfig.vars) {
@@ -100,7 +99,8 @@ function dry.action.packer.run {
         }
        
         # Define the vars file path
-        $TargetVarsFile = Join-Path -Path $ConfigTargetPath -ChildPath "$($Resource.Name).vars.json"
+        $TargetVarsFile = Join-Path -Path $ConfigTargetPath -ChildPath "$($Resource.Name)-vars.json"
+        ol i @('Packers vars file',"$TargetVarsFile")
        
         # Remove files that may exist from a previous run
         If (Test-Path -Path $ConfigTargetPath -ErrorAction Ignore) {
@@ -118,24 +118,19 @@ function dry.action.packer.run {
         # Loop through files in the layout
         foreach ($File in $MetaConfig.files) {
             # define full source and destination
-            $SourceFile = $SourceLocation + '\' + $File.Name
-            $TargetFile = $ConfigTargetPath + '\' + $File.Name
+            $SourceFile = Join-Path -Path $ConfigSourcePath -ChildPath $File.Name
+            $TargetFile = Join-Path -Path $ConfigTargetPath -ChildPath $File.Name
             switch ($File.replace) {
                 $True {
-                    # Get the contents from file
                     $RawFileContents = Get-Content -Path $SourceFile -Raw -ErrorAction Stop
-
                     # Replace all replacement patterns, i.e. '###some_pattern###'
                     $ReplacedFileContents = Resolve-DryReplacementPatterns -InputText $RawFileContents -Variables $Variables
-
-                    # Write to destination
-                    $ReplacedFileContents | 
-                    Out-File -FilePath $TargetFile -Encoding Default -Force
+                    $ReplacedFileContents | Out-File -FilePath $TargetFile -Encoding Default -Force
                     Remove-Variable -Name RawFileContents,ReplacedFileContents -ErrorAction Ignore
                 }
                 Default {
                     # just copy
-                    Copy-Item -Path $SourceFile -Destination $TargetFile -Confirm:$false
+                    Copy-Item -Path $SourceFile -Destination $TargetFile -Confirm:$false -Force
                 }
             }
         }
@@ -173,23 +168,23 @@ function dry.action.packer.run {
         }
 
         # Packer Arguments
-        [Array]$Arguments = @("-var-file=""$($TargetVarsFile.FullName)""")
+        [Array]$Arguments = @("-var-file=""$TargetVarsFile""")
         foreach ($Var in $Variables | Where-Object { $_.secret -eq $true}) {
             $Arguments += "-var"
             $Arguments += "$($Var.Name)=`"$($Var.Value)`""
         }
+        $ValidateArguments = $Arguments
+        $ValidateArguments += "$($PackerFile.FullName)"
         
         # cd to target
         Set-Location -Path $ConfigTargetPath -ErrorAction Stop
 
         # Packer Validate
-        & $PackerExe validate $Arguments
+        ol i @('Packer Validate',"& $PackerExe validate $ValidateArguments")
+        & $PackerExe validate $ValidateArguments
         if ($LastExitCode -ne 0) {
             Throw "Packer Validate failed: $LastExitCode" 
         }
-
-        #! REMOVE THIS
-        start-sleep -Seconds 30
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   ACTIONPARAMS
@@ -217,12 +212,14 @@ function dry.action.packer.run {
                 }
             }
         }
+        $Arguments += "$($PackerFile.FullName)"
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   Packer Build
         #   
         #   Build the config
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        ol i @('Packer Build',"& $PackerExe build $Arguments")
         & $PackerExe build $Arguments
         if ($LastExitCode -ne 0) {
             Throw "Packer Build failed: $LastExitCode" 
