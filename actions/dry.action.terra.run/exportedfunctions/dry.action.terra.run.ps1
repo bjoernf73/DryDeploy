@@ -65,14 +65,20 @@ function dry.action.terra.run {
         #   The MetaConfig is a configfile with info about the actual Terra config
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
         [PSObject]$MetaConfig = Get-DryCommentedJson -Path $MetaFile -ErrorAction Stop
+        Set-Variable -Name 'MetaConfig' -Value $MetaConfig -Scope Global -Force
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   PLATFORM
         #   The Metaconfig supplies an expression to resolve the platform
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        [PSObject]$Platform = Invoke-Expression $MetaConfig.platform_expression -ErrorAction Stop
-        Set-Variable -Name 'Platform' -Value $Platform -Scope Global -Force
-        ol i @("Target Platform","$($Platform.name)")
+        if ($MetaConfig.platform_expression) {
+            [PSObject]$Platform = Invoke-Expression $MetaConfig.platform_expression -ErrorAction Stop
+            Set-Variable -Name 'Platform' -Value $Platform -Scope Global -Force
+            ol i @('Target Terraform Platform',"$($Platform.name)")
+        }
+        else {
+            ol i @('Target Terraform Platform','(unspecified)')
+        }
 
          # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   CREDENTIALS
@@ -106,7 +112,7 @@ function dry.action.terra.run {
         }
        
         # Define the vars file path
-        $TargetTFvarsFile = Join-Path -Path $ConfigTargetPath -ChildPath "$($Resource.Name).auto.tfvars.json"
+        $TargetVarsFile = Join-Path -Path $ConfigTargetPath -ChildPath "$($Resource.Name).auto.tfvars.json"
        
         # Remove files that may exist from a previous run
         If (Test-Path -Path $ConfigTargetPath -ErrorAction Ignore) {
@@ -119,28 +125,21 @@ function dry.action.terra.run {
             New-Item -Path $ConfigTargetPath -ItemType Directory -Confirm:$false -Force | Out-Null
         }
         
-        
         # Copy terraform file to target
         Copy-Item -Path $TerraFile -Destination $ConfigTargetPath -ErrorAction Stop
-
-        # write the vars file
-        $TargetTFvarsFile 
-        foreach ($Var in $Variables) {
-             "$($Var.Name) = `"$($Var.Value)`"" | Out-File -FilePath $TargetTFvarsFile -Encoding UTF8 -Append 
-        }
 
         # Get a hashtable with the names and values only - but only include vars that are not secret, since we're writing these values to a file
         $VariablesHash = ConvertTo-DryHashtable -Variables $Variables -NotSecrets
         
         # Output the tfvars file. Using json, we don't have to create a shady text-parsing-function for this.
-        # Use utf8 by default, but allow the configuration to modify that by specifying tfvars_encoding 
+        # Use ascii by default, but allow the configuration to modify that by specifying vars_encoding 
         $Encoding = 'ascii'
-        if ($MetaConfig.tfvars_encoding) {
+        if ($MetaConfig.vars_encoding) {
             $Encoding = $MetaConfig.tfvars_encoding
         }
         $VariablesHash | 
         ConvertTo-Json -Depth 50 -ErrorAction Stop | 
-        Out-File -FilePath $TargetTFvarsFile -Encoding $Encoding -ErrorAction Stop
+        Out-File -FilePath $TargetVarsFile -Encoding $Encoding -ErrorAction Stop
         
         # cd to target
         Set-Location -Path $ConfigTargetPath -ErrorAction Stop
@@ -191,6 +190,40 @@ function dry.action.terra.run {
             $Arguments += "-var"
             $Arguments += "$($Var.Name)=`"$($Var.Value)`""
         }
+
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        #   ACTIONPARAMS
+        #   When working with a single Action type, for instance during development, 
+        #   it is possible to pass a hashtable of extra commmand line paramaters to 
+        #   DryDeploy that will be passed to the receiving program, in this case 
+        #   Terraform.  
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        if ($ActionParams) {
+            foreach ($ActionParam in $ActionParams.GetEnumerator()) {
+                <#
+                    Params may be switches (like '-no-color') or key value pairs (like '-parallelism=2')
+                    The hash table should in these two cases look like this: 
+                    $ActionParams = @{
+                        'no-color'    = $null 
+                        'parallelism' = 2
+                    }
+                #>
+                if ($null -eq $ActionParam.Value) {
+                    # Switch
+                    $Arguments += "-$($ActionParam.Name)"
+                }
+                else {
+                    # Key-Value pair
+                    $Arguments += "-$($ActionParam.Name)=$($ActionParam.Value)"
+                }
+            }
+        }
+
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        #   Terraform Apply
+        #   
+        #   Apply the config
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         
         # & terraform apply -auto-approve $Arguments *>&1 | Tee-Object -Variable ApplyResult
         & terraform apply -auto-approve $Arguments

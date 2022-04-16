@@ -30,8 +30,9 @@ function dry.action.packer.run {
         $ActionParams
     )
     Try {
-        # $Location = Get-Location
+        $TestedPackerVersion = [Version]"1.8.0"
         Push-Location
+
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   OPTIONS
         #
@@ -42,37 +43,30 @@ function dry.action.packer.run {
         $ConfigSourcePath    = $OptionsObject.ConfigSourcePath
         $ConfigTargetPath    = $OptionsObject.ConfigTargetPath
         
-        [List[String]]$MetaFiles = @((Get-ChildItem -Path "$ConfigSourcePath\*" -Include *.json,*.jsonc -ErrorAction Stop).FullName)
-        [List[String]]$PackerFiles = @((Get-ChildItem -Path "$ConfigSourcePath\*" -Include *.tf -ErrorAction Stop).FullName)
-        if ($MetaFiles.count -eq 1) {
-            $MetaFile = $MetaFiles[0]
-            ol i @("Meta Configuration File",$MetaFile)
-        }
-        else {
-            throw "Multiple .json and/or .jsonc files in '$ConfigSourcePath' - I was excpecting only one!"
-        }
-
-        if ($PackerFiles.count -eq 1) {
-            $PackerFile = $PackerFiles[0]
-            ol i @("packer File",$PackerFile)
-        }
-        else {
-            throw "Multiple .tf files in '$ConfigSourcePath' - I was excpecting only one!"
-        }
+        [System.IO.FileInfo]$MetaFile = Get-ChildItem -Path "$ConfigSourcePath\Config.json" -ErrorAction Stop
+        [System.IO.FileInfo]$PackerFile = Get-ChildItem -Path "$ConfigSourcePath\*" -Include "*.pkr.hcl" -ErrorAction Stop
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   METACONFIG
         #   The MetaConfig is a configfile with info about the actual Packer config
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-        [PSObject]$MetaConfig = Get-DryCommentedJson -Path $MetaFile -ErrorAction Stop
+        [PSObject]$MetaConfig = Get-DryCommentedJson -Path $MetaFile.FullName -ErrorAction Stop
+        Set-Variable -Name 'MetaConfig' -Value $MetaConfig -Scope Global -Force
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   PLATFORM
-        #   The Metaconfig supplies an expression to resolve the platform
+        #   The Metaconfig may supply an expression to resolve the platform, which 
+        #   which often is the case if it's not the null-builder, but also for the 
+        #   hyperv-builder, which doesn't connect to anything
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        [PSObject]$Platform = Invoke-Expression $MetaConfig.platform_expression -ErrorAction Stop
-        Set-Variable -Name 'Platform' -Value $Platform -Scope Global -Force
-        ol i @("Target Platform","$($Platform.name)")
+        if ($MetaConfig.platform_expression) {
+            [PSObject]$Platform = Invoke-Expression $MetaConfig.platform_expression -ErrorAction Stop
+            Set-Variable -Name 'Platform' -Value $Platform -Scope Global -Force
+            ol i @("Target Platform","$($Platform.name)")
+        }
+        else {
+            $Platform = $null
+        }
 
          # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   CREDENTIALS
@@ -90,7 +84,7 @@ function dry.action.packer.run {
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   Variables
-        #   All vars except secrets are put in a main.auto.tfvars together with the 
+        #   All vars except secrets are put in a *.vars.json together with the 
         #   tf-file and automatically picked up at run time. Secrets are passed as  
         #   command line options 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -106,7 +100,7 @@ function dry.action.packer.run {
         }
        
         # Define the vars file path
-        $TargetTFvarsFile = Join-Path -Path $ConfigTargetPath -ChildPath "$($Resource.Name).auto.tfvars.json"
+        $TargetVarsFile = Join-Path -Path $ConfigTargetPath -ChildPath "$($Resource.Name).vars.json"
        
         # Remove files that may exist from a previous run
         If (Test-Path -Path $ConfigTargetPath -ErrorAction Ignore) {
@@ -119,14 +113,31 @@ function dry.action.packer.run {
             New-Item -Path $ConfigTargetPath -ItemType Directory -Confirm:$false -Force | Out-Null
         }
         
-        
         # Copy packer file to target
-        Copy-Item -Path $PackerFile -Destination $ConfigTargetPath -ErrorAction Stop
+        # Copy-Item -Path $PackerFile -Destination $ConfigTargetPath -ErrorAction Stop
+        # Loop through files in the layout
+        foreach ($File in $MetaConfig.files) {
+            # define full source and destination
+            $SourceFile = $SourceLocation + '\' + $File.Name
+            $TargetFile = $ConfigTargetPath + '\' + $File.Name
+            switch ($File.replace) {
+                $True {
+                    # Get the contents from file
+                    $RawFileContents = Get-Content -Path $SourceFile -Raw -ErrorAction Stop
 
-        # write the vars file
-        $TargetTFvarsFile 
-        foreach ($Var in $Variables) {
-             "$($Var.Name) = `"$($Var.Value)`"" | Out-File -FilePath $TargetTFvarsFile -Encoding UTF8 -Append 
+                    # Replace all replacement patterns, i.e. '###some_pattern###'
+                    $ReplacedFileContents = Resolve-DryReplacementPatterns -InputText $RawFileContents -Variables $Variables
+
+                    # Write to destination
+                    $ReplacedFileContents | 
+                    Out-File -FilePath $TargetFile -Encoding Default -Force
+                    Remove-Variable -Name RawFileContents,ReplacedFileContents -ErrorAction Ignore
+                }
+                Default {
+                    # just copy
+                    Copy-Item -Path $SourceFile -Destination $TargetFile -Confirm:$false
+                }
+            }
         }
 
         # Get a hashtable with the names and values only - but only include vars that are not secret, since we're writing these values to a file
@@ -135,70 +146,89 @@ function dry.action.packer.run {
         # Output the tfvars file. Using json, we don't have to create a shady text-parsing-function for this.
         # Use utf8 by default, but allow the configuration to modify that by specifying tfvars_encoding 
         $Encoding = 'ascii'
-        if ($MetaConfig.tfvars_encoding) {
-            $Encoding = $MetaConfig.tfvars_encoding
+        if ($MetaConfig.vars_encoding) {
+            $Encoding = $MetaConfig.vars_encoding
         }
         $VariablesHash | 
         ConvertTo-Json -Depth 50 -ErrorAction Stop | 
-        Out-File -FilePath $TargetTFvarsFile -Encoding $Encoding -ErrorAction Stop
-        
-        # cd to target
-        Set-Location -Path $ConfigTargetPath -ErrorAction Stop
+        Out-File -FilePath $TargetVarsFile -Encoding $Encoding -ErrorAction Stop
 
-        # packer Init
-        & packer init 
-        if ($LastExitCode -ne 0) {
-            Throw "packer Init failed: $LastExitCode" 
-        }
-        
-        <#
-        # *>&1 | Tee-Object -Variable InitResult
-
-        $InitSuccessString = 'packer has been successfully initialized!'
-        $InitSuccess = $false 
-        $InitResult.Foreach({
-            if ($_ -match $InitSuccessString) {
-                $InitSuccess = $true
+        # Make sure the tested Packer version or newer is installed and in path.
+        # The $TestedPackerVersion is defined in the top of this file. Eventually, as
+        # dry.module.pkgmgmt is implemented, this will call a function in that module 
+        # instead
+        if (Get-Command -CommandType Application -Name 'Packer') { 
+            [Version]$Version = ("{0}" -f ((& packer version) -replace "^Packer v"))
+            if ($Version -lt $TestedPackerVersion) {
+                throw "You need Packer $($TestedPackerVersion.ToString()) or newer installed and in path"
             }
-        })
-        if (-not ($InitSuccess)) {
-            Throw "packer could not init"
-        }
-        #>
-        
-        # packer Validate
-        & packer validate
-        if ($LastExitCode -ne 0) {
-            Throw "packer Validate failed: $LastExitCode" 
-        }
-        <#
-        *>&1 | Tee-Object -Variable ValidateResult
-        $ValidateSuccessString = 'The configuration is valid'
-        $ValidateSuccess = $false
-        $ValidateResult.Foreach({
-            if ($_ -match $ValidateSuccessString) {
-                $ValidateSuccess = $true
+            else {
+                ol i "Packer version installed","v$($Version.ToString())"
             }
-        })
-        if (-not ($ValidateSuccess)) {
-            Throw "packer could not validate"
+            $PackerExe = (Get-Command -CommandType Application -Name 'Packer' | 
+                Select-Object -Property Source).Source
+        } 
+        else { 
+            throw "You need to have Packer v$TestedPackerVersion (minimum) installed and in path" 
         }
-        #> 
 
-        # packer Apply
-        [Array]$Arguments = @()
+        # Packer Arguments
+        [Array]$Arguments = @("-var-file=""$($TargetVarsFile.FullName)""")
         foreach ($Var in $Variables | Where-Object { $_.secret -eq $true}) {
             $Arguments += "-var"
             $Arguments += "$($Var.Name)=`"$($Var.Value)`""
         }
         
-        # & packer apply -auto-approve $Arguments *>&1 | Tee-Object -Variable ApplyResult
-        & packer apply -auto-approve $Arguments
+        # cd to target
+        Set-Location -Path $ConfigTargetPath -ErrorAction Stop
+
+        # Packer Validate
+        & $PackerExe validate $Arguments
         if ($LastExitCode -ne 0) {
-            Throw "Packer Apply failed: $LastExitCode" 
+            Throw "Packer Validate failed: $LastExitCode" 
+        }
+
+        #! REMOVE THIS
+        start-sleep -Seconds 30
+
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        #   ACTIONPARAMS
+        #   When working with a single Action type, for instance during development, 
+        #   it is possible to pass a hashtable of extra commmand line paramaters to 
+        #   DryDeploy that will be passed to the receiving program, in this case 
+        #   Packer.
+        #   Params may be switches (like '-no-color') or key value pairs 
+        #   (like '-parallelism=2'). The hash table should in these two cases look 
+        #   like this: 
+        #       $ActionParams = @{
+        #            'no-color'    = $null 
+        #            'parallelism' = 2
+        #       }
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        if ($ActionParams) {
+            foreach ($ActionParam in $ActionParams.GetEnumerator()) {
+                if ($null -eq $ActionParam.Value) {
+                    # Switch
+                    $Arguments += "-$($ActionParam.Name)"
+                }
+                else {
+                    # Key-Value pair
+                    $Arguments += "-$($ActionParam.Name)=$($ActionParam.Value)"
+                }
+            }
+        }
+
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        #   Packer Build
+        #   
+        #   Build the config
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        & $PackerExe build $Arguments
+        if ($LastExitCode -ne 0) {
+            Throw "Packer Build failed: $LastExitCode" 
         }
         
-        # *>&1 | Tee-Object -Variable ApplyResult
+        # & packer apply -auto-approve $Arguments *>&1 | Tee-Object -Variable ApplyResul
     }
     Catch {
         $PSCmdlet.ThrowTerminatingError($_)
