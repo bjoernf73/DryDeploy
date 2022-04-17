@@ -113,8 +113,6 @@ function dry.action.packer.run {
             New-Item -Path $ConfigTargetPath -ItemType Directory -Confirm:$false -Force | Out-Null
         }
         
-        # Copy packer file to target
-        # Copy-Item -Path $PackerFile -Destination $ConfigTargetPath -ErrorAction Stop
         # Loop through files in the layout
         foreach ($File in $MetaConfig.files) {
             # define full source and destination
@@ -169,18 +167,26 @@ function dry.action.packer.run {
 
         # Packer Arguments
         [Array]$Arguments = @("-var-file=""$TargetVarsFile""")
+        $DisplayArguments = $Arguments
         foreach ($Var in $Variables | Where-Object { $_.secret -eq $true}) {
             $Arguments += "-var"
             $Arguments += "$($Var.Name)=`"$($Var.Value)`""
+
+            $DisplayArguments += "-var"
+            $DisplayArguments += "$($Var.Name)=`"**********`""
+            
         }
         $ValidateArguments = $Arguments
+        $ValidateDisplayArguments = $DisplayArguments
+        
         $ValidateArguments += "$($PackerFile.FullName)"
+        $ValidateDisplayArguments += "$($PackerFile.FullName)"
         
         # cd to target
         Set-Location -Path $ConfigTargetPath -ErrorAction Stop
 
         # Packer Validate
-        ol i @('Packer Validate',"& $PackerExe validate $ValidateArguments")
+        ol i @('Packer Validate',"& $PackerExe validate $ValidateDisplayArguments")
         & $PackerExe validate $ValidateArguments
         if ($LastExitCode -ne 0) {
             Throw "Packer Validate failed: $LastExitCode" 
@@ -205,21 +211,24 @@ function dry.action.packer.run {
                 if ($null -eq $ActionParam.Value) {
                     # Switch
                     $Arguments += "-$($ActionParam.Name)"
+                    $DisplayArguments += "-$($ActionParam.Name)"
                 }
                 else {
                     # Key-Value pair
                     $Arguments += "-$($ActionParam.Name)=$($ActionParam.Value)"
+                    $DisplayArguments += "-$($ActionParam.Name)=$($ActionParam.Value)"
                 }
             }
         }
         $Arguments += "$($PackerFile.FullName)"
+        $DisplayArguments += "$($PackerFile.FullName)"
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   Packer Build
         #   
         #   Build the config
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        ol i @('Packer Build',"& $PackerExe build $Arguments")
+        ol i @('Packer Build',"& $PackerExe build $DisplayArguments")
         & $PackerExe build $Arguments
         if ($LastExitCode -ne 0) {
             Throw "Packer Build failed: $LastExitCode" 
@@ -232,7 +241,6 @@ function dry.action.packer.run {
     }
     Finally {
         Pop-Location
-        #Set-Location $Location -ErrorAction Stop 
 
         # Remove temporary files
         If ($GLOBAL:KeepConfigFiles) {
@@ -243,60 +251,33 @@ function dry.action.packer.run {
             Remove-Item -Path $ConfigTargetPath -Recurse -Force -Confirm:$false
         }
 
-        @(
-            'Location',
+        @('TestedPackerVersion',
+            'OptionsObject',
             'ConfigSourcePath',
-            'ConfigOSSourcePath',
             'ConfigTargetPath',
-            'MetaConfigObject',
-            'DscTemplate',
-            'DscImportModulesString',
-            'DscImportResourcesString',
-            'PropertyNames',
-            'VarValue',
-            'ParamsHash',
-            'FunctionParamsHash',
-            'FunctionParamsNameArr',
-            'FunctionParamsName',
-            'DscTarget',
-            'ReplacementParamsHash',
-            'ReplacementParamsHash',
-            'DscTargetSystemPRECredentials',
-            'DscTargetSystemPOSTCredentials',
-            'SessionConfig',
-            'GetDryPSSessionParameters',
-            'DSCSession',
-            'MofTargetDir',
-            'MofTarget',
-            'MetaMofTarget',
-            'DscModuleTarget',
-            'ConfigurationData',
-            'GetDryCIMSessionParameters',
-            'CIMSession',
-            'DscTargetSystemPOSTCredentialsArray',
-            'WaitWinRMInterfaceParams',
-            'WinRMStatus',
-            'LcmInDesiredState',
-            'DscTestIntervalSeconds',
-            'DscTestBeforeSeconds',
-            'LcmObject',
-            'LcmInDesiredState',
-            'ResourceInstancesNotInDesiredState',
-            'AllowedNotInDesiredState',
-            'NotInDesiredStateCount',
-            'LcmInDesiredState',
-            'DscWaitForRebootSeconds',
-            'VerificationObject',
-            'GetDrySessionParams',
-            'WaitDryForEventParamaters',
-            'Filters',
-            'Filter'
-        ).Foreach({
+            'MetaFile',
+            'PackerFile',
+            'MetaConfig',
+            'Platform',
+            'ResolveVariablesParams',
+            'Variables',
+            'TargetVarsFile',
+            'SourceFile',
+            'TargetFile',
+            'VariablesHash',
+            'Encoding',
+            'Version',
+            'PackerExe',
+            'Arguments',
+            'DisplayArguments',
+            'ValidateArguments',
+            'ValidateDisplayArguments',
+            'ActionParams').Foreach({
             Remove-Variable -Name $_ -ErrorAction Ignore
         })
         
 
-        if (Get-Variable -Name "Platform" -Scope Global) {
+        if (Get-Variable -Name "Platform" -Scope Global -ErrorAction Ignore) {
             Remove-Variable -Name "Platform" -Scope Global -Force
         }
         for ($Cred = 1; $Cred -lt 20; $Cred++) {
