@@ -33,7 +33,7 @@ function Set-DryConfigCombo {
         $ModuleType = $ModuleType.SubString(0,1).ToUpper() + $ModuleType.SubString(1).ToLower() 
 
         switch ($ModuleType) {
-            'Global' {
+            'Environment' {
                 $ThisConfig = $ConfigCombo.EnvConfig
             }
             'Module' {

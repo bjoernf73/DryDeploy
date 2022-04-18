@@ -30,7 +30,7 @@ function New-DryConfigCombo {
     "dependencies_hash": "",
     "EnvConfig": {
         "Description": "",
-        "Type": "Global",
+        "Type": "Environment",
         "Guid": "",
         "Path": ""
     },

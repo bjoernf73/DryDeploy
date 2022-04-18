@@ -28,7 +28,7 @@ function Resolve-DryConfigCombo {
         $Path,
 
         [Parameter(Mandatory)]
-        [ValidateSet('Global','Module')]
+        [ValidateSet('Environment','Module')]
         [String] 
         $Type
     )

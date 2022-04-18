@@ -715,11 +715,11 @@ try {
     if ($EnvConfig -or $ModuleConfig) {
         # Resolve the EnvConfig
         if ($EnvConfig) {
-            #Resolve-DryConfigCombo -Path ([IO.Path]::GetFullPath("$EnvConfig")) -Type 'Global'
-            Resolve-DryConfigCombo -Path (Resolve-DryFullPath -Path $EnvConfig -RootPath $ScriptPath) -Type 'Global'
+            #Resolve-DryConfigCombo -Path ([IO.Path]::GetFullPath("$EnvConfig")) -Type 'Environment'
+            Resolve-DryConfigCombo -Path (Resolve-DryFullPath -Path $EnvConfig -RootPath $ScriptPath) -Type 'Environment'
         }
         else {
-            Resolve-DryConfigCombo -Type 'Global' -ErrorAction 'Continue'
+            Resolve-DryConfigCombo -Type 'Environment' -ErrorAction 'Continue'
         }
         Save-DryConfigCombo -Path $ConfigComboPath -ConfigCombo $ConfigCombo
 

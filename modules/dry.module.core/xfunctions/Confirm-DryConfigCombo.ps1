@@ -32,7 +32,7 @@ function Confirm-DryConfigCombo {
     try {
         $ModuleType = $RootConfig.Type
         switch ($ModuleType) {
-            'Global' {
+            'Environment' {
                 $ThisConfig = $ConfigCombo.EnvConfig
             }
             'Module' {
