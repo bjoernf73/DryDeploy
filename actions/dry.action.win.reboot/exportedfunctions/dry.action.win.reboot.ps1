@@ -67,7 +67,7 @@ Function dry.action.win.reboot {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
         If (Test-Path -Path $MetaConfigFile -ErrorAction Ignore) {
-            [PSObject] $ActionMetaConfigObject = Get-DryCommentedJson -Path $MetaConfigFile -ErrorAction Stop 
+            [PSObject] $ActionMetaConfigObject = Get-DryFromJson -Path $MetaConfigFile -ErrorAction Stop 
             [Int]      $NumberOfReboots        = $ActionMetaConfigObject.reboots
             [Bool]     $GPUpdate               = $ActionMetaConfigObject.gpupdate
             [String]   $ConfigOrDefault        = 'Config'
@@ -93,7 +93,7 @@ Function dry.action.win.reboot {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         $CredCount = 1
         While ($Action.credentials."credential$CredCount") {
-            $Credentials += @(Get-DryCredential -Alias $Action.credentials."credential$CredCount" -EnvConfig "$($GLOBAL:EnvConfigName)")
+            $Credentials += @(Get-DryCredential -Alias $Action.credentials."credential$CredCount" -EnvConfig "$($($GLOBAL.dry_var_global_EnvConfig).name)")
             $CredCount++
         }
 

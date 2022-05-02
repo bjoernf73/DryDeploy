@@ -26,20 +26,30 @@ function Install-DryDependencies {
     [CmdLetBinding()]
     param (
         [Parameter(Mandatory)]
-        [PSObject]$Dependencies,
+        [PSCustomObject]$ConfigCombo,
 
-        [Parameter(Mandatory)]
-        [String]$ConfigObjectPath,
+        [Parameter(Mandatory,HelpMessage="To determine which depdencies_hash to write to")]
+        [ValidateSet('environment','module','system')]
+        [String]$Type,
 
         [String]$GitsPath
     )
 
     try {
-        [PSObject]$ConfigObject = Get-Content -Path $ConfigObjectPath -Encoding default -ErrorAction Stop | 
-        ConvertFrom-Json -ErrorAction Stop
-
         ol i " "
         ol i "Dependencies" -sh
+
+        switch ($Type) {
+            'environment' {
+                $Dependencies = $ConfigCombo.envconfig.dependencies
+            }
+            'module' {
+                $Dependencies = $ConfigCombo.moduleconfig.dependencies
+            }
+            'system' {
+                $Dependencies = $ConfigCombo.systemconfig.dependencies
+            }
+        }
 
         # Chocolatey packages must be installed elevated
         #! should check if they are installed before throwing error
@@ -118,7 +128,18 @@ function Install-DryDependencies {
         }
 
         # no catch - assume all dependencies are ensured, so write the dependencies_hash to the ConfigObject
-        Save-DryDependenciesHash -Path $ConfigObjectPath -Dependencies $Dependencies
+        switch ($Type) {
+            'system' {
+                $ConfigCombo.systemconfig.dependencies_hash = $ConfigCombo.CalcDepHash($Dependencies)
+            }
+            'module' {
+                $ConfigCombo.moduleconfig.dependencies_hash = $ConfigCombo.CalcDepHash($Dependencies)
+            }
+            'environment' {
+                $ConfigCombo.envconfig.dependencies_hash = $ConfigCombo.CalcDepHash($Dependencies)
+            }
+        }
+        $ConfigCombo.Save()
         ol i "Dependencies installed" -sh 
     }
     catch {

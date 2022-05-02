@@ -1,11 +1,8 @@
 <# 
- This module provides functions for bootstrapping package management, 
- registering package sources and package installations for use with 
- DryDeploy. ModuleConfigs may specify dependencies in it's root config
- that this module processes.
- 
+ This module provides core functionality for DryDeploy.
+
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
- LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.module.packagemanagement/main/LICENSE
+ LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.module.core/main/LICENSE
  
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -22,32 +19,33 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Test-DryDependenciesHash {
-    [CmdLetBinding()]
-    [OutputType([Bool])]
+function Show-DryActionEnd {
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
-        [AllowEmptyString()]
-        [String]$Hash,
+        [Action] $Action,
 
         [Parameter(Mandatory)]
-        [PSObject]$Dependencies
+        [DateTime] $StartTime,
+
+        [Parameter(Mandatory)]
+        [DateTime] $EndTime
+
     )
     try {
-        if ($null -eq $Hash) {
-            $false
+        [timespan]$ActionSpan = ($EndTime-$StartTime)
+            ol i " " -h
+            ol i " "
+        if ($Action.Phase) {
+            ol i "Action [$($Action.action)] - Phase [$($Action.Phase)] took $($ActionSpan.ToString("dd\:hh\:mm\:ss")) to complete"
         }
         else {
-            [String]$ActualHash = Get-DryDependenciesHash -Dependencies $Dependencies
-            ol d @('Calculated Dependency hash',$ActualHash)
-            ol d @('Stored Dependency hash',$Hash)
-            if ($ActualHash -eq $Hash) {
-                $true
-            }
-            else {
-                $false
-            }
+            ol i "Action [$($Action.action)] took $($ActionSpan.ToString("dd\:hh\:mm\:ss")) to complete"
         }
+        
+            ol i " "
+            ol i "Status: $($Action.Status.ToUpper())"
+            ol i " "
     }
     catch {
         $PSCmdlet.ThrowTerminatingError($_)

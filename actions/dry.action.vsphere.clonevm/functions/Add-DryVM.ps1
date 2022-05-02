@@ -29,7 +29,7 @@ function Add-DryVM {
 
         $WaitTools = $True,
 
-        $Force = $GLOBAL:Force
+        $Force = $GLOBAL:dry_var_global_Force
     )
     try {
         # Connect to vcenter

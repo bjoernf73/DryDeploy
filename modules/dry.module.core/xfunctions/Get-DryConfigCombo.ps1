@@ -22,21 +22,48 @@
 function Get-DryConfigCombo {
     [cmdletbinding()]
     param (
-        [String] $Path
-    )
+        [Parameter(Mandatory)]
+        [String]$Path,
 
+        [Parameter(Mandatory)]
+        [PSCustomObject]$SystemOptions,
+
+        [Parameter(Mandatory)]
+        [PSCustomObject]$Platform
+    )
     try {
-        if (Test-Path -Path $Path -ErrorAction Ignore) {
-            # A ComfigCombo already exists
-            [PSObject]$ConfigCombo = Get-Content -Path $Path | 
-            ConvertFrom-Json -ErrorAction Stop
-            $ConfigCombo.New = $False
+        $SystemDependencies = $SystemOptions.dependencies."$($Platform.platform)"."$($Platform.edition)"
+        # Create the PSCustomObject 
+        $ConfigCombo = [PSCustomObject]@{
+            name                     = 'default'
+            path                     = "$Path"
+            platform                 = $Platform.platform
+            edition                  = $Platform.edition
+            envconfig                = [PSCustomObject]@{ name = ''; type = 'environment';  guid = ''; path = $null; description = ''; dependencies_hash = ''; dependencies = $null; configpath = $null; osconfigpath = $null}
+            moduleconfig             = [PSCustomObject]@{ name = ''; type = 'module';       guid = ''; path = $null; description = ''; dependencies_hash = ''; dependencies = $null; buildpath = $null; rolespath = $null; credentialspath = $null}
+            systemconfig             = [PSCustomObject]@{ name = ''; type = 'system';                                                  dependencies_hash = ''; dependencies = $null}
+        }
+        
+        $ConfigCombo.systemconfig.name = 'DryDeploy'
+        if ($null -ne $SystemDependencies) {
+            $ConfigCombo.systemconfig.dependencies = $SystemDependencies
+        }
+        # add methods to the object
+        $ConfigCombo | Add-Member -MemberType ScriptMethod -Name 'Exists'      -Value $dry_core_sb_configcombo_exists
+        $ConfigCombo | Add-Member -MemberType ScriptMethod -Name 'Read'        -Value $dry_core_sb_configcombo_read
+        $ConfigCombo | Add-Member -MemberType ScriptMethod -Name 'Save'        -Value $dry_core_sb_configcombo_save
+        $ConfigCombo | Add-Member -MemberType ScriptMethod -Name 'CalcDepHash' -Value $dry_core_sb_configcombo_calcdephash
+        $ConfigCombo | Add-Member -MemberType ScriptMethod -Name 'TestDepHash' -Value $dry_core_sb_configcombo_testdephash
+        $ConfigCombo | Add-Member -MemberType ScriptMethod -Name 'Change'      -Value $dry_core_sb_configcombo_change
+        $ConfigCombo | Add-Member -MemberType ScriptMethod -Name 'Show'        -Value $dry_core_sb_configcombo_show
+        
+        if ($ConfigCombo.Exists()) {
+            $ConfigCombo.Read()
         }
         else {
-            [PSObject]$ConfigCombo = New-DryConfigCombo
-            Save-DryConfigCombo -Path $Path -ConfigCombo $ConfigCombo
+            $ConfigCombo.Save()
         }
-        $ConfigCombo
+        return $ConfigCombo
     }
     catch {
         $PSCmdlet.ThrowTerminatingError($_)

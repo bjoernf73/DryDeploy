@@ -39,7 +39,7 @@ Function dry.action.salt.run {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #  
 
-        [PSObject]$MetaConfigObject = Get-DryCommentedJson -Path $SaltMetaConfigFile -ErrorAction Stop 
+        [PSObject]$MetaConfigObject = Get-DryFromJson -Path $SaltMetaConfigFile -ErrorAction Stop 
         
         
         #! Gå igjennom fra her
@@ -688,7 +688,7 @@ Function dry.action.salt.run {
         Remove-Module -Name PSDesiredStateConfiguration,DryDSC -ErrorAction Ignore 
 
         # Remove temporary files
-        If ($GLOBAL:KeepConfigFiles) {
+        If ($GLOBAL:dry_var_global_KeepConfigFiles) {
             ol i @('Keeping ConfigFiles in',"$ConfigTargetPath")
         }
         Else {

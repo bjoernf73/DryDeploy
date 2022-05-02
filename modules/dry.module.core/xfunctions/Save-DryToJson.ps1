@@ -19,19 +19,33 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Save-DryConfigCombo {
+function Save-DryToJson {
     [cmdletbinding()]
     param (
-        [String] $Path,
-        [PSObject]$ConfigCombo
+        [Parameter(Mandatory)]
+        [String]$Path,
+
+        [Parameter(Mandatory)]
+        [PSObject]$InputObject,
+
+        [Parameter()]
+        [Int]$Depth = 50,
+
+        [Parameter()]
+        [ValidateSet('ASCII','BigEndianUnicode','Default','OEM','String','Unicode','Unknown','UTF7','UTF8','UTF32')]
+        [String]$Encoding = 'Default',
+
+        [Parameter()]
+        [Switch]$Force
     )
 
     try {
-        $ConfigCombo | 
-        ConvertTo-Json -Depth 10 -ErrorAction Stop |
-        Out-File -FilePath $Path -Encoding default -ErrorAction Stop -Force
+        $InputObject | 
+        ConvertTo-Json -Depth $Depth -ErrorAction Stop |
+        Out-File -FilePath $Path -Encoding $Encoding -ErrorAction Stop -Force:$Force
     }
     catch {
+        ol w @('Unable to save to',"$Path")
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

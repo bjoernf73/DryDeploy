@@ -30,12 +30,12 @@ function Get-DryCredential {
     )
 
     try {
-        $DryCredentials = [Credentials]::New($GLOBAL:CredentialsFile)
+        $DryCredentials = [Credentials]::New($GLOBAL:dry_var_global_CredentialsFile)
         if ($EnvConfig) {
             return [PSCredential] $DryCredentials.GetCredential($Alias,$EnvConfig)
         }
         else {
-            return [PSCredential] $DryCredentials.GetCredential($Alias,$GLOBAL:EnvConfigName)
+            return [PSCredential] $DryCredentials.GetCredential($Alias,$($GLOBAL.dry_var_global_EnvConfig).name)
         }
     }
     catch {

@@ -76,7 +76,7 @@ Function dry.action.ad.import {
         Else {
             ol i @('Action ad.import uses Credential Alias',"$CredentialAlias (credential1)")
         }
-        $Credential = Get-DryCredential -Alias $CredentialAlias -EnvConfig $GLOBAL:EnvConfigName
+        $Credential = Get-DryCredential -Alias $CredentialAlias -EnvConfig $($GLOBAL.dry_var_global_EnvConfig).name
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         # 
@@ -196,7 +196,7 @@ Function dry.action.ad.import {
             Out-Null
         })
 
-        If ($GLOBAL:KeepConfigFiles) {
+        If ($GLOBAL:dry_var_global_KeepConfigFiles) {
             ol 1 "Keeping ConfigFiles (-KeepConfigFiles was passed) in '$ConfigTargetPath'"
         }
         Else {
@@ -205,7 +205,3 @@ Function dry.action.ad.import {
         ol 6 "Action 'ad.import' is finished" -sh
     }
 }
-
-
-
-

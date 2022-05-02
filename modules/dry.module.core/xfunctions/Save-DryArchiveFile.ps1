@@ -32,7 +32,10 @@ function Save-DryArchiveFile {
         [Int]$ToKeep = 15,
 
         [Parameter()]
-        [String]$ArchiveSubFolder
+        [String]$ArchiveSubFolder,
+
+        [Parameter()]
+        [String]$ArchiveFolder
     )
 
     $OriginalFileDirectory = Split-Path $ArchiveFile
@@ -57,6 +60,9 @@ function Save-DryArchiveFile {
             }
         }
     }
+    elseif ($ArchiveFolder) {
+        $ArchiveFileDirectory = Get-Item -Path $ArchiveFolder
+    }
     else {
         # The file will be renamed and left in it's original directory
         $ArchiveFileDirectory = $OriginalFileDirectory
@@ -73,7 +79,7 @@ function Save-DryArchiveFile {
         Rename-Item -NewName $ArchiveFileNewName -Confirm:$False
 
         # move the file if $ArchiveSubFolder
-        if ($ArchiveSubFolder) {
+        if ($ArchiveSubFolder -or $ArchiveFolder) {
             Get-Item -Path $ArchiveFileNewFullName -ErrorAction Stop | 
             Move-Item -Destination $ArchiveFileDirectory -ErrorAction Stop
         }

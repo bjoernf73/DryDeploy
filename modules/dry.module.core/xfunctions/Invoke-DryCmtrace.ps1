@@ -19,20 +19,15 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Get-DryRootConfig {
-    [CmdLetBinding()]
-    param (
-        [Parameter(Mandatory)]
-        [System.IO.DirectoryInfo] $Path
-    )
-    ol v "Path is: '$Path'"
+function Invoke-DryCmtrace {
+    [cmdletbinding()]
+    param ()
+
     try {
-        $ConfigPath = Join-Path -Path $Path -ChildPath 'Config.json' -ErrorAction Stop
-        [PSObject]$RootConfig = Get-Content -Path $ConfigPath -ErrorAction Stop | 
-        ConvertFrom-Json -ErrorAction Stop
-        $RootConfig
+        
     }
     catch {
+        ol w @('Unable to save to',"$Path")
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

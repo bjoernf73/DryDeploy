@@ -1,8 +1,8 @@
-<#
- This module handles credentials for DryDeploy
+<# 
+ This module provides core functionality for DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
- LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.module.credential/main/LICENSE
+ LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.module.core/main/LICENSE
  
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -19,27 +19,27 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function New-DryCredentialsFile {
-    [CmdLetBinding()]
+function Show-DryActionStart {
+    [CmdletBinding()]
     param (
-        $Path
+        [Parameter(Mandatory)]
+        [Action] $Action
     )
-
     try {
-        
-        if (Test-Path -Path $Path -ErrorAction SilentlyContinue) {
-            ol d "The Credentials file exists already"
+            ol i " "
+            ol i "Resource:      [$($Action.ResourceName)]"
+        if ($Action.Phase) {
+            ol i "Action:        [$($Action.Action)] - Phase [$($Action.Phase)]"
         }
-        else {
-            $Credentials = [PSCustomObject]@{
-                credentials = @()
-                path        = "$Path"
-                accessed    = $null
-            }
-            Save-DryToJson -Path $Path -InputObject $Credentials 
+        else { 
+            ol i "Action:        [$($Action.Action)]"
         }
+            ol i " "
+            ol i "Description:   $($Action.Description)"
+            ol i " "
+            ol i " " -h
     }
     catch {
         $PSCmdlet.ThrowTerminatingError($_)
-    }    
+    }
 }

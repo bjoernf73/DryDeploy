@@ -111,6 +111,10 @@
                         {
                             "Name": "Packer",
                             "Description": "Hashicorp Packer"
+                        },
+                        {
+                            "Name": "Terraform",
+                            "Description": "Hashicorp Terraform"
                         }
                     ]
                 },
@@ -134,13 +138,12 @@
         }
     },
     "logging": {
-        "log_to_file": true,
-        "file": "DryDeploy.log",
-        "path": "",
-        "left_column_width": 30,
-        "console_width_threshold": 70,
-        "post_buffer": 3,
+        "log_to_file":                true,
+        "warn_on_to_narrow_console":  true,
+        "console_width_threshold":    70,
         "array_first_element_length": 45,
+        "left_column_width":          30,
+        "post_buffer":                 3,
         "verbose": {
             "foreground_color": "Cyan"
         },

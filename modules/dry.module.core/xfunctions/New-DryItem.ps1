@@ -19,40 +19,43 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Confirm-DryConfigCombo {
+function New-DryItem {
     [cmdletbinding()]
     param (
-        [PSObject] $RootConfig,
-        [PSObject] $ConfigCombo
+        [Parameter(Mandatory)]
+        [String[]]$Items,
+
+        [Parameter(Mandatory)]
+        [ValidateSet('Directory','File')]
+        [String]$ItemType
     )
 
-    # I'm such a nice guy. I assume total bliss until proven wrong. 
-    $ReturnValue = $True
-
     try {
-        $ModuleType = $RootConfig.Type
-        switch ($ModuleType) {
-            'Environment' {
-                $ThisConfig = $ConfigCombo.EnvConfig
+        foreach ($Item in $Items) {
+            if (Test-Path -Path "$Item" -ErrorAction Ignore) {
+                $ExistingItem = Get-Item -Path "$Item" -ErrorAction Stop
+                Switch ($ItemType) {
+                    'Directory' {
+                        if ($false -eq $ExistingItem.PSIsContainer) {
+                            Throw "Item '$($ExistingItem.FullName)' is of wrong type"
+                        }
+                    }
+                    'File' {
+                        if ($true -eq $ExistingItem.PSIsContainer) {
+                            Throw "Item '$($ExistingItem.FullName)' is of wrong type"
+                        }
+                    }
+                }
             }
-            'Module' {
-                $ThisConfig = $ConfigCombo.ModuleConfig
-            }
-            '' {
-                throw "Empty Configuration Repo type"
-            }
-            default {
-                throw "Unsupported Configuration Repo type: $ModuleType"
+            else {
+                New-Item -ItemType $ItemType -Path "$Item" -Force | Out-Null
             }
         }
-
-        if ($ThisConfig.Guid -ne $RootConfig.Guid) {
-            ol w "The GUID of the Configuration Repo is not identical to the GUID of the saved ConfigCombo"
-            $ReturnValue = $False
-        }
-        $ReturnValue
     }
     catch {
         $PSCmdlet.ThrowTerminatingError($_)
+    }
+    finally {
+        $ExistingItem = $null
     }
 }

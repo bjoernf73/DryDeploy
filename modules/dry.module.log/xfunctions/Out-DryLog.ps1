@@ -266,11 +266,11 @@ function Out-DryLog {
             }
             {$_ -in ('s','success')} {
                 $Type = 'success'
-                $DisplayLogMessage = $GLOBAL:ShowStatus
+                $DisplayLogMessage = $GLOBAL:dry_var_global_ShowStatus
             }
             {$_ -in ('f','fail','failed')} {
                 $Type = 'fail'
-                $DisplayLogMessage = $GLOBAL:ShowStatus
+                $DisplayLogMessage = $GLOBAL:dry_var_global_ShowStatus
             }
             default {
                 $Type = 'verbose'
@@ -405,7 +405,7 @@ function Out-DryLog {
                 foreach ($Key in $MsgHash.Keys) {
                     Remove-Variable -Name ThisValue -ErrorAction Ignore
                     if ($($MsgHash[$Key]) -is [PSCredential]) {
-                        if ($GLOBAL:ShowPasswords) {
+                        if ($GLOBAL:dry_var_global_ShowPasswords) {
                             $ThisValue = ($MsgHash[$Key]).UserName + '===>' + ($MsgHash[$Key]).GetNetworkCredential().Password
                         }
                         else {

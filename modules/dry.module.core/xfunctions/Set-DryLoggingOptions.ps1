@@ -19,73 +19,126 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
+<#
+  .SYNOPSIS
+  Sets the logging options for the module dry.module.log.
+
+  .DESCRIPTION
+  The dry.module.log module exports the function 'Out-DryLog' that is universally
+  used in the DryDeploy project. The function logs and manages text displayed on
+  the console. Set-DryLoggingOptions defines hard coded defaults for all Out-DryLog 
+  options. DryDeploy's SystemOptions.json may define one or more options that will 
+  override the default options. Lastly, the user may define a UserOptions.json that 
+  may define one or more options that will override both the systemoptions and the
+  default options.
+
+  .PARAMETER SystemConfig
+  A logging options object defined by the system. Any value defined in the 
+  SystemConfig overrides values defined by default. 
+
+   .PARAMETER UserConfig
+  A logging options object defined by the user. Any value defined in the UserConfig
+  overrides values defined by default and by the system.
+
+  .INPUTS
+  None. You cannot pipe objects to Set-DryLoggingOptions
+
+  .OUTPUTS
+  None. Set-DryLoggingOptions does not generate any output.
+
+#>
 function Set-DryLoggingOptions {
     [cmdletbinding()]
     param (
-        [psobject]$Config,
-
-        [string]$RootWorkingDirectory,
-
-        [switch]$nolog
+        [PSObject]$SystemConfig,
+        [PSObject]$UserConfig,
+        [String]$WorkingDirectory,
+        [String]$ArchiveDirectory,
+        [Switch]$NoLog
     )
 
-    # If no logging options are defined in the $ProjectMap.logging, the values below will be used 
-    $DefaultLoggingOptions = @"
-    {
-        "logging": {
-            "log_to_file": true,
-            "file": "DryDeploy.log",
-            "path": "",
-            "left_column_width": 30,
-            "console_width_threshold": 70,
-            "post_buffer": 3,
-            "array_first_element_length": 45,
-            "verbose": {
-                "display_name": "VERBOSE:",
-                "foreground_color": "yellow",
-                "background_color": "Black"
-            },
-            "debug": {
-                "display_name": "DEBUG:  ",
-                "foreground_color": "yellow",
-                "background_color": "DarkGrey"
-            },
-            "warning": {
-                "display_name": "WARNING:",
-                "foreground_color": "Magenta",
-                "background_color": "Black"
-            },
-            "information": {
-                "display_name": "INFO:   ",
-                "foreground_color": "Magenta",
-                "background_color": "Black"
-            }    
+    try {
+        # The function defines all it's Defaults, then apply the SystemConfig, then the UserConfig, then relevant command line options
+        $LoggingOptions = [PSCustomObject]@{
+            log_to_file                = $true
+            path                       = Join-Path -Path $WorkingDirectory -ChildPath 'DryDeploy.log'
+            console_width_threshold    = 70
+            warn_on_too_narrow_console = $true
+            array_first_element_length = 45
+            left_column_width          = 30
+            post_buffer                = 3
+            
+            verbose     = [PSCustomObject]@{ foreground_color = 'Cyan';     background_color = $null; display_location = $true;  text_type = 'VERBOSE:' }
+            debug       = [PSCustomObject]@{ foreground_color = 'DarkCyan'; background_color = $null; display_location = $true;  text_type = 'DEBUG:  ' }
+            warning     = [PSCustomObject]@{ foreground_color = 'Yellow';   background_color = $null; display_location = $true;  text_type = 'WARNING:' }
+            information = [PSCustomObject]@{ foreground_color = 'White';    background_color = $null; display_location = $false; text_type = '        ' }
+            error       = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $true;  text_type = 'ERROR:  ' }
+            success     = [PSCustomObject]@{ foreground_color = 'Green';    background_color = $null; display_location = $false; text_type = '        ' ;  status_text = 'Success'}
+            fail        = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $false; text_type = '        ' ;  status_text = 'Fail'   }
+        }
+
+        $Streams  = @('verbose','debug','warning','information','error','success','fail')
+
+        # set properties defined by the system
+        if ($null -ne $SystemConfig.log_to_file)                {$LoggingOptions.log_to_file =                $SystemConfig.log_to_file}
+        if ($null -ne $SystemConfig.path)                       {$LoggingOptions.path =                       $SystemConfig.path}
+        if ($null -ne $SystemConfig.console_width_threshold)    {$LoggingOptions.console_width_threshold =    $SystemConfig.console_width_threshold}
+        if ($null -ne $SystemConfig.warn_on_too_narrow_console) {$LoggingOptions.warn_on_too_narrow_console = $SystemConfig.warn_on_too_narrow_console}
+        if ($null -ne $SystemConfig.array_first_element_length) {$LoggingOptions.array_first_element_length = $SystemConfig.array_first_element_length}
+        if ($null -ne $SystemConfig.left_column_width)          {$LoggingOptions.left_column_width =          $SystemConfig.left_column_width}
+        if ($null -ne $SystemConfig.post_buffer)                {$LoggingOptions.post_buffer =                $SystemConfig.post_buffer}
+
+        $Streams.ForEach({
+            if ($null -ne $SystemConfig."$_".foreground_color) {$LoggingOptions."$_".foreground_color = $SystemConfig."$_".foreground_color}
+            if ($null -ne $SystemConfig."$_".background_color) {$LoggingOptions."$_".background_color = $SystemConfig."$_".background_color}
+            if ($null -ne $SystemConfig."$_".display_location) {$LoggingOptions."$_".display_location = $SystemConfig."$_".display_location}
+            if ($null -ne $SystemConfig."$_".text_type)        {$LoggingOptions."$_".text_type =        $SystemConfig."$_".text_type}
+            
+            # success and fail also have a status_text property
+            if ($_ -in @('success','fail')) {
+                if ($null -ne $SystemConfig."$_".status_text)  {$LoggingOptions."$_".status_text =      $SystemConfig."$_".status_text}
+            }
+        })
+
+        # set properties defined by the user
+        if ($null -ne $UserConfig.log_to_file)                {$LoggingOptions.log_to_file =                $UserConfig.log_to_file}
+        if ($null -ne $UserConfig.path)                       {$LoggingOptions.path =                       $UserConfig.path}
+        if ($null -ne $UserConfig.console_width_threshold)    {$LoggingOptions.console_width_threshold =    $UserConfig.console_width_threshold}
+        if ($null -ne $UserConfig.warn_on_too_narrow_console) {$LoggingOptions.warn_on_too_narrow_console = $UserConfig.warn_on_too_narrow_console}
+        if ($null -ne $UserConfig.array_first_element_length) {$LoggingOptions.array_first_element_length = $UserConfig.array_first_element_length}
+        if ($null -ne $UserConfig.left_column_width)          {$LoggingOptions.left_column_width =          $UserConfig.left_column_width}
+        if ($null -ne $UserConfig.post_buffer)                {$LoggingOptions.post_buffer =                $UserConfig.post_buffer}
+        
+        $Streams.ForEach({
+            if ($null -ne $UserConfig."$_".foreground_color) {$LoggingOptions."$_".foreground_color = $UserConfig."$_".foreground_color}
+            if ($null -ne $UserConfig."$_".background_color) {$LoggingOptions."$_".background_color = $UserConfig."$_".background_color}
+            if ($null -ne $UserConfig."$_".display_location) {$LoggingOptions."$_".display_location = $UserConfig."$_".display_location}
+            if ($null -ne $UserConfig."$_".text_type)        {$LoggingOptions."$_".text_type =        $UserConfig."$_".text_type}
+            
+            # success and fail also have a status_text property
+            if ($_ -in @('success','fail')) {
+                if ($null -ne $UserConfig."$_".status_text)  {$LoggingOptions."$_".status_text =      $UserConfig."$_".status_text}
+            }
+        })
+    
+        # nolog may be specified on the command line and overrides any property log_to_file specified other places
+        if ($nolog) {
+            $LoggingOptions.log_to_file = $false
+        }
+        Set-Variable -Name LoggingOptions -Value $LoggingOptions -Scope GLOBAL
+
+        # Make path to logfile global, archive existing log and create new log file
+        if (($LoggingOptions.path) -and ($LoggingOptions.log_to_file -eq $True)) {
+            if (Test-Path -Path $LoggingOptions.path -ErrorAction SilentlyContinue) {
+                Save-DryArchiveFile -ArchiveFile $LoggingOptions.path -ArchiveFolder $ArchiveDirectory     
+            }
+            New-Item -Path $LoggingOptions.path -ItemType File -Force | Out-Null
         }
     }
-"@
-    # if the RootWorkingDirectory contains a logging options object, use that
-    $UserLoggingOptionsPath = Join-Path -Path $RootWorkingDirectory -ChildPath 'LoggingOptions.json'
-    if (Test-Path -Path $UserLoggingOptionsPath) {
-        $LoggingOptionsObject = Get-Content -Path $UserLoggingOptionsPath -ErrorAction Stop | 
-        ConvertFrom-Json -ErrorAction Stop
+    catch {
+        $PSCmdlet.ThrowTerminatingError($_)
     }
-    elseif ($Config.logging) {
-        $LoggingOptionsObject = $Config.logging
-    } 
-    else {
-        $LoggingOptionsObject = $DefaultLoggingOptions | ConvertFrom-Json -ErrorAction Stop
-    }
+    finally {
 
-    if ($LoggingOptionsObject.path -eq '') {
-        $LoggingOptionsObject.path = Join-Path -Path $RootWorkingDirectory -ChildPath $LoggingOptionsObject.file
     }
-    elseif ($null -eq $LoggingOptionsObject.path) {
-        $LoggingOptionsObject | Add-Member -MemberType NoteProperty -Name 'path' -Value (Join-Path -Path $RootWorkingDirectory -ChildPath $LoggingOptionsObject.file) 
-    }
-    
-
-    if ($nolog) {
-        $LoggingOptionsObject.log_to_file = $false
-    }
-    Set-Variable -Name LoggingOptions -Value $LoggingOptionsObject -Scope GLOBAL
 }

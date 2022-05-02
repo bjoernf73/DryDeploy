@@ -237,12 +237,12 @@ class Credentials {
                 }       
             }
             else {
-                if ($GLOBAL:SuppressInteractivePrompts) {
+                if ($GLOBAL:dry_var_global_SuppressInteractivePrompts) {
                     throw "Found no credential '$Alias' in '$EnvConfig'"
                 }
                 else {
                     ol w "You may suppress interactive prompts with the -SuppressInteractivePrompts switch"
-                    return [PSCredential]($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:CredentialsType))
+                    return [PSCredential]($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:dry_var_global_Configuration.CredentialsType))
                 }
             }
         }
@@ -259,10 +259,10 @@ class Credentials {
             try {
                 if (($null -eq $CredObject.encryptedstring) -or (($CredObject.encryptedstring).Trim() -eq '')) {
                     if (($null -ne $CredObject.UserName) -and ($CredObject.UserName.Trim() -ne '')) {
-                        [PSCredential]$Credential = ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:CredentialsType,$CredObject.UserName))
+                        [PSCredential]$Credential = ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:dry_var_global_Configuration.CredentialsType,$CredObject.UserName))
                     }
                     else {
-                        [PSCredential]$Credential = ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:CredentialsType))
+                        [PSCredential]$Credential = ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:dry_var_global_Configuration.CredentialsType))
                     }
                     
                 }
@@ -271,7 +271,7 @@ class Credentials {
                     [PSCredential]$Credential = New-Object System.Management.Automation.PSCredential ($CredObject.UserName, $SecureString)
                 }
                 
-                if ($GLOBAL:ShowPasswords) {
+                if ($GLOBAL:dry_var_global_ShowPasswords) {
                     ol w @("Credential: $Alias ($EnvConfig)","$($CredObject.UserName) ==> $($Credential.GetNetworkCredential().Password)")
                 }
                 else {
@@ -280,18 +280,18 @@ class Credentials {
                 return $Credential
             }
             catch [System.Security.Cryptography.CryptographicException] {
-                if ($GLOBAL:SuppressInteractivePrompts) {
+                if ($GLOBAL:dry_var_global_SuppressInteractivePrompts) {
                     throw "CryptographicException: Credential '$Alias' in '$EnvConfig' could not be decrypted - probably not created on this system"
                 }
                 else {
                     ol w "CryptographicException: Credential '$Alias' in '$EnvConfig' was probably not created on this system - prompting for correct credential. You may suppress with -SuppressInteractivePrompts"
                     if (($null -ne $CredObject.UserName) -and ($CredObject.UserName.Trim() -ne '')) {
-                        [PSCredential]$Credential = ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:CredentialsType,$CredObject.UserName))
+                        [PSCredential]$Credential = ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:dry_var_global_Configuration.CredentialsType,$CredObject.UserName))
                     }
                     else {
-                        [PSCredential]$Credential = ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:CredentialsType))
+                        [PSCredential]$Credential = ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:dry_var_global_Configuration.CredentialsType))
                     }
-                    if ($GLOBAL:ShowPasswords) {
+                    if ($GLOBAL:dry_var_global_ShowPasswords) {
                         ol w @("Credential: $Alias ($EnvConfig)","$($CredObject.UserName) ==> $($Credential.GetNetworkCredential().Password)")
                     }
                     else {
@@ -327,7 +327,7 @@ class Credentials {
                 $SecureString = ConvertTo-SecureString -String $CredObject.encryptedstring -ErrorAction 'Stop'
                 [PSCredential]$Credential = New-Object System.Management.Automation.PSCredential ($CredObject.UserName, $SecureString)
                 
-                if ($GLOBAL:ShowPasswords) {
+                if ($GLOBAL:dry_var_global_ShowPasswords) {
                     ol w @("Credential: $Alias ($EnvConfig)","$($CredObject.UserName) ==> $($Credential.GetNetworkCredential().Password)")
                 }
                 else {
@@ -336,12 +336,12 @@ class Credentials {
                 return $Credential
             }
             catch [System.Security.Cryptography.CryptographicException] {
-                if ($GLOBAL:SuppressInteractivePrompts) {
+                if ($GLOBAL:dry_var_global_SuppressInteractivePrompts) {
                     throw "CryptographicException: Credential '$Alias' in '$EnvConfig' could not be decrypted - probably not created on this system"
                 }
                 else {
                     ol w "CryptographicException: Credential '$Alias' in '$EnvConfig' was probably not created on this system - prompting for correct credential. You may suppress with -SuppressInteractivePrompts"
-                    return ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:CredentialsType))
+                    return ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:dry_var_global_Configuration.CredentialsType))
                 }
             }
             catch { 
@@ -371,7 +371,7 @@ class Credentials {
                 $SecureString = ConvertTo-SecureString -String $CredObject.encryptedstring -ErrorAction 'Stop'
                 [PSCredential]$Credential = New-Object System.Management.Automation.PSCredential ($CredObject.UserName, $SecureString)
                 
-                if ($GLOBAL:ShowPasswords) {
+                if ($GLOBAL:dry_var_global_ShowPasswords) {
                     ol w @("Credential: $Alias ($EnvConfig)","$($CredObject.UserName) ==> $($Credential.GetNetworkCredential().Password)")
                 }
                 else {
@@ -380,12 +380,12 @@ class Credentials {
                 return $Credential
             }
             catch [System.Security.Cryptography.CryptographicException] {
-                if ($GLOBAL:SuppressInteractivePrompts) {
+                if ($GLOBAL:dry_var_global_SuppressInteractivePrompts) {
                     throw "CryptographicException: Credential '$Alias' in '$EnvConfig' could not be decrypted - probably not created on this system"
                 }
                 else {
                     ol w "CryptographicException: Credential '$Alias' in '$EnvConfig' was probably not created on this system - prompting for correct credential. You may suppress with -SuppressInteractivePrompts"
-                    return ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:CredentialsType))
+                    return ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:dry_var_global_Configuration.CredentialsType))
                 }
             }
             catch { 

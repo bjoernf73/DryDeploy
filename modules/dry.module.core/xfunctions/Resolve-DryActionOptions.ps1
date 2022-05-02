@@ -126,7 +126,7 @@ function Resolve-DryActionOptions {
             $OSActionMetaConfigFile = Join-Path -Path $ConfigOSSourcePath -ChildPath 'Config.json'
             
             # Any action must specify a default type
-            $ActionMetaConfig       = Get-DryCommentedJson -File $ActionMetaConfigFile -ErrorAction Stop
+            $ActionMetaConfig       = Get-DryFromJson -File $ActionMetaConfigFile -ErrorAction Stop
             if ($Null -eq $ActionMetaConfig.default) {
                 throw "The 'default' property is missing from Config.json" 
             }
@@ -177,7 +177,7 @@ function Resolve-DryActionOptions {
 
             # Test if OS config should be included for this action
             if ($ActionMetaConfig.include_os_config -eq $true) {
-                $OSActionMetaConfig = Get-DryCommentedJson -File $OSActionMetaConfigFile -ErrorAction Stop
+                $OSActionMetaConfig = Get-DryFromJson -File $OSActionMetaConfigFile -ErrorAction Stop
                 
                 [String]$OSActionType     = $OSActionMetaConfig.default
                 if ($null -eq $OSActionType) {

@@ -37,7 +37,7 @@ function Add-DryCredentialPlaceholder {
     )
 
     try {
-        $DryCredentials = [Credentials]::New($GLOBAL:CredentialsFile)
+        $DryCredentials = [Credentials]::New($GLOBAL:dry_var_global_CredentialsFile)
         if (($UserName) -and ($UserName.Trim() -ne '')) {
             $DryCredentials.AddCredentialPlaceholder($Alias,$EnvConfig,$Type,$UserName)
         }

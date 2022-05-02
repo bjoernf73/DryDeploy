@@ -64,7 +64,7 @@ function dry.action.terra.run {
         #   METACONFIG
         #   The MetaConfig is a configfile with info about the actual Terra config
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-        [PSObject]$MetaConfig = Get-DryCommentedJson -Path $MetaFile -ErrorAction Stop
+        [PSObject]$MetaConfig = Get-DryFromJson -File $MetaFile -ErrorAction Stop
         Set-Variable -Name 'MetaConfig' -Value $MetaConfig -Scope Global -Force
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -90,7 +90,7 @@ function dry.action.terra.run {
         for ($Cred = 1; $Cred -lt 20; $Cred++) {
             Remove-Variable -Name "Credential$Cred" -Scope Global -ErrorAction Ignore
             if ($Action.credentials."Credential$Cred") {
-                New-Variable -Name "Credential$Cred" -Value (Get-DryCredential -Alias $Action.credentials."Credential$Cred" -EnvConfig $GLOBAL:EnvConfigName) -Scope Global
+                New-Variable -Name "Credential$Cred" -Value (Get-DryCredential -Alias $Action.credentials."Credential$Cred" -EnvConfig $($GLOBAL.dry_var_global_EnvConfig).name) -Scope Global
             }
         }
 
@@ -241,7 +241,7 @@ function dry.action.terra.run {
         #Set-Location $Location -ErrorAction Stop 
 
         # Remove temporary files
-        If ($GLOBAL:KeepConfigFiles) {
+        If ($GLOBAL:dry_var_global_KeepConfigFiles) {
             ol i @('Keeping ConfigFiles in',"$ConfigTargetPath")
         }
         Else {

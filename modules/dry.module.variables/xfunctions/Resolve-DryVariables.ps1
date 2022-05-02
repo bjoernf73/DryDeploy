@@ -201,6 +201,11 @@ function Resolve-DryVariables {
                     }
                 }
             }
+            # fail if it's null, unless property allow_null allows it
+            if (($null -eq $VarValue) -and ($Var.allow_null -eq $true)) {
+                ol e 'Variable resolved null',"$($Var.Name)"
+                throw "Variable '$($Var.Name)' resolved null"
+            }
 
             # Create the variable in the local scope, so subsequent expressions can use previously resolved variable values
             if (Get-Variable -Name $Var.Name -Scope Local -ErrorAction Ignore) {

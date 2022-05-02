@@ -18,12 +18,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 # Dot source all functionscripts - the manifest limits exported functions
-$FunctionsPath = "$PSScriptRoot\Functions\*.ps1"
-$Functions     = Resolve-Path -Path $FunctionsPath -ErrorAction Stop
-ForEach ($Function in $Functions) {
-    . $Function.Path
-}
-
 $ExportedFunctionsPath = "$PSScriptRoot\ExportedFunctions\*.ps1"
 $ExportedFunctions     = Resolve-Path -Path $ExportedFunctionsPath -ErrorAction Stop
 ForEach ($Function in $ExportedFunctions) {

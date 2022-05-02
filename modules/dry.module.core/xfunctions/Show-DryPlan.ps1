@@ -53,17 +53,17 @@ function Show-DryPlan {
         try {
             $TargetMessageLength = $Host.UI.RawUI.WindowSize.Width - ($OffSet + $GLOBAL:LoggingOptions.left_column_width + $Postbuffer)
             If ($TargetMessageLength -lt 10) {
-                If (($GLOBAL:WarnOnTooNarrowConsole -eq $true) -or ($null -eq $GLOBAL:WarnOnTooNarrowConsole)) {
+                If (($GLOBAL:dry_var_global_WarnOnTooNarrowConsole -eq $true) -or ($null -eq $GLOBAL:dry_var_global_WarnOnTooNarrowConsole)) {
                     ol w "Increase console width for messages to display properly"
-                    $GLOBAL:WarnOnTooNarrowConsole = $false
+                    $GLOBAL:dry_var_global_WarnOnTooNarrowConsole = $false
                 }
                 $TargetMessageLength = 10
             } 
         }
         catch {
-            If (($GLOBAL:WarnOnTooNarrowConsole -eq $true) -or ($null -eq $GLOBAL:WarnOnTooNarrowConsole)) {
+            If (($GLOBAL:dry_var_global_WarnOnTooNarrowConsole -eq $true) -or ($null -eq $GLOBAL:dry_var_global_WarnOnTooNarrowConsole)) {
                 ol w "Increase console width for messages to display properly"
-                $GLOBAL:WarnOnTooNarrowConsole = $false
+                $GLOBAL:dry_var_global_WarnOnTooNarrowConsole = $false
             }
             $TargetMessageLength = 10
         }
@@ -161,17 +161,6 @@ function Show-DryPlan {
         } 
         While ($PhaseStr.length -le 7)
         $PlanString = $PlanString + $PhaseStr
-
-
-        <#
-        # planned is exactly 8
-        [String]$PlannedStr = $action.Planned
-        Do {
-            $PlannedStr = "$PlannedStr "
-        } 
-        While ($PlannedStr.length -le 9)
-        $PlanString = $PlanString + $PlannedStr
-        #>
 
          # Role is 3 chars more than $LongestRoleString
          [String]$RoleStr = $Action.Role
@@ -337,8 +326,8 @@ function Show-DryPlan {
         ol i " "
         ol i $(Get-DryConfigComboString -LongestResourceString $LongestResourceString -RepoType $ConfigComboHeader.RepoType -Path $ConfigComboHeader.Path) -Fore DarkGray
         ol i $(Get-DryConfigComboString -LongestResourceString $LongestResourceString -RepoType $ConfigComboLine.RepoType -Path $ConfigComboLine.Path) -Fore DarkGray
-        ol i $(Get-DryConfigComboString -LongestResourceString $LongestResourceString -RepoType 'Env Config' -Path $ConfigCombo.EnvConfig.Path) -Fore DarkGray
-        ol i $(Get-DryConfigComboString -LongestResourceString $LongestResourceString -RepoType 'Module Config' -Path $ConfigCombo.ModuleConfig.Path) -Fore DarkGray
+        ol i $(Get-DryConfigComboString -LongestResourceString $LongestResourceString -RepoType 'EnvConfig' -Path $ConfigCombo.EnvConfig.Path) -Fore DarkGray
+        ol i $(Get-DryConfigComboString -LongestResourceString $LongestResourceString -RepoType 'ModuleConfig' -Path $ConfigCombo.ModuleConfig.Path) -Fore DarkGray
         ol i " " 
         ol i " "
     }

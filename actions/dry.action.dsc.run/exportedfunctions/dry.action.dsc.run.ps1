@@ -39,7 +39,7 @@ Function dry.action.dsc.run {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #  
 
-        [PSObject]$MetaConfigObject = Get-DryCommentedJson -Path $DscMetaConfigFile -ErrorAction Stop 
+        [PSObject]$MetaConfigObject = Get-DryFromJson -Path $DscMetaConfigFile -ErrorAction Stop 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   The DSC Template
         #
@@ -331,7 +331,7 @@ Function dry.action.dsc.run {
         #   to deploy the DSC Configuration.
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        $DscTargetSystemPRECredentials = Get-DryCredential -Alias "$($Action.credentials.credential1)" -EnvConfig $GLOBAL:EnvConfigName
+        $DscTargetSystemPRECredentials = Get-DryCredential -Alias "$($Action.credentials.credential1)" -EnvConfig $($GLOBAL.dry_var_global_EnvConfig).name
 
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -475,7 +475,7 @@ Function dry.action.dsc.run {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         If ($Action.credentials.credential2) {
             ol i @('Post-Credential',"$($Action.credentials.credential2) (credential2 - specific Post-Credential)")
-            $DscTargetSystemPOSTCredentials = Get-DryCredential -Alias "$($Action.credentials.credential2)" -EnvConfig $GLOBAL:EnvConfigName
+            $DscTargetSystemPOSTCredentials = Get-DryCredential -Alias "$($Action.credentials.credential2)" -EnvConfig $($GLOBAL.dry_var_global_EnvConfig).name
             If ($MetaConfigObject.dsc_allow_alternating_post_credentials) {
                 ol i @('Allowing alternating credentials. Alternating between',"'$($Action.credentials.credential1)' and '$($Action.credentials.credential2)'")
                 $DscTargetSystemPOSTCredentialsArray = @($DscTargetSystemPRECredentials,$DscTargetSystemPOSTCredentials)
@@ -487,7 +487,7 @@ Function dry.action.dsc.run {
         }
         Else {
             ol i @('Post-Credential',"$($Action.credentials.credential2) (credential1 - same as Pre-Credential)")
-            $DscTargetSystemPOSTCredentials = Get-DryCredential -Alias "$($Action.credentials.credential1)" -EnvConfig $GLOBAL:EnvConfigName
+            $DscTargetSystemPOSTCredentials = Get-DryCredential -Alias "$($Action.credentials.credential1)" -EnvConfig $($GLOBAL.dry_var_global_EnvConfig).name
             $DscTargetSystemPOSTCredentialsArray = @($DscTargetSystemPOSTCredentials)
         }
         
@@ -679,7 +679,7 @@ Function dry.action.dsc.run {
         Remove-Module -Name PSDesiredStateConfiguration,dry.action.dsc.run -ErrorAction Ignore 
 
         # Remove temporary files
-        If ($GLOBAL:KeepConfigFiles) {
+        If ($GLOBAL:dry_var_global_KeepConfigFiles) {
             ol i @('Keeping ConfigFiles in',"$ConfigTargetPath")
         }
         Else {

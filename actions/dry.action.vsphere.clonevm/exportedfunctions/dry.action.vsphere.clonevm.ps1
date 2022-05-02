@@ -91,7 +91,7 @@ function dry.action.vsphere.clonevm {
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     
     try {    
-        if ($GLOBAL:Force -eq $True) {
+        if ($GLOBAL:dry_var_global_Force -eq $True) {
             ol w 'Forced deployment - existing resources will be destroyed!'
         }
         else {
@@ -126,7 +126,7 @@ function dry.action.vsphere.clonevm {
         
         foreach ($VMConfFile in $ConfigurationPathFiles) {
             # Pick up each files configuration, and merge into $RoleConfiguration
-            $VMConfObject = Get-DryCommentedJson -Path $VMConfFile.FullName -ErrorAction Stop
+            $VMConfObject = Get-DryFromJson -Path $VMConfFile.FullName -ErrorAction Stop
             $RoleConfiguration = (Merge-DryPSObjects -FirstObject $RoleConfiguration -SecondObject $VMConfObject)
         }
 
@@ -312,7 +312,7 @@ function dry.action.vsphere.clonevm {
         ol i 'Credential alias',"$CredAlias"
         ol i 'Connection URL',"$ConnectionURL"
         
-        $Credential = Get-DryCredential -Alias $CredAlias -EnvConfig $GLOBAL:EnvConfigName
+        $Credential = Get-DryCredential -Alias $CredAlias -EnvConfig $($GLOBAL.dry_var_global_EnvConfig).name
         Add-DryVM -vcenter $ConnectionURL -vmspec $VirtualMachine -Credential $Credential
         
         
@@ -334,7 +334,7 @@ function dry.action.vsphere.clonevm {
                 $WaitParameters = @{
                     IP                       = $TargetVMIPAddress
                     Computername             = $Resource.name
-                    Credential               = $(Get-DryCredential -Alias "$($Action.credentials.credential2)" -EnvConfig "$($GLOBAL:EnvConfigName)")
+                    Credential               = $(Get-DryCredential -Alias "$($Action.credentials.credential2)" -EnvConfig "$($($GLOBAL.dry_var_global_EnvConfig).name)")
                     SecondsToTry             = 300
                     SecondsToWaitBeforeStart = 30
                 }
@@ -349,7 +349,7 @@ function dry.action.vsphere.clonevm {
                 $WaitParameters = @{
                     IP                       = $TargetVMIPAddress
                     Computername             = $Resource.name
-                    Credential               = $(Get-DryCredential -Alias "$($Action.credentials.credential2)" -EnvConfig "$($GLOBAL:EnvConfigName)")
+                    Credential               = $(Get-DryCredential -Alias "$($Action.credentials.credential2)" -EnvConfig "$($($GLOBAL.dry_var_global_EnvConfig).name)")
                     SecondsToTry             = 1800
                     SecondsToWaitBeforeStart = 200
                     SessionConfig            = $SessionConfig

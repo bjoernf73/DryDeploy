@@ -54,7 +54,7 @@ Function dry.action.ad.move {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         
-        $MetaConfig          = Get-DryCommentedJson -File $MetaConfigFile
+        $MetaConfig          = Get-DryFromJson -File $MetaConfigFile
         $RoleOU              = $MetaConfig.ous."$ActionType"
         If ($Null -eq $RoleOU) {
             ol -t 1 -m "Action does not contain an OU of type '$ActionType'"
@@ -74,7 +74,7 @@ Function dry.action.ad.move {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-        $Credential = Get-DryCredential -Alias "$($action.credentials.credential1)"  -EnvConfig $GLOBAL:EnvConfigName
+        $Credential = Get-DryCredential -Alias "$($action.credentials.credential1)"  -EnvConfig $($GLOBAL.dry_var_global_EnvConfig).name
         ol i @('Using Credential',"$($Credential.UserName)")
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #

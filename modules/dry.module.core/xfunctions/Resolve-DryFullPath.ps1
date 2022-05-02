@@ -18,29 +18,40 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
-
-function New-DryConfigCombo {
+function Resolve-DryFullPath {
     [cmdletbinding()]
     param (
+        [String] 
+        $Path,
+
+        [System.IO.DirectoryInfo] 
+        $RootPath
     )
-    $ConfigComboScheme = @"
-{
-    "name": "default",
-    "new": true,
-    "dependencies_hash": "",
-    "EnvConfig": {
-        "Description": "",
-        "Type": "Environment",
-        "Guid": "",
-        "Path": ""
-    },
-    "ModuleConfig": {
-        "Description": "",
-        "Type": "Module",
-        "Guid": "",
-        "Path": ""
+
+    try {
+        # if no RootPath is specified, use the current working directory
+        if (-not ($RootPath)) {
+            [System.IO.DirectoryInfo]$RootPath = ($PWD).Path
+        }
+
+        # determine the slash - backslash on windows, slash on Linux
+        $slash = '\'
+        if ($PSVersionTable.Platform -eq 'Unix') {
+            $slash = '/'
+        }
+        
+        # Path cannot be a system.io-object, because it does not necessarily exist
+        if ($Path -match "^\.") {
+            # Path relative to the current directory
+            $FullPath = [IO.Path]::GetFullPath("$RootPath$($slash)$Path")
+        }
+        else {
+            # Full path
+            $FullPath = [IO.Path]::GetFullPath("$Path")
+        }
+        return $FullPath
     }
-}
-"@
-    return ($ConfigComboScheme | ConvertFrom-Json -ErrorAction Stop)
+    catch {
+        $PSCmdlet.ThrowTerminatingError($_)
+    }
 }

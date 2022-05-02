@@ -18,39 +18,36 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
-function Resolve-DryFullPath {
+
+function Get-DryConfigData {
     [cmdletbinding()]
     param (
-        [String] 
-        $Path,
+        [Parameter(Mandatory)]
+        [String]$Path,
 
-        [System.IO.DirectoryInfo] 
-        $RootPath
+        [Parameter(HelpMessage="Object to merge changes into")]
+        [PSCustomObject]$Configuration
+
     )
-
     try {
-        # if no RootPath is specified, use the current working directory
-        if (-not ($RootPath)) {
-            [System.IO.DirectoryInfo]$RootPath = ($PWD).Path
+        if (-not $Configuration) {
+            $Configuration = New-Object PSCustomObject
         }
-
-        # determine the slash - backslash on windows, slash on Linux
-        $slash = '\'
-        if ($PSVersionTable.Platform -eq 'Unix') {
-            $slash = '/'
-        }
+        $FullPath = Join-Path -Path (Resolve-DryFullPath -Path $Path) -ChildPath '*'
+        $Files    = @(Get-ChildItem -Path $FullPath -Include '*.jsonc','*.json','*.yml','*.yaml' -ErrorAction Stop)
         
-        # Path cannot be a system.io-object, because it does not necessarily exist
-        if ($Path -match "^\.") {
-            # Path relative to the current directory
-            $FullPath = [IO.Path]::GetFullPath("$RootPath$($slash)$Path")
+        foreach ($File in $Files) {
+            switch ($File.extension) {
+                {$_ -in '.json','.jsonc'} {
+                    $ConfObject = Get-DryFromJson -Path $File.FullName -ErrorAction Stop  
+                }
+                {$_ -in '.yml','.yaml'} {
+                    $ConfObject = Get-DryFromYaml -Path $File.FullName -ErrorAction Stop 
+                }
+            }
+            $Configuration = (Merge-DryPSObjects -FirstObject $Configuration -SecondObject $ConfObject)
         }
-        else {
-            # Full path
-            $FullPath = [IO.Path]::GetFullPath("$Path")
-        }
-
-        return $FullPath
+        return $Configuration
     }
     catch {
         $PSCmdlet.ThrowTerminatingError($_)

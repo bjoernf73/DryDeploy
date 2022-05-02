@@ -8,7 +8,7 @@ schema: 2.0.0
 # DryDeploy.ps1
 
 ## SYNOPSIS
-DryDeploy.ps1 prepares your deployment platform (-Init, -Moduleinit), 
+DD prepares your deployment platform (-Init), 
 stores paths to a configuration combination of a EnvConfig and a 
 ModuleConfig, creates a plan of Actions to perform based on the 
 configurations and any filters specified (-Plan), and applies the 
@@ -25,7 +25,7 @@ DryDeploy.ps1 [-ShowDeselected] [<CommonParameters>]
 
 ### Init
 ```
-DryDeploy.ps1 [-Init] [-ModuleInit] [<CommonParameters>]
+DryDeploy.ps1 [-Init] [<CommonParameters>]
 ```
 
 ### Plan
@@ -49,8 +49,13 @@ DryDeploy.ps1 [-Apply] [-Actions <String[]>] [-ExcludeActions <String[]>] [-Buil
 DryDeploy.ps1 [-EnvConfig <String>] [-ModuleConfig <String>] [<CommonParameters>]
 ```
 
+### GetConfig
+```
+DryDeploy.ps1 [-GetConfig] [<CommonParameters>]
+```
+
 ## DESCRIPTION
-DryDeploy.ps1 needs 2 configuration repositories: 
+DD needs 2 configuration repositories: 
 
  - EnvConfig: Contains information on an environment, 
    including variables as key-value-pairs, where values may be 
@@ -89,7 +94,7 @@ if not
 
 ### EXAMPLE 2
 ```
-.\DryDeploy.ps1 -ModuleConfig ..\ModuleConfigs\MyModule -EnvConfigPath ..\EnvConfigs\MyEnvironment
+.\DryDeploy.ps1 -ModuleConfig ..\ModuleConfigs\MyModule -EnvConfig ..\EnvConfigs\MyEnvironment
 ```
 
 Creates a configuration combination of a Module Configuration and
@@ -99,29 +104,20 @@ and used on subsequent runs until you change any of them again
 
 ### EXAMPLE 3
 ```
-.\DryDeploy.ps1 -ModuleInit
-```
-
-Will prepare your system for deployment of a specific ModuleConfig. 
-Installs a module's dependencies, including chocos, gits, powershell 
-modules and so on
-
-### EXAMPLE 4
-```
 .\DryDeploy.ps1 -Plan
 ```
 
 Will create a full plan for all resources in the configuration that
 is of a role that matches roles in your ModuleConfig
 
-### EXAMPLE 5
+### EXAMPLE 4
 ```
 .\DryDeploy.ps1
 ```
 
 Displays the current Plan
 
-### EXAMPLE 6
+### EXAMPLE 5
 ```
 .\DryDeploy.ps1 -Plan -Resources dc,ca
 ```
@@ -129,7 +125,7 @@ Displays the current Plan
 Creates a partial plan, containing only Resources whos name is 
 or matches "dc*" or "ca*"
 
-### EXAMPLE 7
+### EXAMPLE 6
 ```
 .\DryDeploy.ps1 -Plan -Resources dc,ca -Actions vsp,ad
 ```
@@ -139,7 +135,7 @@ or match "dc*" or "ca*", with only Actions whos name is or
 matches "vsph*" (for instance "vsphere.clone") or "ad*" (for instance 
 "ad.import")
 
-### EXAMPLE 8
+### EXAMPLE 7
 ```
 .\DryDeploy.ps1 -Plan -ExcludeResources DC,DB
 ```
@@ -147,14 +143,14 @@ matches "vsph*" (for instance "vsphere.clone") or "ad*" (for instance
 Creates a partial plan, excluding any Resource whos name is or 
 matches "DC*" or "DB*"
 
-### EXAMPLE 9
+### EXAMPLE 8
 ```
 .\DryDeploy.ps1 -Apply
 ```
 
 Applies the current Plan.
 
-### EXAMPLE 10
+### EXAMPLE 9
 ```
 .\DryDeploy.ps1 -Apply -Force
 ```
@@ -162,7 +158,7 @@ Applies the current Plan.
 Applies the current Plan, destroying any resource with the same 
 identity as the resource you are creating.
 
-### EXAMPLE 11
+### EXAMPLE 10
 ```
 .\DryDeploy.ps1 -Apply -Resources ca002 -Actions ad.import
 ```
@@ -171,35 +167,18 @@ Applies only actions of the Plan where the Resources name is or
 matches "ca002*", and the name of the Action that is or matches 
 "ad.import"
 
+### EXAMPLE 11
+```
+$Config = .\DryDeploy.ps1 -GetConfig
+```
+
+Returns the configuration object, and assigns it to the variable 
+'$Config' so you may inspect it's content 'offline'
+
 ## PARAMETERS
 
 ### -Init
-Initiates, meaning that it installs dependencies, like Chocolatey, 
-Packer, some external modules from PSGallery, and the core DryDeploy
-modules.
-Must be executed as an administrator (elevated).
-The core 
-modules are installed for the system.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: Init
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ModuleInit
-Downloads dependencies for the system module you
-
-are deploying.
-If any chocos needs to be installed, you have to
-
-run elevated (Run as Administrator)
+Installs local dependencies for the platform on which you run DD on.
 
 ```yaml
 Type: SwitchParameter
@@ -398,13 +377,9 @@ Accept wildcard characters: False
 ```
 
 ### -EnvConfig
-Path to the directory where the EnvConfig is.
-
-Once set, the ConfigCombo (the combination of a EnvConfig,
-
-a ModuleConfig and an InstanceConfig) will be stored and reused
-
-for each subsequent action
+Path to the Directory where the EnvConfiguration is.
+Use to 
+set the configuration combination (ConfigCombo)
 
 ```yaml
 Type: String
@@ -449,6 +424,25 @@ Aliases:
 Required: False
 Position: Named
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -GetConfig
+During -Plan and -Apply, selected configurations from the current 
+Environment and Module are combined into one configuration object.
+Run -GetConfig to just return this configuration object, and then 
+quit.
+Assign the output to a variable to examine the configuration.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: GetConfig
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -600,7 +594,7 @@ Accept wildcard characters: False
 ### -IgnoreDependencies
 Ignores any dependency for both ModuleConfig and
 
-DryDeploy itself
+DD itself
 
 ```yaml
 Type: SwitchParameter

@@ -61,7 +61,7 @@ function dry.action.packer.run {
         $CredIndex = 1
         while ($Action.credentials."credential$CredIndex") {
             $Credentials.Add([PSObject]@{
-                "credential$CredIndex" = Get-DryCredential -Alias ($Action.credentials."credential$CredIndex") -EnvConfig $GLOBAL:EnvConfigName
+                "credential$CredIndex" = Get-DryCredential -Alias ($Action.credentials."credential$CredIndex") -EnvConfig $($GLOBAL.dry_var_global_EnvConfig).name
             })
             $CredIndex++
         }
@@ -82,7 +82,7 @@ function dry.action.packer.run {
     }
     finally {
         # Remove temporary files
-        if ($GLOBAL:KeepConfigFiles) {
+        if ($GLOBAL:dry_var_global_KeepConfigFiles) {
             ol i @('Keeping ConfigFiles in',"$ConfigTargetPath")
         }
         else {

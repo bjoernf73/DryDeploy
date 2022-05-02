@@ -19,16 +19,28 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-# Replaced by Resolve-DryFullPath - kept here for reference
-
-function Resolve-DryPath {
+function Get-DryQuote {
+    [cmdletbinding()]
     param (
-        [String] $Path
     )
+    try {
+        $QuoteRepo      = ' '
+        $Configuration = New-Object PSObject
+        $Files         = @(Get-ChildItem -Path $FullPath -Include '*.jsonc','*.json','*.yml','*.yaml' -ErrorAction Stop)
 
-    $Path = Resolve-Path $Path -ErrorAction SilentlyContinue -ErrorVariable FileNotExist
-    if (-not($Path)) {
-        $Path = $FileNotExist[0].TargetObject
+        foreach ($File in $Files) {
+            switch ($File.extension) {
+                {$_ -in '.json','.jsonc'} {
+                    $ConfObject = Get-DryFromJson -Path $File.FullName -ErrorAction Stop  
+                }
+                {$_ -in '.yml','.yaml'} {
+                    $ConfObject = Get-DryFromYaml -Path $File.FullName -ErrorAction Stop 
+                }
+            }
+            $Configuration = (Merge-DryPSObjects -FirstObject $Configuration -SecondObject $ConfObject)
+        }
     }
-    return $Path
+    catch {
+        $PSCmdlet.ThrowTerminatingError($_)
+    }
 }

@@ -349,7 +349,7 @@ class Plan {
                             $Dependency_Guid,
                             $CurrentAction.Action_Guid
                         )
-                        [ArrayList]$This.Actions += $Action
+                        $This.Actions += $Action
                     }
                     # Since one or more Action were added to the Plan, Chained actions
                     # in the UnresolvedActionsList may now resolve
@@ -359,7 +359,7 @@ class Plan {
                     $This.UnresolvedActionsList += $Action
                 }
                 else {
-                    [ArrayList]$This.Actions += $Action
+                    $This.Actions += $Action
                     # Since an Action was added to the Plan, Chained actions
                     # in the UnresolvedActionsList may now resolve
                     $ResolveUnresolvedActions = $True
@@ -395,7 +395,7 @@ class Plan {
         $This.OrderCount            = $PlanObject.OrderCount
 
         $PlanObject.Actions.foreach({
-            [ArrayList]$This.Actions += [Action]::New($_)
+            $This.Actions += [Action]::New($_)
         })
     }
 
@@ -415,7 +415,7 @@ class Plan {
                 foreach ($DependentActionGuid in $DependentActionGuids) {
                     # get the ned action guid
                     $InstanceActionGuid = $This.ResolveActionGuid($DependentActionGuid,$ActionGuid) 
-                    [ArrayList]$This.Actions += [Action]::New($_,$InstanceActionGuid)
+                    $This.Actions += [Action]::New($_,$InstanceActionGuid)
                 }
             })
 
@@ -428,8 +428,7 @@ class Plan {
     }
 
     [Void] hidden AddActionOrder() {
-        [ArrayList]$This.Actions = $This.Actions | 
-        Sort-Object -Property Action_Guid
+        $This.Actions = $This.Actions | Sort-Object -Property Action_Guid
         
         $ActionCount = 0
         $This.Actions.foreach({
@@ -805,14 +804,14 @@ class Resource {
         $This.Description              = $Description
         $This.ResourceOrder            = 0
         $This.Network                  = $Network
-        $This.Resolved_Network         = [Network]::New($Network,$($GLOBAL:Configuration).network.sites)
-        $This.RolePath                 = Join-Path -Path $GLOBAL:RoleConfigs -ChildPath $Role -Resolve
-        $This.ConfigurationTargetPath  = Join-Path -Path ($GLOBAL:RootWorkingDirectory + '\TempConfigs') -ChildPath $This.Name
+        $This.Resolved_Network         = [Network]::New($Network,$($GLOBAL:dry_var_global_Configuration).network.sites)
+        $This.RolePath                 = Join-Path -Path $GLOBAL:dry_var_global_ConfigCombo.moduleconfig.rolespath -ChildPath $Role -Resolve
+        $This.ConfigurationTargetPath  = Join-Path -Path ($GLOBAL:dry_var_global_RootWorkingDirectory + '\TempConfigs') -ChildPath $This.Name
         $This.Resource_Guid            = $($(New-Guid).Guid)
         $This.Options                  = $Options
 
         Remove-Variable -Name BuildTemplate -ErrorAction Ignore
-        $BuildTemplate = $($GLOBAL:Configuration).build.role_order | Where-Object {
+        $BuildTemplate = $($GLOBAL:dry_var_global_Configuration).build.role_order | Where-Object {
             $_.role -eq $Role
         }
 
@@ -832,7 +831,7 @@ class Resource {
             $_ | Add-Member -MemberType NoteProperty -Name 'Role' -Value $Role
         })
 
-        [array]$This.ActionOrder = $ResourceBuild.action_order
+        $This.ActionOrder = $ResourceBuild.action_order
     }
 }
 
@@ -957,10 +956,10 @@ class Resources {
     [Void] DoOrder (
     ) {
         
-        $Sites             = ($GLOBAL:Configuration.Network.Sites).Name
+        $Sites = ($GLOBAL:dry_var_global_Configuration.Network.Sites).Name
         
         # loop thorugh the deployment Build
-        $Build       = $GLOBAL:Configuration.build
+        $Build = $GLOBAL:dry_var_global_Configuration.build
         [Array]$RoleOrder  = $Build.role_order 
         [String]$OrderType = $Build.order_type
 
@@ -1072,8 +1071,12 @@ class Resources {
     }
 }
 
+$ScriptBlocksPath      = "$PSScriptRoot\scriptblocks\*.ps1"
+$ScriptBlocks          = Resolve-Path -Path $ScriptBlocksPath -ErrorAction Stop
+ForEach ($ScriptBlock in $ScriptBlocks) {
+    . $ScriptBlock.Path
+}
 
-# Dot source all functionscripts - the manifest limits exported functions
 $ExportedFunctionsPath = "$PSScriptRoot\xfunctions\*.ps1"
 $Functions = Resolve-Path -Path $ExportedFunctionsPath -ErrorAction Stop
 foreach ($Function in $Functions) {
