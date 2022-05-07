@@ -43,18 +43,23 @@ function Get-DryFromJson {
     try {
         Switch ($PSCmdlet.ParameterSetName) {
             'StringPath' {
+                ol d 'Trying to get file from [string]',$Path
                 [String]$StrPath = $Path  
                 [System.IO.FileInfo]$File = Get-ChildItem -Path $Path -ErrorAction Stop
                 [PSCustomObject]((($File | Get-Content -Raw -ErrorAction Stop) -replace '("(\\.|[^\\"])*")|/\*[\S\s]*?\*/|//.*', '$1') | 
                 ConvertFrom-Json -ErrorAction Stop)
             }
             'FileInfoPath' {
+                ol d 'Trying to get file from [fileinfo]',$File.FullName
                 [String]$StrPath = $File.FullName
+                # this seems counter intuitive, but the system.io.fileinfo object may just be a string cast to [system.io.fileinfo]
+                [System.IO.FileInfo]$File = Get-ChildItem -Path $File -ErrorAction Stop
                 [PSCustomObject]((($File | Get-Content -Raw -ErrorAction Stop) -replace '("(\\.|[^\\"])*")|/\*[\S\s]*?\*/|//.*', '$1') | 
                 ConvertFrom-Json -ErrorAction Stop)
             }
             'MaybeStringPath' {
                 try {
+                    ol d 'Trying to get file from [string]',$MaybePath
                     [System.IO.FileInfo]$File = Get-ChildItem -Path $MaybePath -ErrorAction Stop
                     [PSCustomObject]((($File | Get-Content -Raw -ErrorAction Stop) -replace '("(\\.|[^\\"])*")|/\*[\S\s]*?\*/|//.*', '$1') | 
                     ConvertFrom-Json -ErrorAction Stop)
@@ -70,6 +75,17 @@ function Get-DryFromJson {
         }        
     }
     catch {
+        switch ($PSCmdlet.ParameterSetName) {
+            'StringPath' {
+                ol d 'Failed getting',$Path
+            }
+            'FileInfoPath' {
+                ol d 'Failed getting',$File
+            }
+            'MaybeStringPath' {
+                ol d 'Failed getting',$MaybePath
+            }
+        }
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

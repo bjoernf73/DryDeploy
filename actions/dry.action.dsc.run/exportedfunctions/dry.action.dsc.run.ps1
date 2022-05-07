@@ -331,7 +331,7 @@ Function dry.action.dsc.run {
         #   to deploy the DSC Configuration.
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        $DscTargetSystemPRECredentials = Get-DryCredential -Alias "$($Action.credentials.credential1)" -EnvConfig $($GLOBAL.dry_var_global_EnvConfig).name
+        $DscTargetSystemPRECredentials = Get-DryCredential -Alias "$($Action.credentials.credential1)" -EnvConfig $GLOBAL:dry_var_global_ConfigCombo.envconfig.name
 
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -475,7 +475,7 @@ Function dry.action.dsc.run {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         If ($Action.credentials.credential2) {
             ol i @('Post-Credential',"$($Action.credentials.credential2) (credential2 - specific Post-Credential)")
-            $DscTargetSystemPOSTCredentials = Get-DryCredential -Alias "$($Action.credentials.credential2)" -EnvConfig $($GLOBAL.dry_var_global_EnvConfig).name
+            $DscTargetSystemPOSTCredentials = Get-DryCredential -Alias "$($Action.credentials.credential2)" -EnvConfig $GLOBAL:dry_var_global_ConfigCombo.envconfig.name
             If ($MetaConfigObject.dsc_allow_alternating_post_credentials) {
                 ol i @('Allowing alternating credentials. Alternating between',"'$($Action.credentials.credential1)' and '$($Action.credentials.credential2)'")
                 $DscTargetSystemPOSTCredentialsArray = @($DscTargetSystemPRECredentials,$DscTargetSystemPOSTCredentials)
@@ -487,7 +487,7 @@ Function dry.action.dsc.run {
         }
         Else {
             ol i @('Post-Credential',"$($Action.credentials.credential2) (credential1 - same as Pre-Credential)")
-            $DscTargetSystemPOSTCredentials = Get-DryCredential -Alias "$($Action.credentials.credential1)" -EnvConfig $($GLOBAL.dry_var_global_EnvConfig).name
+            $DscTargetSystemPOSTCredentials = Get-DryCredential -Alias "$($Action.credentials.credential1)" -EnvConfig $GLOBAL:dry_var_global_ConfigCombo.envconfig.name
             $DscTargetSystemPOSTCredentialsArray = @($DscTargetSystemPOSTCredentials)
         }
         

@@ -76,7 +76,7 @@ Function dry.action.ad.import {
         Else {
             ol i @('Action ad.import uses Credential Alias',"$CredentialAlias (credential1)")
         }
-        $Credential = Get-DryCredential -Alias $CredentialAlias -EnvConfig $($GLOBAL.dry_var_global_EnvConfig).name
+        $Credential = Get-DryCredential -Alias $CredentialAlias -EnvConfig $GLOBAL:dry_var_global_ConfigCombo.envconfig.name
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         # 

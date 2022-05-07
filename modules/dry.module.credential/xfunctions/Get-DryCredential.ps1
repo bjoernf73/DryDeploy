@@ -35,7 +35,7 @@ function Get-DryCredential {
             return [PSCredential] $DryCredentials.GetCredential($Alias,$EnvConfig)
         }
         else {
-            return [PSCredential] $DryCredentials.GetCredential($Alias,$($GLOBAL.dry_var_global_EnvConfig).name)
+            return [PSCredential] $DryCredentials.GetCredential($Alias,$GLOBAL:dry_var_global_ConfigCombo.envconfig.name)
         }
     }
     catch {

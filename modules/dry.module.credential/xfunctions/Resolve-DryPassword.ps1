@@ -73,7 +73,7 @@ function Resolve-DryPassword {
             # Get the credential alias which is <alias> in '___pwd___<alias>___'
             $CredentialName = $InputString.Substring(9,($InputString.length-12))
             ol v "The credential alias is '$CredentialName'"
-            $CredObject = Get-DryCredential -Alias $CredentialName -EnvConfig $($GLOBAL.dry_var_global_EnvConfig).name
+            $CredObject = Get-DryCredential -Alias $CredentialName -EnvConfig $GLOBAL:dry_var_global_ConfigCombo.envconfig.name
             $CredObject.GetNetworkCredential().Password
         }
     }

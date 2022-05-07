@@ -74,7 +74,7 @@ Function dry.action.ad.move {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-        $Credential = Get-DryCredential -Alias "$($action.credentials.credential1)"  -EnvConfig $($GLOBAL.dry_var_global_EnvConfig).name
+        $Credential = Get-DryCredential -Alias "$($action.credentials.credential1)"  -EnvConfig $GLOBAL:dry_var_global_ConfigCombo.envconfig.name
         ol i @('Using Credential',"$($Credential.UserName)")
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #

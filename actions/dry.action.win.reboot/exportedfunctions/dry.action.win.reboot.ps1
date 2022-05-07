@@ -93,7 +93,7 @@ Function dry.action.win.reboot {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         $CredCount = 1
         While ($Action.credentials."credential$CredCount") {
-            $Credentials += @(Get-DryCredential -Alias $Action.credentials."credential$CredCount" -EnvConfig "$($($GLOBAL.dry_var_global_EnvConfig).name)")
+            $Credentials += @(Get-DryCredential -Alias $Action.credentials."credential$CredCount" -EnvConfig "$($GLOBAL:dry_var_global_ConfigCombo.envconfig.name)")
             $CredCount++
         }
 

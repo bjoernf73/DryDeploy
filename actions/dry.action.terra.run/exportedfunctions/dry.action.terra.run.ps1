@@ -90,7 +90,7 @@ function dry.action.terra.run {
         for ($Cred = 1; $Cred -lt 20; $Cred++) {
             Remove-Variable -Name "Credential$Cred" -Scope Global -ErrorAction Ignore
             if ($Action.credentials."Credential$Cred") {
-                New-Variable -Name "Credential$Cred" -Value (Get-DryCredential -Alias $Action.credentials."Credential$Cred" -EnvConfig $($GLOBAL.dry_var_global_EnvConfig).name) -Scope Global
+                New-Variable -Name "Credential$Cred" -Value (Get-DryCredential -Alias $Action.credentials."Credential$Cred" -EnvConfig $GLOBAL:dry_var_global_ConfigCombo.envconfig.name) -Scope Global
             }
         }
 
