@@ -16,7 +16,8 @@
             $this.envconfig.dependencies      = $EnvConfig.dependencies."$($this.platform)"."$($this.edition)"
             # the dependencies_hash is a calculated property - but we read the value already on file, if any
             $this.envconfig.dependencies_hash = $ConfigCombo.envconfig.dependencies_hash
-            $this.envconfig.configpath        = (Join-Path -Path $this.envconfig.path -ChildPath 'Config')
+            $this.envconfig.coreconfigpath    = (Join-Path -Path $this.envconfig.path -ChildPath 'CoreConfig')
+            $this.envconfig.userconfigpath    = (Join-Path -Path $this.envconfig.path -ChildPath 'UserConfig')
             $this.envconfig.osconfigpath      = (Join-Path -Path $this.envconfig.path -ChildPath 'OSConfig')
         }
 

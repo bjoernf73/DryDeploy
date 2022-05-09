@@ -35,13 +35,14 @@
             
             switch ($Type) {
                 'environment' {
-                    $this.envconfig.configpath        = (Join-Path -Path $FullPath -ChildPath 'Config')
-                    $this.envconfig.osconfigpath      = (Join-Path -Path $FullPath -ChildPath 'OSConfig')
+                    $this.envconfig.coreconfigpath  = (Join-Path -Path $FullPath -ChildPath 'CoreConfig')
+                    $this.envconfig.userconfigpath  = (Join-Path -Path $FullPath -ChildPath 'UserConfig')
+                    $this.envconfig.osconfigpath    = (Join-Path -Path $FullPath -ChildPath 'OSConfig')
                 }
                 'module' {
-                    $this.moduleconfig.buildpath         = (Join-Path -Path $FullPath -ChildPath 'Build')
-                    $this.moduleconfig.rolespath         = (Join-Path -Path $FullPath -ChildPath 'Roles')
-                    $this.moduleconfig.credentialspath   = (Join-Path -Path $FullPath -ChildPath 'Credentials')
+                    $this.moduleconfig.buildpath       = (Join-Path -Path $FullPath -ChildPath 'Build')
+                    $this.moduleconfig.rolespath       = (Join-Path -Path $FullPath -ChildPath 'Roles')
+                    $this.moduleconfig.credentialspath = (Join-Path -Path $FullPath -ChildPath 'Credentials')
                 }
             }
 

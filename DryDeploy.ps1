@@ -290,10 +290,10 @@ param (
     HelpMessage='Array of one or more Resource names to include. 
     All others are excluded. If not specified, all Resources are 
     included')]
-    #! The argumentcompleter does not work anymore
-    [ArgumentCompleter({((Get-Content -Path (Join-Path ((Get-Content (Join-Path (Join-Path $($env:USERPROFILE) DryDeploy) ConfigCombo.json) | ConvertFrom-Json).InstanceConfig.Path) `
-        resources.json) | ConvertFrom-Json).resources) | 
-        Select-Object -ExpandProperty Name })]
+    [ArgumentCompleter({((Get-Content -Path (Join-Path ((Get-Content `
+    (Join-Path (Join-Path $home 'DryDeploy') 'dry_deploy_config_combo.json') | 
+    ConvertFrom-Json).EnvConfig.CoreConfigPath) resources.json) | 
+    ConvertFrom-Json).resources) | Select-Object -ExpandProperty Name })]
     [String[]]
     $Resources,
 
@@ -305,12 +305,10 @@ param (
     HelpMessage='Array of one or more Resource names to exclude. 
     All others are included. If not specified, no Resources are 
     excluded')]
-    #! The argumentcompleter does not work anymore
     [ArgumentCompleter({((Get-Content -Path (Join-Path ((Get-Content `
-        (Join-Path (Join-Path $($env:localappdata) DryDeploy) `
-        ConfigCombo.json) | ConvertFrom-Json).InstanceConfig.Path) `
-        resources.json) | ConvertFrom-Json).resources) | 
-        Select-Object -ExpandProperty Name })]
+    (Join-Path (Join-Path $home 'DryDeploy') 'dry_deploy_config_combo.json') | 
+    ConvertFrom-Json).EnvConfig.CoreConfigPath) resources.json) | 
+    ConvertFrom-Json).resources) | Select-Object -ExpandProperty Name })]
     [String[]]
     $ExcludeResources,
 
