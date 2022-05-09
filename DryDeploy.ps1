@@ -460,8 +460,9 @@ param (
     
     PreModulesFunctions
     
-    Functions that are needed in-script to ensure proper resolving of paths to modules 
-    required by DD
+    Functions that are needed in-script to ensure proper resolving of paths to where DD's
+    modules are, and such. For instance, $PSScriptRoot does not always exist, as you may 
+    have experienced. If that is the case, we try $MyInvocation, and so on. 
     
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
 

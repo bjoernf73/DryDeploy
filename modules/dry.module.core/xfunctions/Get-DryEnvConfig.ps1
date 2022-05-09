@@ -26,18 +26,38 @@ function Get-DryEnvConfig {
         [PSCustomObject]$ConfigCombo
     )
     try {
-        #   The EnvConfig describes the environment into which you deploy your module. 
-        #   The EnvConfig is a directory or repository containing two directories; 
-        #   
-        #   1. 'Config' which contain common environment specific definitions      
-        #   2. 'OSConfig' which contains os-specific definitions shared 
-        #       among environments 
+            <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+            
+                EnvConfig
+
+                The EnvConfig describes the environment into which you deploy your module. The EnvConfig 
+                is a directory or repository containing three sub directories; 
+                
+                1. 'CoreConfig' which containing configurations DryDeploy needs to Plan and Apply
+
+                2. 'UserConfig' which is user definable. Make any structure you'd like, and resolve in 
+                    params to your Actions
+
+                3. 'OSConfig' has a file structure like Roles, but lacks Phases. We don't "pick up" those 
+                    configs here, since they may be DSC-files, Active Directory defintions, and such - 
+                    just record the path to the folder. Actions that inherit OSConfigs, will pick those
+                    files up, and include in your Action config.
+
+            # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         $Configuration = $null
-        $Configuration = Get-DryConfigData -Path (Join-Path -Path $ConfigCombo.envconfig.path -ChildPath 'Config') -ErrorAction Stop
+        $Configuration = [PSCustomObject]@{
+            CoreConfig = $null 
+            UserConfig = $null
+            OSConfigDirectory = $null
+        }
+        $Configuration.CoreConfig = Get-DryConfigData -Path (Join-Path -Path $ConfigCombo.envconfig.path -ChildPath 'CoreConfig') -ErrorAction Stop
+        if (Test-Path -Path (Join-Path -Path $ConfigCombo.envconfig.path -ChildPath 'UserConfig')) {
+            $Configuration.UserConfig = Get-DryConfigData -Path (Join-Path -Path $ConfigCombo.envconfig.path -ChildPath 'UserConfig') -Configuration $Configuration -ErrorAction Stop
+        }
         
         # Add the resolved OS Configuration directory to the Configuration so that functions
         # below may use that instead of having to resolve relative paths over and over
-        $Configuration | Add-Member -MemberType NoteProperty -name OSConfigDirectory -value (Join-Path -Path $ConfigCombo.envconfig.path -ChildPath 'OSConfig')
+        $Configuration.OSConfigDirectory = Join-Path -Path $ConfigCombo.envconfig.path -ChildPath 'OSConfig'
         return $Configuration
     }
     catch {
