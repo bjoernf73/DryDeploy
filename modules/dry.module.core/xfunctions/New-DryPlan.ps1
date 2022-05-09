@@ -56,11 +56,11 @@ function New-DryPlan {
 
         [Parameter()]
         [Int[]] 
-        $BuildOrders,
+        $BuildSteps,
 
         [Parameter()]
         [Int[]] 
-        $ExcludeBuildOrders,
+        $ExcludeBuildSteps,
 
         [Parameter()]
         [Int[]] 
@@ -82,7 +82,7 @@ function New-DryPlan {
     $Plan = [Plan]::New($Resources)
 
     # Get the planfilter
-    $PlanFilter = [PlanFilter]::New($ResourceNames,$ExcludeResourceNames,$ActionNames,$ExcludeActionNames,$Phases,$ExcludePhases,$BuildOrders,$ExcludeBuildOrders)
+    $PlanFilter = [PlanFilter]::New($ResourceNames,$ExcludeResourceNames,$ActionNames,$ExcludeActionNames,$Phases,$ExcludePhases,$BuildSteps,$ExcludeBuildSteps)
     
     # Set selections based on filter
     $Plan.Actions.foreach({

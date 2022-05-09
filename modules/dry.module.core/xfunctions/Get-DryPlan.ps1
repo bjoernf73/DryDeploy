@@ -53,11 +53,11 @@ function Get-DryPlan {
 
         [Parameter()]
         [Int[]]
-        $BuildOrders,
+        $BuildSteps,
 
         [Parameter()]
         [Int[]]
-        $ExcludeBuildOrders,
+        $ExcludeBuildSteps,
 
         [Parameter(HelpMessage="Changes status 'Retrying' back to 'Failed'")]
         [Switch]
@@ -68,7 +68,7 @@ function Get-DryPlan {
     $Plan = [Plan]::New($PlanFile)
 
     # Get the planfilter
-    $PlanFilter = [PlanFilter]::New($ResourceNames,$ExcludeResourceNames,$ActionNames,$ExcludeActionNames,$Phases,$ExcludePhases,$BuildOrders,$ExcludeBuildOrders)
+    $PlanFilter = [PlanFilter]::New($ResourceNames,$ExcludeResourceNames,$ActionNames,$ExcludeActionNames,$Phases,$ExcludePhases,$BuildSteps,$ExcludeBuildSteps)
     
     # At runtime (i.e. when you -Apply), selections made the the parameters -Resources, 
     # -Actions and -Phases, are only applied to actions that are already selected in the 

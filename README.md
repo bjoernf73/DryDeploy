@@ -30,15 +30,15 @@ DryDeploy.ps1 [-Init] [<CommonParameters>]
 
 ### Plan
 ```
-DryDeploy.ps1 [-Plan] [-Actions <String[]>] [-ExcludeActions <String[]>] [-BuildOrders <Int32[]>]
- [-ExcludeBuildOrders <Int32[]>] [-Resources <String[]>] [-ExcludeResources <String[]>] [-Phases <Int32[]>]
+DryDeploy.ps1 [-Plan] [-Actions <String[]>] [-ExcludeActions <String[]>] [-BuildSteps <Int32[]>]
+ [-ExcludeBuildSteps <Int32[]>] [-Resources <String[]>] [-ExcludeResources <String[]>] [-Phases <Int32[]>]
  [-ExcludePhases <Int32[]>] [-NoLog] [-ShowDeselected] [-CmTrace] [<CommonParameters>]
 ```
 
 ### Apply
 ```
-DryDeploy.ps1 [-Apply] [-Actions <String[]>] [-ExcludeActions <String[]>] [-BuildOrders <Int32[]>]
- [-ExcludeBuildOrders <Int32[]>] [-Resources <String[]>] [-ExcludeResources <String[]>] [-Phases <Int32[]>]
+DryDeploy.ps1 [-Apply] [-Actions <String[]>] [-ExcludeActions <String[]>] [-BuildSteps <Int32[]>]
+ [-ExcludeBuildSteps <Int32[]>] [-Resources <String[]>] [-ExcludeResources <String[]>] [-Phases <Int32[]>]
  [-ExcludePhases <Int32[]>] [-ActionParams <Hashtable>] [-NoLog] [-KeepConfigFiles] [-DestroyOnFailedBuild]
  [-ShowAllErrors] [-ShowPasswords] [-ShowStatus] [-SuppressInteractivePrompts] [-IgnoreDependencies] [-Step]
  [-Quit] [-CmTrace] [-Force] [<CommonParameters>]
@@ -262,11 +262,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -BuildOrders
-Array of one or more BuildOrders to include.
+### -BuildSteps
+Array of one or more BuildSteps to include.
 All others are 
 excluded.
-If not specified, all BuildOrders are included.
+If not specified, all BuildSteps are included.
 
 ```yaml
 Type: Int32[]
@@ -280,11 +280,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -ExcludeBuildOrders
-Array of one or more BuildOrders to exclude.
+### -ExcludeBuildSteps
+Array of one or more BuildSteps to exclude.
 All others are 
 included.
-If not specified, all BuildOrders are included.
+If not specified, all BuildSteps are included.
 
 ```yaml
 Type: Int32[]

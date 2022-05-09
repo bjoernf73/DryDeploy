@@ -647,8 +647,8 @@ class PlanFilter {
     [String[]]  $ExcludeActionNames
     [Int[]]     $Phases
     [Int[]]     $ExcludePhases
-    [Int[]]     $BuildOrders
-    [Int[]]     $ExcludeBuildOrders
+    [Int[]]     $BuildSteps
+    [Int[]]     $ExcludeBuildSteps
 
     PlanFilter (
         [String[]] $ResourceNames,
@@ -657,8 +657,8 @@ class PlanFilter {
         [String[]] $ExcludeActionNames,
         [Int[]]    $Phases,
         [Int[]]    $ExcludePhases,
-        [Int[]]    $BuildOrders,
-        [Int[]]    $ExcludeBuildOrders
+        [Int[]]    $BuildSteps,
+        [Int[]]    $ExcludeBuildSteps
     ) {
         $This.ResourceNames        = $ResourceNames
         $This.ExcludeResourceNames = $ExcludeResourceNames
@@ -666,8 +666,8 @@ class PlanFilter {
         $This.ExcludeActionNames   = $ExcludeActionNames
         $This.Phases               = $Phases
         $This.ExcludePhases        = $ExcludePhases
-        $This.BuildOrders         = $BuildOrders
-        $This.ExcludeBuildOrders  = $ExcludeBuildOrders
+        $This.BuildSteps         = $BuildSteps
+        $This.ExcludeBuildSteps  = $ExcludeBuildSteps
     }
 
     [Bool] Hidden InFilter(
@@ -739,18 +739,18 @@ class PlanFilter {
         }
 
         # ActionOrder
-        if ($Null -eq $This.BuildOrders) {
+        if ($Null -eq $This.BuildSteps) {
             $ActionOrderValidated = $True
         }
-        elseif ($ActionOrder -in $This.BuildOrders) {
+        elseif ($ActionOrder -in $This.BuildSteps) {
             $ActionOrderValidated = $True
         }
 
         # ExcludeActionOrder
-        if ($Null -eq $This.ExcludeBuildOrders) {
+        if ($Null -eq $This.ExcludeBuildSteps) {
             # do noting
         }
-        elseif ($ActionOrder -in $This.ExcludeBuildOrders) {
+        elseif ($ActionOrder -in $This.ExcludeBuildSteps) {
             $ActionOrderValidated = $False
         }
 

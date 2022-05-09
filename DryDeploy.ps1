@@ -49,13 +49,13 @@ Array of one or more Actions to exclude. All others are included.
 If not specified, no actions are excluded. Supports partial 
 match ('Co' will match Action 'ConfigAD')
 
-.PARAMETER BuildOrders
-Array of one or more BuildOrders to include. All others are 
-excluded. If not specified, all BuildOrders are included. 
+.PARAMETER BuildSteps
+Array of one or more BuildSteps to include. All others are 
+excluded. If not specified, all BuildSteps are included. 
 
-.PARAMETER ExcludeBuildOrders
-Array of one or more BuildOrders to exclude. All others are 
-included. If not specified, all BuildOrders are included. 
+.PARAMETER ExcludeBuildSteps
+Array of one or more BuildSteps to exclude. All others are 
+included. If not specified, all BuildSteps are included. 
 
 .PARAMETER Resources
 Array of one or more Resource names to include. All others are 
@@ -269,7 +269,7 @@ param (
     others are excluded. If not specified, all ActionsOrders are 
     included.')]
     [Int[]]
-    $BuildOrders,
+    $BuildSteps,
 
     [Parameter(ParameterSetName='Plan',
     HelpMessage='Array of one or more ActionsOrders to exclude. All 
@@ -280,7 +280,7 @@ param (
     others are included. If not specified, all ActionsOrders are 
     included.')]
     [Int[]]
-    $ExcludeBuildOrders,
+    $ExcludeBuildSteps,
 
     [Parameter(ParameterSetName='Plan',
     HelpMessage='Array of one or more Resource names to include. 
@@ -769,8 +769,8 @@ try {
                 ExcludeResourceNames = $ExcludeResources
                 ActionNames          = $Actions
                 ExcludeActionNames   = $ExcludeActions
-                BuildOrders          = $BuildOrders
-                ExcludeBuildOrders   = $ExcludeBuildOrders
+                BuildSteps          = $BuildSteps
+                ExcludeBuildSteps   = $ExcludeBuildSteps
                 Phases               = $Phases
                 ExcludePhases        = $ExcludePhases
                 ShowStatus           = $True
@@ -885,8 +885,8 @@ try {
                 ExcludeResourceNames = $ExcludeResources
                 ActionNames          = $Actions
                 ExcludeActionNames   = $ExcludeActions
-                BuildOrders          = $BuildOrders
-                ExcludeBuildOrders   = $ExcludeBuildOrders
+                BuildSteps          = $BuildSteps
+                ExcludeBuildSteps   = $ExcludeBuildSteps
                 Phases               = $Phases
                 ExcludePhases        = $ExcludePhases
             }
@@ -920,8 +920,8 @@ try {
                 ExcludeResourceNames = $ExcludeResources
                 ActionNames          = $Actions
                 ExcludeActionNames   = $ExcludeActions
-                BuildOrders          = $BuildOrders
-                ExcludeBuildOrders   = $ExcludeBuildOrders
+                BuildSteps          = $BuildSteps
+                ExcludeBuildSteps   = $ExcludeBuildSteps
                 Phases               = $Phases
                 ExcludePhases        = $ExcludePhases
             }
