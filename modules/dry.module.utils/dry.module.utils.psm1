@@ -1,5 +1,5 @@
 <# 
- This module provides generic functions for use with DryDeploy.
+ This module provides functions to resolve values from expressions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
  LICENSE: https://raw.githubusercontent.com/bjoernf73/DryDeploy/master/LICENSE
@@ -19,28 +19,14 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
+$ScriptBlocksPath = "$PSScriptRoot\scriptblocks\*.ps1"
+$ScriptBlocks = Resolve-Path -Path $ScriptBlocksPath -ErrorAction Stop
+foreach ($ScriptBlock in $ScriptBlocks) {
+    . $ScriptBlock.Path
+}
 
-function Get-DryRandomPath {
-    [CmdletBinding()]
-    [Alias("Get-RandomPath")] 
-    param (
-        [Parameter()]
-        [String]$Folderpath = $env:TEMP,
-
-        [Parameter()]
-        [String]$Extension,
-
-        [Parameter()]
-        [Int]$Length = 25
-    )
-  
-    $RandomString = Get-RandomHex -Length $length
-    if ($Extension) {
-        # extension was passed, returning a file name
-        return ($Folderpath + '\' + $RandomString + ".$Extension")
-    } 
-    else {
-        # no extension was passed, returning a folder (or file name without ext)
-        return ($Folderpath + '\' + $RandomString)
-    }
+$FunctionsPath = "$PSScriptRoot\xfunctions\*.ps1"
+$Functions = Resolve-Path -Path $FunctionsPath -ErrorAction Stop
+foreach ($Function in $Functions) {
+    . $Function.Path
 }
