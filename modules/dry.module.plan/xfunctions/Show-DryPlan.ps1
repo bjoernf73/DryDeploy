@@ -95,16 +95,12 @@ function Show-DryPlan {
             [Int]$LongestResourceString
         )
         [String]$RepoString = ''
-        
-        $RepoTypeStringLength = $LongestResourceString + 11
-
+        [Int]$RepoTypeStringLength = $LongestResourceString + 11
         [String]$RepoString = $RepoType
         do {
             $RepoString = "$RepoString "
         } while ($RepoString.length -le $RepoTypeStringLength)
-        
         [String]$RepoString = $RepoString + $Path
-        # return the string
         $RepoString
     }
 
@@ -122,14 +118,12 @@ function Show-DryPlan {
 
             [Switch]$ShowDeslected
         )
-
-        # If Phase = 0, set to blank. 
+ 
         if ($Action.Phase -eq 0) {
             $Action.Phase = " "
         }
-
         # PlanO is exactly 5 chars. If it is 0, make empty
-        [String]$OrderStr = $Action.PlanO
+        [String]$OrderStr = $Action.PlanO  
         if ($OrderStr -eq '0') {
             [String]$OrderStr = ' '
         }
@@ -139,7 +133,7 @@ function Show-DryPlan {
         $PlanString += $OrderStr
 
         # resource is 3 chars more than $LongestResourceString
-        [String]$ResourceStr = $Action.Resource
+        [String]$ResourceStr = $Action.Resource  
         $ResourceStr = "   $ResourceStr"
         Do {
             $ResourceStr = "$ResourceStr "
@@ -289,15 +283,14 @@ function Show-DryPlan {
         Path        = '....'
     }
     
-    
     $Header = [PSCustomObject]@{
-        PlanO       = 'Plan'
+        PlanO       = 'Plan#'
         Resource    = 'Resource'
         Action      = 'Action'
         Phase       = 'Phase'
         Role        = 'Role'
         Status      = 'Status'
-        ActionO     = 'Build'
+        ActionO     = 'Build#'
         Description = 'Description'
     }
 
@@ -333,9 +326,7 @@ function Show-DryPlan {
         ol i " "
     }
     
-    if (
-        ($PlanArray.count -gt 0)
-    ) {
+    if ($PlanArray.count -gt 0) {
         
         ol i " "
         switch ($Mode) {

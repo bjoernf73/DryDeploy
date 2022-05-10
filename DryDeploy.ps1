@@ -67,6 +67,16 @@ Array of one or more Resource names to exclude. All others are
 included. If not specified, no Resources are excluded. Supports 
 partial match ('DC' will match Resource 'DC001-S5-D')
 
+.PARAMETER Roles
+Array of one or more Role names to include. All others are 
+excluded. If not specified, all Roles are included. Supports 
+partial match ('dc' will match Role 'dc-domctrl-froot')
+
+.PARAMETER ExcludeRoles
+Array of one or more Role names to exclude. All others are 
+included. If not specified, no Roles are excluded. Supports 
+partial match ('dc' will match Role 'dc-domctrl-froot')
+
 .PARAMETER Phases
 Array of one or more Phases (of any Action) to include. All other 
 Phases (and non-phased actions) are excluded. If not specified, 
@@ -183,10 +193,10 @@ Creates a partial plan, containing only Resources whos name is
 or matches "dc*" or "ca*"
 
 .EXAMPLE
-.\DryDeploy.ps1 -Plan -Resources dc,ca -Actions vsp,ad
+.\DryDeploy.ps1 -Plan -Resources dc,ca -Actions terra,ad
 Creates a partial plan, containing only Resources whos name is 
 or match "dc*" or "ca*", with only Actions whos name is or 
-matches "vsph*" (for instance "vsphere.clone") or "ad*" (for instance 
+matches "terra*" (for instance "terra.run") or "ad*" (for instance 
 "ad.import")
 
 .EXAMPLE
@@ -311,6 +321,36 @@ param (
     ConvertFrom-Json).resources) | Select-Object -ExpandProperty Name })]
     [String[]]
     $ExcludeResources,
+
+    [Parameter(ParameterSetName='Plan',
+    HelpMessage='Array of one or more Role names to include. 
+    All others are excluded. If not specified, all Roles are 
+    included')]
+    [Parameter(ParameterSetName='Apply',
+    HelpMessage='Array of one or more Role names to include. 
+    All others are excluded. If not specified, all Reles are 
+    included')]
+    [ArgumentCompleter({((Get-Content -Path (Join-Path ((Get-Content `
+    (Join-Path (Join-Path $home 'DryDeploy') 'dry_deploy_config_combo.json') | 
+    ConvertFrom-Json).EnvConfig.CoreConfigPath) resources.json) | 
+    ConvertFrom-Json).resources) | Select-Object -ExpandProperty Role })]
+    [String[]]
+    $Roles,
+
+    [Parameter(ParameterSetName='Plan',
+    HelpMessage='Array of one or more Role names to exclude. 
+    All others are included. If not specified, no Roles are 
+    excluded')]
+    [Parameter(ParameterSetName='Apply',
+    HelpMessage='Array of one or more Role names to exclude. 
+    All others are included. If not specified, no Roles are 
+    excluded')]
+    [ArgumentCompleter({((Get-Content -Path (Join-Path ((Get-Content `
+    (Join-Path (Join-Path $home 'DryDeploy') 'dry_deploy_config_combo.json') | 
+    ConvertFrom-Json).EnvConfig.CoreConfigPath) resources.json) | 
+    ConvertFrom-Json).resources) | Select-Object -ExpandProperty Role })]
+    [String[]]
+    $ExcludeRoles,
 
     [Parameter(ParameterSetName='Plan',
     HelpMessage='Array of one or more Phases (of any Action) to 
@@ -571,8 +611,7 @@ try {
     $GLOBAL:dry_var_global_ShowPasswords              = $ShowPasswords
     $GLOBAL:dry_var_global_KeepConfigFiles            = $KeepConfigFiles
     $GLOBAL:dry_var_global_WarnOnTooNarrowConsole     = $true #! lagt i options som 'warn_on_too_narrow_console'
-    $GLOBAL:dry_var_global_RootWorkingDirectory       = $dry_var_global_Platform.RootWorkingDirectory
-     
+    $GLOBAL:dry_var_global_RootWorkingDirectory       = $dry_var_global_Platform.RootWorkingDirectory 
     
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -674,9 +713,10 @@ try {
             at least once for a configuration combination.
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+        #! INIT must be changed when dry.module.pkgmgmt is released
+        #! The test-dryelevated should only be run if there are changes to be made
         'Init' {
-            #! All of this must be changed when dry.module.pkgmgmt is released
-            #! The test-dryelevated should only be run if there are changes to be made
+            
             if (Test-DryElevated){
                 # System Dependencies
                 if ($dry_var_global_ConfigCombo.TestDepHash('system')) {
@@ -765,10 +805,12 @@ try {
                 PlanFile             = $dry_var_PlanFile
                 ResourceNames        = $Resources
                 ExcludeResourceNames = $ExcludeResources
+                RoleNames            = $Roles
+                ExcludeRoleNames     = $ExcludeRoles
                 ActionNames          = $Actions
                 ExcludeActionNames   = $ExcludeActions
-                BuildSteps          = $BuildSteps
-                ExcludeBuildSteps   = $ExcludeBuildSteps
+                BuildSteps           = $BuildSteps
+                ExcludeBuildSteps    = $ExcludeBuildSteps
                 Phases               = $Phases
                 ExcludePhases        = $ExcludePhases
                 ShowStatus           = $True
@@ -881,10 +923,12 @@ try {
                 CommonVariables      = $dry_var_CommonVariables
                 ResourceNames        = $Resources
                 ExcludeResourceNames = $ExcludeResources
+                RoleNames            = $Roles
+                ExcludeRoleNames     = $ExcludeRoles
                 ActionNames          = $Actions
                 ExcludeActionNames   = $ExcludeActions
-                BuildSteps          = $BuildSteps
-                ExcludeBuildSteps   = $ExcludeBuildSteps
+                BuildSteps           = $BuildSteps
+                ExcludeBuildSteps    = $ExcludeBuildSteps
                 Phases               = $Phases
                 ExcludePhases        = $ExcludePhases
             }
@@ -916,10 +960,12 @@ try {
                 PlanFile             = $dry_var_PlanFile
                 ResourceNames        = $Resources
                 ExcludeResourceNames = $ExcludeResources
+                RoleNames            = $Roles
+                ExcludeRoleNames     = $ExcludeRoles
                 ActionNames          = $Actions
                 ExcludeActionNames   = $ExcludeActions
-                BuildSteps          = $BuildSteps
-                ExcludeBuildSteps   = $ExcludeBuildSteps
+                BuildSteps           = $BuildSteps
+                ExcludeBuildSteps    = $ExcludeBuildSteps
                 Phases               = $Phases
                 ExcludePhases        = $ExcludePhases
             }
@@ -936,6 +982,7 @@ try {
                 upon which I will only display a warning. 
                 
             # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+            #! implement  $dry_var_global_ConfigCombo.NeedsInit()
             if (($dry_var_global_ConfigCombo.TestDepHash('system')) -and
                 ($dry_var_global_ConfigCombo.TestDepHash('environment')) -and
                 ($dry_var_global_ConfigCombo.TestDepHash('module'))) {

@@ -30,6 +30,5 @@ function Set-DryPlan {
         [Parameter(Mandatory)]
         [Plan]   $Plan
     )
-
     $Plan.SaveToFile($PlanFile,$False)
 }

@@ -1,40 +1,49 @@
+using Namespace System.Collections.Generic
+using Namespace System.Collections
 class PlanFilter {
-    [String[]]  $ResourceNames
-    [String[]]  $ExcludeResourceNames
-    [String[]]  $ActionNames
-    [String[]]  $ExcludeActionNames
-    [Int[]]     $Phases
-    [Int[]]     $ExcludePhases
-    [Int[]]     $BuildSteps
-    [Int[]]     $ExcludeBuildSteps
+    [String[]] $ResourceNames
+    [String[]] $ExcludeResourceNames
+    [String[]] $RoleNames
+    [String[]] $ExcludeRoleNames
+    [String[]] $ActionNames
+    [String[]] $ExcludeActionNames
+    [Int[]]    $Phases
+    [Int[]]    $ExcludePhases
+    [Int[]]    $BuildSteps
+    [Int[]]    $ExcludeBuildSteps
 
     PlanFilter (
         [String[]] $ResourceNames,
         [String[]] $ExcludeResourceNames,
+        [String[]] $RoleNames,
+        [String[]] $ExcludeRoleNames,
         [String[]] $ActionNames,
         [String[]] $ExcludeActionNames,
         [Int[]]    $Phases,
         [Int[]]    $ExcludePhases,
         [Int[]]    $BuildSteps,
-        [Int[]]    $ExcludeBuildSteps
-    ) {
+        [Int[]]    $ExcludeBuildSteps) {
+            
         $This.ResourceNames        = $ResourceNames
         $This.ExcludeResourceNames = $ExcludeResourceNames
+        $This.RoleNames            = $RoleNames
+        $This.ExcludeRoleNames     = $ExcludeRoleNames
         $This.ActionNames          = $ActionNames
         $This.ExcludeActionNames   = $ExcludeActionNames
         $This.Phases               = $Phases
         $This.ExcludePhases        = $ExcludePhases
-        $This.BuildSteps         = $BuildSteps
-        $This.ExcludeBuildSteps  = $ExcludeBuildSteps
+        $This.BuildSteps           = $BuildSteps
+        $This.ExcludeBuildSteps    = $ExcludeBuildSteps
     }
 
     [Bool] Hidden InFilter(
         [String] $ResourceName,
+        [String] $RoleName,
         [String] $ActionName,
         [Int]    $Phase,
-        [Int]    $ActionOrder
-    ) {
-        $ResourceValidated = $ActionValidated = $PhaseValidated = $ActionOrderValidated = $False
+        [Int]    $ActionOrder) {
+        
+        $ResourceValidated = $RoleValidated = $ActionValidated = $PhaseValidated = $ActionOrderValidated = $False
         
         # ResourceName
         if ($Null -eq $This.ResourceNames) {
@@ -43,8 +52,11 @@ class PlanFilter {
         elseif ($ResourceName -in $This.ResourceNames) {
             $ResourceValidated = $True
         }
-        elseif (Test-DryCollection -Collection $This.ResourceNames -Name $ResourceName) {
-            $ResourceValidated = $True 
+        else {
+            $NameMatch = $false
+            if ({($This.ResourceNames).foreach({if ($ResourceName -match "^$_") {$NameMatch = $true}}); return $NameMatch}) {
+                $ResourceValidated = $true
+            }
         }
 
         # ExcludeResourceName
@@ -54,10 +66,41 @@ class PlanFilter {
         elseif ($ResourceName -in $This.ExcludeResourceNames) {
             $ResourceValidated = $False
         }
-        elseif (Test-DryCollection -Collection $This.ExcludeResourceNames -Name $ResourceName) {
-            $ResourceValidated = $False
+        else {
+            $NameMatch = $false
+            if ({($This.ExcludeResourceNames).foreach({if ($ResourceName -match "^$_") {$NameMatch = $true}}); return $NameMatch}) {
+                $ResourceValidated = $false
+            }
         }
-        
+
+        # RoleName
+        if ($Null -eq $This.RoleNames) {
+            $RoleValidated = $True
+        }
+        elseif ($RoleName -in $This.RoleNames) {
+            $RoleValidated = $True
+        }
+        else {
+            $NameMatch = $false
+            if ({($This.RoleNames).foreach({if ($RoleName -match "^$_") {$NameMatch = $true}}); return $NameMatch}) {
+                $RoleValidated = $true
+            }
+        }
+
+        # ExcludeRoleName
+        if ($Null -eq $This.ExcludeRoleNames) {
+            # do noting
+        }
+        elseif ($RoleName -in $This.ExcludeRoleNames) {
+            $RoleValidated = $False
+        }
+        else {
+            $NameMatch = $false
+            if ({($This.ExcludeRoleNames).foreach({if ($RoleName -match "^$_") {$NameMatch = $true}}); return $NameMatch}) {
+                $RoleValidated = $false
+            }
+        }
+
         # ActionName
         if ($Null -eq $This.ActionNames) {
             $ActionValidated = $True
@@ -65,8 +108,11 @@ class PlanFilter {
         elseif ($ActionName -in $This.ActionNames) {
             $ActionValidated = $True
         }
-        elseif (Test-DryCollection -Collection $This.ActionNames -Name $ActionName) {
-            $ActionValidated = $True 
+        else {
+            $NameMatch = $false
+            if ({($This.ActionNames).foreach({if ($ActionName -match "^$_") {$NameMatch = $true}}); return $NameMatch}) {
+                $ActionValidated = $true 
+            }
         }
 
         # ExcludeActionName
@@ -76,8 +122,11 @@ class PlanFilter {
         elseif ($ActionName -in $This.ExcludeActionNames) {
             $ActionValidated = $False
         }
-        elseif (Test-DryCollection -Collection $This.ExcludeActionNames -Name $ActionName) {
-            $ActionValidated = $False 
+        else {
+            $NameMatch = $false
+            if ({($This.ExcludeActionNames).foreach({if ($ActionName -match "^$_") {$NameMatch = $true}}); return $NameMatch}) {
+                $ActionValidated = $false 
+            }
         }
 
         # Phase
@@ -113,12 +162,11 @@ class PlanFilter {
         }
 
         # return true only if all are validated, false if not
-        if (
-            $ResourceValidated -and 
-            $ActionValidated   -and 
-            $PhaseValidated    -and
-            $ActionOrderValidated
-        ) {
+        if ($ResourceValidated -and 
+            $RoleValidated -and
+            $ActionValidated -and 
+            $PhaseValidated -and
+            $ActionOrderValidated) {
             return $True
         }
         else {

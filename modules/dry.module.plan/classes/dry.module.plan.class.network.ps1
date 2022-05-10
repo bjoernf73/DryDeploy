@@ -1,3 +1,5 @@
+using Namespace System.Collections.Generic
+using Namespace System.Collections
 class Network {
     [String]         $Name
     [String]         $Switch_Name

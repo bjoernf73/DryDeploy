@@ -38,6 +38,14 @@ function Get-DryPlan {
 
         [Parameter()]
         [Array]
+        $RoleNames,
+
+        [Parameter()]
+        [Array]
+        $ExcludeRoleNames,
+
+        [Parameter()]
+        [Array]
         $ActionNames,
 
         [Parameter()]
@@ -64,23 +72,19 @@ function Get-DryPlan {
         [Switch]
         $ShowStatus
     )
-    
-    # Create Plan from file
-    $Plan = [Plan]::New($PlanFile)
 
-    # Get the planfilter
-    $PlanFilter = [PlanFilter]::New($ResourceNames,$ExcludeResourceNames,$ActionNames,$ExcludeActionNames,$Phases,$ExcludePhases,$BuildSteps,$ExcludeBuildSteps)
-    
-    # At runtime (i.e. when you -Apply), selections made the the parameters -Resources, 
-    # -Actions and -Phases, are only applied to actions that are already selected in the 
-    # current Plan (i.e. when you -Plan). At each -Apply, the ApplySelected is reevaluated. 
+    $Plan = [Plan]::New($PlanFile)
+    $PlanFilter = [PlanFilter]::New($ResourceNames,$ExcludeResourceNames,$RoleNames,$ExcludeRoleNames,$ActionNames,$ExcludeActionNames,$Phases,$ExcludePhases,$BuildSteps,$ExcludeBuildSteps)
+    <#
+        At runtime (i.e. when you -Apply), selections made by the the parameters -Resources, 
+        -Roles, -Actions and -Phases, are only applied to actions that are already selected in the 
+        current Plan (i.e. when you -Plan). At each -Apply, the ApplySelected is reevaluated. 
+    #>
     $Plan.Actions.foreach({
         if ($_.PlanSelected -eq $True) {
-            # Apply selections
-            if ($PlanFilter.InFilter($_.ResourceName,$_.Action,$_.Phase,$_.ActionOrder)) {
+            if ($PlanFilter.InFilter($_.ResourceName,$_.Role,$_.Action,$_.Phase,$_.ActionOrder)) {
                 $_.ApplySelected = $True
-                # If the Action was previously 'Retrying', change to 'Failed' if $ShowStatus
-                if ($ShowStatus) {
+                if ($ShowStatus) {  # If the Action was previously 'Retrying', change to 'Failed' if $ShowStatus
                     if ($_.Status -eq 'Retrying') {
                         $_.Status = 'Failed'
                     }
@@ -89,22 +93,16 @@ function Get-DryPlan {
             else {
                 $_.ApplySelected = $False
             }
-
-            # However, if the Action has a status of 'Success', deselect
-            if ($_.Status -eq 'Success') {
-                $_.ApplySelected = $False
+            if ($_.Status -eq 'Success') {  # However, if the Action has a status of 'Success', deselect
+                $_.ApplySelected = $false
             }
         }
         else {
-            $_.ApplySelected = $False
+            $_.ApplySelected = $false
         }
     })
-
-    # Set the ApplyOrder based on PlanSelected
-    $Plan.ResolveApplyOrder($PlanFile)
-
-    # Set ApplyOrder and number of active actions
-    $Plan.ActiveActions = 0 
+    $Plan.ResolveApplyOrder($PlanFile) # Set the ApplyOrder based on PlanSelected
+    $Plan.ActiveActions = 0            # Set ApplyOrder and number of active actions
     $Plan.Actions.foreach({
         if ($_.ApplySelected -eq $True) {
             $Plan.ActiveActions++

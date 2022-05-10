@@ -21,11 +21,6 @@ using Namespace System.Collections
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
-$ClassesPath = "$PSScriptRoot\classes\*.ps1"
-$Scripts = Resolve-Path -Path $ClassesPath -ErrorAction Stop
-foreach ($Script in $Scripts) {
-    . $Script.Path
-}
 
 $ExportedFunctionsPath = "$PSScriptRoot\xfunctions\*.ps1"
 $Functions = Resolve-Path -Path $ExportedFunctionsPath -ErrorAction Stop

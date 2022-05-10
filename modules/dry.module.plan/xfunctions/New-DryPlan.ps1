@@ -48,6 +48,14 @@ function New-DryPlan {
         $ExcludeResourceNames,
 
         [Parameter()]
+        [Array]
+        $RoleNames,
+
+        [Parameter()]
+        [Array]
+        $ExcludeRoleNames,
+
+        [Parameter()]
         [Array] 
         $ActionNames,
 
@@ -72,35 +80,24 @@ function New-DryPlan {
         $ExcludePhases
     )
     
-    Remove-Variable -Name Resources -ErrorAction Ignore 
+    $Resources = $null 
     $Resources = [Resources]::New($Configuration,$CommonVariables)
-    ol v "Number of Resources: $($Resources.resources.count)"
-
-    # Save Resources file
     $Resources.SaveToFile($ResourcesFile,$True)
-    
-    # Create Plan
     $Plan = [Plan]::New($Resources)
-
-    # Get the planfilter
-    $PlanFilter = [PlanFilter]::New($ResourceNames,$ExcludeResourceNames,$ActionNames,$ExcludeActionNames,$Phases,$ExcludePhases,$BuildSteps,$ExcludeBuildSteps)
-    
-    # Set selections based on filter
+    $PlanFilter = [PlanFilter]::New($ResourceNames,$ExcludeResourceNames,$RoleNames,$ExcludeRoleNames,$ActionNames,$ExcludeActionNames,$Phases,$ExcludePhases,$BuildSteps,$ExcludeBuildSteps)
     $Plan.Actions.foreach({
-        if ($PlanFilter.InFilter($_.ResourceName,$_.Action,$_.Phase,$_.ActionOrder)) {
+        if ($PlanFilter.InFilter($_.ResourceName,$_.Role,$_.Action,$_.Phase,$_.ActionOrder)) {
             $_.PlanSelected = $True
         }
         else {
             $_.PlanSelected = $False
         }
-
         # However, always set applyselected to false
         $_.ApplySelected = $False
     })
     
     # Set the PlanOrder based on PlanSelected
     $Plan.ResolvePlanOrder($PlanFile)
-
     $Plan.SaveToFile($PlanFile,$True)
     return $Plan
 }

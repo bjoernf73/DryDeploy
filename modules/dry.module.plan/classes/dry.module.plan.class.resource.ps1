@@ -1,6 +1,8 @@
+using Namespace System.Collections.Generic
+using Namespace System.Collections
 class Resource {
     [String]          $Name 
-    [String]          $RoleName
+    [String]          $role_short_name
     [String]          $Role # Changed back
     [String]          $OS_Tag
     [String]          $Description
@@ -17,7 +19,7 @@ class Resource {
     # Initial creation of the resource
     Resource (
         [String]          $Name,
-        [String]          $RoleName,
+        [String]          $role_short_name,
         [String]          $Role,
         [String]          $OS_Tag,
         [String]          $OSConfigPath,
@@ -26,7 +28,7 @@ class Resource {
         [PSCustomObject]  $Options
     ) {
         $This.Name                     = $Name
-        $This.RoleName                 = $RoleName
+        $This.role_short_name                 = $role_short_name
         $This.Role                     = $Role
         $This.OS_Tag                   = $OS_Tag
         $This.OSConfigPath             = Join-Path -Path $OSConfigPath -ChildPath $OS_Tag -Resolve

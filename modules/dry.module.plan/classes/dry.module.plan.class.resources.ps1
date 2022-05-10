@@ -1,3 +1,6 @@
+using Namespace System.Collections.Generic
+using Namespace System.Collections
+
 class Resources {
     [ArrayList] $Resources
 
@@ -12,7 +15,7 @@ class Resources {
         foreach ($Resource in $Configuration.resources | Where-Object { $_.role -in @($Configuration.build.role_order.role) }) {
             $Resource = [Resource]::New(
                 $Resource.Name,
-                $(Get-DryRoleMetaConfigProperty -Configuration $Configuration -Role $Resource.Role -Property 'rolename'),
+                $(Get-DryRoleMetaConfigProperty -Configuration $Configuration -Role $Resource.Role -Property 'role_short_name'),
                 $Resource.Role,
                 $(Get-DryRoleMetaConfigProperty -Configuration $Configuration -Role $Resource.Role -Property 'os_tag'),
                 $Configuration.OSConfigDirectory,
@@ -141,7 +144,7 @@ class Resources {
                     for ($RoleCount = 1; $RoleCount -le $RoleOrder.count; $RoleCount++) {
             
                         Remove-Variable -Name BuildRole -ErrorAction Ignore
-                       
+                        $BuildRole = $null
                         $BuildRole = $RoleOrder | Where-Object {
                             $_.order -eq $RoleCount
                         }
