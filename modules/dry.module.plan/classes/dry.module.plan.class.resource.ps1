@@ -45,13 +45,10 @@ class Resource {
         $BuildTemplate = $($GLOBAL:dry_var_global_Configuration).build.role_order | Where-Object {
             $_.role -eq $Role
         }
-
         if ($Null -eq $BuildTemplate) {
-            ol w "The Build does not contain a Role '$($This.Role)'"
             throw "The Build does not contain a Role '$($This.Role)'"
         }
         elseif ($BuildTemplate -is [Array]) {
-            ol w "The Build contains multiple Roles matching '$($This.Role)'"
             throw "The Build contains multiple Roles matching '$($This.Role)'"
         }
         # Get a copy of the Build Object. The Build is now instantiated by a Resource, 
@@ -61,7 +58,6 @@ class Resource {
         $ResourceBuild.action_order.foreach({
             $_ | Add-Member -MemberType NoteProperty -Name 'Role' -Value $Role
         })
-
         $This.ActionOrder = $ResourceBuild.action_order
     }
 }
