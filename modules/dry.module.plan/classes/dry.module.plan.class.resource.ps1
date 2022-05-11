@@ -42,7 +42,7 @@ class Resource {
         $This.Options                  = $Options
 
         Remove-Variable -Name BuildTemplate -ErrorAction Ignore
-        $BuildTemplate = $($GLOBAL:dry_var_global_Configuration).build.role_order | Where-Object {
+        $BuildTemplate = $($GLOBAL:dry_var_global_Configuration).build.roles | Where-Object {
             $_.role -eq $Role
         }
         if ($Null -eq $BuildTemplate) {
@@ -55,9 +55,9 @@ class Resource {
         # but there may be many Resources in the Plan using that Tempolate. So, not to contaminate 
         # the Template with the unique GUID of each Action, use a copy
         $ResourceBuild = Get-DryPSObjectCopy -Object $BuildTemplate
-        $ResourceBuild.action_order.foreach({
+        $ResourceBuild.actions.foreach({
             $_ | Add-Member -MemberType NoteProperty -Name 'Role' -Value $Role
         })
-        $This.ActionOrder = $ResourceBuild.action_order
+        $This.ActionOrder = $ResourceBuild.actions
     }
 }

@@ -35,10 +35,6 @@ function New-DryPlan {
         [PSObject]
         $Configuration,
 
-        [Parameter(Mandatory)]
-        [List[PSObject]]
-        $CommonVariables,
-
         [Parameter()]
         [Array]
         $ResourceNames,
@@ -81,8 +77,8 @@ function New-DryPlan {
     )
     
     $Resources = $null 
-    $Resources = [Resources]::New($Configuration,$CommonVariables)
-    $Resources.SaveToFile($ResourcesFile,$True)
+    $Resources = [Resources]::New($Configuration)
+    $Resources.Save($ResourcesFile,$True)
     $Plan = [Plan]::New($Resources)
     $PlanFilter = [PlanFilter]::New($ResourceNames,$ExcludeResourceNames,$RoleNames,$ExcludeRoleNames,$ActionNames,$ExcludeActionNames,$Phases,$ExcludePhases,$BuildSteps,$ExcludeBuildSteps)
     $Plan.Actions.foreach({
@@ -98,6 +94,6 @@ function New-DryPlan {
     
     # Set the PlanOrder based on PlanSelected
     $Plan.ResolvePlanOrder($PlanFile)
-    $Plan.SaveToFile($PlanFile,$True)
+    $Plan.Save($PlanFile,$True)
     return $Plan
 }

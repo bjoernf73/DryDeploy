@@ -815,22 +815,19 @@ try {
                 ExcludePhases        = $ExcludePhases
                 ShowStatus           = $True
             }
-            $PlanObj = Get-DryPlan @GetDryPlanParams -ErrorAction Stop
-            $GetDryPlanParams = $null
+            $dry_var_Plan = Get-DryPlan @GetDryPlanParams -ErrorAction Stop
+            $ShowDryPlanParams = $null
             
-            
-            # $PlanObj.Show('Plan',$ShowDeselected,$ShowConfigCombo,$dry_var_global_ConfigCombo)
-    
             $ShowDryPlanParams       = @{
-                Plan                 = $PlanObj
+                Plan                 = $dry_var_Plan
                 Mode                 = 'Plan' 
                 ConfigCombo          = $dry_var_global_ConfigCombo 
                 ShowConfigCombo      = $True
                 ShowDeselected       = $ShowDeselected
             }
-            #! Show-DryPlan bør kanskje bli $PlanObj.show()
             Show-DryPlan @ShowDryPlanParams
-            $ShowDryPlanParams = $null
+            
+            $GetDryPlanParams = $null
 
         }
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -844,6 +841,9 @@ try {
         {$_ -in 'Plan','Apply','GetConfig'} {
             $GLOBAL:dry_var_global_Configuration = Get-DryEnvConfig -ConfigCombo $dry_var_global_ConfigCombo
             $GLOBAL:dry_var_global_Configuration = Get-DryModuleConfig -ConfigCombo $dry_var_global_ConfigCombo -Configuration $GLOBAL:dry_var_global_Configuration 
+            
+
+            
             <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
                 Common Variables
@@ -854,6 +854,7 @@ try {
 
             # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
 
+            <#
             if ($GLOBAL:dry_var_global_Configuration.common_variables) {
                 $dry_var_CommonVariables = Resolve-DryVariables -Variables $GLOBAL:dry_var_global_Configuration.common_variables -Configuration $GLOBAL:dry_var_global_Configuration -OutputType 'list'
                 $dry_var_CommonVariables.foreach({
@@ -867,7 +868,7 @@ try {
             }
             # Replace any common ReplacementPattern ("###($Variable.name)###") in $Configuration
             $GLOBAL:dry_var_global_Configuration = Resolve-DryReplacementPatterns -InputObject $GLOBAL:dry_var_global_Configuration -Variables $dry_var_CommonVariables
-
+            #>
             <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
                 Credentials File
@@ -920,7 +921,6 @@ try {
                 ResourcesFile        = $dry_var_ResourcesFile
                 PlanFile             = $dry_var_PlanFile
                 Configuration        = $dry_var_global_Configuration
-                CommonVariables      = $dry_var_CommonVariables
                 ResourceNames        = $Resources
                 ExcludeResourceNames = $ExcludeResources
                 RoleNames            = $Roles
@@ -932,18 +932,18 @@ try {
                 Phases               = $Phases
                 ExcludePhases        = $ExcludePhases
             }
-            $dry_var_PlanObj = New-DryPlan @NewDryPlanParams
+            $dry_var_Plan = New-DryPlan @NewDryPlanParams
             $NewDryPlanParams = $null
             
             $ShowDryPlanParams = @{
-                Plan                 = $dry_var_PlanObj
+                Plan                 = $dry_var_Plan
                 Mode                 = 'Plan' 
                 ConfigCombo          = $dry_var_global_ConfigCombo 
                 ShowConfigCombo      = $True
                 ShowDeselected       = $ShowDeselected
             }
             Show-DryPlan @ShowDryPlanParams
-            $dry_var_PlanObj = $null
+            $dry_var_Plan = $null
             $ShowDryPlanParams = $null
         }
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -969,7 +969,7 @@ try {
                 Phases               = $Phases
                 ExcludePhases        = $ExcludePhases
             }
-            $dry_var_PlanObj           = Get-DryPlan @GetDryPlanParams -ErrorAction Stop
+            $dry_var_Plan           = Get-DryPlan @GetDryPlanParams -ErrorAction Stop
             $dry_var_ResolvedResources = Get-DryFromJson -Path $dry_var_ResourcesFile -ErrorAction Stop
             $GetDryPlanParams          = $null
 
@@ -1000,23 +1000,23 @@ try {
                 The iteration on every object in the Plan.  
                 
             # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-            for ($ActionCount = 1; $ActionCount -le $dry_var_PlanObj.ActiveActions; $ActionCount++ ) {
+            for ($ActionCount = 1; $ActionCount -le $dry_var_Plan.ActiveActions; $ActionCount++ ) {
                 $Action = $null
-                $Action = $dry_var_PlanObj.Actions | Where-Object { $_.ApplyOrder -eq $ActionCount }
+                $Action = $dry_var_Plan.Actions | Where-Object { $_.ApplyOrder -eq $ActionCount }
                 
                 if ($Null -eq $Action) { throw "Unable to find Action with Order $ActionCount in Plan" }
 
                 try {
                     if ($Action.Status -eq 'Todo') {
                         $Action.Status = 'Starting'
-                        $dry_var_PlanObj.SaveToFile($dry_var_PlanFile,$False)
+                        $dry_var_Plan.Save($dry_var_PlanFile,$False)
                     }
                     elseif ($Action.Status -eq 'Failed') {
                         $Action.Status = 'Retrying'
-                        $dry_var_PlanObj.SaveToFile($dry_var_PlanFile,$False)
+                        $dry_var_Plan.Save($dry_var_PlanFile,$False)
                     }
                     
-                    Show-DryPlan -Plan $dry_var_PlanObj -Mode 'Apply' -ConfigCombo $dry_var_global_ConfigCombo
+                    Show-DryPlan -Plan $dry_var_Plan -Mode 'Apply' -ConfigCombo $dry_var_global_ConfigCombo
                     Show-DryActionStart -Action $Action
 
                     # Define the global resource name used in output after the plan has been shown
@@ -1185,7 +1185,7 @@ try {
                     $PSCmdLet.ThrowTerminatingError($_)
                 }
                 finally {
-                    $dry_var_PlanObj.SaveToFile($dry_var_PlanFile,$False)
+                    $dry_var_Plan.Save($dry_var_PlanFile,$False)
                     $ActionEndTime = Get-Date
                     $GLOBAL:GlobalResourceName = $null 
                     $GLOBAL:GlobalActionName = $null

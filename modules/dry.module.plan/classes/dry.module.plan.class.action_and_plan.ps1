@@ -60,41 +60,34 @@ class Action {
                 These Actions all need a Dependendy_Guid to resolve ActionOrder
             #>
             $This.ActionOrder         = 1
-            $This.ResolvedActionOrder = $True
+            $This.ResolvedActionOrder = $true
             $Plan.OrderCount          = 2
         }
         elseif ($Null -ne $ActionObject.depends_on) {
             # The Action has an explicit dependency
-            $DependencyObject = New-Object -TypeName PSObject -Property @{
-                'Role'            = $ActionObject.depends_on.Role
-                'Action'          = $ActionObject.depends_on.action
-                'Phase'           = $ActionObject.depends_on.phase
-                'Dependency_Type' = $ActionObject.depends_on.dependency_type
+            if ($ActionObject.depends_on.dependency_type -notin 'first','last','every','numbered','chained') {
+                throw "A dependency_type must be 'first', 'last', 'every', 'numbered' or 'chained'"
             }
-            if ($ActionObject.depends_on.dependency_type -notin 'first','last','every','chained') {
-                throw "A dependency_type must be 'first','last','every' or 'chained'"
-            }
-            <#
-                if (-not ($Null -eq $ActionObject.depends_on.phase)) {
-                    $DependencyObject | Add-Member -MemberType NoteProperty -Name 'Phase' -Value $ActionObject.depends_on.phase
-                }
-            #>
-            
+           
             switch ($ActionObject.depends_on.dependency_type) {
                 'first' {
                     # The Action will be executed only after the first occurence of the dependency_action
-                    $This.Dependency_Guid  = $Plan.GetFirstDependencyActionGuid($DependencyObject)
+                    $This.Dependency_Guid  = $Plan.GetFirstDependencyActionGuid($ActionObject.depends_on)
                     $This.Action_Guid      = $Plan.ResolveActionGuid($This.Dependency_Guid,$This.Action_Guid)
                         
                 }
                 'last' {
                     # The Action will be executed only after the last occurance of the dependency_action
-                    $This.Dependency_Guid  = $Plan.GetLastDependencyActionGuid($DependencyObject)
+                    $This.Dependency_Guid  = $Plan.GetLastDependencyActionGuid($ActionObject.depends_on)
                     $This.Action_Guid      = $Plan.ResolveActionGuid($This.Dependency_Guid,$This.Action_Guid)
                 }
                 'every' {
                     # The action will be executed after every occurance of the dependency_action
-                    $This.Dependency_Guids = $Plan.GetEveryDependencyActionGuid($DependencyObject)
+                    $This.Dependency_Guids = $Plan.GetEveryDependencyActionGuid($ActionObject.depends_on)
+                }
+                'numbered' {
+                    # The action will be executed only after the n'th occurance of the dependency_action
+                    $This.Dependency_Guids = $Plan.GetNumberedDependencyActionGuid($ActionObject.depends_on)
                 }
                 'chained' {
                     # The action will be executed after every occurance of the previous_action
@@ -197,20 +190,22 @@ class Action {
 }
 
 class Plan {
-    [ArrayList]                       $Actions
-    [Bool]                            $UnresolvedActions
-    [ArrayList]                       $UnresolvedActionsList
-    [Int]                             $OrderCount
-    [Int]                             $ActiveActions
+    [ArrayList] $Actions
+    [Bool]      $UnresolvedActions
+    [ArrayList] $UnresolvedActionsList
+    [Int]       $OrderCount
+    [Int]       $ActiveActions
+    [DateTime]  $PlannedTime  # updated any time you create or modify a plan
+    [DateTime]  $EndTime      # set in DryDeploy's finally - will be reset to null any time $PlannedTime is modified
     
     # New Plan Object
-    Plan (
-        [Resources]                   $Resources
-    ) {
+    Plan ([Resources] $Resources) {
         $This.Actions               = [ArrayList]::New()
         $This.UnresolvedActionsList = [ArrayList]::New()
         $This.OrderCount            = 1
         $This.ActiveActions         = 0
+        $This.PlannedTime           = [DateTime](Get-Date)
+        $This.EndTime               = $null
         
         # Loop backwards through the Resources
         for (
@@ -228,13 +223,11 @@ class Plan {
             for (
                     $ActionOrderCount = ($CurrentResource.ActionOrder).Count; 
                     $ActionOrderCount -gt 0;
-                    $ActionOrderCount--
-                ) {
+                    $ActionOrderCount-- ) {
                 [PSCustomObject] $CurrentAction = $CurrentResource.ActionOrder | 
                 Where-Object {
                     $_.order -eq $ActionOrderCount
                 }
-
                 if ($Null -eq $CurrentAction) {
                     throw "Unable to find action order $ActionOrderCount on resource $($CurrentResource.Name)"
                 }
@@ -306,6 +299,13 @@ class Plan {
         $PlanObject.Actions.foreach({
             $This.Actions += [Action]::New($_)
         })
+        $This.PlannedTime = [DateTime]($PlanObject.PlannedTime)
+        if ($null -eq $PlanObject.EndTime) {
+            $This.EndTime = $null
+        }
+        else {
+            $This.EndTime = [DateTime]($PlanObject.PlannedTime)
+        }
     }
 
     [Void] hidden ResolveUnresolvedActions() {
@@ -336,7 +336,6 @@ class Plan {
 
     [Void] hidden AddActionOrder() {
         $This.Actions = $This.Actions | Sort-Object -Property Action_Guid
-        
         $ActionCount = 0
         $This.Actions.foreach({
             $ActionCount++
@@ -370,7 +369,7 @@ class Plan {
                 }
             }
         }
-        $This.SaveToFile($PlanFile,$False)
+        $This.Save($PlanFile,$False)
     }
 
     [Void] ResolveApplyOrder($PlanFile) {
@@ -397,11 +396,11 @@ class Plan {
                 }
             }
         }
-        $This.SaveToFile($PlanFile,$False)
+        $This.Save($PlanFile,$False)
     }
 
 
-    [Void] SaveToFile($PlanFile,$Archive) {
+    [Void] Save($PlanFile,$Archive) {
         if ($Archive) {
             if (Test-Path -Path $PlanFile -ErrorAction Ignore) {
                 ol v "Plan '$PlanFile' exists, archiving"
@@ -409,7 +408,8 @@ class Plan {
                 Save-DryArchiveFile -ArchiveFile $PlanFile -ArchiveSubFolder 'ArchivedPlans'
             }
         }
-        ol v "Saving planfile '$PlanFile'"
+        ol d "Saving planfile '$PlanFile'"
+        #! har vi ikke en funksjon for dette - kanskje en som tar seg av hele greia?
         Set-Content -Path $PlanFile -Value (ConvertTo-Json -InputObject $This -Depth 50) -Force
     }
 
@@ -418,7 +418,7 @@ class Plan {
         $EveryDependencyActionGuid = $null
         $EveryDependencyActionGuid = @()
         $This.Actions.foreach({
-            if ($Null -eq $DependencySpec.Phase) {
+            if ($null -eq $DependencySpec.Phase) {
                 $DependencySpecPhase = 0
             }
             else {
@@ -467,15 +467,29 @@ class Plan {
         return $EveryDependencyActionGuid[0]
     }
 
+    [String] GetNumberedDependencyActionGuid ([PSObject] $DependencySpec) {
+        [Int]$DependencyNumberedActionOrder = ($DependencySpec.dependency_numbered_action)-1
+        $EveryDependencyActionGuid = $null
+        $EveryDependencyActionGuid = $This.GetEveryDependencyActionGuid($DependencySpec)
+        if ($EveryDependencyActionGuid.Count -eq 0) {
+            throw "Unable to find the Dependency Action Guid"
+        }
+        $EveryDependencyActionGuid = $EveryDependencyActionGuid | Sort-Object -ErrorAction Stop
+        if ($null -eq $EveryDependencyActionGuid[$DependencyNumberedActionOrder]) {
+            throw "There is no numbered dependency Action nr $($DependencySpec.dependency_numbered_action)"
+        }
+        return $EveryDependencyActionGuid[$DependencyNumberedActionOrder]
+    }
+
     
     [String] ResolveActionGuid($DependencyGuid,$ActionGuid) {
         try {
-            $DependencyAction     = $Null
+            [ArrayList]$DependencyAction = $null
             $DependecyActionCount = 0 
             $DashActualGuidPart = $ActionGuid.SubString(12)
             $This.Actions.foreach({
                 if ($DependencyGuid -eq $_.Action_Guid) {
-                    $DependencyAction = $_
+                    [ArrayList]$DependencyAction += $_
                     $DependecyActionCount++
                 }
             })

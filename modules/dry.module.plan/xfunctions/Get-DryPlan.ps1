@@ -109,6 +109,6 @@ function Get-DryPlan {
         }
     })
     
-    $Plan.SaveToFile($PlanFile,$False)
+    $Plan.Save($PlanFile,$False)
     return $Plan
 }

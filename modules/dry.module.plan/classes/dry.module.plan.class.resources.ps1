@@ -6,14 +6,13 @@ class Resources {
 
     # create an instance
     Resources (
-        [PSCustomObject] $Configuration,
-        [List[PSObject]] $CommonVariables
+        [PSCustomObject] $Configuration
     ) {
         
         $This.Resources = [ArrayList]::New()
         # Loop through the resources in the build
-        foreach ($Resource in $Configuration.resources | Where-Object { $_.role -in @($Configuration.build.role_order.role) }) {
-            $Resource = [Resource]::New(
+        foreach ($Resource in $Configuration.resources | Where-Object { $_.role -in @($Configuration.build.roles.role) }) {
+            $This.Resources = [Resource]::New(
                 $Resource.Name,
                 $(Get-DryRoleMetaConfigProperty -Configuration $Configuration -Role $Resource.Role -Property 'role_short_name'),
                 $Resource.Role,
@@ -22,24 +21,8 @@ class Resources {
                 $(Get-DryRoleMetaConfigProperty -Configuration $Configuration -Role $Resource.Role -Property 'description'),
                 $Resource.Network,
                 $Resource.Options
-            )
-
-            # Add Resource-specific variables to $CommonVariables --> $ResourceVariables
-            $ResolveDryVariablesParams = @{
-                Variables     = $Configuration.resource_variables 
-                Configuration = $Configuration 
-                VariablesList = $CommonVariables
-                Resource      = $Resource
-                OutputType    = 'list'
-            }
-            Remove-Variable -Name ResourceVariables -ErrorAction Ignore
-            $ResourceVariables  = Resolve-DryVariables @ResolveDryVariablesParams
-
-            $Resource           = Resolve-DryReplacementPatterns -InputObject $Resource -Variables $ResourceVariables
-            $This.Resources    += $Resource
-            Remove-Variable -Name 'ResourceVariables','ResolveDryVariablesParams' -ErrorAction Ignore
+            )  
         }
-
         $This.DoOrder()
         $This.AddActionGuids()
     }
@@ -126,7 +109,7 @@ class Resources {
         
         # loop thorugh the deployment Build
         $Build = $GLOBAL:dry_var_global_Configuration.build
-        [Array]$RoleOrder  = $Build.role_order 
+        [Array]$RoleOrder  = $Build.roles 
         [String]$OrderType = $Build.order_type
 
         if ($OrderType -notin @('site','role')) {
