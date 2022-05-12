@@ -1,13 +1,49 @@
 <#
 .SYNOPSIS
+DryDeploy is a bridge between the gaps of different technologies.
+
+A complete autodeploy of an information system may require you 
+to use a variety of technologies. 
+
+For instance, the Windows Powershell version of DSC (Desired State 
+Configuration) is great for configuring your Windows roles (while 
+the 'Core' version is basically dead - killed by MS officials who 
+decided it to be an Azure-only technology), but DSC does not operate 
+well (or at all) against your platform. So, you're forced to resort 
+to some other technology, or technologies, to do the whole thing. 
+You may need to use Packer to customize images (or templates), and 
+you may need Terraform to instantiate your roles (or blueprints). It 
+may be practical to throw some arbitrary scripts in there - and
+spice it up with a few linux roles with/and some docker containers. 
+
+The 'automation frameworks' of the major platform providers is either 
+  - trying to limit you to the specific provider, or
+  - trying to make you pay more for flexibility
+
+Typically, the approach these frameworks take is a bit like BDSM. 
+They offer a feature rich experience - if - but only if - you're 
+willing to be tied down (to the platform). Hashicorp has made it's 
+business on the exact opposite - letting you choose.  
+
+However, this is not to say that DryDeploy is a HashiCorp "fan-boy"
+project. Terraforms "active_directory_provider" is breathtakenly 
+bad. One man (DryDeploy) has done so much more that Terraforms 
+"so-called"  
+
+So, you end up requirinyou may need to use some Packer to create your images, and some 
+Terraform to instatiate those images. Furthermore, you may have a 
+preference of using SaltStack to fiddle in 
+only operates 
+.
+
+.DESCRIPTION
 DD prepares your deployment platform (-Init), 
 stores paths to a configuration combination of a EnvConfig and a 
 ModuleConfig, creates a plan of Actions to perform based on the 
 configurations and any filters specified (-Plan), and applies the 
 plan in the configured order (-Apply). Run DryDeploy.ps1 without any 
-parameters to show the deployment status of the current Plan.
+parameters to show the deployment status of the current Plan
 
-.DESCRIPTION
 DD needs 2 configuration repositories: 
 
  - EnvConfig: Contains information on an environment, 

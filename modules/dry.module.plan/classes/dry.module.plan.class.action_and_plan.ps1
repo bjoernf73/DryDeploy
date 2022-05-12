@@ -404,8 +404,7 @@ class Plan {
         if ($Archive) {
             if (Test-Path -Path $PlanFile -ErrorAction Ignore) {
                 ol v "Plan '$PlanFile' exists, archiving"
-                #! Må fikses - fjern ArchiveSubFolder og bruk $configCombo elns. $Platform?
-                Save-DryArchiveFile -ArchiveFile $PlanFile -ArchiveSubFolder 'ArchivedPlans'
+                Save-DryArchiveFile -ArchiveFile $PlanFile -ArchivFolder $GLOBAL:dry_global_var_PlanFile
             }
         }
         ol d "Saving planfile '$PlanFile'"
@@ -480,7 +479,6 @@ class Plan {
         }
         return $EveryDependencyActionGuid[$DependencyNumberedActionOrder]
     }
-
     
     [String] ResolveActionGuid($DependencyGuid,$ActionGuid) {
         try {

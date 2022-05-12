@@ -23,17 +23,20 @@ function Get-DryConfigData {
     [cmdletbinding()]
     param (
         [Parameter(Mandatory)]
-        [String]$Path,
+        [String]
+        $Path,
 
         [Parameter(HelpMessage="Object to merge changes into")]
-        [PSCustomObject]$Configuration
+        [PSCustomObject]
+        $Configuration
 
     )
     try {
+        $Utils = Get-DryUtils
         if (-not $Configuration) {
             $Configuration = New-Object PSCustomObject
         }
-        $FullPath = Join-Path -Path (Resolve-DryFullPath -Path $Path) -ChildPath '*'
+        $FullPath = Join-Path -Path ($Utils.FileSystem_ResolveFullPath($Path)) -ChildPath '*'
         $Files    = @(Get-ChildItem -Path $FullPath -Include '*.jsonc','*.json','*.yml','*.yaml' -ErrorAction Stop)
         
         foreach ($File in $Files) {

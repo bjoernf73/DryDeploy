@@ -206,12 +206,12 @@ class Resources {
         }  
     }
 
-    [Void] Save ($ResourcesFile,$Archive) {
+    [Void] Save ($ResourcesFile,$Archive,$ArchiveFolder) {
         if ($Archive) {
             # Archive previous resources Plan-file and create new
             if (Test-Path -Path $ResourcesFile -ErrorAction SilentlyContinue) {
                 ol v "ResourcesFile '$ResourcesFile' exists, archiving" 
-                Save-DryArchiveFile -ArchiveFile $ResourcesFile -ArchiveSubFolder 'ArchivedResources'
+                Save-DryArchiveFile -ArchiveFile $ResourcesFile -ArchiveFolder $ArchiveFolder
             }
         }
         

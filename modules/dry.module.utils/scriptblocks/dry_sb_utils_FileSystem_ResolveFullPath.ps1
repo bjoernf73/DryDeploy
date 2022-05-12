@@ -31,7 +31,7 @@
                     'DirectoryInfo' {
                         [System.IO.DirectoryInfo]$FullPath = Get-Item -Path $PathInfo -ErrorAction Stop
                     }
-                    Default {
+                    default {
                         [System.String]$FullPath = $PathInfo.Path
                     }
                 }

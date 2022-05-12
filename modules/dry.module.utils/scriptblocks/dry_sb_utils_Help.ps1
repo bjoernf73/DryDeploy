@@ -1,13 +1,12 @@
 [scriptblock]$dry_sb_utils_Help = {
     [CmdLetBinding()]
-    [OutputType([System.String])]
     param (
         [Parameter(HelpMessage="Specify one or more categories of utilities to show help from. If unset, shows help for all categories")]
-        [ValidateSet('Strings','FileSystem',$null, 'All')]
-        [System.String[]]$Category
+        [ValidateScript({$_.foreach({$_ -in @('Strings','FileSystem',$null, 'All')})})]
+        [Array]$Category
     )
     try {
-        if (($null -eq $Category) -or ($Category -contains 'All')) {
+        if (($Category -contains $null) -or ($Category -contains 'All')) {
             $Category = @('All')
         }
         switch ($Category[0]) {

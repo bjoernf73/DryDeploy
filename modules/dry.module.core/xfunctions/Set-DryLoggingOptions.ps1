@@ -50,11 +50,11 @@
 function Set-DryLoggingOptions {
     [cmdletbinding()]
     param (
-        [PSObject]$SystemConfig,
-        [PSObject]$UserConfig,
-        [String]$WorkingDirectory,
-        [String]$ArchiveDirectory,
-        [Switch]$NoLog
+        [PSObject] $SystemConfig,
+        [PSObject] $UserConfig,
+        [String]   $WorkingDirectory,
+        [String]   $ArchiveDirectory,
+        [Switch]   $NoLog
     )
 
     try {

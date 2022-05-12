@@ -9,6 +9,9 @@ function Get-DryUtils {
         # FileSystem
         $DryUtils | Add-Member -MemberType ScriptMethod -Name 'FileSystem_ResolveFullPath' -Value $dry_sb_utils_FileSystem_ResolveFullPath
         $DryUtils | Add-Member -MemberType ScriptMethod -Name 'FileSystem_GetRandomPath' -Value $dry_sb_utils_FileSystem_GetRandomPath
+
+        # Help
+        $DryUtils | Add-Member -MemberType ScriptMethod -Name 'Help' -Value $dry_sb_utils_Help
         return $DryUtils
     }
     catch {
