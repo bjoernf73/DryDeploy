@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-DryDeploy is a bridge between the gaps of different technologies.
+DryDeploy is a bridge between deployment technologies.
 
 A complete autodeploy of an information system may require you 
 to use a variety of technologies. For instance, DSC (Desired 
