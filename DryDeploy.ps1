@@ -15,126 +15,155 @@ Common for DSC, Terraform and Packer is that:
  - when you deploy, you suppply the tool with the path to the config,
  and all the variables that the configuration needs. 
 
- Manually, this is a pretty tedious task. If you want a full s
+ Manually, this is a pretty tedious task, given that you must do this 
+ for every action that configures some part of your role, for every 
+ role that your system module, or information system, consists of. 
+ Moreover, if you first took the time to put everything in code - 
+ shouldn't that enable you to just 'click play' to deploy everything?
 
+ DryDeploy does. And all you need is a client.  
+ 
+ Define your networks, resources (instances of roles) and platform(s)
+ (the CoreConfig) in an environment confguration repository. You may 
+ also add any set of user defined data and data structure to the 
+ environment configuration (the UserConfig). 
+ 
+ Each action of a role is provided with a set of expressions that 
+ resolves values from that configuration. The set is then passed to 
+ the technology that performs the action, be it Terraform, Packer, 
+ DSC or other.
 
-The 'automation frameworks' of the major platform providers is either 
-  - trying to limit you to the specific provider, or
-  - trying to make you pay more for flexibility
+ You the issue one command to Plan...
+   
+   .\DryDeploy.ps1 -Plan
+ 
+ ...and one to Apply....
 
-Typically, the approach these frameworks take is a bit like BDSM. 
-They offer a feature rich experience - if - but only if - you're 
-willing to be tied down (to the platform). Hashicorp has made it's 
-business on the exact opposite - letting you choose.  
-
-However, this is not to say that DryDeploy is a HashiCorp "fan-boy"
-project. Terraforms "active_directory_provider" is breathtakenly 
-bad. One man (DryDeploy) has done so much more that Terraforms 
-"so-called"  
-
-So, you end up requirinyou may need to use some Packer to create your images, and some 
-Terraform to instatiate those images. Furthermore, you may have a 
-preference of using SaltStack to fiddle in 
-only operates 
-.
+   .\DryDeploy.ps1 -Apply
+ 
+ If something fails, edit your code, and -Apply again. DryDeploy 
+ retries the failed Action and continues to Apply the rest of the 
+ Plan.
 
 .DESCRIPTION
-DD prepares your deployment platform (-Init), 
-stores paths to a configuration combination of a EnvConfig and a 
-ModuleConfig, creates a plan of Actions to perform based on the 
-configurations and any filters specified (-Plan), and applies the 
-plan in the configured order (-Apply). Run DryDeploy.ps1 without any 
-parameters to show the deployment status of the current Plan
+DryDeploy prepares your deployment platform (-Init), stores paths to a 
+configuration combination of an environment configuration (EnvConfig)
+and a module configuration (ModuleConfig), creates a Plan of Actions 
+to perform based on the configurations and any filters specified (-Plan), 
+and applies the plan in the configured order (-Apply). Run DryDeploy
+parameterless to show the status of the current Plan. 
 
-DD needs 2 configuration repositories: 
+Dryeploy needs 2 configuration repositories: 
 
- - EnvConfig: Contains information on an environment, 
-   including variables as key-value-pairs, where values may be 
-   expressions to resolve actual values, network information and
-   platform definitions. It also contains OS-specific configs, 
-   so Actions may pick up the shared base-config, to use as is,
-   or add role-specific configurations. Also contains a list of
-   the all Resources that the environment will contain. As such,
-   the Resources node only specify the instances of roles, but 
-   each role must be represented in a ModuleConfig, which specifies
-   how each resource is built, and the order of those Actions. 
+ - EnvConfig: must contain the "CoreConfig" - information of your 
+   environment; network information, target platforms (cloud, on-prem, 
+   hybrid), and all the resources (instances of roles). It can also
+   contain a "UserConfig" which is any data you can put in a json
+   or yaml. Lastly, it may contain "OSConfig", which contains shared,
+   generic configurations which every (or selected) instances of an 
+   operating system should invoke.  
 
- - ModuleConfig: Contains Roles and Build. 
-   Roles are types of resources, and contain the configuration 
-   files to be consumed by Actions that build each role of the 
-   module. The Build specifies the order in which 
-   roles of a module are deployed, and the Ations, and the order 
-   of those Actions, that builds and configures each Role.
+ - ModuleConfig: Contains Roles and a Build. Roles are the blueprint
+   configuration of some type of resource, be it a Windows domain
+   controller, a linux gitlab server, or simply a container instance.
+   A module may contain one or multiple roles, and roles may be re-used 
+   in multiple system modules. The Role contain the configuration files
+   used by any Action that the role build addresses. It also contain a
+   set of expressions that when run against the EnvConfig, they resolve 
+   the variable values that in turn will be passed to the technology 
+   behind the Action (i.e. Terraform, Packer, DSC, SaltStack and so on)
+   The Build defines how the module is built. It contains 
+      1. the order in which Roles are deployed
+      2. the order in which Actions of the Roles are deployed
+   Actions of a role may 'depend on' Actions of other roles, so that 
+   when you -Plan, the execution of the dependent Action is delayed 
+   until after the action it depends on.
    
 .PARAMETER Init
-Installs local dependencies for the platform on which you run DD on. 
+Inistializes the local system for package management, and installs 
+all dependencies for DryDeploy and for the selected system module.
+Supports git-repos-as-PowerShell-modules, chocolatey packages, nuget
+modules, windows features, optional features and so on.
 
 .PARAMETER Plan
-Plan must be run at least once to combine the ModuleConfiguration 
-and EnvConfiguration, and to determine the resources to create 
-and configure, and the order of the Actions to process. 
+Create or modify a Plan. Use alone for a full Plan, or with any 
+filter to limit the Actions to include in the Plan (-Actions, 
+-ExcludeActions, -BuildSteps, -ExcludeBuildSteps, -Resources, 
+-ExcludeResources, -Roles, -ExcludeRoles, -Phases, -ExcludePhases) 
 
 .PARAMETER Apply
-Applies the Plan. 
+Applies the Plan. Use alone to to Apply the full Plan, or with
+any filter to only Apply a limited set of planned actions (-Actions, 
+-ExcludeActions, -BuildSteps, -ExcludeBuildSteps, -Resources, 
+-ExcludeResources, -Roles, -ExcludeRoles, -Phases, -ExcludePhases)
 
 .PARAMETER Actions
 Array of one or more Actions to include. All others are excluded. 
-If not specified, all Actions are included. Supports partial 
-match ('Co' will match Action 'ConfigAD')
+If not specified, Actions are disregarded from the filter. Supports 
+tab-completion and partial match ('ter' will match Action 'terra.run')
 
 .PARAMETER ExcludeActions
 Array of one or more Actions to exclude. All others are included. 
-If not specified, no actions are excluded. Supports partial 
-match ('Co' will match Action 'ConfigAD')
+If not specified, Actions are disregarded from the filter.Supports 
+tab-completion and partial match ('ter' will match Action 'terra.run')
 
 .PARAMETER BuildSteps
 Array of one or more BuildSteps to include. All others are 
-excluded. If not specified, all BuildSteps are included. 
+excluded. If not specified, BuildSteps are disregarded from 
+the filter. Specify as digits, or sets of digits, like 3 or 
+3,4,5 or (3..5) for a range
 
 .PARAMETER ExcludeBuildSteps
 Array of one or more BuildSteps to exclude. All others are 
-included. If not specified, all BuildSteps are included. 
+included. If not specified, BuildSteps are disregarded from 
+the filter. Specify as digits, or sets of digits, like 3 or 
+3,4,5 or (3..5) for a range
 
 .PARAMETER Resources
 Array of one or more Resource names to include. All others are 
-excluded. If not specified, all Resources are included. Supports 
-partial match ('DC' will match Resource 'DC001-S5-D')
+excluded. If not specified, Resources are disregarded from the 
+filter. Supports tab-completion and partial match ('dc' will 
+match Resource 'dc1-s5-d')
 
 .PARAMETER ExcludeResources
 Array of one or more Resource names to exclude. All others are 
-included. If not specified, no Resources are excluded. Supports 
-partial match ('DC' will match Resource 'DC001-S5-D')
+included. If not specified, Resources are disregarded from the 
+filter. Supports partial match ('dc' will match Resource 'dc1-s5-d')
 
 .PARAMETER Roles
 Array of one or more Role names to include. All others are 
-excluded. If not specified, all Roles are included. Supports 
-partial match ('dc' will match Role 'dc-domctrl-froot')
+excluded. If not specified, Roles are disregarded from the 
+filter. Supports tab-completion and partial match ('dc' will 
+match Role 'dc-domctrl-froot')
 
 .PARAMETER ExcludeRoles
 Array of one or more Role names to exclude. All others are 
-included. If not specified, no Roles are excluded. Supports 
-partial match ('dc' will match Role 'dc-domctrl-froot')
+included. If not specified, Roles are disregarded from the 
+filter. Supports tab-completion and partial match ('dc' will 
+match Role 'dc-domctrl-froot')
 
 .PARAMETER Phases
 Array of one or more Phases (of any Action) to include. All other 
 Phases (and non-phased actions) are excluded. If not specified, 
-all Phases are included
+Phases are disregarded from the filter
 
 .PARAMETER ExcludePhases
 Array of one or more Phases (of any Action) to exclude. All other 
 Phases (and non-phased actions) are included. If not specified, 
-no Phases are excluded
+Phases are disregarded from the filter
 
 .PARAMETER EnvConfig
-Path to the Directory where the EnvConfiguration is. Use to 
-set the configuration combination (ConfigCombo)
+Path to the directory of an environment configuration. Use to  
+set the configuration combination (ConfigCombo). It will be 
+stored, and used implicitly until you change it. 
 
 .PARAMETER ModuleConfig
-Path to the Directory where the ModuleConfiguration is. Use to 
-set the configuration combination (ConfigCombo)
+Path to the directory of a system module configuration. Use to 
+set the configuration combination (ConfigCombo). It will be 
+stored, and used implicitly until you change it. 
 
 .PARAMETER ActionParams
-HashTable that will be sent to the Action Function. Useful during 
+HashTable that will be sent to the Action function. Useful during 
 development, for instance if the receiving action function 
 supports a parameter to specify a limited set of tasks to do. 
 
@@ -212,9 +241,10 @@ if not
 
 .EXAMPLE
 .\DryDeploy.ps1 -ModuleConfig ..\ModuleConfigs\MyModule -EnvConfig ..\EnvConfigs\MyEnvironment
-Creates a configuration combination of a Module Configuration and
-a Env Configuration. The combination (the "ConfigCombo") is stored
-and used on subsequent runs until you change any of them again
+Creates a configuration combination of a module configuration and
+an environment configuration. The combination (the "ConfigCombo") 
+is stored and used on every subsequent run until you invoke the 
+SetConfig parameterset again.
 
 .EXAMPLE
 .\DryDeploy.ps1 -Plan
