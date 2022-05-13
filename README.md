@@ -46,7 +46,7 @@ The set is then passed to
  the technology that performs the action, be it Terraform, Packer, 
  DSC or other.
 
- You the issue one command to Plan...
+ ...one command to Plan...
    
    .\DryDeploy.ps1 -Plan
  

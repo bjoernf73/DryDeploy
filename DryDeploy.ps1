@@ -33,7 +33,7 @@ Common for DSC, Terraform and Packer is that:
  the technology that performs the action, be it Terraform, Packer, 
  DSC or other.
 
- You the issue one command to Plan...
+ ...one command to Plan...
    
    .\DryDeploy.ps1 -Plan
  
