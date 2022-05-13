@@ -3,18 +3,20 @@
 DryDeploy is a bridge between the gaps of different technologies.
 
 A complete autodeploy of an information system may require you 
-to use a variety of technologies. 
+to use a variety of technologies. For instance, DSC (Desired 
+State Configuration) is great for configuring Windows roles, but 
+does not operate well (or at all) against your platform provider.
+You may need to use Packer to automate customization of your templates, 
+and Terraform to instantiate them. 
 
-For instance, the Windows Powershell version of DSC (Desired State 
-Configuration) is great for configuring your Windows roles (while 
-the 'Core' version is basically dead - killed by MS officials who 
-decided it to be an Azure-only technology), but DSC does not operate 
-well (or at all) against your platform. So, you're forced to resort 
-to some other technology, or technologies, to do the whole thing. 
-You may need to use Packer to customize images (or templates), and 
-you may need Terraform to instantiate your roles (or blueprints). It 
-may be practical to throw some arbitrary scripts in there - and
-spice it up with a few linux roles with/and some docker containers. 
+Common for DSC, Terraform and Packer is that: 
+ - you create one or more file containing your configuration, using
+ variables for environment specific values and secrets
+ - when you deploy, you suppply the tool with the path to the config,
+ and all the variables that the configuration needs. 
+
+ Manually, this is a pretty tedious task. If you want a full s
+
 
 The 'automation frameworks' of the major platform providers is either 
   - trying to limit you to the specific provider, or
