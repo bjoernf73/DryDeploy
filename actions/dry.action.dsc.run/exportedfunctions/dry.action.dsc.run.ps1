@@ -374,7 +374,7 @@ Function dry.action.dsc.run {
 
         If ($MetaConfigObject.dsc_sleep_before_seconds) {
             ol i @('Sleep before applying',"$($MetaConfigObject.dsc_sleep_before_seconds) seconds")
-            Start-DrySleep -seconds $MetaConfigObject.dsc_sleep_before_seconds
+            Start-DryUtilsSleep -seconds $MetaConfigObject.dsc_sleep_before_seconds
         }
 
          # Define the mof directory path and the mof, meta.mof and the dsc module target file path
@@ -401,7 +401,7 @@ Function dry.action.dsc.run {
         Out-File -FilePath "$DscModuleTarget" -Encoding ascii -InputObject $DscTemplate
 
         # Import the DSC configuration module
-        Import-DryModule -Name PSDesiredStateConfiguration 
+        Import-Module -Name PSDesiredStateConfiguration -Verbose:$False -Force
         
         ol i @('Importing module',"$DscModuleTarget")
         Import-Module -Name "$DscModuleTarget" -Force
@@ -528,7 +528,7 @@ Function dry.action.dsc.run {
             [int]$DscTestBeforeSeconds = $MetaConfigObject.dsc_test_before_seconds
         }
 
-        Start-DrySleep -Seconds $DscTestBeforeSeconds -Message "Sleeping before testing configuration"
+        Start-DryUtilsSleep -Seconds $DscTestBeforeSeconds -Message "Sleeping before testing configuration"
 
         Do {
             $CimSession | 
@@ -574,7 +574,7 @@ Function dry.action.dsc.run {
             }
 
             If (-not ($LcmInDesiredState)) {
-                Start-DrySleep -Seconds $DscTestIntervalSeconds -Message "Sleeping $DscTestIntervalSeconds seconds before retesting..."
+                Start-DryUtilsSleep -Seconds $DscTestIntervalSeconds -Message "Sleeping $DscTestIntervalSeconds seconds before retesting..."
             }
 
         }
@@ -593,7 +593,7 @@ Function dry.action.dsc.run {
             }
 
             ol i @('Waiting for the target to restart',"$DscWaitForRebootSeconds seconds" )
-            Start-DrySleep -Seconds $DscWaitForRebootSeconds
+            Start-DryUtilsSleep -Seconds $DscWaitForRebootSeconds
         }
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -651,7 +651,7 @@ Function dry.action.dsc.run {
                 # Add SessionParameters to ParamsHash
                 # $TestSession = New-DrySession @GetDrySessionParams
                 $WaitDryForEventParamaters.Add('SessionParameters',$GetDrySessionParams)
-                Wait-DryForEvent @WaitDryForEventParamaters
+                Wait-DryUtilsForEvent @WaitDryForEventParamaters
             }
             Catch {
                 $PSCmdlet.ThrowTerminatingError($_)

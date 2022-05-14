@@ -95,7 +95,7 @@ function Wait-DrySSH {
         Write-Progress @WriteProgressParameters    
         
         # First, the port must be up
-        if ((Test-DryPort -Port $port -ComputerName $Address -ErrorAction SilentlyContinue).Open -eq $true) {
+        if ((Test-DryUtilsPort -Port $port -ComputerName $Address -ErrorAction SilentlyContinue).Open -eq $true) {
             $PortUp = $true
             # Inner do test if SSH is actually usable
             do {

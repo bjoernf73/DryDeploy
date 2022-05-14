@@ -1222,7 +1222,7 @@ try {
                                 ol i " "
                             }
                             if ($Error[$ec].GetType().Name -eq 'ErrorRecord') {
-                                Show-DryError -Err $Error[$ec]
+                                Show-DryUtilsError -Err $Error[$ec]
                             }
                             else {
                                 ol i "Not Error, type is: $($Error[$ec].GetType().Name)"
@@ -1237,7 +1237,7 @@ try {
                     else {
                         ol i "The terminating exception: " -sh
                         ol i " "
-                        Show-DryError -Err $_
+                        Show-DryUtilsError -Err $_
                     }
 
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #

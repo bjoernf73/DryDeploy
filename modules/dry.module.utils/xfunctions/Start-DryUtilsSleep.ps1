@@ -1,5 +1,5 @@
 <# 
- This module provides functions to resolve values from expressions for use with DryDeploy.
+ This module provides generic functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
  LICENSE: https://raw.githubusercontent.com/bjoernf73/DryDeploy/master/LICENSE
@@ -19,8 +19,19 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-$FunctionsPath = "$PSScriptRoot\xfunctions\*.ps1"
-$Functions = Resolve-Path -Path $FunctionsPath -ErrorAction Stop
-foreach ($Function in $Functions) {
-    . $Function.Path
+function Start-DryUtilsSleep {
+    [CmdletBinding()]
+    param (
+        [Int]$Seconds,
+
+        [String]$Message = "Sleeping $Seconds seconds..."
+    )
+    $TargetTime = (Get-Date).AddSeconds($Seconds)
+    while($TargetTime -gt (Get-Date)) {
+        $SecondsLeft = $TargetTime.Subtract((Get-Date)).TotalSeconds
+        $Percent = ($Seconds - $SecondsLeft) / $Seconds * 100
+        Write-Progress -Activity "Sleeping" -Status "$Message" -SecondsRemaining $SecondsLeft -PercentComplete $Percent
+        [System.Threading.Thread]::Sleep(500)
+    }
+    Write-Progress -Activity "Sleeping" -Status "Sleeping..." -SecondsRemaining 0 -Completed
 }

@@ -86,7 +86,7 @@ function Wait-DryWinRM {
         }   
         Write-Progress @WriteProgressParameters    
         
-        if ((Test-DryPort -Port $Port -ComputerName $Address -ErrorAction SilentlyContinue).Open -eq $true) {
+        if ((Test-DryUtilsPort -Port $Port -ComputerName $Address -ErrorAction SilentlyContinue).Open -eq $true) {
             $PortUp = $true
             do {
                 $StartInPSSessionParams = @{

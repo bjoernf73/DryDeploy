@@ -39,15 +39,14 @@ function Save-DryArchiveFile {
         $ArchiveFolder
     )
     try {
-        $Utils = Get-DryUtils
         if (-not $ArchiveFolder) {
             $ArchiveFolder = Split-Path -Path $ArchiveFile
             # $ArchiveTargetFolder = Resolve-DryFullPath -Path $ArchiveFolder 
         }
-        $ArchiveTargetFolder = $Utils.FileSystem_ResolveFullPath($ArchiveFolder)
+        $ArchiveTargetFolder = Resolve-DryUtilsFullPath -Path $ArchiveFolder -Force
     
         if (-not (Test-Path -Path $ArchiveTargetFolder -ErrorAction Ignore)) {
-            New-Item -Path $ArchiveTargetFolder -ItemType Directory -ErrorAction Stop | Out-Null
+            New-Item -Path $ArchiveTargetFolder -ItemType Directory -ErrorAction Stop -Force | Out-Null
         }
 
         $ArchiveFileName = Split-Path $ArchiveFile -leaf

@@ -19,28 +19,33 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Get-DryQuote {
+function Save-DryUtilsToJson {
     [cmdletbinding()]
     param (
-    )
-    try {
-        $QuoteRepo      = ' '
-        $Configuration = New-Object PSObject
-        $Files         = @(Get-ChildItem -Path $FullPath -Include '*.jsonc','*.json','*.yml','*.yaml' -ErrorAction Stop)
+        [Parameter(Mandatory)]
+        [String]$Path,
 
-        foreach ($File in $Files) {
-            switch ($File.extension) {
-                {$_ -in '.json','.jsonc'} {
-                    $ConfObject = Get-DryFromJson -Path $File.FullName -ErrorAction Stop  
-                }
-                {$_ -in '.yml','.yaml'} {
-                    $ConfObject = Get-DryFromYaml -Path $File.FullName -ErrorAction Stop 
-                }
-            }
-            $Configuration = (Merge-DryUtilsPSObjects -FirstObject $Configuration -SecondObject $ConfObject)
-        }
+        [Parameter(Mandatory)]
+        [PSObject]$InputObject,
+
+        [Parameter()]
+        [Int]$Depth = 50,
+
+        [Parameter()]
+        [ValidateSet('ASCII','BigEndianUnicode','Default','OEM','String','Unicode','Unknown','UTF7','UTF8','UTF32')]
+        [String]$Encoding = 'Default',
+
+        [Parameter()]
+        [Switch]$Force
+    )
+
+    try {
+        $InputObject | 
+        ConvertTo-Json -Depth $Depth -ErrorAction Stop |
+        Out-File -FilePath $Path -Encoding $Encoding -ErrorAction Stop -Force:$Force
     }
     catch {
+        ol w @('Unable to save to',"$Path")
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

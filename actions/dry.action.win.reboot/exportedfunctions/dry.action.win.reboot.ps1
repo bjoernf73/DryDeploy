@@ -177,7 +177,7 @@ Function dry.action.win.reboot {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #   
         if ($null -ne $ActionMetaConfigObject.sleep_after_seconds) {
-            Start-DrySleep -Seconds $ActionMetaConfigObject.sleep_after_seconds -Message "Sleeping $($ActionMetaConfigObject.sleep_after_seconds) seconds before continuing..."
+            Start-DryUtilsSleep -Seconds $ActionMetaConfigObject.sleep_after_seconds -Message "Sleeping $($ActionMetaConfigObject.sleep_after_seconds) seconds before continuing..."
         }
         ol i "All reboots were successful" -sh    
     }

@@ -377,7 +377,7 @@ Function dry.action.salt.run {
 
         If ($MetaConfigObject.dsc_sleep_before_seconds) {
             ol -t 6 -arr "Sleep before applying","$($MetaConfigObject.dsc_sleep_before_seconds) seconds"
-            Start-DrySleep -seconds $MetaConfigObject.dsc_sleep_before_seconds
+            Start-DryUtilsSleep -seconds $MetaConfigObject.dsc_sleep_before_seconds
         }
 
          # Define the mof directory path and the mof, meta.mof and the dsc module target file path
@@ -406,7 +406,7 @@ Function dry.action.salt.run {
          
         # Import the DSC configuration module
         ol -t 6 -arr "Importing module",'PSDesiredStateConfiguration'
-        Import-DryModule -Name PSDesiredStateConfiguration 
+        Import-Module -Name PSDesiredStateConfiguration 
         
         ol -t 6 -arr "Importing module","$DscModuleTarget"
         Import-Module -Name "$DscModuleTarget" -Force
@@ -536,7 +536,7 @@ Function dry.action.salt.run {
             [int]$DscTestBeforeSeconds = $MetaConfigObject.dsc_test_before_seconds
         }
 
-        Start-DrySleep -Seconds $DscTestBeforeSeconds -Message "Sleeping before testing configuration"
+        Start-DryUtilsSleep -Seconds $DscTestBeforeSeconds -Message "Sleeping before testing configuration"
 
         Do {
             $CimSession | 
@@ -582,7 +582,7 @@ Function dry.action.salt.run {
             }
 
             If (-not ($LcmInDesiredState)) {
-                Start-DrySleep -Seconds $DscTestIntervalSeconds -Message "Sleeping $DscTestIntervalSeconds seconds before re-testing..."
+                Start-DryUtilsSleep -Seconds $DscTestIntervalSeconds -Message "Sleeping $DscTestIntervalSeconds seconds before re-testing..."
             }
 
         }
@@ -601,7 +601,7 @@ Function dry.action.salt.run {
             }
 
             ol i "Waiting $DscWaitForRebootSeconds seconds for the target to restart..."
-            Start-DrySleep -Seconds $DscWaitForRebootSeconds
+            Start-DryUtilsSleep -Seconds $DscWaitForRebootSeconds
         }
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -659,7 +659,7 @@ Function dry.action.salt.run {
                 # Add SessionParameters to ParamsHash
                 # $TestSession = New-DrySession @GetDrySessionParams
                 $WaitDryForEventParamaters.Add('SessionParameters',$GetDrySessionParams)
-                Wait-DryForEvent @WaitDryForEventParamaters
+                Wait-DryUtilsForEvent @WaitDryForEventParamaters
             }
             Catch {
                 $PSCmdlet.ThrowTerminatingError($_)

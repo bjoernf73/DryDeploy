@@ -11,8 +11,7 @@
         [String]$Type
     )
     try {
-        $Utils = Get-DryUtils
-        $FullPath = $Utils.FileSystem_ResolveFullPath($Path)
+        $FullPath = Resolve-DryUtilsFullPath -Path $Path 
         $RootConfigFile = Join-Path -Path $FullPath -ChildPath 'Config.json'
         [PSCustomObject]$RootConfig = Get-DryFromJson -Path $RootConfigFile
         if ($RootConfig.type -ne "$Type") {

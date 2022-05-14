@@ -1,5 +1,5 @@
 <# 
- This module provides functions to resolve values from expressions for use with DryDeploy.
+ This module provides generic functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
  LICENSE: https://raw.githubusercontent.com/bjoernf73/DryDeploy/master/LICENSE
@@ -19,8 +19,30 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-$FunctionsPath = "$PSScriptRoot\xfunctions\*.ps1"
-$Functions = Resolve-Path -Path $FunctionsPath -ErrorAction Stop
-foreach ($Function in $Functions) {
-    . $Function.Path
+
+function Wait-DryUtilsRestart {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [String]$ComputerName,
+
+        [Parameter()]
+        [Int]$MinimumTimeOuts = 3
+
+    )
+
+    throw "This function does not do anything until it is written"
+     
+    [bool]$RebootConfirmed = $False
+    $TestResults = @()
+    for ($i=0; $i -lt $MinimumTimeOuts; $i++) {
+        $TestResults += $False
+    }
+
+    do {
+        if ( Test-Connection -ComputerName $ComputerName -Protocol TCP -Count 1 ) {
+            # Add result to $TestResults
+        }
+    }
+    while (-not $RebootConfirmed)
 }
