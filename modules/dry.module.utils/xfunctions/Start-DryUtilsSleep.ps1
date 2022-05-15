@@ -1,5 +1,5 @@
 <# 
- This module provides generic functions for use with DryDeploy.
+ This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
  LICENSE: https://raw.githubusercontent.com/bjoernf73/DryDeploy/master/LICENSE

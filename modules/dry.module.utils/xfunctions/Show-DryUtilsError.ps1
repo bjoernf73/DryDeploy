@@ -1,8 +1,8 @@
 <# 
- This module provides core functionality for DryDeploy.
+ This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
- LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.module.core/main/LICENSE
+ LICENSE: https://raw.githubusercontent.com/bjoernf73/DryDeploy/master/LICENSE
  
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -17,43 +17,6 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-#>
-
-<#
-function Show-DryUtilsError {
-    [cmdletbinding()]
-    param (
-        [Management.Automation.ErrorRecord]$Err
-    )
-    
-    $StackTraceLine = @($Err.ScriptStackTrace -Split "`n")[0]
-    
-    $ErrParts1 = $StackTraceLine.Split(',')
-    $Function = ($ErrParts1[0]).TrimStart('at ')
-    $ErrParts2 = $ErrParts1[1] -Split ': '
-    $Script = ($ErrParts2[0]).Trim()
-    # $ScriptLeaf = Split-Path -Path $Script -Leaf
-    # $ScriptDir = Split-Path -Path $Script -Parent
-    $Line = (($ErrParts2[1]).Trim()).TrimStart('line ')
-    
-    # Add Function, Script and Line
-    $ErrObject = New-Object -TypeName PSObject -Property @{
-        'Function'=$Function
-        'Script'=$Script
-        'Line'=$Line
-    }
-    # Add the exception
-    $ErrObject | 
-    Add-Member -MemberType NoteProperty -Name 'Exception' -Value "$($Err.Exception)"
-
-    # Add category info properties
-    ($Err.CategoryInfo).PSObject.Properties | foreach-Object {
-        $ErrObject | 
-        Add-Member -MemberType NoteProperty -Name $_.Name -Value $_.Value
-    } 
-    # Show the error object
-    Write-Host ($ErrObject | Format-List | Out-String) -Foregroundcolor 'Red'
-}
 #>
 
 function Show-DryUtilsError {
