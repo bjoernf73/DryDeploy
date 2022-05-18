@@ -24,7 +24,7 @@ function Show-DryActionEnd {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
-        [Action] $Action,
+        [DryAction] $Action,
 
         [Parameter(Mandatory)]
         [DateTime] $StartTime,

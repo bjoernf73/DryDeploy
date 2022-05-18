@@ -1,6 +1,6 @@
 using Namespace System.Collections.Generic
 using Namespace System.Collections
-class Action {
+class DryAction {
     [Int]               $ApplyOrder
     [Int]               $PlanOrder
     [Int]               $ActionOrder
@@ -23,7 +23,7 @@ class Action {
 
 
     # Create Action
-    Action (
+    DryAction (
         [PSCustomObject]         $ActionObject,
         [Resource]                   $Resource,
         [Resources]                  $Resources,
@@ -98,7 +98,7 @@ class Action {
     }
 
     # Create Action after Dependency_Action has been resolved
-    Action (
+    DryAction (
         [PSCustomObject]             $ActionObject,
         [Resource]                   $Resource,
         [Resources]                  $Resources,
@@ -134,7 +134,7 @@ class Action {
     }
 
     # Create Action after Dependency Chain has been resolved
-    Action (
+    DryAction (
         [PSCustomObject]             $ActionObject,
         [String]                     $ActionGuid
     ) {
@@ -164,7 +164,7 @@ class Action {
     }
 
     # Create Action from file
-    Action (
+    DryAction (
         [PSCustomObject]             $ActionObject
     ) {
         $This.ResolvedActionOrder  = $ActionObject.ResolvedActionOrder
@@ -196,7 +196,7 @@ class Plan {
     [Int]       $OrderCount
     [Int]       $ActiveActions
     [DateTime]  $PlannedTime  # updated any time you create or modify a plan
-    [DateTime]  $EndTime      # set in DryDeploy's finally - will be reset to null any time $PlannedTime is modified
+    [nullable[Datetime]]  $EndTime      # set in DryDeploy's finally - will be reset to null any time $PlannedTime is modified
     
     # New Plan Object
     Plan ([Resources] $Resources) {
@@ -235,7 +235,7 @@ class Plan {
                 $ResolveUnresolvedActions = $False
 
                 # Create the action object
-                $Action = [Action]::New(
+                $Action = [DryAction]::New(
                     $CurrentAction,
                     $CurrentResource,
                     $Resources,
@@ -247,7 +247,7 @@ class Plan {
                 # case, create an independent Action for for each dependency 
                 if ($Action.Dependency_Guids) {
                     foreach ($Dependency_Guid in $Action.Dependency_Guids) {
-                        $Action = [Action]::New(
+                        $Action = [DryAction]::New(
                             $CurrentAction,
                             $CurrentResource,
                             $Resources,
@@ -297,7 +297,7 @@ class Plan {
         ConvertFrom-Json -ErrorAction Stop
         $This.OrderCount = $PlanObject.OrderCount
         $PlanObject.Actions.foreach({
-            $This.Actions += [Action]::New($_)
+            $This.Actions += [DryAction]::New($_)
         })
         $This.PlannedTime = [DateTime]($PlanObject.PlannedTime)
         if ($null -eq $PlanObject.EndTime) {
@@ -310,7 +310,7 @@ class Plan {
 
     [Void] hidden ResolveUnresolvedActions() {
         try {
-            [ArrayList]$This.UnresolvedActionsList = @($This.UnresolvedActionsList | Sort-Object -Property Action_Guid)
+            $This.UnresolvedActionsList = @($This.UnresolvedActionsList | Sort-Object -Property Action_Guid)
 
             # Get each Action in Plan that the Unresolved (chained) Action depends on
             $This.UnresolvedActionsList.foreach({
@@ -324,7 +324,7 @@ class Plan {
                 foreach ($DependentActionGuid in $DependentActionGuids) {
                     # get the ned action guid
                     $InstanceActionGuid = $This.ResolveActionGuid($DependentActionGuid,$ActionGuid) 
-                    $This.Actions += [Action]::New($_,$InstanceActionGuid)
+                    $This.Actions += [DryAction]::New($_,$InstanceActionGuid)
                 }
             })
             $This.UnresolvedActionsList = [ArrayList]::New()
@@ -404,7 +404,7 @@ class Plan {
         if ($Archive) {
             if (Test-Path -Path $PlanFile -ErrorAction Ignore) {
                 ol v "Plan '$PlanFile' exists, archiving"
-                Save-DryArchiveFile -ArchiveFile $PlanFile -ArchivFolder $GLOBAL:dry_global_var_PlanFile
+                Save-DryArchiveFile -ArchiveFile $PlanFile -ArchiveFolder $GLOBAL:dry_global_var_PlanFile
             }
         }
         ol d "Saving planfile '$PlanFile'"
@@ -482,12 +482,13 @@ class Plan {
     
     [String] ResolveActionGuid($DependencyGuid,$ActionGuid) {
         try {
-            [ArrayList]$DependencyAction = $null
+            $DependencyAction = $null
+            $DependencyAction = [ArrayList]::New()
             $DependecyActionCount = 0 
             $DashActualGuidPart = $ActionGuid.SubString(12)
             $This.Actions.foreach({
                 if ($DependencyGuid -eq $_.Action_Guid) {
-                    [ArrayList]$DependencyAction += $_
+                    $DependencyAction.Add($_)
                     $DependecyActionCount++
                 }
             })

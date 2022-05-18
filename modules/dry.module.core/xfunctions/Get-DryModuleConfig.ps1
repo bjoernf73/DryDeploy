@@ -40,7 +40,6 @@ function Get-DryModuleConfig {
         })
 
         $Configuration = Get-DryConfigData -Path $ConfigCombo.moduleconfig.buildpath -Configuration $Configuration
-        $Configuration | Add-Member -MemberType NoteProperty -name ModuleConfigDirectory -value $ConfigCombo.moduleconfig.path
 
         # Each folder below $ConfigCombo.moduleconfig.rolespath should have a Config.Json containing
         # meta properties for the Roles. Pick up and create a an array RoleMetaConfigs, and add to the configuration. 

@@ -5,25 +5,39 @@ class Resources {
     [ArrayList] $Resources
 
     # create an instance
-    Resources (
-        [PSCustomObject] $Configuration
-    ) {
+    Resources ([PSCustomObject] $Configuration,[PSCustomObject] $ConfigCombo) {
+
+        <#
+        Build                 : @{order_type=role; roles=System.Object[]}
+        CoreConfig            : @{connections=System.Object[]; network=; resources=System.Object[]}
+        ModuleConfigDirectory : C:\GITs\DRY\ModuleConfigs\DomainRoot\
+        OSConfigDirectory     : C:\GITs\DRYCORE\EnvConfigs\utv.local\OSConfig
+        RoleMetaConfigs       : {@{rolename=ADM; role=adm-winclient; os_tag=Windows-10; description=Administration Client}, @{rolename=CA; role=ca-certauth-iss; os_tag=WindowsServer; description=Windows Server Issuing Root CA}, @{rolename=CA; role=ca-certauth-root;
+                                os_tag=WindowsServer; description=Windows Server Standalone Root CA}, @{rolename=DC; role=dc-domctrl-add; os_tag=WindowsServer; description=Additional DC}...}
+        UserConfig            : @{ad.import=; CoreConfig=; credentials=System.Object[]; OSConfigDirectory=; platforms=System.Object[]; UserConfig=; common_variables=System.Object[]; resource_variables=System.Object[]}
+        credentials           : {@{alias=alternate-domain-admin; username=###DomainNB###\bjoernf}, @{alias=domain-admin; username=###DomainNB###\Administrator}}
+        CredentialsType       : encryptedstring
+        #>
         
         $This.Resources = [ArrayList]::New()
         # Loop through the resources in the build
-        foreach ($Resource in $Configuration.resources | Where-Object { $_.role -in @($Configuration.build.roles.role) }) {
-            $This.Resources = [Resource]::New(
+        foreach ($Resource in $Configuration.CoreConfig.resources | Where-Object { $_.role -in @($Configuration.Build.roles.role) }) {
+            $Resource = [Resource]::New(
                 $Resource.Name,
-                $(Get-DryRoleMetaConfigProperty -Configuration $Configuration -Role $Resource.Role -Property 'role_short_name'),
+                $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $Resource.role -Property 'role_short_name'),
                 $Resource.Role,
-                $(Get-DryRoleMetaConfigProperty -Configuration $Configuration -Role $Resource.Role -Property 'os_tag'),
-                $Configuration.OSConfigDirectory,
-                $(Get-DryRoleMetaConfigProperty -Configuration $Configuration -Role $Resource.Role -Property 'description'),
+                $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $Resource.role -Property 'os_tag'),
+                $Configuration.Paths.OSConfigDirectory,
+                $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $Resource.role -Property 'description'),
                 $Resource.Network,
+                $ConfigCombo,
+                $Configuration,
                 $Resource.Options
-            )  
+            )
+            #! Previously, this called Replace-Patterns etc
+            $This.Resources += $Resource
         }
-        $This.DoOrder()
+        $This.DoOrder($Configuration.CoreConfig.Network,$Configuration.Build)
         $This.AddActionGuids()
     }
 
@@ -65,9 +79,7 @@ class Resources {
     }
 
     # Find first Action in plan and return true if it matches $ActionSpec
-    [Bool] IsThisFirstActionInPlan (
-        [String] $ActionGuid
-    ) {
+    [Bool] IsThisFirstActionInPlan ([String] $ActionGuid) {
         
         # Loop though Resources using their ResourceOrder-property
         :ResourceLoop for ($ResourceOrder = 1; $ResourceOrder -le $This.Resources.Count; $ResourceOrder++) {
@@ -102,18 +114,14 @@ class Resources {
         }
     }
 
-    [Void] DoOrder (
-    ) {
+    [Void] DoOrder ([PSObject] $Network,[PSObject]$Build) {
         
-        $Sites = ($GLOBAL:dry_var_global_Configuration.Network.Sites).Name
-        
-        # loop thorugh the deployment Build
-        $Build = $GLOBAL:dry_var_global_Configuration.build
-        [Array]$RoleOrder  = $Build.roles 
+        [Array]$Sites = @(($Network.Sites).Name)
+        [Array]$RoleOrder  = @($Build.roles)
         [String]$OrderType = $Build.order_type
 
         if ($OrderType -notin @('site','role')) {
-            throw "The Deployment Builds' 'order_type' property must be 'site' or 'role'"
+            [String]$OrderType = 'role'
         }
 
         $ResourceCount     = 0

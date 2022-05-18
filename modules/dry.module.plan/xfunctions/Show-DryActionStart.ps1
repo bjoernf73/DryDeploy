@@ -24,7 +24,7 @@ function Show-DryActionStart {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
-        [Action] $Action
+        [DryAction] $Action
     )
     try {
             ol i " "

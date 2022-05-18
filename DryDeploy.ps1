@@ -666,7 +666,6 @@ try {
     $GLOBAL:dry_var_global_ScriptPath                 = Get-DryScriptPath
     $GLOBAL:dry_var_global_Platform                   = Get-DryPlatform -ScriptPath $GLOBAL:dry_var_global_ScriptPath
     Set-DryPSModulePath -Platform $GLOBAL:dry_var_global_Platform
-    
     # Remove DD modules that may have escaped the removal in finally{}
     Get-Module | Where-Object {(
         ($_.Name -match "^dry\.module\.") -or 
@@ -711,11 +710,22 @@ try {
     [String]$dry_var_ConfigComboFile    = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'dry_deploy_config_combo.json'
     [String]$dry_var_UserOptionsFile    = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'UserOptions.json' # the user may create this file to override the defaults
     [String]$dry_var_TempConfigsDir     = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'TempConfigs'
-    [String]$dry_var_LogsArchiveDir     = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'ArchivedLogs'
+    [String]$dry_var_ArchiveDir     = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'Archived'
     [String]$dry_var_SystemOptionsFile  = Join-Path -Path $dry_var_global_ScriptPath           -ChildPath 'SystemOptions.json'
     [String]$GLOBAL:dry_var_global_CredentialsFile    = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'dry_deploy_credentials.json'
+
+    $dry_var_Paths = [PSCustomObject]@{
+        RootWorkingDirectory = $dry_var_global_RootWorkingDirectory
+        PlanFile = $dry_var_PlanFile
+        ResourcesFile = $dry_var_ResourcesFile
+        ConfigComboFile = $dry_var_ConfigComboFile
+        UserOptionsFile = $dry_var_UserOptionsFile
+        TempConfigsDir = $dry_var_TempConfigsDir
+        ArchiveDir = $dry_var_ArchiveDir
+        SystemOptionsFile = $dry_var_SystemOptionsFile
+    }
     
-    New-DryItem -ItemType Directory -Items @($dry_var_global_RootWorkingDirectory, $dry_var_LogsArchiveDir, $dry_var_TempConfigsDir)
+    New-DryItem -ItemType Directory -Items @($dry_var_global_RootWorkingDirectory, $dry_var_ArchiveDir, $dry_var_TempConfigsDir)
     
    
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -742,7 +752,7 @@ try {
         SystemConfig     = $dry_var_SystemOptions.logging 
         UserConfig       = $dry_var_UserOptions.logging
         WorkingDirectory = $dry_var_global_RootWorkingDirectory
-        ArchiveDirectory = $dry_var_LogsArchiveDir
+        ArchiveDirectory = $dry_var_ArchiveDir
         NoLog            = $NoLog
     }
     Set-DryLoggingOptions @SetDryLoggingOptionsParams
@@ -907,7 +917,9 @@ try {
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         {$_ -in 'Plan','Apply','GetConfig'} {
-            $GLOBAL:dry_var_global_Configuration = Get-DryEnvConfig -ConfigCombo $dry_var_global_ConfigCombo
+            $dry_var_Paths | Add-Member -MemberType NoteProperty -Name 'OSConfigDirectory' -Value (Join-Path -Path $dry_var_global_ConfigCombo.envconfig.path -ChildPath 'OSConfig')
+            $dry_var_Paths | Add-Member -MemberType NoteProperty -Name 'ModuleConfigDirectory' -Value $dry_var_global_ConfigCombo.moduleconfig.path
+            $GLOBAL:dry_var_global_Configuration = Get-DryEnvConfig -ConfigCombo $dry_var_global_ConfigCombo -Paths $dry_var_Paths
             $GLOBAL:dry_var_global_Configuration = Get-DryModuleConfig -ConfigCombo $dry_var_global_ConfigCombo -Configuration $GLOBAL:dry_var_global_Configuration 
             
 
@@ -989,6 +1001,7 @@ try {
                 ResourcesFile        = $dry_var_ResourcesFile
                 PlanFile             = $dry_var_PlanFile
                 Configuration        = $dry_var_global_Configuration
+                ConfigCombo          = $dry_var_global_ConfigCombo
                 ResourceNames        = $Resources
                 ExcludeResourceNames = $ExcludeResources
                 RoleNames            = $Roles
@@ -999,6 +1012,7 @@ try {
                 ExcludeBuildSteps    = $ExcludeBuildSteps
                 Phases               = $Phases
                 ExcludePhases        = $ExcludePhases
+                ArchiveFolder        = $dry_var_ArchiveDir
             }
             $dry_var_Plan = New-DryPlan @NewDryPlanParams
             $NewDryPlanParams = $null
@@ -1037,7 +1051,7 @@ try {
                 Phases               = $Phases
                 ExcludePhases        = $ExcludePhases
             }
-            $dry_var_Plan           = Get-DryPlan @GetDryPlanParams -ErrorAction Stop
+            $dry_var_Plan            = Get-DryPlan @GetDryPlanParams -ErrorAction Stop
             $dry_var_ResolvedResources = Get-DryFromJson -Path $dry_var_ResourcesFile -ErrorAction Stop
             $GetDryPlanParams          = $null
 

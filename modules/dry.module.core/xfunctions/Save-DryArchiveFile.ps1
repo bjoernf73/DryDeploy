@@ -41,8 +41,8 @@ function Save-DryArchiveFile {
     try {
         if (-not $ArchiveFolder) {
             $ArchiveFolder = Split-Path -Path $ArchiveFile
-            # $ArchiveTargetFolder = Resolve-DryFullPath -Path $ArchiveFolder 
         }
+        $ArchiveSourceFolder = Resolve-DryUtilsFullPath -Path (Split-Path -Path $ArchiveFile)
         $ArchiveTargetFolder = Resolve-DryUtilsFullPath -Path $ArchiveFolder -Force
     
         if (-not (Test-Path -Path $ArchiveTargetFolder -ErrorAction Ignore)) {
@@ -52,9 +52,10 @@ function Save-DryArchiveFile {
         $ArchiveFileName = Split-Path $ArchiveFile -leaf
         # Create the new file name based on the file's LastWriteTime attribute
         $ArchiveFileNewName = "ARCH_" + $(($ArchiveFile.LastWriteTime | Get-Date -format s) -replace ':','-') + "_$ArchiveFileName"
-        $ArchiveFileNewFullName = Join-Path -Path $ArchiveTargetFolder -ChildPath $ArchiveFileNewName
+        $ArchiveFileNewFullName = Join-Path -Path $ArchiveSourceFolder -ChildPath $ArchiveFileNewName
         $ArchiveFile | Rename-Item -NewName $ArchiveFileNewName -Confirm:$False
-        if ($ArchiveFolder) {
+        
+        if ($ArchiveSourceFolder -ne $ArchiveTargetFolder) {
             Get-Item -Path $ArchiveFileNewFullName -ErrorAction Stop | 
             Move-Item -Destination $ArchiveTargetFolder -ErrorAction Stop
         }
@@ -92,6 +93,7 @@ function Save-DryArchiveFile {
         $ArchiveFolder = $null
         $ArchiveFile = $null 
         $ArchiveTargetFolder = $null
+        $ArchiveSourceFolder = $null
         $ArchiveFileName = $null
         $ArchiveFileNewName = $null
         $ArchiveFileNewFullName = $null

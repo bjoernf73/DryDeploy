@@ -32,8 +32,16 @@ function New-DryPlan {
         $PlanFile,
 
         [Parameter(Mandatory)]
+        [String]
+        $ArchiveFolder,
+
+        [Parameter(Mandatory)]
         [PSObject]
         $Configuration,
+
+        [Parameter(Mandatory)]
+        [PSObject]
+        $ConfigCombo,
 
         [Parameter()]
         [Array]
@@ -77,23 +85,23 @@ function New-DryPlan {
     )
     
     $Resources = $null 
-    $Resources = [Resources]::New($Configuration)
-    $Resources.Save($ResourcesFile,$True)
+    $Resources = [Resources]::New($Configuration,$ConfigCombo)
+    $Resources.Save($ResourcesFile,$true,$ArchiveFolder)
     $Plan = [Plan]::New($Resources)
     $PlanFilter = [PlanFilter]::New($ResourceNames,$ExcludeResourceNames,$RoleNames,$ExcludeRoleNames,$ActionNames,$ExcludeActionNames,$Phases,$ExcludePhases,$BuildSteps,$ExcludeBuildSteps)
     $Plan.Actions.foreach({
         if ($PlanFilter.InFilter($_.ResourceName,$_.Role,$_.Action,$_.Phase,$_.ActionOrder)) {
-            $_.PlanSelected = $True
+            $_.PlanSelected = $true
         }
         else {
-            $_.PlanSelected = $False
+            $_.PlanSelected = $false
         }
         # However, always set applyselected to false
-        $_.ApplySelected = $False
+        $_.ApplySelected = $false
     })
     
     # Set the PlanOrder based on PlanSelected
     $Plan.ResolvePlanOrder($PlanFile)
-    $Plan.Save($PlanFile,$True)
+    $Plan.Save($PlanFile,$true)
     return $Plan
 }

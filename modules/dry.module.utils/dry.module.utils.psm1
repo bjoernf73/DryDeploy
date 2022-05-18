@@ -19,8 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-$FunctionsPath = "$PSScriptRoot\xfunctions\*.ps1"
-$Functions = Resolve-Path -Path $FunctionsPath -ErrorAction Stop
-foreach ($Function in $Functions) {
+# Dot source all exported functionscripts
+$ExportedFunctionsPath = Join-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath 'xfunctions') -ChildPath "*.ps1"
+$ExportedFunctions     = Resolve-Path -Path $ExportedFunctionsPath -ErrorAction Stop
+foreach ($Function in $ExportedFunctions) {
     . $Function.Path
 }

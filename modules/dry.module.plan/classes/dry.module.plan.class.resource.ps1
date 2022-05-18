@@ -1,18 +1,18 @@
 using Namespace System.Collections.Generic
 using Namespace System.Collections
 class Resource {
-    [String]          $Name 
-    [String]          $role_short_name
-    [String]          $Role # Changed back
+    [String]          $Name
+    [String]          $Role 
+    [String]          $Role_Short_Name
     [String]          $OS_Tag
     [String]          $Description
     [Int]             $ResourceOrder
     [String]          $OSConfigPath
     [String]          $RolePath
     [String]          $ConfigurationTargetPath
-    [Guid]            $Resource_Guid # Changed back
+    [Guid]            $Resource_Guid
     [PSCustomObject]  $Network
-    [Network]         $Resolved_Network # Changed back
+    [Network]         $Resolved_Network
     [PSCustomObject]  $ActionOrder
     [PSCustomObject]  $Options
 
@@ -25,24 +25,26 @@ class Resource {
         [String]          $OSConfigPath,
         [String]          $Description,
         [PSCustomObject]  $Network,
+        [PSCustomObject]  $ConfigCombo,
+        [PSCustomObject]  $Configuration,
         [PSCustomObject]  $Options
     ) {
         $This.Name                     = $Name
-        $This.role_short_name                 = $role_short_name
+        $This.role_short_name          = $role_short_name
         $This.Role                     = $Role
         $This.OS_Tag                   = $OS_Tag
         $This.OSConfigPath             = Join-Path -Path $OSConfigPath -ChildPath $OS_Tag -Resolve
         $This.Description              = $Description
         $This.ResourceOrder            = 0
         $This.Network                  = $Network
-        $This.Resolved_Network         = [Network]::New($Network,$($GLOBAL:dry_var_global_Configuration).network.sites)
-        $This.RolePath                 = Join-Path -Path $GLOBAL:dry_var_global_ConfigCombo.moduleconfig.rolespath -ChildPath $Role -Resolve
-        $This.ConfigurationTargetPath  = Join-Path -Path ($GLOBAL:dry_var_global_RootWorkingDirectory + '\TempConfigs') -ChildPath $This.Name
+        $This.Resolved_Network         = [Network]::New($Network,$Configuration.CoreConfig.network.sites)
+        $This.RolePath                 = Join-Path -Path $ConfigCombo.moduleconfig.rolespath -ChildPath $Role -Resolve
+        $This.ConfigurationTargetPath  = Join-Path -Path ($Configuration.Paths.TempConfigsDir) -ChildPath $This.Name
         $This.Resource_Guid            = $($(New-Guid).Guid)
         $This.Options                  = $Options
 
         Remove-Variable -Name BuildTemplate -ErrorAction Ignore
-        $BuildTemplate = $($GLOBAL:dry_var_global_Configuration).build.roles | Where-Object {
+        $BuildTemplate = $Configuration.build.roles | Where-Object {
             $_.role -eq $Role
         }
         if ($Null -eq $BuildTemplate) {
