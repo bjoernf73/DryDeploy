@@ -1,8 +1,8 @@
 <# 
- This module provides core functionality for DryDeploy.
+ This module executes actions for DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
- LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.module.core/main/LICENSE
+ LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.module.query/main/LICENSE
  
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -19,17 +19,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Invoke-DryCmtrace {
-    [cmdletbinding()]
-    param ()
-
-    try {
-        #! not implemented
-        throw "not implemented - databjorn must skjerpe seg"
-        
-    }
-    catch {
-        ol w @('Unable to save to',"$Path")
-        $PSCmdlet.ThrowTerminatingError($_) 
-    }
+$FunctionsPath = "$PSScriptRoot\xfunctions\*.ps1"
+$Functions     = Resolve-Path -Path $FunctionsPath -ErrorAction Stop
+foreach ($Function in $Functions) {
+    . $Function.Path
 }

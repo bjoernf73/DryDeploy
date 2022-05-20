@@ -11,7 +11,8 @@ class DryAction {
     [String]          $Role 
     [Guid]            $Resource_Guid 
     [String]          $Action_Guid
-    [String]          $ResourceName 
+    [String]          $ResourceName
+    [PSCustomObject]  $Resource
     [String]          $Status
     [String]          $Dependency_Guid
     [String]          $Chained_Guid
@@ -39,6 +40,7 @@ class DryAction {
         $This.Resource_Guid        = $Resource.Resource_Guid 
         $This.Action_Guid          = $ActionObject.Action_Guid 
         $This.ResourceName         = $Resource.Name
+        $This.Resource             = $Resource 
         $This.Status               = 'Todo'
         $This.PlanSelected         = $False
         $This.ApplySelected        = $False
@@ -118,8 +120,8 @@ class DryAction {
         [Resources]                  $Resources,
         [Plan]                       $Plan,
         [String]                     $Dependency_Guid,
-        [String]                     $Action_Guid
-    ) {
+        [String]                     $Action_Guid) {
+
         $This.ResolvedActionOrder  = $False
         $This.Action               = $ActionObject.Action
         $This.Description          = $ActionObject.Description
@@ -129,11 +131,13 @@ class DryAction {
         $This.Resource_Guid        = $Resource.Resource_Guid
         $This.Action_Guid          = $Action_Guid
         $This.ResourceName         = $Resource.Name
+        $This.Resource             = $Resource
         $This.Status               = 'Todo'
         $This.PlanSelected         = $False
         $This.ApplySelected        = $False
         $This.Dependency_Guid      = $Dependency_Guid
         $This.Dependency_Guids     = $Null
+
         if ($ActionObject.Credentials) {
             $This.Credentials      = $ActionObject.Credentials
         }
@@ -157,14 +161,14 @@ class DryAction {
             $This.Source = 'role'
         }
 
-        $This.Action_Guid          = $Plan.ResolveActionGuid($This.Dependency_Guid,$This.Action_Guid)
+        $This.Action_Guid = $Plan.ResolveActionGuid($This.Dependency_Guid,$This.Action_Guid)
     }
 
     # Create Action after Dependency Chain has been resolved
     DryAction (
         [PSCustomObject]             $ActionObject,
-        [String]                     $ActionGuid
-    ) {
+        [String]                     $ActionGuid) {
+
         $This.ResolvedActionOrder  = $False
         $This.Action               = $ActionObject.Action
         $This.Description          = $ActionObject.Description
@@ -174,6 +178,7 @@ class DryAction {
         $This.Resource_Guid        = $ActionObject.Resource_Guid
         $This.Action_Guid          = $ActionGuid
         $This.ResourceName         = $ActionObject.ResourceName
+        $This.Resource             = fuckyou
         $This.Status               = 'Todo'
         $This.PlanSelected         = $False
         $This.ApplySelected        = $False
@@ -205,8 +210,7 @@ class DryAction {
 
     # Create Action from file
     DryAction (
-        [PSCustomObject]             $ActionObject
-    ) {
+        [PSCustomObject]$ActionObject) {
         $This.ResolvedActionOrder  = $ActionObject.ResolvedActionOrder
         $This.ApplyOrder           = $Null # <-- Re-evaluated at every run
         $This.PlanOrder            = $ActionObject.PlanOrder
@@ -376,6 +380,7 @@ class Plan {
     }
 
     [Void] hidden AddActionOrder() {
+
         $This.Actions = $This.Actions | Sort-Object -Property Action_Guid
         $ActionCount = 0
         $This.Actions.foreach({
@@ -386,6 +391,7 @@ class Plan {
     }
 
     [Void] ResolvePlanOrder($PlanFile) {
+
         if ($This.UnresolvedActions) {
             throw "There are unresolved actions - planorder cannot be determined"
         }
@@ -414,6 +420,7 @@ class Plan {
     }
 
     [Void] ResolveApplyOrder($PlanFile) {
+
         if ($This.UnresolvedActions) {
             throw "There are unresolved actions - applyorder cannot be determined"
         }
@@ -442,6 +449,7 @@ class Plan {
 
 
     [Void] Save($PlanFile,$Archive) {
+
         if ($Archive) {
             if (Test-Path -Path $PlanFile -ErrorAction Ignore) {
                 ol v "Plan '$PlanFile' exists, archiving"
@@ -454,7 +462,9 @@ class Plan {
     }
 
 
-    [String[]] GetEveryDependencyActionGuid ([PSObject] $DependencySpec) {
+    [String[]] GetEveryDependencyActionGuid (
+        [PSObject] $DependencySpec) {
+
         $EveryDependencyActionGuid = $null
         $EveryDependencyActionGuid = @()
         $This.Actions.foreach({
@@ -474,7 +484,9 @@ class Plan {
     }
 
 
-    [String[]] GetEveryDependencyActionGuid ([String] $DependencyGuid) {
+    [String[]] GetEveryDependencyActionGuid (
+        [String] $DependencyGuid) {
+
         $EveryDependencyActionGuid = $null
         $EveryDependencyActionGuid = @()
         $This.Actions.foreach({
@@ -486,7 +498,9 @@ class Plan {
     }
 
 
-    [String] GetFirstDependencyActionGuid ([PSObject] $DependencySpec) {
+    [String] GetFirstDependencyActionGuid (
+        [PSObject] $DependencySpec) {
+
         $EveryDependencyActionGuid = $null
         $EveryDependencyActionGuid = $This.GetEveryDependencyActionGuid($DependencySpec)
         if ($EveryDependencyActionGuid.Count -eq 0) {
@@ -497,7 +511,9 @@ class Plan {
     }
 
 
-    [String] GetLastDependencyActionGuid ([PSObject] $DependencySpec) {
+    [String] GetLastDependencyActionGuid (
+        [PSObject] $DependencySpec) {
+
         $EveryDependencyActionGuid = $null
         $EveryDependencyActionGuid = $This.GetEveryDependencyActionGuid($DependencySpec)
         if ($EveryDependencyActionGuid.Count -eq 0) {
@@ -507,7 +523,9 @@ class Plan {
         return $EveryDependencyActionGuid[0]
     }
 
-    [String] GetNumberedDependencyActionGuid ([PSObject] $DependencySpec) {
+    [String] GetNumberedDependencyActionGuid (
+        [PSObject] $DependencySpec) {
+
         [Int]$DependencyNumberedActionOrder = ($DependencySpec.dependency_numbered_action)-1
         $EveryDependencyActionGuid = $null
         $EveryDependencyActionGuid = $This.GetEveryDependencyActionGuid($DependencySpec)
@@ -551,6 +569,7 @@ class Plan {
 
 
     [String] GetAvailableActionGuid($OrderPart) {
+
         try {
             $ActionOrderPart = ''
             # The OrderPart is a string like 000200050000. We must keep the 00020005 and increase the 0000-part

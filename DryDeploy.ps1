@@ -995,7 +995,7 @@ try {
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         'Plan' {
-            $NewDryPlanParams = @{
+            $dry_var_NewDryPlanParams = @{
                 ResourcesFile        = $dry_var_ResourcesFile
                 PlanFile             = $dry_var_PlanFile
                 Configuration        = $dry_var_global_Configuration
@@ -1012,19 +1012,19 @@ try {
                 ExcludePhases        = $ExcludePhases
                 ArchiveFolder        = $dry_var_ArchiveDir
             }
-            $dry_var_Plan = New-DryPlan @NewDryPlanParams
-            $NewDryPlanParams = $null
+            $dry_var_Plan = New-DryPlan @dry_var_NewDryPlanParams
+            $dry_var_NewDryPlanParams = $null
             
-            $ShowDryPlanParams = @{
+            $dry_var_ShowDryPlanParams = @{
                 Plan                 = $dry_var_Plan
                 Mode                 = 'Plan' 
                 ConfigCombo          = $dry_var_global_ConfigCombo 
                 ShowConfigCombo      = $True
                 ShowDeselected       = $ShowDeselected
             }
-            Show-DryPlan @ShowDryPlanParams
+            Show-DryPlan @dry_var_ShowDryPlanParams
             $dry_var_Plan = $null
-            $ShowDryPlanParams = $null
+            $dry_var_ShowDryPlanParams = $null
         }
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
@@ -1036,7 +1036,7 @@ try {
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         'Apply' {
-            $GetDryPlanParams = @{
+            $dry_var_GetDryPlanParams = @{
                 PlanFile             = $dry_var_PlanFile
                 ResourceNames        = $Resources
                 ExcludeResourceNames = $ExcludeResources
@@ -1049,9 +1049,9 @@ try {
                 Phases               = $Phases
                 ExcludePhases        = $ExcludePhases
             }
-            $dry_var_Plan            = Get-DryPlan @GetDryPlanParams -ErrorAction Stop
+            $dry_var_Plan            = Get-DryPlan @dry_var_GetDryPlanParams -ErrorAction Stop
             $dry_var_ResolvedResources = Get-DryFromJson -Path $dry_var_ResourcesFile -ErrorAction Stop
-            $GetDryPlanParams          = $null
+            $dry_var_GetDryPlanParams          = $null
 
             <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
@@ -1111,35 +1111,12 @@ try {
 
                     # Match up this action with the resource object 
                     # in $dry_var_ResolvedResources
+                    #! should be performed by the action class, and attached to the $action object
                     $Resource = $null 
                     $Resource = $dry_var_ResolvedResources.Resources | Where-Object { 
                         $_.Resource_Guid -eq $dry_var_Action.Resource_Guid
                     }
-
                     
-                    <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-                    
-                        Resource Variables
-                        
-                        $dry_var_global_ResourceVariables are invoked for each action, so they may contain 
-                        values specific to the Resource (or Action, actually)
-
-                    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-                    <#
-                    if ($dry_var_global_Configuration.resource_variables) {
-                        $ResolveDryVariablesParams = @{
-                            Variables              = $dry_var_global_Configuration.resource_variables
-                            Configuration          = $dry_var_global_Configuration
-                            VariablesList          = $dry_var_CommonVariables
-                            Resource               = $Resource
-                            OutputType             = 'list'
-                        }
-                        $ResourceVariables = Resolve-DryVariables @ResolveDryVariablesParams
-                        $ResolveDryVariablesParams = $null  
-                    }
-                    #>
-                    
-
                     # Assume the worst
                     $dry_var_Action.Status = 'Failed'
                     $ActionName = "dry.action.$($dry_var_Action.Action)"
@@ -1292,17 +1269,19 @@ finally {
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
     $GLOBAL:GlobalResourceName = $null 
-    $GLOBAL:GlobalActionName = $null
-    $GLOBAL:GlobalPhase = $null
+    $GLOBAL:GlobalActionName   = $null
+    $GLOBAL:GlobalPhase        = $null
     
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         Reset Powershell's Global Preference variables
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-    $GLOBAL:VerbosePreference = $dry_var_GlobalVerbosePreference
-    $GLOBAL:DebugPreference = $dry_var_GlobalDebugPreference
+    $GLOBAL:VerbosePreference     = $dry_var_GlobalVerbosePreference
+    $GLOBAL:DebugPreference       = $dry_var_GlobalDebugPreference
     $GLOBAL:ErrorActionPreference = $dry_var_GlobalErrorActionPreference
+    ol i "DryDeploy $($PSCmdLet.ParameterSetName): outro" -sh -air
+    ol i ' '
 
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -1311,44 +1290,23 @@ finally {
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
     $env:PSModulePath = $dry_var_OriginalPSModulePath
     
-    ol i "DryDeploy $($PSCmdLet.ParameterSetName): outro" -sh -air
-    ol i ' '
-
-    
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-        Remove all DD-specific modules
+        Remove all DryDeploy modules
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-    foreach ($DryModule in  @((Get-Module | 
-        Where-Object { (($_.Name -match "^dry\.action\.") -or ($_.Name -match "^dry\.module\."))}) | 
-        Select-Object Name).Name) {
-        Get-Module $DryModule | Remove-Module -Verbose:$False -Force -ErrorAction Ignore
-    }
-
-    <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-        Remove all Common Variables from both the GLOBAL and LOCAL scope
-
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-    $dry_var_CommonVariables.foreach({
-        if (Get-Variable -Name $_.Name -Scope GLOBAL -ErrorAction Ignore) {
-            Remove-Variable -Name $_.Name -Scope GLOBAL
-        }
-        if (Get-Variable -Name $_.Name -Scope LOCAL -ErrorAction Ignore) {
-            Remove-Variable -Name $_.Name -Scope LOCAL
-        }
+    (Get-Module | Where-Object { 
+        ($_.Name -match "^dry\.action\.*") -or 
+        ($_.Name -match "^dry\.module\.*")}).foreach({
+        Remove-Module -Name $_.Name -Force
     })
 
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-        Remove any variable in the GLOBAL and LOCAL scope that may remain
+        Remove all DryDeploy variables
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-    (Get-Variable -Scope GLOBAL | Where-Object {$_.Name -match "^dry_var_"}) | ForEach-Object  { 
-        Remove-Variable -Name "$_" -Scope Global -ErrorAction 'Ignore'
-    }
-    (Get-Variable -Scope LOCAL | Where-Object {$_.Name -match "^dry_var_"}) | ForEach-Object  { 
-        Remove-Variable -Name "$_" -Scope Local -ErrorAction 'Ignore'
-    }
+    (Get-Variable | Where-Object {$_.Name -match '^dry_var_*'}).foreach({
+        Remove-Variable -Name $_ -Force
+    })
 }
