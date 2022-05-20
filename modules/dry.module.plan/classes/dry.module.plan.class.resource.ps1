@@ -4,10 +4,10 @@ class Resource {
     [String]          $Name
     [String]          $Role 
     [String]          $Role_Short_Name
-    [String]          $OS_Tag
+    [String]          $BaseConfig
     [String]          $Description
     [Int]             $ResourceOrder
-    [String]          $OSConfigPath
+    [String]          $BaseConfigPath
     [String]          $RolePath
     [String]          $ConfigurationTargetPath
     [Guid]            $Resource_Guid
@@ -21,8 +21,8 @@ class Resource {
         [String]          $Name,
         [String]          $role_short_name,
         [String]          $Role,
-        [String]          $OS_Tag,
-        [String]          $OSConfigPath,
+        [String]          $BaseConfig,
+        [String]          $BaseConfigPath,
         [String]          $Description,
         [PSCustomObject]  $Network,
         [PSCustomObject]  $ConfigCombo,
@@ -32,8 +32,8 @@ class Resource {
         $This.Name                     = $Name
         $This.role_short_name          = $role_short_name
         $This.Role                     = $Role
-        $This.OS_Tag                   = $OS_Tag
-        $This.OSConfigPath             = Join-Path -Path $OSConfigPath -ChildPath $OS_Tag -Resolve
+        $This.BaseConfig               = $BaseConfig
+        $This.BaseConfigPath             = Join-Path -Path $BaseConfigPath -ChildPath $BaseConfig -Resolve
         $This.Description              = $Description
         $This.ResourceOrder            = 0
         $This.Network                  = $Network

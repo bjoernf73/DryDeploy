@@ -115,7 +115,7 @@ Dryeploy needs 2 configuration repositories:
 It can also
    contain a "UserConfig" which is any data you can put in a json
    or yaml.
-Lastly, it may contain "OSConfig", which contains shared,
+Lastly, it may contain "BaseConfig", which contains shared,
    generic configurations which every (or selected) instances of an 
    operating system should invoke.
  

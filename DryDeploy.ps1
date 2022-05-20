@@ -59,7 +59,7 @@ Dryeploy needs 2 configuration repositories:
    environment; network information, target platforms (cloud, on-prem, 
    hybrid), and all the resources (instances of roles). It can also
    contain a "UserConfig" which is any data you can put in a json
-   or yaml. Lastly, it may contain "OSConfig", which contains shared,
+   or yaml. Lastly, it may contain "BaseConfig", which contains shared,
    generic configurations which every (or selected) instances of an 
    operating system should invoke.  
 
@@ -917,12 +917,10 @@ try {
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         {$_ -in 'Plan','Apply','GetConfig'} {
-            $dry_var_Paths | Add-Member -MemberType NoteProperty -Name 'OSConfigDirectory' -Value (Join-Path -Path $dry_var_global_ConfigCombo.envconfig.path -ChildPath 'OSConfig')
+            $dry_var_Paths | Add-Member -MemberType NoteProperty -Name 'BaseConfigDirectory' -Value (Join-Path -Path $dry_var_global_ConfigCombo.envconfig.path -ChildPath 'BaseConfig')
             $dry_var_Paths | Add-Member -MemberType NoteProperty -Name 'ModuleConfigDirectory' -Value $dry_var_global_ConfigCombo.moduleconfig.path
             $GLOBAL:dry_var_global_Configuration = Get-DryEnvConfig -ConfigCombo $dry_var_global_ConfigCombo -Paths $dry_var_Paths
             $GLOBAL:dry_var_global_Configuration = Get-DryModuleConfig -ConfigCombo $dry_var_global_ConfigCombo -Configuration $GLOBAL:dry_var_global_Configuration 
-            
-
             
             <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
@@ -967,20 +965,20 @@ try {
             }
             
             if ($GLOBAL:dry_var_global_Configuration.Credentials) {
-                foreach ($Credential in $GLOBAL:dry_var_global_Configuration.Credentials) {
-                    $AddCredentialPlaceholderParams = @{
-                        Alias        = $Credential.Alias
-                        EnvConfig    = $dry_var_global_ConfigCombo.envconfig.name
+                foreach ($dry_var_Credential in $GLOBAL:dry_var_global_Configuration.Credentials) {
+                    $dry_var_AddCredentialPlaceholderParams = @{
+                        Alias        = $dry_var_Credential.Alias
+                        EnvConfig    = $GLOBAL:dry_var_global_ConfigCombo.envconfig.name
                         Type         = $GLOBAL:dry_var_global_Configuration.CredentialsType
                     }
-                    if ($Credential.UserName) {
-                        $AddCredentialPlaceholderParams += @{
-                            UserName = $Credential.UserName
+                    if ($dry_var_Credential.UserName) {
+                        $dry_var_AddCredentialPlaceholderParams += @{
+                            UserName = $dry_var_Credential.UserName
                         }
                     }
-                    Add-DryCredentialPlaceholder @AddCredentialPlaceholderParams
+                    Add-DryCredentialPlaceholder @dry_var_AddCredentialPlaceholderParams
                 }
-                $AddCredentialPlaceholderParams = $null
+                $dry_var_AddCredentialPlaceholderParams = $null
             }
             
             if ($GetConfig) {
@@ -1082,41 +1080,43 @@ try {
                 The iteration on every object in the Plan.  
                 
             # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-            for ($ActionCount = 1; $ActionCount -le $dry_var_Plan.ActiveActions; $ActionCount++ ) {
-                $Action = $null
-                $Action = $dry_var_Plan.Actions | Where-Object { $_.ApplyOrder -eq $ActionCount }
+            for ($dry_var_ActionCount = 1; $dry_var_ActionCount -le $dry_var_Plan.ActiveActions; $dry_var_ActionCount++ ) {
+                $dry_var_Action = $null
+                $dry_var_Action = $dry_var_Plan.Actions | Where-Object { $_.ApplyOrder -eq $dry_var_ActionCount }
                 
-                if ($Null -eq $Action) { throw "Unable to find Action with Order $ActionCount in Plan" }
+                if ($Null -eq $dry_var_Action) { throw "Unable to find Action with Order $dry_var_ActionCount in Plan" }
 
                 try {
-                    if ($Action.Status -eq 'Todo') {
-                        $Action.Status = 'Starting'
+                    if ($dry_var_Action.Status -eq 'Todo') {
+                        $dry_var_Action.Status = 'Starting'
                         $dry_var_Plan.Save($dry_var_PlanFile,$False)
                     }
-                    elseif ($Action.Status -eq 'Failed') {
-                        $Action.Status = 'Retrying'
+                    elseif ($dry_var_Action.Status -eq 'Failed') {
+                        $dry_var_Action.Status = 'Retrying'
                         $dry_var_Plan.Save($dry_var_PlanFile,$False)
                     }
                     
                     Show-DryPlan -Plan $dry_var_Plan -Mode 'Apply' -ConfigCombo $dry_var_global_ConfigCombo
-                    Show-DryActionStart -Action $Action
+                    Show-DryActionStart -Action $dry_var_Action
 
-                    # Define the global resource name used in output after the plan has been shown
-                    New-Variable -Name GlobalResourceName -Value $Action.ResourceName -Scope GLOBAL -Force
-                    New-Variable -Name GlobalActionName -Value $Action.Action -Scope GLOBAL -Force
-                    if ($Action.Phase -ge 1) {
-                        New-Variable -Name GlobalPhase -Value $Action.Phase -Scope GLOBAL -Force
+                    # Used by Out-DryLog ('ol')
+                    $GLOBAL:GlobalResourceName = $dry_var_Action.ResourceName
+                    $GLOBAL:GlobalActionName   = $dry_var_Action.Action
+                    if ($dry_var_Action.Phase -ge 1) {
+                        $GLOBAL:GlobalPhase    = $dry_var_Action.Phase
                     }
                     else {
-                        Remove-Variable -Name GlobalPhase -Scope GLOBAL -ErrorAction Ignore -Force
+                        $GLOBAL:GlobalPhase    = $null
                     }
 
-                    # Match up this action with the resource object in $dry_var_ResolvedResources
-                    Remove-Variable -Name Resource -ErrorAction Ignore 
+                    # Match up this action with the resource object 
+                    # in $dry_var_ResolvedResources
+                    $Resource = $null 
                     $Resource = $dry_var_ResolvedResources.Resources | Where-Object { 
-                        $_.Resource_Guid -eq $Action.Resource_Guid
+                        $_.Resource_Guid -eq $dry_var_Action.Resource_Guid
                     }
 
+                    
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                     
                         Resource Variables
@@ -1125,6 +1125,7 @@ try {
                         values specific to the Resource (or Action, actually)
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+                    <#
                     if ($dry_var_global_Configuration.resource_variables) {
                         $ResolveDryVariablesParams = @{
                             Variables              = $dry_var_global_Configuration.resource_variables
@@ -1136,10 +1137,12 @@ try {
                         $ResourceVariables = Resolve-DryVariables @ResolveDryVariablesParams
                         $ResolveDryVariablesParams = $null  
                     }
+                    #>
+                    
 
                     # Assume the worst
-                    $Action.Status = 'Failed'
-                    $ActionName = "dry.action.$($Action.Action)"
+                    $dry_var_Action.Status = 'Failed'
+                    $ActionName = "dry.action.$($dry_var_Action.Action)"
                     ol i @('Action Module/Name',"$ActionName")
                     $ActionName | Import-Module -Force -ErrorAction Stop
 
@@ -1174,7 +1177,7 @@ try {
                     & $ActionName @ActionParameters
                     $ActionEndTime = Get-Date
                     # No Catch?  
-                    $Action.Status = 'Success'
+                    $dry_var_Action.Status = 'Success'
 
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -1200,9 +1203,9 @@ try {
                     
                         You may call 
                             .\DryDeploy.ps1 -Apply -Step
-                        to make DD wait for you to press ENTER to continue to the next Actions, or q/quit to 
-                        just quit, if you're unhappy about something. You probably are, but don't push it
-
+                        to make DryDeploy wait for you to press ENTER before continuing to the next 
+                        Action, or Q to quit, if you're unhappy about something. 
+                         
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
                     if ($Step) {
                         $StepResponse = Read-Host -Prompt "Press ENTER to continue or Q(uit) to quit"
@@ -1212,7 +1215,7 @@ try {
                     }
                 }
                 catch {
-                    $Action.Status = 'Failed'
+                    $dry_var_Action.Status = 'Failed'
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
                         On certain exceptions it may be pertinent to see the chain of errors in the stack. If
@@ -1259,9 +1262,9 @@ try {
                         If we reach a catch, create a warning on the DD Action, but throw the original exception
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-                    $dry_var_WarningString = "Failed action: [$($Action.action)]"
-                    if ($Action.Phase) {
-                        $dry_var_WarningString += " - Phase [$($Action.Phase)]"
+                    $dry_var_WarningString = "Failed action: [$($dry_var_Action.action)]"
+                    if ($dry_var_Action.Phase) {
+                        $dry_var_WarningString += " - Phase [$($dry_var_Action.Phase)]"
                     }
                     ol w $dry_var_WarningString
                     $PSCmdLet.ThrowTerminatingError($_)
@@ -1272,8 +1275,8 @@ try {
                     $GLOBAL:GlobalResourceName = $null 
                     $GLOBAL:GlobalActionName = $null
                     $GLOBAL:GlobalPhase = $null
-                    Remove-Module -Name "dry.action.$($Action.Action)" -ErrorAction Ignore
-                    Show-DryActionEnd -Action $Action -StartTime $ActionStartTime -EndTime $ActionEndTime
+                    Remove-Module -Name "dry.action.$($dry_var_Action.Action)" -ErrorAction Ignore
+                    Show-DryActionEnd -Action $dry_var_Action -StartTime $ActionStartTime -EndTime $ActionEndTime
                 }
             }
         }

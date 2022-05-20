@@ -21,7 +21,6 @@
 
 function Resolve-DryActionOptions {
     [CmdletBinding()]
-    [Alias("Get-DryActionPaths")]
     param (
         [Parameter(Mandatory)]
         [PSObject]$Resource,
@@ -120,7 +119,7 @@ function Resolve-DryActionOptions {
             <#
                 - The OS Source Path is never Phased, define OSSourcePath 
             #>
-            [String]$ConfigOSSourcePath = Join-Path -Path $Resource.OSConfigPath -ChildPath $Action.Action
+            [String]$ConfigOSSourcePath = Join-Path -Path $Resource.BaseConfigPath -ChildPath $Action.Action
 
             $ActionMetaConfigFile   = Join-Path -Path $ConfigSourcePath -ChildPath 'Config.json'
             $OSActionMetaConfigFile = Join-Path -Path $ConfigOSSourcePath -ChildPath 'Config.json'
@@ -181,14 +180,14 @@ function Resolve-DryActionOptions {
                 
                 [String]$OSActionType     = $OSActionMetaConfig.default
                 if ($null -eq $OSActionType) {
-                    throw "The OSConfig for Action '$($Action.Action)' has no 'default'"
+                    throw "The BaseConfig for Action '$($Action.Action)' has no 'default'"
                 }
                 [Array]$OSSupportedTypes = @($OSActionMetaConfig.supported_types)
                 if (
                     ($Null -eq $OSSupportedTypes) -or 
                     ($OSSupportedTypes.count -eq 0)
                 ) {
-                    throw "The OSConfig for Action '$($Action.Action)' has no 'supported_types'"
+                    throw "The BaseConfig for Action '$($Action.Action)' has no 'supported_types'"
                 }
 
                 # Test if the Resource specifies a type for this Action, and modify  

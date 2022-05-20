@@ -11,10 +11,10 @@ class Resources {
         Build                 : @{order_type=role; roles=System.Object[]}
         CoreConfig            : @{connections=System.Object[]; network=; resources=System.Object[]}
         ModuleConfigDirectory : C:\GITs\DRY\ModuleConfigs\DomainRoot\
-        OSConfigDirectory     : C:\GITs\DRYCORE\EnvConfigs\utv.local\OSConfig
-        RoleMetaConfigs       : {@{rolename=ADM; role=adm-winclient; os_tag=Windows-10; description=Administration Client}, @{rolename=CA; role=ca-certauth-iss; os_tag=WindowsServer; description=Windows Server Issuing Root CA}, @{rolename=CA; role=ca-certauth-root;
-                                os_tag=WindowsServer; description=Windows Server Standalone Root CA}, @{rolename=DC; role=dc-domctrl-add; os_tag=WindowsServer; description=Additional DC}...}
-        UserConfig            : @{ad.import=; CoreConfig=; credentials=System.Object[]; OSConfigDirectory=; platforms=System.Object[]; UserConfig=; common_variables=System.Object[]; resource_variables=System.Object[]}
+        BaseConfigDirectory     : C:\GITs\DRYCORE\EnvConfigs\utv.local\BaseConfig
+        RoleMetaConfigs       : {@{rolename=ADM; role=adm-winclient; base_config=Windows-10; description=Administration Client}, @{rolename=CA; role=ca-certauth-iss; base_config=WindowsServer; description=Windows Server Issuing Root CA}, @{rolename=CA; role=ca-certauth-root;
+                                base_config=WindowsServer; description=Windows Server Standalone Root CA}, @{rolename=DC; role=dc-domctrl-add; base_config=WindowsServer; description=Additional DC}...}
+        UserConfig            : @{ad.import=; CoreConfig=; credentials=System.Object[]; BaseConfigDirectory=; platforms=System.Object[]; UserConfig=; common_variables=System.Object[]; resource_variables=System.Object[]}
         credentials           : {@{alias=alternate-domain-admin; username=###DomainNB###\bjoernf}, @{alias=domain-admin; username=###DomainNB###\Administrator}}
         CredentialsType       : encryptedstring
         #>
@@ -26,8 +26,8 @@ class Resources {
                 $Resource.Name,
                 $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $Resource.role -Property 'role_short_name'),
                 $Resource.Role,
-                $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $Resource.role -Property 'os_tag'),
-                $Configuration.Paths.OSConfigDirectory,
+                $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $Resource.role -Property 'base_config'),
+                $Configuration.Paths.BaseConfigDirectory,
                 $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $Resource.role -Property 'description'),
                 $Resource.Network,
                 $ConfigCombo,

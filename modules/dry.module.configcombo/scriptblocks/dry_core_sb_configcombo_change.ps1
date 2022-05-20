@@ -37,7 +37,7 @@
                 'environment' {
                     $this.envconfig.coreconfigpath  = (Join-Path -Path $FullPath -ChildPath 'CoreConfig')
                     $this.envconfig.userconfigpath  = (Join-Path -Path $FullPath -ChildPath 'UserConfig')
-                    $this.envconfig.osconfigpath    = (Join-Path -Path $FullPath -ChildPath 'OSConfig')
+                    $this.envconfig.BaseConfigPath    = (Join-Path -Path $FullPath -ChildPath 'BaseConfig')
                 }
                 'module' {
                     $this.moduleconfig.buildpath       = (Join-Path -Path $FullPath -ChildPath 'Build')

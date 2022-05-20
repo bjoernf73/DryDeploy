@@ -41,9 +41,9 @@ function Get-DryEnvConfig {
             2. 'UserConfig' which is user definable. Make any structure you'd like, and resolve in 
                 params to your Actions
 
-            3. 'OSConfig' has a file structure like Roles, but lacks Phases. We don't "pick up" those 
+            3. 'BaseConfig' has a file structure like Roles, but lacks Phases. We don't "pick up" those 
                 configs here, since they may be DSC-files, Active Directory defintions, and such - 
-                just record the path to the folder. Actions that inherit OSConfigs, will pick those
+                just record the path to the folder. Actions that inherit BaseConfigs, will pick those
                 files up, and include in your Action config.
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>

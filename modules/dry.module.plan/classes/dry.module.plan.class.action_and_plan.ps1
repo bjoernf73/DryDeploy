@@ -1,25 +1,26 @@
 using Namespace System.Collections.Generic
 using Namespace System.Collections
 class DryAction {
-    [Int]               $ApplyOrder
-    [Int]               $PlanOrder
-    [Int]               $ActionOrder
-    [String]            $Action
-    [Int]               $Phase
-    [String]            $Description
-    [String]            $Role 
-    [Guid]              $Resource_Guid 
-    [String]            $Action_Guid
-    [String]            $ResourceName 
-    [String]            $Status
-    [String]            $Dependency_Guid
-    [String]            $Chained_Guid
-    [String[]]          $Dependency_Guids
-    [Bool]              $PlanSelected
-    [Bool]              $ApplySelected
-    [Bool]              $ResolvedActionOrder
-    [PSCustomObject]    $Credentials
-    [PSCustomObject]    $Depends_On
+    [Int]             $ApplyOrder
+    [Int]             $PlanOrder
+    [Int]             $ActionOrder
+    [String]          $Action
+    [Int]             $Phase
+    [String]          $Source
+    [String]          $Description
+    [String]          $Role 
+    [Guid]            $Resource_Guid 
+    [String]          $Action_Guid
+    [String]          $ResourceName 
+    [String]          $Status
+    [String]          $Dependency_Guid
+    [String]          $Chained_Guid
+    [String[]]        $Dependency_Guids
+    [Bool]            $PlanSelected
+    [Bool]            $ApplySelected
+    [Bool]            $ResolvedActionOrder
+    [PSCustomObject]  $Credentials
+    [PSCustomObject]  $Depends_On
 
 
     # Create Action
@@ -50,6 +51,19 @@ class DryAction {
         }
         else {
             $This.Phase            = $Null
+        }
+
+        # The Action may get it's files from the role repository or a base repository
+        if ($ActionObject.Source) {
+            if ($ActionObject.Source -in @('role','base')) {
+                $This.Source = $ActionObject.Source
+            }
+            else {
+                throw "An Action's Source property must be 'base', 'role' or null"
+            }
+        }
+        else {
+            $This.Source = 'role'
         }
 
         # Test if the Action is the first in Plan
@@ -130,6 +144,19 @@ class DryAction {
             $This.Phase            = $Null
         }
 
+        # The Action may get it's files from the role repository or a base repository
+        if ($ActionObject.Source) {
+            if ($ActionObject.Source -in @('role','base')) {
+                $This.Source = $ActionObject.Source
+            }
+            else {
+                throw "An Action's Source property must be 'base', 'role' or null"
+            }
+        }
+        else {
+            $This.Source = 'role'
+        }
+
         $This.Action_Guid          = $Plan.ResolveActionGuid($This.Dependency_Guid,$This.Action_Guid)
     }
 
@@ -161,6 +188,19 @@ class DryAction {
         else {
             $This.Phase            = $Null
         }
+
+        # The Action may get it's files from the role repository or a base repository
+        if ($ActionObject.Source) {
+            if ($ActionObject.Source -in @('role','base')) {
+                $This.Source = $ActionObject.Source
+            }
+            else {
+                throw "An Action's Source property must be 'base', 'role' or null"
+            }
+        }
+        else {
+            $This.Source = 'role'
+        }
     }
 
     # Create Action from file
@@ -183,6 +223,7 @@ class DryAction {
         $This.Description          = $ActionObject.Description
         $This.Role                 = $ActionObject.Role
         $This.Phase                = $ActionObject.Phase
+        $This.Source               = $ActionObject.Source
         $This.Credentials          = $ActionObject.Credentials
         $This.Depends_On           = $ActionObject.Depends_On
         $This.Dependency_Guid      = $ActionObject.Dependency_Guid

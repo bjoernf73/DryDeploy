@@ -39,7 +39,7 @@ function Get-DryConfigCombo {
             path                     = "$Path"
             platform                 = $Platform.platform
             edition                  = $Platform.edition
-            envconfig                = [PSCustomObject]@{ name = ''; type = 'environment';  guid = ''; path = $null; description = ''; dependencies_hash = ''; dependencies = $null; coreconfigpath = $null; userconfigpath = $null; osconfigpath = $null}
+            envconfig                = [PSCustomObject]@{ name = ''; type = 'environment';  guid = ''; path = $null; description = ''; dependencies_hash = ''; dependencies = $null; coreconfigpath = $null; userconfigpath = $null; BaseConfigPath = $null}
             moduleconfig             = [PSCustomObject]@{ name = ''; type = 'module';       guid = ''; path = $null; description = ''; dependencies_hash = ''; dependencies = $null; buildpath = $null; rolespath = $null; credentialspath = $null}
             systemconfig             = [PSCustomObject]@{ name = ''; type = 'system';                                                  dependencies_hash = ''; dependencies = $null}
         }

@@ -18,7 +18,7 @@
             $this.envconfig.dependencies_hash = $ConfigCombo.envconfig.dependencies_hash
             $this.envconfig.coreconfigpath    = (Join-Path -Path $this.envconfig.path -ChildPath 'CoreConfig')
             $this.envconfig.userconfigpath    = (Join-Path -Path $this.envconfig.path -ChildPath 'UserConfig')
-            $this.envconfig.osconfigpath      = (Join-Path -Path $this.envconfig.path -ChildPath 'OSConfig')
+            $this.envconfig.BaseConfigPath      = (Join-Path -Path $this.envconfig.path -ChildPath 'BaseConfig')
         }
 
         # ModuleConfig
