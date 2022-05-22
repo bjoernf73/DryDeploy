@@ -7,21 +7,14 @@ function dry.action.terra.run {
         [PSObject]
         $Action,
 
-        [Parameter(Mandatory,HelpMessage="The resolved resource 
-        object")]
+        [Parameter(Mandatory)]
         [PSObject]
-        $Resource,
+        $OptionsObject,
 
         [Parameter(Mandatory,HelpMessage="The resolved global 
         configuration object")]
         [PSObject]
         $Configuration,
-
-        [Parameter(Mandatory,HelpMessage="ResourceVariables 
-        contains resolved variable values from the configurations 
-        common_variables and resource_variables combined")]
-        [List[PSObject]]
-        $ResourceVariables,
 
         [Parameter(HelpMessage="Hash directly from the command 
         line to be added as parameters to the function that 
@@ -38,7 +31,7 @@ function dry.action.terra.run {
         #   Resolve sources, temporary target folders, and other options 
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        $OptionsObject       = Resolve-DryActionOptions -Resource $Resource -Action $Action
+
         $ConfigSourcePath    = $OptionsObject.ConfigSourcePath
         $ConfigTargetPath    = $OptionsObject.ConfigTargetPath
         
@@ -71,8 +64,8 @@ function dry.action.terra.run {
         #   PLATFORM
         #   The Metaconfig supplies an expression to resolve the platform
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        if ($MetaConfig.platform_expression) {
-            [PSObject]$Platform = Invoke-Expression $MetaConfig.platform_expression -ErrorAction Stop
+        if ($MetaConfig.target_expression) {
+            [PSObject]$Platform = Invoke-Expression $MetaConfig.target_expression -ErrorAction Stop
             Set-Variable -Name 'Platform' -Value $Platform -Scope Global -Force
             ol i @('Target Terraform Platform',"$($Platform.name)")
         }

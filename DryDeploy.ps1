@@ -924,31 +924,6 @@ try {
             
             <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
-                Common Variables
-                
-                $dry_var_CommonVariables are processed once per run (if you, -Plan, -Apply or -GetConfig), 
-                as opposed to $dry_var_ResourceVariables, that are processed once per resource, hence 
-                resource specific
-
-            # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-
-            <#
-            if ($GLOBAL:dry_var_global_Configuration.common_variables) {
-                $dry_var_CommonVariables = Resolve-DryVariables -Variables $GLOBAL:dry_var_global_Configuration.common_variables -Configuration $GLOBAL:dry_var_global_Configuration -OutputType 'list'
-                $dry_var_CommonVariables.foreach({
-                    if (Get-Variable -Name $_.Name -Scope GLOBAL -ErrorAction Ignore) {
-                        Set-Variable -Name $_.Name -Value $_.Value -Scope GLOBAL
-                    }
-                    else {
-                        New-Variable -Name $_.Name -Value $_.Value -Scope GLOBAL
-                    }
-                }) 
-            }
-            # Replace any common ReplacementPattern ("###($Variable.name)###") in $Configuration
-            $GLOBAL:dry_var_global_Configuration = Resolve-DryReplacementPatterns -InputObject $GLOBAL:dry_var_global_Configuration -Variables $dry_var_CommonVariables
-            #>
-            <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-            
                 Credentials File
                 
                 The EnvConfig and/or ModuleConfig may provide placeholders for Credentials that should 
@@ -1050,8 +1025,7 @@ try {
                 ExcludePhases        = $ExcludePhases
             }
             $dry_var_Plan            = Get-DryPlan @dry_var_GetDryPlanParams -ErrorAction Stop
-            $dry_var_ResolvedResources = Get-DryFromJson -Path $dry_var_ResourcesFile -ErrorAction Stop
-            $dry_var_GetDryPlanParams          = $null
+            $dry_var_GetDryPlanParams = $null
 
             <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
@@ -1108,38 +1082,54 @@ try {
                     else {
                         $GLOBAL:GlobalPhase    = $null
                     }
+                    <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                        
+                        Make an ass out of you and me (assume) the worst. In the Plan written to file, make
+                        sure the Action has a status of 'Failed' before it starts. The only way the Action
+                        in the Plan on file may switch to a status of 'Success' is if all goes well
 
-                    # Match up this action with the resource object 
-                    # in $dry_var_ResolvedResources
-                    #! should be performed by the action class, and attached to the $action object
-                    $Resource = $null 
-                    $Resource = $dry_var_ResolvedResources.Resources | Where-Object { 
-                        $_.Resource_Guid -eq $dry_var_Action.Resource_Guid
-                    }
-                    
-                    # Assume the worst
+                    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
                     $dry_var_Action.Status = 'Failed'
-                    $ActionName = "dry.action.$($dry_var_Action.Action)"
-                    ol i @('Action Module/Name',"$ActionName")
-                    $ActionName | Import-Module -Force -ErrorAction Stop
+                    $dry_var_Plan.Save($dry_var_PlanFile,$False)
 
-                    $ActionParameters     = @{
-                        Action            = $Action 
-                        Resource          = $Resource
+                    <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                        
+                        Read the Action's top Config.json, and resolve paths, variables etc
+
+                    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+                    $dry_var_OptionsObject = Resolve-DryActionOptions -Action $dry_var_Action -Configuration $dry_var_global_Configuration -ConfigCombo $dry_var_global_ConfigCombo
+
+                    <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                        
+                        Import the action function
+
+                    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+                    
+                    $dry_var_ActionName = "dry.action.$($dry_var_Action.Action)"
+                    ol i @('Action Module/Name',"$dry_var_ActionName")
+                    $dry_var_ActionName | Import-Module -Force -ErrorAction Stop
+
+                    <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                        
+                        Params to send to the action function
+
+                    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+                    $dry_var_ActionParams = @{
+                        Action            = $dry_var_Action 
                         Configuration     = $dry_var_global_Configuration
-                        ResourceVariables = $ResourceVariables
+                        OptionsObject     = $dry_var_OptionsObject
                     }
                     
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                     
                         You may call ".\DryDeploy.ps1 -Apply -ActionParams @{'param1'='value1'}" to pass a hashtable
                         of names and values to the action-function if it supports some way of filtering on certain 
-                        parts of the configuration, however this params are highly Action specific, som the action
+                        parts of the configuration, however this params are highly Action specific, so the action
                         function will automatically quit after this.
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
                     if ($ActionParams) {
-                        $ActionParameters+=@{'ActionParams'=$ActionParams}
+                        $dry_var_ActionParams+=@{'ActionParams'=$ActionParams}
                         $Quit = $true
                     }
 
@@ -1150,9 +1140,9 @@ try {
                         This is where the Action Function get's called
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-                    $ActionStartTime = Get-Date
-                    & $ActionName @ActionParameters
-                    $ActionEndTime = Get-Date
+                    $dry_var_ActionStartTime = Get-Date
+                    & $dry_var_ActionName @$dry_var_ActionParams
+                    $dry_var_ActionEndTime = Get-Date
                     # No Catch?  
                     $dry_var_Action.Status = 'Success'
 
@@ -1185,8 +1175,8 @@ try {
                          
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
                     if ($Step) {
-                        $StepResponse = Read-Host -Prompt "Press ENTER to continue or Q(uit) to quit"
-                        if (($StepResponse -eq 'q') -or ($StepResponse -eq 'quit')) { 
+                        $dry_var_StepResponse = Read-Host -Prompt "Press ENTER to continue or Q(uit) to quit"
+                        if (($dry_var_StepResponse -eq 'q') -or ($dry_var_StepResponse -eq 'quit')) { 
                             break
                         }
                     }
@@ -1248,12 +1238,12 @@ try {
                 }
                 finally {
                     $dry_var_Plan.Save($dry_var_PlanFile,$False)
-                    $ActionEndTime = Get-Date
+                    $dry_var_ActionEndTime = Get-Date
                     $GLOBAL:GlobalResourceName = $null 
                     $GLOBAL:GlobalActionName = $null
                     $GLOBAL:GlobalPhase = $null
                     Remove-Module -Name "dry.action.$($dry_var_Action.Action)" -ErrorAction Ignore
-                    Show-DryActionEnd -Action $dry_var_Action -StartTime $ActionStartTime -EndTime $ActionEndTime
+                    Show-DryActionEnd -Action $dry_var_Action -StartTime $dry_var_ActionStartTime -EndTime $dry_var_ActionEndTime
                 }
             }
         }
@@ -1295,18 +1285,16 @@ finally {
         Remove all DryDeploy modules
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-    (Get-Module | Where-Object { 
+    Get-Module | Where-Object { 
         ($_.Name -match "^dry\.action\.*") -or 
-        ($_.Name -match "^dry\.module\.*")}).foreach({
-        Remove-Module -Name $_.Name -Force
-    })
+        ($_.Name -match "^dry\.module\.*")} | 
+    Remove-Module -Force
 
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         Remove all DryDeploy variables
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-    (Get-Variable | Where-Object {$_.Name -match '^dry_var_*'}).foreach({
-        Remove-Variable -Name $_ -Force
-    })
+    Get-Variable -Scope Local | Where-Object {$_.Name -match '^dry_var_*'} | Remove-Variable -Scope Local -Force
+    Get-Variable -Scope Global | Where-Object {$_.Name -match '^dry_var_*'} | Remove-Variable -Scope Global -Force
 }

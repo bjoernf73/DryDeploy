@@ -178,7 +178,7 @@ class DryAction {
         $This.Resource_Guid        = $ActionObject.Resource_Guid
         $This.Action_Guid          = $ActionGuid
         $This.ResourceName         = $ActionObject.ResourceName
-        $This.Resource             = fuckyou
+        $This.Resource             = $ActionObject.Resource
         $This.Status               = 'Todo'
         $This.PlanSelected         = $False
         $This.ApplySelected        = $False
@@ -218,6 +218,7 @@ class DryAction {
         $This.Resource_Guid        = $ActionObject.Resource_Guid
         $This.Action_Guid          = $ActionObject.Action_Guid
         $This.ResourceName         = $ActionObject.ResourceName
+        $This.Resource             = $ActionObject.Resource
         $This.Status               = $ActionObject.Status
         $This.PlanSelected         = $ActionObject.PlanSelected
         $This.ApplySelected        = $False # <-- Re-evaluated at every run
@@ -253,11 +254,7 @@ class Plan {
         $This.EndTime               = $null
         
         # Loop backwards through the Resources
-        for (
-            $ResourceOrderCount = $($Resources.Resources).Count; 
-            $ResourceOrderCount -gt 0; 
-            $ResourceOrderCount-- 
-        ) {
+        for ($ResourceOrderCount = $($Resources.Resources).Count; $ResourceOrderCount -gt 0; $ResourceOrderCount-- ) {
             # Get the resource with ResourceOrder = $ResourceCount
             [Resource] $CurrentResource = $Resources.Resources | 
             Where-Object {
@@ -265,10 +262,7 @@ class Plan {
             }
 
             # Loop backwards through the Actions
-            for (
-                    $ActionOrderCount = ($CurrentResource.ActionOrder).Count; 
-                    $ActionOrderCount -gt 0;
-                    $ActionOrderCount-- ) {
+            for ($ActionOrderCount = ($CurrentResource.ActionOrder).Count; $ActionOrderCount -gt 0; $ActionOrderCount-- ) {
                 [PSCustomObject] $CurrentAction = $CurrentResource.ActionOrder | 
                 Where-Object {
                     $_.order -eq $ActionOrderCount
@@ -316,10 +310,7 @@ class Plan {
                     $ResolveUnresolvedActions = $True
                 }
 
-                if (
-                    ($ResolveUnresolvedActions -eq $True) -And 
-                    ($This.UnresolvedActionsList.Count -gt 0)
-                ) {
+                if (($ResolveUnresolvedActions -eq $true) -and ($This.UnresolvedActionsList.Count -gt 0)) {
                     $This.ResolveUnresolvedActions()
                 }
             }
@@ -367,7 +358,7 @@ class Plan {
                     throw "Unable to find Dependent Action with Guid matching $DependencyGuid"
                 }
                 foreach ($DependentActionGuid in $DependentActionGuids) {
-                    # get the ned action guid
+                    # get the action guid
                     $InstanceActionGuid = $This.ResolveActionGuid($DependentActionGuid,$ActionGuid) 
                     $This.Actions += [DryAction]::New($_,$InstanceActionGuid)
                 }
