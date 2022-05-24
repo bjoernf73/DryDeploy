@@ -31,7 +31,7 @@ Function Get-DryDscADSubnet {
         $AllSubnetsatSite = @()
         
         # Get resource's site
-        $Site = $Configuration.network.sites | Where-Object { $_.Name -eq $Resource.network.site }
+        $Site = $Configuration.CoreConfig.network.sites | Where-Object { $_.Name -eq $Resource.network.site }
         If (($Site -is [array]) -or ($Null -eq $Site)) {
             Write-Error "Multiple or no sites matched pattern '$($Resource.network.site)'" -ErrorAction Stop
         }

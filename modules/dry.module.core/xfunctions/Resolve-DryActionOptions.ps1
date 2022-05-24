@@ -99,6 +99,18 @@ function Resolve-DryActionOptions {
             }
         }
 
+        <#
+            Resolve all credentials 
+        #>
+        $ResolvedCredentials = $null
+        $ResolvedCredentials = New-Object -TypeName PSCustomObject
+        $c = 0
+        $Action.Credentials.PSObject.Properties.ForEach({$c++})
+        for ($CredCount = 1; $CredCount -le $c; $CredCount++) {
+            $ResolvedCredentials | Add-Member -MemberType NoteProperty -Name "Credential$CredCount" -Value (Get-DryCredential -Alias $Action.credentials."Credential$CredCount" -EnvConfig $ConfigCombo.envconfig.name)
+        }
+        $Action.Credentials = $ResolvedCredentials
+
         # Any action must specify a default type
         if (Test-Path -Path $ActionMetaConfigFile -ErrorAction ignore) {
             $ActionMetaConfig = Get-DryFromJson -File $ActionMetaConfigFile
@@ -133,33 +145,34 @@ function Resolve-DryActionOptions {
                         }
                     }
                 }
-                
                 [String]$ConfigSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath $ActionType
                 [String]$TypeFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'files'
                 [String]$TypeMetaConfigFile = Join-Path -Path $ConfigSourcePath -ChildPath 'Config.json'
                 [PSCustomObject]$TypeMetaConfig = Get-DryFromJson -Path $TypeMetaConfigFile
-                if ($TypeMetaConfig.vars) {
-                    # There are variables to be resolved for the Action
-                    $ResolveDryVarParams = @{
-                        Variables     = $TypeMetaConfig.vars
-                        Action        = $Action
-                        Resource      = $Action.Resource 
-                        Configuration = $Configuration
-                    }
-                    $TypeMetaConfigVars = Resolve-DryVariables @ResolveDryVarParams
-                    $ResolveDryVarParams = $null
-                }
+                
             }
             else {
 
             } 
         }
 
+        if ($TypeMetaConfig.vars) {
+            # There are variables to be resolved for the Action
+            $ResolveDryVarParams = @{
+                Variables     = $TypeMetaConfig.vars
+                Action        = $Action
+                Resource      = $Action.Resource
+                Configuration = $Configuration
+            }
+            $TypeMetaConfigVars = Resolve-DryVariables @ResolveDryVarParams
+            $ResolveDryVarParams = $null
+        }
 
         $OptionsObject = New-Object -TypeName PSCustomObject
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ActionType' -Value $ActionType
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ConfigTargetPath' -Value $ConfigTargetPath
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ConfigSourcePath' -Value $ConfigSourcePath
+        $OptionsObject | Add-Member -MemberType NoteProperty -Name 'Credentials' -Value $ResolvedCredentials
         
         if ($ModuleFilesSourcePath) {
             if (Test-Path -Path $ModuleFilesSourcePath -ErrorAction Ignore) {

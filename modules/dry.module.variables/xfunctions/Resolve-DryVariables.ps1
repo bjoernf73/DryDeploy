@@ -49,7 +49,7 @@ function Resolve-DryVariables {
     try {
         Switch ($OutPutType) {
             'hashtable' {
-                $PRIVATE:PrivateVariablesHash = [HastTable]::New()
+                $PRIVATE:PrivateVariablesHash = [HashTable]::New()
             }
             'list' {
                 $PRIVATE:PrivateVariablesList = [System.Collections.Generic.List[PSObject]]::New()
@@ -158,7 +158,7 @@ function Resolve-DryVariables {
                     # The variable value is a function call
                     Try {
                         Remove-Variable -name VarValue,FunctionParamsHash,FunctionParamsNameArr,FunctionParamsName -ErrorAction Ignore
-                        $FunctionParamsHash = [HastTable]::New()
+                        $FunctionParamsHash = [HashTable]::New()
                         $FunctionParamsNameArr = @($Var.parameters | Get-Member -MemberType NoteProperty | Select-Object -Property Name).Name
                         
                         ForEach ($FunctionParamsName in $FunctionParamsNameArr) {

@@ -17,40 +17,30 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-Function Get-DryDscReverseZones {
+function Get-DryDomainDN {
     [CmdletBinding()]  
-    Param (
-        [Parameter(Mandatory=$true)]
-        [psobject]$Resource,
+    param (
+        [Parameter(Mandatory)]
+        [psobject]$Configuration,
 
-        [Parameter(Mandatory=$true)]
-        [psobject]$Configuration
+        [Parameter()]
+        [switch]$SchemaDN, 
+
+        [Parameter()]
+        [switch]$ConfigurationDN
     )
-    Try {
-        # Holds all reverse zones at site
-        $AllReverseZonesAtSite = @()
-        
-        # Get resource's site
-        $Site = $Configuration.network.sites | 
-        Where-Object { $_.Name -eq $Resource.network.site }
-        If (($Site -is [array]) -or ($Null -eq $Site)){
-            Write-Error "Multiple or no sites matched pattern '$($Resource.network.site)'" -ErrorAction Stop
+    try {
+        $DomainFQDN = $Configuration.CoreConfig.network.domain.domain_fqdn
+        $DomainDN = ConvertTo-DryUtilsDomainDN -DomainFQDN $DomainFQDN
+        if ($ConfigurationDN -or $SchemaDN) {
+            $DomainDN = "CN=Configuration,$DomainDN"
         }
-
-        # Get the resource's subnet. That must exist, and there should be only one
-        $Subnets = @($Site.Subnets)
-        If ($Null -eq $Subnets) {
-            Write-Error "No subnets matched pattern '$($Resource.network.subnet_name)'" -ErrorAction Stop
+        if ($SchemaDN) {
+            $DomainDN = "CN=Schema,$DomainDN"
         }
-
-        # then the others
-        ForEach ($Subnet in $Subnets) {
-            $AllReverseZonesAtSite+= $Subnet.reverse_zone
-        }
-
-        $AllReverseZonesAtSite
+        $DomainDN
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }
