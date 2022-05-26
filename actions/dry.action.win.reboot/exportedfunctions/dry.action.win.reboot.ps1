@@ -21,32 +21,24 @@ Function dry.action.win.reboot {
     [CmdletBinding()]  
     Param (
         [Parameter(Mandatory,HelpMessage="The resolved action object")]
-        [PSObject]$Action,
+        [PSObject]
+        $Action,
 
-        [Parameter(Mandatory,HelpMessage="The resolved resource object")]
-        [PSObject]$Resource,
+        [Parameter(Mandatory)]
+        [PSObject]
+        $Resolved,
 
-        [Parameter(Mandatory,HelpMessage="The resolved environment configuration object")]
-        [PSObject]$Configuration,
+        [Parameter(Mandatory,HelpMessage="The resolved global configuration
+        object")]
+        [PSObject]
+        $Configuration,
 
-        [Parameter(Mandatory,HelpMessage="ResourceVariables contains resolved variable values from the configurations common_variables and resource_variables combined")]
-        [System.Collections.Generic.List[PSObject]]$ResourceVariables,
-
-        [Parameter(Mandatory=$False,HelpMessage="Hash directly from the command line to be added as parameters to the function that iniates the action")]
-        [HashTable]$ActionParams
+        [Parameter(HelpMessage="Hash directly from the command line to be 
+        added as parameters to the function that iniates the action")]
+        [HashTable]
+        $ActionParams
     )
-    Try {
-
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        #   OPTIONS
-        #
-        #   Resolve sources, temporary target folders, and other options 
-        #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        $OptionsObject       = Resolve-DryActionOptions -Resource $Resource -Action $Action -NoFiles
-        $ConfigRootPath      = $OptionsObject.ConfigRootPath
-        $MetaConfigFile      = Join-Path -Path $ConfigRootPath -ChildPath 'Config.json'
-        
+    try {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   DEFAULT
         #
@@ -66,18 +58,17 @@ Function dry.action.win.reboot {
         #   defined previously
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-        If (Test-Path -Path $MetaConfigFile -ErrorAction Ignore) {
-            [PSObject] $ActionMetaConfigObject = Get-DryFromJson -Path $MetaConfigFile -ErrorAction Stop 
-            [Int]      $NumberOfReboots        = $ActionMetaConfigObject.reboots
-            [Bool]     $GPUpdate               = $ActionMetaConfigObject.gpupdate
-            [String]   $ConfigOrDefault        = 'Config'
+        if ($Resolved.MetaConfig) {
+            [Int]$NumberOfReboots = $Resolved.MetaConfig.reboots
+            [Bool]$GPUpdate = $Resolved.MetaConfig.gpupdate
+            [String]$ConfigOrDefault        = 'Config'
         }
         
-        Switch ($GPUpdate) {
+        switch ($GPUpdate) {
             $True {
                 $WithOrWithout = 'with'
             }
-            Default {
+            default {
                 $WithOrWithout = 'without'
             }
         }
@@ -92,8 +83,8 @@ Function dry.action.win.reboot {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         $CredCount = 1
-        While ($Action.credentials."credential$CredCount") {
-            $Credentials += @(Get-DryCredential -Alias $Action.credentials."credential$CredCount" -EnvConfig "$($GLOBAL:dry_var_global_ConfigCombo.envconfig.name)")
+        while ($Resolved.credentials."credential$CredCount") {
+            $Credentials += @($Resolved.credentials."credential$CredCount")
             $CredCount++
         }
 
@@ -107,14 +98,13 @@ Function dry.action.win.reboot {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         
         # get the winrm session options
-        $SessionConfig = $Configuration.connections | 
+        $SessionConfig = $Configuration.CoreConfig.connections | 
         Where-Object { 
             $_.type -eq 'winrm'
         }
         
-        If ($Null -eq $SessionConfig) {
-            ol w "Unable to find 'connection' of type 'winrm' in environment config"
-            Throw "Unable to find 'connection' of type 'winrm' in environment config"
+        if ($null -eq $SessionConfig) {
+            throw "Unable to find 'connection' of type 'winrm' in environment config"
         }
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -124,14 +114,14 @@ Function dry.action.win.reboot {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #       
         
-        For ($RebootCount = 1; $RebootCount -le $NumberOfReboots; $RebootCount++) {
+        for ($RebootCount = 1; $RebootCount -le $NumberOfReboots; $RebootCount++) {
             ol i @("Reboot $WithOrWithout GPUpdate","$RebootCount of $NumberOfReboots")
             
-            If ($GPUpdate) {
+            if ($GPUpdate) {
                 $InvokeInPSSessionParams = @{
                     Credential     = $Credentials
                     Command        = 'gpupdate' 
-                    Computername   = $Resource.resolved_network.ip_address 
+                    Computername   = $Action.Resource.resolved_network.ip_address 
                     ArgumentString = '/force' 
                     SessionConfig  = $SessionConfig
                 }
@@ -143,28 +133,28 @@ Function dry.action.win.reboot {
                 Command       = 'Restart-Computer' 
                 Arguments     = @{'Force'=$True} 
                 Credential    = $Credentials
-                Computername  = $Resource.resolved_network.ip_address 
+                Computername  = $Action.Resource.resolved_network.ip_address 
                 SessionConfig = $SessionConfig
             }
             ol i 'Rebooting...'
             Invoke-DryInPSSession @InvokeInPSSessionParams
     
             $WaitWinRMInterfaceParams = @{
-                IP                       = $Resource.resolved_network.ip_address
+                IP                       = $Action.Resource.resolved_network.ip_address
                 Credential               = $Credentials
-                ComputerName             = $Resource.name
+                ComputerName             = $Action.Resource.name
                 SecondsToTry             = 500
                 SessionConfig            = $SessionConfig
                 SecondsToWaitBeforeStart = 30
             }
     
             $WinRMStatus = Wait-DryWinRM @WaitWinRMInterfaceParams
-            Switch ($WinRMStatus) {
+            switch ($WinRMStatus) {
                 $False {
-                    Throw "Failed to Connect to $($Resource.name) (IP: $($Resource.resolved_network.ip_address))"
+                    throw "Failed to Connect to $($Action.Resource.name) (IP: $($Action.Resource.resolved_network.ip_address))"
                 }
                 $True {
-                    ol i @('Successfully connected',"$($Resource.name) (IP: $($Resource.resolved_network.ip_address))")
+                    ol i @('Successfully connected',"$($Action.Resource.name) (IP: $($Action.Resource.resolved_network.ip_address))")
                 }  
             }
         }
@@ -176,28 +166,16 @@ Function dry.action.win.reboot {
         #   on the restartet resource come up
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #   
-        if ($null -ne $ActionMetaConfigObject.sleep_after_seconds) {
-            Start-DryUtilsSleep -Seconds $ActionMetaConfigObject.sleep_after_seconds -Message "Sleeping $($ActionMetaConfigObject.sleep_after_seconds) seconds before continuing..."
+        if ($null -ne $Resolved.MetaConfig.sleep_after_seconds) {
+            Start-DryUtilsSleep -Seconds $Resolved.MetaConfig.sleep_after_seconds -Message "Sleeping $($Resolved.MetaConfig.sleep_after_seconds) seconds before continuing..."
         }
         ol i "All reboots were successful" -sh    
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    Finally {
-        @(  'ConfigRootPath',
-            'NumberOfReboots',
-            'GPUpdate',
-            'ConfigOrDefault',
-            'ActionMetaConfigObject',
-            'WithOrWithout',
-            'CredCount',
-            'Credentials',
-            'SessionConfig',
-            'InvokeInPSSessionParams',
-            'WaitWinRMInterfaceParams',
-            'WinRMStatus'
-        ).ForEach({
+    finally {
+        @(Get-Variable -Scope Script).ForEach({
             Remove-Variable -Name $_ -ErrorAction Ignore
         })
 

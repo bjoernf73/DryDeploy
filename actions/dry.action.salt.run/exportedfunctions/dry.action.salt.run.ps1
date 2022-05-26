@@ -351,7 +351,7 @@ Function dry.action.salt.run {
             
 
             # Ensure that the target system has the requires modules
-            $SessionConfig = $Configuration.connections | 
+            $SessionConfig = $Configuration.CoreConfig.connections | 
             Where-Object { 
                 $_.type -eq 'winrm'
             }
@@ -436,7 +436,7 @@ Function dry.action.salt.run {
             'ComputerName'=$DscTarget
             'SessionType'='CIMSession'
         }
-        $SessionConfig = $Configuration.connections | 
+        $SessionConfig = $Configuration.CoreConfig.connections | 
         Where-Object { 
             $_.type -eq 'winrm'
         }
@@ -467,7 +467,7 @@ Function dry.action.salt.run {
         Remove-CimSession -ErrorAction SilentlyContinue 
 
         # Wait for the winrm interface to come up
-        $SessionConfig = $Configuration.connections | 
+        $SessionConfig = $Configuration.CoreConfig.connections | 
         Where-Object { 
             $_.type -eq 'winrm'
         }

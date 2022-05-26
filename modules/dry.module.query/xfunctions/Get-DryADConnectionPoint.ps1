@@ -71,14 +71,14 @@ function Get-DryADConnectionPoint {
     
     try {
         if ($null -ne $Resource.network.site) {
-            $Site = $Configuration.network.sites | Where-Object {
+            $Site = $Configuration.CoreConfig.network.sites | Where-Object {
                 $_.name -eq "$($Resource.network.site)"
             }
             if ($null -eq $Site) {
                 throw "Unable to find site object matching name $($Resource.network.site)"
             }
             elseif ($Site -is [array]) {
-                throw "Multiple references to site $($Resource.network.site) in `$Configuration.network"
+                throw "Multiple references to site $($Resource.network.site) in `$Configuration.CoreConfig.network"
             }
 
             $ADConnectionPoints = $Site.active_directory_connection_points
@@ -135,7 +135,7 @@ function Get-DryADConnectionPoint {
         }
         else {
             ol v "The Resource $($Resource.name) does specify a site-property - PDC Emulator will be returned"
-            $ADConnectionPoint = $Configuration.network.pdc_emulator
+            $ADConnectionPoint = $Configuration.CoreConfig.network.pdc_emulator
         }
         ol i "Resolved AD Connection Point","$ADConnectionPoint"
         return $ADConnectionPoint

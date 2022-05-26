@@ -38,6 +38,10 @@ function Resolve-DryVariables {
         [PSObject]
         $Resource,
 
+        [Parameter(HelpMessage="The resolved credentials list for the action. Not in use by the function, but may be used by expressions that resolves a value")]
+        [PSCustomObject]
+        $Credentials,
+
         [Parameter(HelpMessage="The resolved environment configuration object. Not in use by the function, but may be used by expressions that resolves a value")]
         [PSObject]
         $Configuration,
@@ -129,7 +133,7 @@ function Resolve-DryVariables {
                         }
                     }
                 }
-                'bool' {
+                {$_ -in 'bool','boolean'} {
                     # The variable value is a boolean
                     Try {
                         [Boolean]$VarValue = $Var.Value

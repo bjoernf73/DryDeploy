@@ -19,49 +19,34 @@
 
 Function dry.action.ad.move {
     [CmdletBinding()]  
-    Param (
+    param (
         [Parameter(Mandatory,HelpMessage="The resolved action object")]
-        [PSObject]$Action,
+        [PSObject]
+        $Action,
 
-        [Parameter(Mandatory,HelpMessage="The resolved resource object")]
-        [PSObject]$Resource,
+        [Parameter(Mandatory)]
+        [PSObject]
+        $Resolved,
 
-        [Parameter(Mandatory,HelpMessage="The resolved environment configuration object")]
-        [PSObject]$Configuration,
+        [Parameter(Mandatory,HelpMessage="The resolved global configuration
+        object")]
+        [PSObject]
+        $Configuration,
 
-        [Parameter(Mandatory,HelpMessage="ResourceVariables contains resolved variable values from the configurations common_variables and resource_variables combined")]
-        [System.Collections.Generic.List[PSObject]]$ResourceVariables,
-
-        [Parameter(Mandatory=$False,HelpMessage="Hash directly from the command line to be added as parameters to the function that iniates the action")]
-        [HashTable]$ActionParams
+        [Parameter(HelpMessage="Hash directly from the command line to be 
+        added as parameters to the function that iniates the action")]
+        [HashTable]
+        $ActionParams
     )
 
-    Try {
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        #   OPTIONS
-        #
-        #   Resolve sources, temporary target folders, and other options 
-        #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        $OptionsObject       = Resolve-DryActionOptions -Resource $Resource -Action $Action
-        $ActionType          = $OptionsObject.ActionType
-        $ConfigRootPath      = $OptionsObject.ConfigRootPath
-        $MetaConfigFile      = Join-Path -Path $ConfigRootPath -ChildPath 'Config.json'
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        #   METACONFIG
-        #
-        #   Open MetaConfig, resolve OU from it
-        #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        
-        $MetaConfig          = Get-DryFromJson -File $MetaConfigFile
-        $RoleOU              = $MetaConfig.ous."$ActionType"
-        If ($Null -eq $RoleOU) {
-            ol -t 1 -m "Action does not contain an OU of type '$ActionType'"
-            Throw "Action does not contain an OU of type '$ActionType'"
+    try {
+        $MetaConfig = $Resolved.MetaConfig
+        $RoleOU = $MetaConfig.ous."$($MetaConfig.ActionType)"
+        if ($null -eq $RoleOU) {
+            throw "Action does not contain an OU of type '$ActionType'"
         }
         # Replace replacement patterns
-        $RoleOU = Resolve-DryReplacementPattern -InputText $RoleOU -Variables $ResourceVariables
+        $RoleOU = Resolve-DryReplacementPattern -InputText $RoleOU -Variables $Resolved.MetaConfig.vars
         
         # Convert the RoleOU to a distinguished name
         $RoleOU = ConvertTo-DryUtilsDistinguishedName -Name $RoleOU
@@ -74,7 +59,7 @@ Function dry.action.ad.move {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-        $Credential = Get-DryCredential -Alias "$($action.credentials.credential1)"  -EnvConfig $GLOBAL:dry_var_global_ConfigCombo.envconfig.name
+        $Credential = $Resolved.Credentials.credential1
         ol i @('Using Credential',"$($Credential.UserName)")
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -101,11 +86,11 @@ Function dry.action.ad.move {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         $GetDryADConnectionPointParams = @{
-            Resource      = $Resource 
+            Resource      = $Action.Resource 
             Configuration = $Configuration 
             ExecutionType = $ExecutionType
         }
-        If ($ExecutionType -eq 'Remote') {
+        if ($ExecutionType -eq 'Remote') {
             $GetDryADConnectionPointParams += @{
                 Credential    = $Credential
             }
@@ -120,15 +105,14 @@ Function dry.action.ad.move {
         #   Action: Create session
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        If ($ExecutionType -eq 'Remote') {
+        if ($ExecutionType -eq 'Remote') {
             # Create the session
-            $SessionConfig = $Configuration.connections | 
+            $SessionConfig = $Configuration.CoreConfig.connections | 
             Where-Object { 
                 $_.type -eq 'winrm'
             }
-            If ($Null -eq $SessionConfig) {
-                ol v "Unable to find 'connection' of type 'winrm' in environment config"
-                Throw "Unable to find 'connection' of type 'winrm' in environment config"
+            if ($null -eq $SessionConfig) {
+                throw "Unable to find 'connection' of type 'winrm' in environment config"
             }
 
             $GetDrySessionParams =  @{
@@ -137,19 +121,18 @@ Function dry.action.ad.move {
                 SessionConfig = $SessionConfig
                 SessionType   = 'PSSession'
             }
-            $ConfADSession = New-DrySession @GetDrySessionParams
-
-            ol i @("Created PSSession to connection point","Session ID: $($ConfADSession.Id), State: $($ConfADSession.State)")
+            $AdMoveSession = New-DrySession @GetDrySessionParams
+            ol i @("Created PSSession to connection point","Session ID: $($AdMoveSession.Id), State: $($AdMoveSession.State)")
         }
 
         $MoveDryADComputerParams = @{
-            ComputerName = $Resource.Name
+            ComputerName = $Action.Resource.Name
             TargetOU     = $RoleOU
         }
-        Switch ($ExecutionType) {
+        switch ($ExecutionType) {
             'Remote' {
                 $MoveDryADComputerParams += @{
-                    PSSession = $ConfADSession       
+                    PSSession = $AdMoveSession       
                 }
             }
             'Local' {
@@ -168,31 +151,19 @@ Function dry.action.ad.move {
         $MoveDryADComputerParams+= @{'Test'=$True}
         ol i @("Testing location of '$($Resource.name)' computer object","$RoleOU")
         
-        If ((Move-DryADComputer @MoveDryADComputerParams) -eq $True) {
+        if ((Move-DryADComputer @MoveDryADComputerParams) -eq $True) {
             ol i "Successfully completed the MoveToOU Action"
         }
-        Else {
-            Throw "Failed Action MoveToOU"
+        else {
+            throw "Failed Action MoveToOU"
         }        
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    Finally {
-        $ConfADSession | Remove-PSSession -ErrorAction Ignore
-        $VarsToRemove = @(
-            'RoleOU',
-            'Credential',
-            'ActiveDirectoryConnectionPoint',
-            'GetDrySessionParams',
-            'ConfADSession',
-            'MoveDryADComputerParams',
-            'Test'
-        )
-        $VarsToRemove.ForEach({
-            Remove-Variable -Name "$_" -ErrorAction Ignore
-        })
-        Remove-Module -Name 'dry.module.ad' -Force -ErrorAction Continue
+    finally {
+        $AdMoveSession | Remove-PSSession -ErrorAction Ignore 
+        Remove-Module -Name 'dry.module.ad' -Force -ErrorAction continue
         ol i "Action 'ad.move' is finished" -sh
     }
 }

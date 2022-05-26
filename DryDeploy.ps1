@@ -1108,8 +1108,8 @@ try {
                         Configuration = $dry_var_global_Configuration 
                         ConfigCombo   = $dry_var_global_ConfigCombo
                     }
-                    $dry_var_OptionsObject = Resolve-DryActionOptions @dry_var_ResolveActionOptionsParams
-                    $dry_var_OptionsObject
+                    $dry_var_Resolved = Resolve-DryActionOptions @dry_var_ResolveActionOptionsParams
+                    $dry_var_Resolved
                     #! Should display the options object
                     
                 }
@@ -1233,7 +1233,7 @@ try {
                         Configuration = $dry_var_global_Configuration 
                         ConfigCombo   = $dry_var_global_ConfigCombo
                     }
-                    $dry_var_OptionsObject = Resolve-DryActionOptions @dry_var_ResolveActionOptionsParams
+                    $dry_var_Resolved = Resolve-DryActionOptions @dry_var_ResolveActionOptionsParams
 
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                         
@@ -1251,9 +1251,9 @@ try {
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
                     $dry_var_ActionParams = @{
-                        Action            = $dry_var_Action 
-                        Configuration     = $dry_var_global_Configuration
-                        OptionsObject     = $dry_var_OptionsObject
+                        Action        = $dry_var_Action 
+                        Configuration = $dry_var_global_Configuration
+                        Resolved      = $dry_var_Resolved
                     }
                     
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -1277,7 +1277,7 @@ try {
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
                     $dry_var_ActionStartTime = Get-Date
-                    & $dry_var_ActionName @$dry_var_ActionParams
+                    & $dry_var_ActionName @dry_var_ActionParams
                     $dry_var_ActionEndTime = Get-Date
                     # No Catch?  
                     $dry_var_Action.Status = 'Success'

@@ -52,7 +52,7 @@ function Get-DryAdExecutionType {
         }
 
         # Test: If executing system is in target domain
-        if ((Get-WmiObject -Class Win32_ComputerSystem -ErrorAction SilentlyContinue).Domain -eq $Configuration.network.domain.domainfqdn) {
+        if ((Get-WmiObject -Class Win32_ComputerSystem -ErrorAction SilentlyContinue).Domain -eq $Configuration.CoreConfig.network.domain.domain_fqdn) {
             $LocalPrereqs['DomainComputerInTargetDomain'] = $True
         }
 

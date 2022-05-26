@@ -56,6 +56,7 @@ function Resolve-DryActionOptions {
         #>
         [String]$ConfigTargetPath = Join-Path -Path $Configuration.Paths.TempConfigsDir -ChildPath $ConfigCombo.envconfig.name
         [String]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.ResourceName
+        [String]$RoleTargetRootPath = $ConfigTargetPath
         [String]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.Action
         [String]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.Source
 
@@ -102,14 +103,22 @@ function Resolve-DryActionOptions {
         <#
             Resolve all credentials 
         #>
-        $ResolvedCredentials = $null
-        $ResolvedCredentials = New-Object -TypeName PSCustomObject
+        $Credentials = $null
+        $Credentials = New-Object -TypeName PSCustomObject
         $c = 0
         $Action.Credentials.PSObject.Properties.ForEach({$c++})
         for ($CredCount = 1; $CredCount -le $c; $CredCount++) {
-            $ResolvedCredentials | Add-Member -MemberType NoteProperty -Name "Credential$CredCount" -Value (Get-DryCredential -Alias $Action.credentials."Credential$CredCount" -EnvConfig $ConfigCombo.envconfig.name)
+            $GetCredentialsParams = @{
+                Alias     = $Action.credentials."Credential$CredCount" 
+                EnvConfig = $ConfigCombo.envconfig.name
+            }
+            $AddMemberParams = @{
+                MemberType = 'NoteProperty' 
+                Name       = "Credential$CredCount" 
+                Value      = (Get-DryCredential @GetCredentialsParams)
+            }
+            $Credentials | Add-Member @AddMemberParams
         }
-        $Action.Credentials = $ResolvedCredentials
 
         # Any action must specify a default type
         if (Test-Path -Path $ActionMetaConfigFile -ErrorAction ignore) {
@@ -163,17 +172,41 @@ function Resolve-DryActionOptions {
                 Action        = $Action
                 Resource      = $Action.Resource
                 Configuration = $Configuration
+                Credentials   = $Credentials
             }
             $TypeMetaConfigVars = Resolve-DryVariables @ResolveDryVarParams
             $ResolveDryVarParams = $null
+        }
+
+        if ($TypeMetaConfig.target_expression) {
+            [String]$Target = Invoke-Expression -Command $TypeMetaConfig.target_expression 
+        }
+        else {
+            # dhcp da? hvordan gjør vi det? 
+            [String]$Target = $Action.Resource.Resolved_Network.ip_address
+        }
+
+        # Create the target folder
+        If (-not (Test-Path -Path $ConfigTargetPath -ErrorAction Ignore)) {
+            New-Item -Path $ConfigTargetPath -ItemType Directory -Confirm:$false -Force | Out-Null
         }
 
         $OptionsObject = New-Object -TypeName PSCustomObject
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ActionType' -Value $ActionType
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ConfigTargetPath' -Value $ConfigTargetPath
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ConfigSourcePath' -Value $ConfigSourcePath
-        $OptionsObject | Add-Member -MemberType NoteProperty -Name 'Credentials' -Value $ResolvedCredentials
+        $OptionsObject | Add-Member -MemberType NoteProperty -Name 'Credentials' -Value $Credentials
+        $OptionsObject | Add-Member -MemberType NoteProperty -Name 'Target' -Value $Target
+        $OptionsObject | Add-Member -MemberType NoteProperty -Name 'RoleTargetRootPath' -Value $RoleTargetRootPath
+
+        if ($ActionMetaConfig) {
+            $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ActionMetaConfig' -Value $ActionMetaConfig
+        }
         
+        if ($TypeMetaConfig) {
+            $OptionsObject | Add-Member -MemberType NoteProperty -Name 'TypeMetaConfig' -Value $TypeMetaConfig
+        }
+
         if ($ModuleFilesSourcePath) {
             if (Test-Path -Path $ModuleFilesSourcePath -ErrorAction Ignore) {
                 $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ModuleFilesSourcePath' -Value $ModuleFilesSourcePath
@@ -199,6 +232,7 @@ function Resolve-DryActionOptions {
                 $OptionsObject | Add-Member -MemberType NoteProperty -Name 'TypeFilesSourcePath' -Value $TypeFilesSourcePath
             }
         }
+
         if ($TypeMetaConfigFile) {
             $OptionsObject | Add-Member -MemberType NoteProperty -Name 'TypeMetaConfigFile' -Value $TypeMetaConfigFile
         }
