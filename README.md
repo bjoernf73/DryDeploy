@@ -8,21 +8,38 @@ schema: 2.0.0
 # DryDeploy.ps1
 
 ## SYNOPSIS
-DryDeploy is a bridge between deployment technologies.
+DryDeploy is an indecent, promiscuous deployment orchestrator - 
+thrashing traditional values of selecting a mate and sticking 
+with it - swinging among available technologies. 
+
+Do you really want to marry an automation platform?
+What if you 
+could use any technology for what it is good, scrapping it for 
+what it is bad?
 
 A complete autodeploy of an information system may require you 
 to use a variety of technologies.
-For instance, DSC (Desired 
-State Configuration) is great for configuring Windows roles, but 
-does not operate well (or at all) against your platform provider.
-You may need to use Packer to automate customization of your templates, 
-and Terraform to instantiate them. 
+For instance, Terraform is great
+for configuring any cloud platform and instantiate your resources, 
+but it's inside-OS-capabilities are breathtakenly bad.
+DSC 
+(Desired State Configuration) is great for configuring Windows 
+roles, but does nothing for your platform provider.
+You may want 
+to use Packer to automate creation of templates for your platform, 
+and SaltStack to manage packages within OS's. 
 
-Common for DSC, Terraform and Packer is that: 
+What hinders you to use all of them?
+Must you chose?
+Nope! 
+
+Common for DSC, Terraform, Packer and SaltStack is that: 
  - you create one or more file containing your configuration, using
  variables for environment specific values and secrets
  - when you deploy, you suppply the tool with the path to the config,
- and all the variables that the configuration needs. 
+ and all the variables that the configuration needs.
+ - ...and you don't need a specific platform.
+ 
 
  Manually, this is a pretty tedious task, given that you must do this 
  for every action that configures some part of your role, for every 
@@ -30,21 +47,20 @@ Common for DSC, Terraform and Packer is that:
  Moreover, if you first took the time to put everything in code - 
  shouldn't that enable you to just 'click play' to deploy everything?
 
- DryDeploy does.
+ DryDeploy seeks to do that.
 And all you need is a client.
  
  
- Define your networks, resources (instances of roles) and platform(s)
- (the CoreConfig) in an environment confguration repository.
-You may 
- also add any set of user defined data and data structure to the 
- environment configuration (the UserConfig). 
+ Define your environment in an environment config (EnvConfig).
+Then
+ define your system modules in a module config (ModuleConfig). 
+ Combine the two to instantiate your system modules. 
  
- Each action of a role is provided with a set of expressions that 
- resolves values from that configuration.
-The set is then passed to 
- the technology that performs the action, be it Terraform, Packer, 
- DSC or other.
+ Each action of a role provides a set of expressions that resolves
+ variable values from the cimbined config.
+Those values are then 
+ passed to the technology that performs the action, be it Terraform, 
+ Packer, DSC or any other.
 
  ...one command to Plan...
    
@@ -77,6 +93,11 @@ DryDeploy.ps1 [-Plan] [-Actions <String[]>] [-ExcludeActions <String[]>] [-Build
  [-ExcludeBuildSteps <Int32[]>] [-Resources <String[]>] [-ExcludeResources <String[]>] [-Roles <String[]>]
  [-ExcludeRoles <String[]>] [-Phases <Int32[]>] [-ExcludePhases <Int32[]>] [-NoLog] [-ShowDeselected]
  [-CmTrace] [<CommonParameters>]
+```
+
+### Resolve
+```
+DryDeploy.ps1 [-Resolve] [<CommonParameters>]
 ```
 
 ### Apply
@@ -210,12 +231,20 @@ matches "DC*" or "DB*"
 
 ### EXAMPLE 8
 ```
+.\DryDeploy.ps1 -Resolve
+```
+
+Resolves all credentials, variables and options for each Action 
+in the current plan, but does not actually invoke the Action
+
+### EXAMPLE 9
+```
 .\DryDeploy.ps1 -Apply
 ```
 
 Applies the current Plan.
 
-### EXAMPLE 9
+### EXAMPLE 10
 ```
 .\DryDeploy.ps1 -Apply -Force
 ```
@@ -223,7 +252,7 @@ Applies the current Plan.
 Applies the current Plan, destroying any resource with the same 
 identity as the resource you are creating.
 
-### EXAMPLE 10
+### EXAMPLE 11
 ```
 .\DryDeploy.ps1 -Apply -Resources ca002 -Actions ad.import
 ```
@@ -232,7 +261,7 @@ Applies only actions of the Plan where the Resources name is or
 matches "ca002*", and the name of the Action that is or matches 
 "ad.import"
 
-### EXAMPLE 11
+### EXAMPLE 12
 ```
 $Config = .\DryDeploy.ps1 -GetConfig
 ```
@@ -270,6 +299,42 @@ filter to limit the Actions to include in the Plan (-Actions,
 ```yaml
 Type: SwitchParameter
 Parameter Sets: Plan
+Aliases:
+
+Required: True
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Resolve
+Runs through the Plan, resolving all credentials, variables 
+and options, but does not actually invoke the action.
+Each 
+Action in a Plan run against a target to which you need to
+authenticate.
+That credential is generally the first credential,
+'credential1'.
+An Action may require one or more additional 
+credentials which are resolved by your Action variables 
+expressions, 'credential2', 'credential3' and so on.
+Those 
+credentials are specified in the Plan by Aliases, for instance
+'local-admin' or 'domain-admin' or 'db-svc-user'.
+Run
+.\DryDeploy.ps1 -Resolve to resolve those Aliases into actual 
+credentials before you -Apply.
+If you don't, you may be 
+prompted at the beginning av each Action for which a credential
+isn't yet resolved.
+Once resolved, the credential will be stored 
+as encrypted securestrings in
+$home\DryDeploy\dry_deploy_credentials.json
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: Resolve
 Aliases:
 
 Required: True

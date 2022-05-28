@@ -152,6 +152,19 @@ Function dry.action.dsc.run {
         # Remove cim session
         $CimSession | Remove-CimSession -ErrorAction SilentlyContinue 
 
+        <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+            Since you just threw a massive configuration on a poor server, you probably 
+            wanna give it some seconds to finish processing before asking it to test the 
+            configuration. By default, I wait 15 seconds, but you may increase or decrease
+            that for very large or very small configs. 
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+        [int]$DscTestBeforeSeconds = 15
+        if ($Resolved.TypeMetaConfig.dsc_test_before_seconds) {
+            [int]$DscTestBeforeSeconds = $Resolved.TypeMetaConfig.dsc_test_before_seconds
+        }
+        Start-DryUtilsSleep -Seconds $DscTestBeforeSeconds -Message "Sleeping before testing configuration"
+
+
         if (($Action.credentials.credential1 -ne $Action.credentials.credential2) -and ($null -ne $Action.credentials.credential2)) {
             # alternating credentials
             $DscTargetSystemPOSTCredentialsArray = @($Resolved.Credentials.credential1,$Resolved.Credentials.credential2)
@@ -197,19 +210,6 @@ Function dry.action.dsc.run {
         if ($Resolved.TypeMetaConfig.dsc_test_interval_seconds) {
             [int]$DscTestIntervalSeconds = $Resolved.TypeMetaConfig.dsc_test_interval_seconds
         }
-
-        <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-            Since you just threw a massive configuration on a poor server, you probably 
-            wanna give it some seconds to finish processing before asking it to test the 
-            configuration. By default, I wait 15 seconds, but you may increase or decrease
-            that for very large or very small configs. 
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        [int]$DscTestBeforeSeconds = 15
-        if ($Resolved.TypeMetaConfig.dsc_test_before_seconds) {
-            [int]$DscTestBeforeSeconds = $Resolved.TypeMetaConfig.dsc_test_before_seconds
-        }
-
-        Start-DryUtilsSleep -Seconds $DscTestBeforeSeconds -Message "Sleeping before testing configuration"
 
         do {
             $CimSession | Remove-CimSession -ErrorAction Ignore

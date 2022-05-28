@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
 DryDeploy is an indecent, promiscuous deployment orchestrator - 
-thrashing traditional values of selecting a mate, and sticking 
+thrashing traditional values of selecting a mate and sticking 
 with it - swinging among available technologies. 
 
 Do you really want to marry an automation platform? What if you 
@@ -10,19 +10,14 @@ what it is bad?
 
 A complete autodeploy of an information system may require you 
 to use a variety of technologies. For instance, Terraform is great
-for configuring any cloud platform and to create your resources, 
+for configuring any cloud platform and instantiate your resources, 
 but it's inside-OS-capabilities are breathtakenly bad. DSC 
 (Desired State Configuration) is great for configuring Windows 
 roles, but does nothing for your platform provider. You may want 
 to use Packer to automate creation of templates for your platform, 
 and SaltStack to manage packages within OS's. 
 
-What hinders you to use all of them? It may be a 'System Architect' 
-with virtually no coding experience, who initiated an 'evaluation' 
-of different available technologies, ultimately deciding on one of 
-them. Knowing better, it's painful.  
-
-Must you chose? Absolutely not! 
+What hinders you to use all of them? Must you chose? Nope! 
 
 Common for DSC, Terraform, Packer and SaltStack is that: 
  - you create one or more file containing your configuration, using
@@ -37,17 +32,16 @@ Common for DSC, Terraform, Packer and SaltStack is that:
  Moreover, if you first took the time to put everything in code - 
  shouldn't that enable you to just 'click play' to deploy everything?
 
- DryDeploy does. And all you need is a client.  
+ DryDeploy seeks to do that. And all you need is a client.  
  
- Define your networks, resources (instances of roles) and platform(s)
- (the CoreConfig) in an environment confguration repository. You may 
- also add any set of user defined data and data structure to the 
- environment configuration (the UserConfig). 
+ Define your environment in an environment config (EnvConfig). Then
+ define your system modules in a module config (ModuleConfig). 
+ Combine the two to instantiate your system modules. 
  
- Each action of a role is provided with a set of expressions that 
- resolves values from that configuration. The set is then passed to 
- the technology that performs the action, be it Terraform, Packer, 
- DSC or other.
+ Each action of a role provides a set of expressions that resolves
+ variable values from the cimbined config. Those values are then 
+ passed to the technology that performs the action, be it Terraform, 
+ Packer, DSC or any other.
 
  ...one command to Plan...
    
