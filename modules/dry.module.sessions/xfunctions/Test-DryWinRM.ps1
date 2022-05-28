@@ -1,8 +1,8 @@
 <# 
- This module provides query functions for use with DryDeploy.
+ This module establishes sessions to target machines for use by DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
- LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.module.sessions/main/LICENSE
+ LICENSE: https://raw.githubusercontent.com/bjoernf73/DryDeploy/master/LICENSE
  
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

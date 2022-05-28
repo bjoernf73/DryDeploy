@@ -17,54 +17,41 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-Function dry.action.ad.move {
+function dry.action.ad.move { 
     [CmdletBinding()]  
-    Param (
+    param (
         [Parameter(Mandatory,HelpMessage="The resolved action object")]
-        [PSObject]$Action,
+        [PSObject]
+        $Action,
 
-        [Parameter(Mandatory,HelpMessage="The resolved resource object")]
-        [PSObject]$Resource,
+        [Parameter(Mandatory)]
+        [PSObject]
+        $Resolved,
 
-        [Parameter(Mandatory,HelpMessage="The resolved environment configuration object")]
-        [PSObject]$Configuration,
+        [Parameter(Mandatory,HelpMessage="The resolved global configuration
+        object")]
+        [PSObject]
+        $Configuration,
 
-        [Parameter(Mandatory,HelpMessage="ResourceVariables contains resolved variable values from the configurations common_variables and resource_variables combined")]
-        [System.Collections.Generic.List[PSObject]]$ResourceVariables,
-
-        [Parameter(Mandatory=$False,HelpMessage="Hash directly from the command line to be added as parameters to the function that iniates the action")]
-        [HashTable]$ActionParams
+        [Parameter(HelpMessage="Hash directly from the command line to be 
+        added as parameters to the function that iniates the action")]
+        [HashTable]
+        $ActionParams
     )
 
-    Try {
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        #   OPTIONS
-        #
-        #   Resolve sources, temporary target folders, and other options 
-        #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        $OptionsObject       = Resolve-DryActionOptions -Resource $Resource -Action $Action
-        $ActionType          = $OptionsObject.ActionType
-        $ConfigRootPath      = $OptionsObject.ConfigRootPath
-        $MetaConfigFile      = Join-Path -Path $ConfigRootPath -ChildPath 'Config.json'
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        #   METACONFIG
-        #
-        #   Open MetaConfig, resolve OU from it
-        #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+    try {
+        $MetaConfig = $Resolved.ActionMetaConfig
+        $RoleOUType = $Resolved.ActionType
+        $RoleOU = $MetaConfig.ous."$RoleOUType"
         
-        $MetaConfig          = Get-DryFromJson -File $MetaConfigFile
-        $RoleOU              = $MetaConfig.ous."$ActionType"
-        If ($Null -eq $RoleOU) {
-            ol -t 1 -m "Action does not contain an OU of type '$ActionType'"
-            Throw "Action does not contain an OU of type '$ActionType'"
+        if ($null -eq $RoleOU) {
+            throw "Action does not contain an OU of type '$RoleOUType'"
         }
-        # Replace replacement patterns
-        $RoleOU = Resolve-DryReplacementPattern -InputText $RoleOU -Variables $ResourceVariables
+        # Replace replacement patterns                             
+        $RoleOU = Resolve-DryReplacementPattern -InputText "$RoleOU" -Variables $Resolved.vars
         
         # Convert the RoleOU to a distinguished name
-        $RoleOU = ConvertTo-DryDistinguishedName -Name $RoleOU
+        $RoleOU = ConvertTo-DryUtilsDistinguishedName -Name $RoleOU
         ol i @("The resolved role OU distinguishedName","$RoleOU")
         
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -74,7 +61,7 @@ Function dry.action.ad.move {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-        $Credential = Get-DryCredential -Alias "$($action.credentials.credential1)"  -EnvConfig $GLOBAL:dry_var_global_ConfigCombo.envconfig.name
+        $Credential = $Resolved.Credentials.credential1
         ol i @('Using Credential',"$($Credential.UserName)")
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -101,11 +88,11 @@ Function dry.action.ad.move {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         $GetDryADConnectionPointParams = @{
-            Resource      = $Resource 
+            Resource      = $Action.Resource 
             Configuration = $Configuration 
             ExecutionType = $ExecutionType
         }
-        If ($ExecutionType -eq 'Remote') {
+        if ($ExecutionType -eq 'Remote') {
             $GetDryADConnectionPointParams += @{
                 Credential    = $Credential
             }
@@ -120,15 +107,14 @@ Function dry.action.ad.move {
         #   Action: Create session
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        If ($ExecutionType -eq 'Remote') {
+        if ($ExecutionType -eq 'Remote') {
             # Create the session
-            $SessionConfig = $Configuration.connections | 
+            $SessionConfig = $Configuration.CoreConfig.connections | 
             Where-Object { 
                 $_.type -eq 'winrm'
             }
-            If ($Null -eq $SessionConfig) {
-                ol v "Unable to find 'connection' of type 'winrm' in environment config"
-                Throw "Unable to find 'connection' of type 'winrm' in environment config"
+            if ($null -eq $SessionConfig) {
+                throw "Unable to find 'connection' of type 'winrm' in environment config"
             }
 
             $GetDrySessionParams =  @{
@@ -137,19 +123,18 @@ Function dry.action.ad.move {
                 SessionConfig = $SessionConfig
                 SessionType   = 'PSSession'
             }
-            $ConfADSession = New-DrySession @GetDrySessionParams
-
-            ol i @("Created PSSession to connection point","Session ID: $($ConfADSession.Id), State: $($ConfADSession.State)")
+            $AdMoveSession = New-DrySession @GetDrySessionParams
+            ol i @("Created PSSession to connection point","Session ID: $($AdMoveSession.Id), State: $($AdMoveSession.State)")
         }
 
         $MoveDryADComputerParams = @{
-            ComputerName = $Resource.Name
+            ComputerName = $Action.Resource.Name
             TargetOU     = $RoleOU
         }
-        Switch ($ExecutionType) {
+        switch ($ExecutionType) {
             'Remote' {
                 $MoveDryADComputerParams += @{
-                    PSSession = $ConfADSession       
+                    PSSession = $AdMoveSession       
                 }
             }
             'Local' {
@@ -168,210 +153,19 @@ Function dry.action.ad.move {
         $MoveDryADComputerParams+= @{'Test'=$True}
         ol i @("Testing location of '$($Resource.name)' computer object","$RoleOU")
         
-        If ((Move-DryADComputer @MoveDryADComputerParams) -eq $True) {
+        if ((Move-DryADComputer @MoveDryADComputerParams) -eq $True) {
             ol i "Successfully completed the MoveToOU Action"
         }
-        Else {
-            Throw "Failed Action MoveToOU"
+        else {
+            throw "Failed Action MoveToOU"
         }        
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    Finally {
-        $ConfADSession | Remove-PSSession -ErrorAction Ignore
-        $VarsToRemove = @(
-            'RoleOU',
-            'Credential',
-            'ActiveDirectoryConnectionPoint',
-            'GetDrySessionParams',
-            'ConfADSession',
-            'MoveDryADComputerParams',
-            'Test'
-        )
-        $VarsToRemove.ForEach({
-            Remove-Variable -Name "$_" -ErrorAction Ignore
-        })
-        Remove-Module -Name 'dry.module.ad' -Force -ErrorAction Continue
+    finally {
+        $AdMoveSession | Remove-PSSession -ErrorAction Ignore 
+        Remove-Module -Name 'dry.module.ad' -Force -ErrorAction continue
         ol i "Action 'ad.move' is finished" -sh
     }
 }
-
-<#
-Function ConvertTo-DryDistinguishedName {
-    [CmdletBinding()]
-    Param (
-        [Parameter(Mandatory)]
-        [AllowEmptyString()]
-        [String]$Name
-    )
-    
-    # chop off any leading or trailing slashes and spaces. 
-    $Name = $Name.Trim() ; $Name = $Name.Trim('/')
-   
-    Try {
-        [String]$ConvertedName = ""
-        
-        If (($name -match "^ou=") -or ($name -match "^cn=")) {
-            $ConvertedName = "$name"
-        }
-        ElseIf ($name -eq '') {
-            # Empty string (probably root of domain) - return empty string then"
-            $ConvertedName = $name
-        }
-        Else {
-            # names like root/middle/leaf will be converted 
-            # to ou=leaf,ou=middle,ou=root. Must assume that 
-            # these are OUs, not CNs (or DCs)
-            $NameArr = @($Name -split "/")
-            for ($c = ($nameArr.Count -1); $c -ge 0; $c--) {  
-                $ConvertedName += "OU=$($nameArr[$c]),"
-            }
-            # The accumulated name ends with ',', chop that off
-            $ConvertedName = $ConvertedName.TrimEnd(',')
-        } 
-        $ConvertedName
-    }
-    Catch {
-        ol -t 2 -m "Error converting '$Name' to distinguishedName"  
-        $PSCmdlet.ThrowTerminatingError($_)
-    }
-    Finally {
-    }
-}
-
-Function Move-DryADComputerAccount {
-
-    [CmdletBinding()]
-    Param (
-        [Parameter(Mandatory)]
-        [String]$ComputerName,
-
-        [Parameter(Mandatory)]
-        [String]$TargetOU,
-
-        [Parameter(Mandatory)]
-        [System.Management.Automation.Runspaces.PSSession]$PSSession,
-
-        [Parameter(Mandatory=$false,HelpMessage="Only test and return true or false")]
-        [Switch]$Test
-    )
-    ol -t 3 -m "Moving: '$ComputerName' to OU '$TargetOU'"
-
-    # Is the Object already in place??
-    Try {     
-        $GetResult = Invoke-command -Session $PSSession -ScriptBlock { 
-            Param ($ComputerName,$TargetOU); 
-            
-            Try {
-                # Make sure ActiveDirectory module is loaded, so the AD drive is created
-                If ((Get-Module | Select-Object -Property Name).Name -notcontains 'ActiveDirectory') {
-                    
-                    Try {
-                        Import-Module -Name 'ActiveDirectory' -ErrorAction Stop
-                        Start-Sleep -Seconds 4
-                    }
-                    Catch {
-                        $PSCmdlet.ThrowTerminatingError($_)
-                    }
-                }
-                [String]$DomainDN = (Get-ADDomain | Select-Object -Property distinguishedName).distinguishedName
-                If ($TargetOU -notmatch "$DomainDN$") {
-                    $TargetOU = $TargetOU + ",$DomainDN"
-                }
-                # The distinguishedName of the computer object that we eventually wants
-                $TargetComputerDN = "CN=$ComputerName,$TargetOU"
-                # Test if member, return $True if, $false if not
-                If ((Get-ADComputer -Identity "$ComputerName" | Select-Object -Property distinguishedName).distinguishedName -eq "$TargetComputerDN") {
-                    $True
-                } 
-                Else {
-                    $False
-                }
-            }
-            Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-                Throw "The computer '$ComputerName' does not exist"
-            }
-
-            Catch {
-                # If caught here, return the error object
-                $PSCmdlet.ThrowTerminatingError($_)
-            }
-        } -ArgumentList $ComputerName,$TargetOU
-
-        If ($GetResult -eq $True) {
-            ol v "'$ComputerName' is already in OU '$TargetOU'"
-            If ($Test) {
-                Return $True
-            } 
-            Else {
-                Return
-            } 
-        } 
-        ElseIf ($GetResult -is [System.Management.Automation.ErrorRecord]) {
-            $PSCmdlet.ThrowTerminatingError($GetResult)
-        } 
-        ElseIf ($GetResult -eq $False) {
-            If ($Test) {
-                ol v "'$ComputerName' is not in OU '$TargetOU'"
-                Return $False
-            } 
-            Else {
-                ol v "'$ComputerName' is not in OU '$TargetOU' - trying to move it"
-            }
-        } 
-        Else {
-            ol v "Unrecognized response from GetResult"
-            $GetResult
-            Throw "Unrecognized response from GetResult"
-        }
-    }
-    Catch {
-        $PSCmdlet.ThrowTerminatingError($_)
-    }
-
-    # Add to the group
-    If (-not $Test) {
-        Try {     
-            $SetResult = Invoke-command -Session $PSSession -ScriptBlock { 
-                Param ($ComputerName,$TargetOU); 
-                
-                Try {
-                    [String]$DomainDN = (Get-ADDomain | Select-Object -Property distinguishedName).distinguishedName
-                    If ($TargetOU -notmatch "$DomainDN$") {
-                        $TargetOU = $TargetOU + ",$DomainDN"
-                    }
-                    
-                    # Test if member, return $True if, $false if not
-                    $TargetComputer = Get-ADComputer -Identity "$ComputerName"
-                    $TargetComputer | Move-ADObject -TargetPath $TargetOU
-                    $true
-                }
-                catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-                    Throw "The computer '$ComputerName' does not exist"
-                    
-                }
-                Catch {
-                    throw $_
-                }
-            } -ArgumentList $ComputerName,$TargetOU
-    
-            If ($SetResult -eq $True) {
-                ol v "'$ComputerName' was moved into OU '$TargetOU'"
-                Return
-            } 
-            ElseIf ($SetResult -is [System.Management.Automation.ErrorRecord]) {
-                $PSCmdlet.ThrowTerminatingError($GetResult)
-            }  
-            Else {
-                ol v "Unrecognized response from GetResult"
-                $SetResult
-                Throw "Unrecognized response from GetResult"
-            }
-        }
-        Catch {
-            $PSCmdlet.ThrowTerminatingError($_)
-        }  
-    }
-}
-#>

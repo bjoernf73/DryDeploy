@@ -36,7 +36,7 @@ function New-DryCredentialsFile {
                 path        = "$Path"
                 accessed    = $null
             }
-            Save-DryToJson -Path $Path -InputObject $Credentials 
+            Save-DryUtilsToJson -Path $Path -InputObject $Credentials 
         }
     }
     catch {

@@ -37,7 +37,7 @@ function Get-DryQuote {
                     $ConfObject = Get-DryFromYaml -Path $File.FullName -ErrorAction Stop 
                 }
             }
-            $Configuration = (Merge-DryPSObjects -FirstObject $Configuration -SecondObject $ConfObject)
+            $Configuration = (Merge-DryUtilsPSObjects -FirstObject $Configuration -SecondObject $ConfObject)
         }
     }
     catch {

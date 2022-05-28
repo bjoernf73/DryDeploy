@@ -1,92 +1,196 @@
 <#
 .SYNOPSIS
-DD prepares your deployment platform (-Init), 
-stores paths to a configuration combination of a EnvConfig and a 
-ModuleConfig, creates a plan of Actions to perform based on the 
-configurations and any filters specified (-Plan), and applies the 
-plan in the configured order (-Apply). Run DryDeploy.ps1 without any 
-parameters to show the deployment status of the current Plan.
+DryDeploy is an indecent, promiscuous deployment orchestrator - 
+thrashing traditional values of selecting a mate and sticking 
+with it - swinging among available technologies. 
+
+Do you really want to marry an automation platform? What if you 
+could use any technology for what it is good, scrapping it for 
+what it is bad?
+
+A complete autodeploy of an information system may require you 
+to use a variety of technologies. For instance, Terraform is great
+for configuring any cloud platform and instantiate your resources, 
+but it's inside-OS-capabilities are breathtakenly bad. DSC 
+(Desired State Configuration) is great for configuring Windows 
+roles, but does nothing for your platform provider. You may want 
+to use Packer to automate creation of templates for your platform, 
+and SaltStack to manage packages within OS's. 
+
+What hinders you to use all of them? Must you chose? Nope! 
+
+Common for DSC, Terraform, Packer and SaltStack is that: 
+ - you create one or more file containing your configuration, using
+ variables for environment specific values and secrets
+ - when you deploy, you suppply the tool with the path to the config,
+ and all the variables that the configuration needs.
+ - ...and you don't need a specific platform.  
+
+ Manually, this is a pretty tedious task, given that you must do this 
+ for every action that configures some part of your role, for every 
+ role that your system module, or information system, consists of. 
+ Moreover, if you first took the time to put everything in code - 
+ shouldn't that enable you to just 'click play' to deploy everything?
+
+ DryDeploy seeks to do that. And all you need is a client.  
+ 
+ Define your environment in an environment config (EnvConfig). Then
+ define your system modules in a module config (ModuleConfig). 
+ Combine the two to instantiate your system modules. 
+ 
+ Each action of a role provides a set of expressions that resolves
+ variable values from the cimbined config. Those values are then 
+ passed to the technology that performs the action, be it Terraform, 
+ Packer, DSC or any other.
+
+ ...one command to Plan...
+   
+   .\DryDeploy.ps1 -Plan
+ 
+ ...and one to Apply....
+
+   .\DryDeploy.ps1 -Apply
+ 
+ If something fails, edit your code, and -Apply again. DryDeploy 
+ retries the failed Action and continues to Apply the rest of the 
+ Plan.
 
 .DESCRIPTION
-DD needs 2 configuration repositories: 
+DryDeploy prepares your deployment platform (-Init), stores paths to a 
+configuration combination of an environment configuration (EnvConfig)
+and a module configuration (ModuleConfig), creates a Plan of Actions 
+to perform based on the configurations and any filters specified (-Plan), 
+and applies the plan in the configured order (-Apply). Run DryDeploy
+parameterless to show the status of the current Plan. 
 
- - EnvConfig: Contains information on an environment, 
-   including variables as key-value-pairs, where values may be 
-   expressions to resolve actual values, network information and
-   platform definitions. It also contains OS-specific configs, 
-   so Actions may pick up the shared base-config, to use as is,
-   or add role-specific configurations. Also contains a list of
-   the all Resources that the environment will contain. As such,
-   the Resources node only specify the instances of roles, but 
-   each role must be represented in a ModuleConfig, which specifies
-   how each resource is built, and the order of those Actions. 
+Dryeploy needs 2 configuration repositories: 
 
- - ModuleConfig: Contains Roles and Build. 
-   Roles are types of resources, and contain the configuration 
-   files to be consumed by Actions that build each role of the 
-   module. The Build specifies the order in which 
-   roles of a module are deployed, and the Ations, and the order 
-   of those Actions, that builds and configures each Role.
+ - EnvConfig: must contain the "CoreConfig" - information of your 
+   environment; network information, target platforms (cloud, on-prem, 
+   hybrid), and all the resources (instances of roles). It can also
+   contain a "UserConfig" which is any data you can put in a json
+   or yaml. Lastly, it may contain "BaseConfig", which contains shared,
+   generic configurations which every (or selected) instances of an 
+   operating system should invoke.  
+
+ - ModuleConfig: Contains Roles and a Build. Roles are the blueprint
+   configuration of some type of resource, be it a Windows domain
+   controller, a linux gitlab server, or simply a container instance.
+   A module may contain one or multiple roles, and roles may be re-used 
+   in multiple system modules. The Role contain the configuration files
+   used by any Action that the role build addresses. It also contain a
+   set of expressions that when run against the EnvConfig, they resolve 
+   the variable values that in turn will be passed to the technology 
+   behind the Action (i.e. Terraform, Packer, DSC, SaltStack and so on)
+   The Build defines how the module is built. It contains 
+      1. the order in which Roles are deployed
+      2. the order in which Actions of the Roles are deployed
+   Actions of a role may 'depend on' Actions of other roles, so that 
+   when you -Plan, the execution of the dependent Action is delayed 
+   until after the action it depends on.
    
 .PARAMETER Init
-Installs local dependencies for the platform on which you run DD on. 
+Inistializes the local system for package management, and installs 
+all dependencies for DryDeploy and for the selected system module.
+Supports git-repos-as-PowerShell-modules, chocolatey packages, nuget
+modules, windows features, optional features and so on.
 
 .PARAMETER Plan
-Plan must be run at least once to combine the ModuleConfiguration 
-and EnvConfiguration, and to determine the resources to create 
-and configure, and the order of the Actions to process. 
+Create or modify a Plan. Use alone for a full Plan, or with any 
+filter to limit the Actions to include in the Plan (-Actions, 
+-ExcludeActions, -BuildSteps, -ExcludeBuildSteps, -Resources, 
+-ExcludeResources, -Roles, -ExcludeRoles, -Phases, -ExcludePhases) 
+
+.PARAMETER Resolve
+Runs through the Plan, resolving all credentials, variables 
+and options, but does not actually invoke the action. Each 
+Action in a Plan run against a target to which you need to
+authenticate. That credential is generally the first credential,
+'credential1'. An Action may require one or more additional 
+credentials which are resolved by your Action variables 
+expressions, 'credential2', 'credential3' and so on. Those 
+credentials are specified in the Plan by Aliases, for instance
+'local-admin' or 'domain-admin' or 'db-svc-user'. Run
+.\DryDeploy.ps1 -Resolve to resolve those Aliases into actual 
+credentials before you -Apply. If you don't, you may be 
+prompted at the beginning av each Action for which a credential
+isn't yet resolved. Once resolved, the credential will be stored 
+as encrypted securestrings in
+$home\DryDeploy\dry_deploy_credentials.json
 
 .PARAMETER Apply
-Applies the Plan. 
+Applies the Plan. Use alone to to Apply the full Plan, or with
+any filter to only Apply a limited set of planned actions (-Actions, 
+-ExcludeActions, -BuildSteps, -ExcludeBuildSteps, -Resources, 
+-ExcludeResources, -Roles, -ExcludeRoles, -Phases, -ExcludePhases)
 
 .PARAMETER Actions
 Array of one or more Actions to include. All others are excluded. 
-If not specified, all Actions are included. Supports partial 
-match ('Co' will match Action 'ConfigAD')
+If not specified, Actions are disregarded from the filter. Supports 
+tab-completion and partial match ('ter' will match Action 'terra.run')
 
 .PARAMETER ExcludeActions
 Array of one or more Actions to exclude. All others are included. 
-If not specified, no actions are excluded. Supports partial 
-match ('Co' will match Action 'ConfigAD')
+If not specified, Actions are disregarded from the filter.Supports 
+tab-completion and partial match ('ter' will match Action 'terra.run')
 
-.PARAMETER BuildOrders
-Array of one or more BuildOrders to include. All others are 
-excluded. If not specified, all BuildOrders are included. 
+.PARAMETER BuildSteps
+Array of one or more BuildSteps to include. All others are 
+excluded. If not specified, BuildSteps are disregarded from 
+the filter. Specify as digits, or sets of digits, like 3 or 
+3,4,5 or (3..5) for a range
 
-.PARAMETER ExcludeBuildOrders
-Array of one or more BuildOrders to exclude. All others are 
-included. If not specified, all BuildOrders are included. 
+.PARAMETER ExcludeBuildSteps
+Array of one or more BuildSteps to exclude. All others are 
+included. If not specified, BuildSteps are disregarded from 
+the filter. Specify as digits, or sets of digits, like 3 or 
+3,4,5 or (3..5) for a range
 
 .PARAMETER Resources
 Array of one or more Resource names to include. All others are 
-excluded. If not specified, all Resources are included. Supports 
-partial match ('DC' will match Resource 'DC001-S5-D')
+excluded. If not specified, Resources are disregarded from the 
+filter. Supports tab-completion and partial match ('dc' will 
+match Resource 'dc1-s5-d')
 
 .PARAMETER ExcludeResources
 Array of one or more Resource names to exclude. All others are 
-included. If not specified, no Resources are excluded. Supports 
-partial match ('DC' will match Resource 'DC001-S5-D')
+included. If not specified, Resources are disregarded from the 
+filter. Supports partial match ('dc' will match Resource 'dc1-s5-d')
+
+.PARAMETER Roles
+Array of one or more Role names to include. All others are 
+excluded. If not specified, Roles are disregarded from the 
+filter. Supports tab-completion and partial match ('dc' will 
+match Role 'dc-domctrl-froot')
+
+.PARAMETER ExcludeRoles
+Array of one or more Role names to exclude. All others are 
+included. If not specified, Roles are disregarded from the 
+filter. Supports tab-completion and partial match ('dc' will 
+match Role 'dc-domctrl-froot')
 
 .PARAMETER Phases
 Array of one or more Phases (of any Action) to include. All other 
 Phases (and non-phased actions) are excluded. If not specified, 
-all Phases are included
+Phases are disregarded from the filter
 
 .PARAMETER ExcludePhases
 Array of one or more Phases (of any Action) to exclude. All other 
 Phases (and non-phased actions) are included. If not specified, 
-no Phases are excluded
+Phases are disregarded from the filter
 
 .PARAMETER EnvConfig
-Path to the Directory where the EnvConfiguration is. Use to 
-set the configuration combination (ConfigCombo)
+Path to the directory of an environment configuration. Use to  
+set the configuration combination (ConfigCombo). It will be 
+stored, and used implicitly until you change it. 
 
 .PARAMETER ModuleConfig
-Path to the Directory where the ModuleConfiguration is. Use to 
-set the configuration combination (ConfigCombo)
+Path to the directory of a system module configuration. Use to 
+set the configuration combination (ConfigCombo). It will be 
+stored, and used implicitly until you change it. 
 
 .PARAMETER ActionParams
-HashTable that will be sent to the Action Function. Useful during 
+HashTable that will be sent to the Action function. Useful during 
 development, for instance if the receiving action function 
 supports a parameter to specify a limited set of tasks to do. 
 
@@ -164,9 +268,10 @@ if not
 
 .EXAMPLE
 .\DryDeploy.ps1 -ModuleConfig ..\ModuleConfigs\MyModule -EnvConfig ..\EnvConfigs\MyEnvironment
-Creates a configuration combination of a Module Configuration and
-a Env Configuration. The combination (the "ConfigCombo") is stored
-and used on subsequent runs until you change any of them again
+Creates a configuration combination of a module configuration and
+an environment configuration. The combination (the "ConfigCombo") 
+is stored and used on every subsequent run until you invoke the 
+SetConfig parameterset again.
 
 .EXAMPLE
 .\DryDeploy.ps1 -Plan
@@ -183,16 +288,21 @@ Creates a partial plan, containing only Resources whos name is
 or matches "dc*" or "ca*"
 
 .EXAMPLE
-.\DryDeploy.ps1 -Plan -Resources dc,ca -Actions vsp,ad
+.\DryDeploy.ps1 -Plan -Resources dc,ca -Actions terra,ad
 Creates a partial plan, containing only Resources whos name is 
 or match "dc*" or "ca*", with only Actions whos name is or 
-matches "vsph*" (for instance "vsphere.clone") or "ad*" (for instance 
+matches "terra*" (for instance "terra.run") or "ad*" (for instance 
 "ad.import")
 
 .EXAMPLE
 .\DryDeploy.ps1 -Plan -ExcludeResources DC,DB
 Creates a partial plan, excluding any Resource whos name is or 
 matches "DC*" or "DB*"
+
+.EXAMPLE
+.\DryDeploy.ps1 -Resolve
+Resolves all credentials, variables and options for each Action 
+in the current plan, but does not actually invoke the Action
 
 .EXAMPLE
 .\DryDeploy.ps1 -Apply
@@ -229,6 +339,14 @@ param (
     and selections made by -Actions and -Resources')]
     [Switch]
     $Plan,
+
+    [Parameter(Mandatory,ParameterSetName='Resolve',
+    HelpMessage='Resolves credentials, Action variables, and other
+    options, but does not invoke the Action. Use to ensure all 
+    variables can be resolved, and that all credentials are stored
+    so you are not prompted for them during -Apply')]
+    [Switch]
+    $Resolve,
 
     [Parameter(Mandatory,ParameterSetName='Apply',
     HelpMessage="To start applying (performing actions) according 
@@ -269,7 +387,7 @@ param (
     others are excluded. If not specified, all ActionsOrders are 
     included.')]
     [Int[]]
-    $BuildOrders,
+    $BuildSteps,
 
     [Parameter(ParameterSetName='Plan',
     HelpMessage='Array of one or more ActionsOrders to exclude. All 
@@ -280,7 +398,7 @@ param (
     others are included. If not specified, all ActionsOrders are 
     included.')]
     [Int[]]
-    $ExcludeBuildOrders,
+    $ExcludeBuildSteps,
 
     [Parameter(ParameterSetName='Plan',
     HelpMessage='Array of one or more Resource names to include. 
@@ -290,10 +408,10 @@ param (
     HelpMessage='Array of one or more Resource names to include. 
     All others are excluded. If not specified, all Resources are 
     included')]
-    #! The argumentcompleter does not work anymore
-    [ArgumentCompleter({((Get-Content -Path (Join-Path ((Get-Content (Join-Path (Join-Path $($env:USERPROFILE) DryDeploy) ConfigCombo.json) | ConvertFrom-Json).InstanceConfig.Path) `
-        resources.json) | ConvertFrom-Json).resources) | 
-        Select-Object -ExpandProperty Name })]
+    [ArgumentCompleter({((Get-Content -Path (Join-Path ((Get-Content `
+    (Join-Path (Join-Path $home 'DryDeploy') 'dry_deploy_config_combo.json') | 
+    ConvertFrom-Json).EnvConfig.CoreConfigPath) resources.json) | 
+    ConvertFrom-Json).resources) | Select-Object -ExpandProperty Name })]
     [String[]]
     $Resources,
 
@@ -305,14 +423,42 @@ param (
     HelpMessage='Array of one or more Resource names to exclude. 
     All others are included. If not specified, no Resources are 
     excluded')]
-    #! The argumentcompleter does not work anymore
     [ArgumentCompleter({((Get-Content -Path (Join-Path ((Get-Content `
-        (Join-Path (Join-Path $($env:localappdata) DryDeploy) `
-        ConfigCombo.json) | ConvertFrom-Json).InstanceConfig.Path) `
-        resources.json) | ConvertFrom-Json).resources) | 
-        Select-Object -ExpandProperty Name })]
+    (Join-Path (Join-Path $home 'DryDeploy') 'dry_deploy_config_combo.json') | 
+    ConvertFrom-Json).EnvConfig.CoreConfigPath) resources.json) | 
+    ConvertFrom-Json).resources) | Select-Object -ExpandProperty Name })]
     [String[]]
     $ExcludeResources,
+
+    [Parameter(ParameterSetName='Plan',
+    HelpMessage='Array of one or more Role names to include. 
+    All others are excluded. If not specified, all Roles are 
+    included')]
+    [Parameter(ParameterSetName='Apply',
+    HelpMessage='Array of one or more Role names to include. 
+    All others are excluded. If not specified, all Reles are 
+    included')]
+    [ArgumentCompleter({((Get-Content -Path (Join-Path ((Get-Content `
+    (Join-Path (Join-Path $home 'DryDeploy') 'dry_deploy_config_combo.json') | 
+    ConvertFrom-Json).EnvConfig.CoreConfigPath) resources.json) | 
+    ConvertFrom-Json).resources) | Select-Object -ExpandProperty Role })]
+    [String[]]
+    $Roles,
+
+    [Parameter(ParameterSetName='Plan',
+    HelpMessage='Array of one or more Role names to exclude. 
+    All others are included. If not specified, no Roles are 
+    excluded')]
+    [Parameter(ParameterSetName='Apply',
+    HelpMessage='Array of one or more Role names to exclude. 
+    All others are included. If not specified, no Roles are 
+    excluded')]
+    [ArgumentCompleter({((Get-Content -Path (Join-Path ((Get-Content `
+    (Join-Path (Join-Path $home 'DryDeploy') 'dry_deploy_config_combo.json') | 
+    ConvertFrom-Json).EnvConfig.CoreConfigPath) resources.json) | 
+    ConvertFrom-Json).resources) | Select-Object -ExpandProperty Role })]
+    [String[]]
+    $ExcludeRoles,
 
     [Parameter(ParameterSetName='Plan',
     HelpMessage='Array of one or more Phases (of any Action) to 
@@ -460,8 +606,9 @@ param (
     
     PreModulesFunctions
     
-    Functions that are needed in-script to ensure proper resolving of paths to modules 
-    required by DD
+    Functions that are needed in-script to ensure proper resolving of paths to where DD's
+    modules are, and such. For instance, $PSScriptRoot does not always exist, as you may 
+    have experienced. If that is the case, we try $MyInvocation, and so on. 
     
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
 
@@ -559,7 +706,6 @@ try {
     $GLOBAL:dry_var_global_ScriptPath                 = Get-DryScriptPath
     $GLOBAL:dry_var_global_Platform                   = Get-DryPlatform -ScriptPath $GLOBAL:dry_var_global_ScriptPath
     Set-DryPSModulePath -Platform $GLOBAL:dry_var_global_Platform
-    
     # Remove DD modules that may have escaped the removal in finally{}
     Get-Module | Where-Object {(
         ($_.Name -match "^dry\.module\.") -or 
@@ -572,8 +718,7 @@ try {
     $GLOBAL:dry_var_global_ShowPasswords              = $ShowPasswords
     $GLOBAL:dry_var_global_KeepConfigFiles            = $KeepConfigFiles
     $GLOBAL:dry_var_global_WarnOnTooNarrowConsole     = $true #! lagt i options som 'warn_on_too_narrow_console'
-    $GLOBAL:dry_var_global_RootWorkingDirectory       = $dry_var_global_Platform.RootWorkingDirectory
-     
+    $GLOBAL:dry_var_global_RootWorkingDirectory       = $dry_var_global_Platform.RootWorkingDirectory 
     
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -605,11 +750,22 @@ try {
     [String]$dry_var_ConfigComboFile    = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'dry_deploy_config_combo.json'
     [String]$dry_var_UserOptionsFile    = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'UserOptions.json' # the user may create this file to override the defaults
     [String]$dry_var_TempConfigsDir     = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'TempConfigs'
-    [String]$dry_var_LogsArchiveDir     = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'ArchivedLogs'
+    [String]$dry_var_ArchiveDir         = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'Archived'
     [String]$dry_var_SystemOptionsFile  = Join-Path -Path $dry_var_global_ScriptPath           -ChildPath 'SystemOptions.json'
     [String]$GLOBAL:dry_var_global_CredentialsFile    = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'dry_deploy_credentials.json'
+
+    $dry_var_Paths = [PSCustomObject]@{
+        RootWorkingDirectory = $dry_var_global_RootWorkingDirectory
+        PlanFile = $dry_var_PlanFile
+        ResourcesFile = $dry_var_ResourcesFile
+        ConfigComboFile = $dry_var_ConfigComboFile
+        UserOptionsFile = $dry_var_UserOptionsFile
+        TempConfigsDir = $dry_var_TempConfigsDir
+        ArchiveDir = $dry_var_ArchiveDir
+        SystemOptionsFile = $dry_var_SystemOptionsFile
+    }
     
-    New-DryItem -ItemType Directory -Items @($dry_var_global_RootWorkingDirectory, $dry_var_LogsArchiveDir, $dry_var_TempConfigsDir)
+    New-DryItem -ItemType Directory -Items @($dry_var_global_RootWorkingDirectory, $dry_var_ArchiveDir, $dry_var_TempConfigsDir)
     
    
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -636,7 +792,7 @@ try {
         SystemConfig     = $dry_var_SystemOptions.logging 
         UserConfig       = $dry_var_UserOptions.logging
         WorkingDirectory = $dry_var_global_RootWorkingDirectory
-        ArchiveDirectory = $dry_var_LogsArchiveDir
+        ArchiveDirectory = $dry_var_ArchiveDir
         NoLog            = $NoLog
     }
     Set-DryLoggingOptions @SetDryLoggingOptionsParams
@@ -675,9 +831,10 @@ try {
             at least once for a configuration combination.
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+        #! INIT must be changed when dry.module.pkgmgmt is released
+        #! The test-dryelevated should only be run if there are changes to be made
         'Init' {
-            #! All of this must be changed when dry.module.pkgmgmt is released
-            #! The test-dryelevated should only be run if there are changes to be made
+            
             if (Test-DryElevated){
                 # System Dependencies
                 if ($dry_var_global_ConfigCombo.TestDepHash('system')) {
@@ -766,30 +923,29 @@ try {
                 PlanFile             = $dry_var_PlanFile
                 ResourceNames        = $Resources
                 ExcludeResourceNames = $ExcludeResources
+                RoleNames            = $Roles
+                ExcludeRoleNames     = $ExcludeRoles
                 ActionNames          = $Actions
                 ExcludeActionNames   = $ExcludeActions
-                BuildOrders          = $BuildOrders
-                ExcludeBuildOrders   = $ExcludeBuildOrders
+                BuildSteps           = $BuildSteps
+                ExcludeBuildSteps    = $ExcludeBuildSteps
                 Phases               = $Phases
                 ExcludePhases        = $ExcludePhases
                 ShowStatus           = $True
             }
-            $PlanObj = Get-DryPlan @GetDryPlanParams -ErrorAction Stop
-            $GetDryPlanParams = $null
+            $dry_var_Plan = Get-DryPlan @GetDryPlanParams -ErrorAction Stop
+            $ShowDryPlanParams = $null
             
-            
-            # $PlanObj.Show('Plan',$ShowDeselected,$ShowConfigCombo,$dry_var_global_ConfigCombo)
-    
             $ShowDryPlanParams       = @{
-                Plan                 = $PlanObj
+                Plan                 = $dry_var_Plan
                 Mode                 = 'Plan' 
                 ConfigCombo          = $dry_var_global_ConfigCombo 
                 ShowConfigCombo      = $True
                 ShowDeselected       = $ShowDeselected
             }
-            #! Show-DryPlan bør kanskje bli $PlanObj.show()
             Show-DryPlan @ShowDryPlanParams
-            $ShowDryPlanParams = $null
+            
+            $GetDryPlanParams = $null
 
         }
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -800,33 +956,12 @@ try {
             gets and invokes common variables, prepares for credentials.
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        {$_ -in 'Plan','Apply','GetConfig'} {
-            $GLOBAL:dry_var_global_Configuration = Get-DryEnvConfig -ConfigCombo $dry_var_global_ConfigCombo
+        {$_ -in 'Plan','Apply','GetConfig','Resolve'} {
+            $dry_var_Paths | Add-Member -MemberType NoteProperty -Name 'BaseConfigDirectory' -Value (Join-Path -Path $dry_var_global_ConfigCombo.envconfig.path -ChildPath 'BaseConfig')
+            $dry_var_Paths | Add-Member -MemberType NoteProperty -Name 'ModuleConfigDirectory' -Value $dry_var_global_ConfigCombo.moduleconfig.path
+            $GLOBAL:dry_var_global_Configuration = Get-DryEnvConfig -ConfigCombo $dry_var_global_ConfigCombo -Paths $dry_var_Paths
             $GLOBAL:dry_var_global_Configuration = Get-DryModuleConfig -ConfigCombo $dry_var_global_ConfigCombo -Configuration $GLOBAL:dry_var_global_Configuration 
-            <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
-                Common Variables
-                
-                $dry_var_CommonVariables are processed once per run (if you, -Plan, -Apply or -GetConfig), 
-                as opposed to $dry_var_ResourceVariables, that are processed once per resource, hence 
-                resource specific
-
-            # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-
-            if ($GLOBAL:dry_var_global_Configuration.common_variables) {
-                $dry_var_CommonVariables = Resolve-DryVariables -Variables $GLOBAL:dry_var_global_Configuration.common_variables -Configuration $GLOBAL:dry_var_global_Configuration -OutputType 'list'
-                $dry_var_CommonVariables.foreach({
-                    if (Get-Variable -Name $_.Name -Scope GLOBAL -ErrorAction Ignore) {
-                        Set-Variable -Name $_.Name -Value $_.Value -Scope GLOBAL
-                    }
-                    else {
-                        New-Variable -Name $_.Name -Value $_.Value -Scope GLOBAL
-                    }
-                }) 
-            }
-            # Replace any common ReplacementPattern ("###($Variable.name)###") in $Configuration
-            $GLOBAL:dry_var_global_Configuration = Resolve-DryReplacementPatterns -InputObject $GLOBAL:dry_var_global_Configuration -Variables $dry_var_CommonVariables
-
             <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
                 Credentials File
@@ -845,20 +980,20 @@ try {
             }
             
             if ($GLOBAL:dry_var_global_Configuration.Credentials) {
-                foreach ($Credential in $GLOBAL:dry_var_global_Configuration.Credentials) {
-                    $AddCredentialPlaceholderParams = @{
-                        Alias        = $Credential.Alias
-                        EnvConfig    = $dry_var_global_ConfigCombo.envconfig.name
+                foreach ($dry_var_Credential in $GLOBAL:dry_var_global_Configuration.Credentials) {
+                    $dry_var_AddCredentialPlaceholderParams = @{
+                        Alias        = $dry_var_Credential.Alias
+                        EnvConfig    = $GLOBAL:dry_var_global_ConfigCombo.envconfig.name
                         Type         = $GLOBAL:dry_var_global_Configuration.CredentialsType
                     }
-                    if ($Credential.UserName) {
-                        $AddCredentialPlaceholderParams += @{
-                            UserName = $Credential.UserName
+                    if ($dry_var_Credential.UserName) {
+                        $dry_var_AddCredentialPlaceholderParams += @{
+                            UserName = $dry_var_Credential.UserName
                         }
                     }
-                    Add-DryCredentialPlaceholder @AddCredentialPlaceholderParams
+                    Add-DryCredentialPlaceholder @dry_var_AddCredentialPlaceholderParams
                 }
-                $AddCredentialPlaceholderParams = $null
+                $dry_var_AddCredentialPlaceholderParams = $null
             }
             
             if ($GetConfig) {
@@ -875,34 +1010,122 @@ try {
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         'Plan' {
-            $NewDryPlanParams = @{
+            $dry_var_NewDryPlanParams = @{
                 ResourcesFile        = $dry_var_ResourcesFile
                 PlanFile             = $dry_var_PlanFile
                 Configuration        = $dry_var_global_Configuration
-                CommonVariables      = $dry_var_CommonVariables
+                ConfigCombo          = $dry_var_global_ConfigCombo
                 ResourceNames        = $Resources
                 ExcludeResourceNames = $ExcludeResources
+                RoleNames            = $Roles
+                ExcludeRoleNames     = $ExcludeRoles
                 ActionNames          = $Actions
                 ExcludeActionNames   = $ExcludeActions
-                BuildOrders          = $BuildOrders
-                ExcludeBuildOrders   = $ExcludeBuildOrders
+                BuildSteps           = $BuildSteps
+                ExcludeBuildSteps    = $ExcludeBuildSteps
                 Phases               = $Phases
                 ExcludePhases        = $ExcludePhases
+                ArchiveFolder        = $dry_var_ArchiveDir
             }
-            $dry_var_PlanObj = New-DryPlan @NewDryPlanParams
-            $NewDryPlanParams = $null
+            $dry_var_Plan = New-DryPlan @dry_var_NewDryPlanParams
+            $dry_var_NewDryPlanParams = $null
             
-            $ShowDryPlanParams = @{
-                Plan                 = $dry_var_PlanObj
+            $dry_var_ShowDryPlanParams = @{
+                Plan                 = $dry_var_Plan
                 Mode                 = 'Plan' 
                 ConfigCombo          = $dry_var_global_ConfigCombo 
                 ShowConfigCombo      = $True
                 ShowDeselected       = $ShowDeselected
             }
-            Show-DryPlan @ShowDryPlanParams
-            $dry_var_PlanObj = $null
-            $ShowDryPlanParams = $null
+            Show-DryPlan @dry_var_ShowDryPlanParams
+            $dry_var_Plan = $null
+            $dry_var_ShowDryPlanParams = $null
         }
+
+        <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+            
+            Parameterset: Resolve
+            
+            Resolve gets the current plan, resolving all credentials, variables and options, but 
+            does not modify the Plan or invoke any Action. You'll be prompted for any credential
+            that cannot be found, 
+            
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+        'Resolve' {
+            $dry_var_GetDryPlanParams = @{
+                PlanFile             = $dry_var_PlanFile
+                ResourceNames        = $Resources
+                ExcludeResourceNames = $ExcludeResources
+                RoleNames            = $Roles
+                ExcludeRoleNames     = $ExcludeRoles
+                ActionNames          = $Actions
+                ExcludeActionNames   = $ExcludeActions
+                BuildSteps           = $BuildSteps
+                ExcludeBuildSteps    = $ExcludeBuildSteps
+                Phases               = $Phases
+                ExcludePhases        = $ExcludePhases
+            }
+            $dry_var_Plan            = Get-DryPlan @dry_var_GetDryPlanParams -ErrorAction Stop
+            $dry_var_GetDryPlanParams = $null
+            
+            <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+            
+                The iteration on every object in the Plan.  
+                
+            # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+            for ($dry_var_ActionCount = 1; $dry_var_ActionCount -le $dry_var_Plan.ActiveActions; $dry_var_ActionCount++ ) {
+                $dry_var_Action = $null
+                $dry_var_Action = $dry_var_Plan.Actions | Where-Object { $_.ApplyOrder -eq $dry_var_ActionCount }
+                
+                if ($Null -eq $dry_var_Action) { throw "Unable to find Action with Order $dry_var_ActionCount in Plan" }
+
+                try {
+                    Show-DryActionStart -Action $dry_var_Action
+
+                    # Used by Out-DryLog ('ol')
+                    $GLOBAL:GlobalResourceName = $dry_var_Action.ResourceName
+                    $GLOBAL:GlobalActionName   = $dry_var_Action.Action
+                    if ($dry_var_Action.Phase -ge 1) {
+                        $GLOBAL:GlobalPhase    = $dry_var_Action.Phase
+                    }
+                    else {
+                        $GLOBAL:GlobalPhase    = $null
+                    }
+
+                    <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                        
+                        Read the Action's top Config.json, and resolve paths, variables etc
+
+                    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+                    $dry_var_ResolveActionOptionsParams = @{
+                        Action        = $dry_var_Action 
+                        Configuration = $dry_var_global_Configuration 
+                        ConfigCombo   = $dry_var_global_ConfigCombo
+                    }
+                    $dry_var_Resolved = Resolve-DryActionOptions @dry_var_ResolveActionOptionsParams
+                    $dry_var_Resolved
+                    #! Should display the options object
+                    
+                }
+                catch {
+                    ol i "The terminating exception: " -sh
+                    ol i " "
+                    Show-DryUtilsError -Err $_
+                    $dry_var_WarningString = "Failed action: [$($dry_var_Action.action)]"
+                    if ($dry_var_Action.Phase) {
+                        $dry_var_WarningString += " - Phase [$($dry_var_Action.Phase)]"
+                    }
+                    ol w $dry_var_WarningString
+                    $PSCmdLet.ThrowTerminatingError($_)
+                }
+                finally {
+                    $GLOBAL:GlobalResourceName = $null 
+                    $GLOBAL:GlobalActionName = $null
+                    $GLOBAL:GlobalPhase = $null
+                }
+            }
+        }
+
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
             Parameterset: Apply
@@ -913,20 +1136,21 @@ try {
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         'Apply' {
-            $GetDryPlanParams = @{
+            $dry_var_GetDryPlanParams = @{
                 PlanFile             = $dry_var_PlanFile
                 ResourceNames        = $Resources
                 ExcludeResourceNames = $ExcludeResources
+                RoleNames            = $Roles
+                ExcludeRoleNames     = $ExcludeRoles
                 ActionNames          = $Actions
                 ExcludeActionNames   = $ExcludeActions
-                BuildOrders          = $BuildOrders
-                ExcludeBuildOrders   = $ExcludeBuildOrders
+                BuildSteps           = $BuildSteps
+                ExcludeBuildSteps    = $ExcludeBuildSteps
                 Phases               = $Phases
                 ExcludePhases        = $ExcludePhases
             }
-            $dry_var_PlanObj           = Get-DryPlan @GetDryPlanParams -ErrorAction Stop
-            $dry_var_ResolvedResources = Get-DryFromJson -Path $dry_var_ResourcesFile -ErrorAction Stop
-            $GetDryPlanParams          = $null
+            $dry_var_Plan            = Get-DryPlan @dry_var_GetDryPlanParams -ErrorAction Stop
+            $dry_var_GetDryPlanParams = $null
 
             <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
@@ -937,6 +1161,7 @@ try {
                 upon which I will only display a warning. 
                 
             # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+            #! implement  $dry_var_global_ConfigCombo.NeedsInit()
             if (($dry_var_global_ConfigCombo.TestDepHash('system')) -and
                 ($dry_var_global_ConfigCombo.TestDepHash('environment')) -and
                 ($dry_var_global_ConfigCombo.TestDepHash('module'))) {
@@ -954,84 +1179,87 @@ try {
                 The iteration on every object in the Plan.  
                 
             # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-            for ($ActionCount = 1; $ActionCount -le $dry_var_PlanObj.ActiveActions; $ActionCount++ ) {
-                $Action = $null
-                $Action = $dry_var_PlanObj.Actions | Where-Object { $_.ApplyOrder -eq $ActionCount }
+            for ($dry_var_ActionCount = 1; $dry_var_ActionCount -le $dry_var_Plan.ActiveActions; $dry_var_ActionCount++ ) {
+                $dry_var_Action = $null
+                $dry_var_Action = $dry_var_Plan.Actions | Where-Object { $_.ApplyOrder -eq $dry_var_ActionCount }
                 
-                if ($Null -eq $Action) { throw "Unable to find Action with Order $ActionCount in Plan" }
+                if ($Null -eq $dry_var_Action) { throw "Unable to find Action with Order $dry_var_ActionCount in Plan" }
 
                 try {
-                    if ($Action.Status -eq 'Todo') {
-                        $Action.Status = 'Starting'
-                        $dry_var_PlanObj.SaveToFile($dry_var_PlanFile,$False)
+                    if ($dry_var_Action.Status -eq 'Todo') {
+                        $dry_var_Action.Status = 'Starting'
+                        $dry_var_Plan.Save($dry_var_PlanFile,$False)
                     }
-                    elseif ($Action.Status -eq 'Failed') {
-                        $Action.Status = 'Retrying'
-                        $dry_var_PlanObj.SaveToFile($dry_var_PlanFile,$False)
+                    elseif ($dry_var_Action.Status -eq 'Failed') {
+                        $dry_var_Action.Status = 'Retrying'
+                        $dry_var_Plan.Save($dry_var_PlanFile,$False)
                     }
                     
-                    Show-DryPlan -Plan $dry_var_PlanObj -Mode 'Apply' -ConfigCombo $dry_var_global_ConfigCombo
-                    Show-DryActionStart -Action $Action
+                    Show-DryPlan -Plan $dry_var_Plan -Mode 'Apply' -ConfigCombo $dry_var_global_ConfigCombo
+                    Show-DryActionStart -Action $dry_var_Action
 
-                    # Define the global resource name used in output after the plan has been shown
-                    New-Variable -Name GlobalResourceName -Value $Action.ResourceName -Scope GLOBAL -Force
-                    New-Variable -Name GlobalActionName -Value $Action.Action -Scope GLOBAL -Force
-                    if ($Action.Phase -ge 1) {
-                        New-Variable -Name GlobalPhase -Value $Action.Phase -Scope GLOBAL -Force
+                    # Used by Out-DryLog ('ol')
+                    $GLOBAL:GlobalResourceName = $dry_var_Action.ResourceName
+                    $GLOBAL:GlobalActionName   = $dry_var_Action.Action
+                    if ($dry_var_Action.Phase -ge 1) {
+                        $GLOBAL:GlobalPhase    = $dry_var_Action.Phase
                     }
                     else {
-                        Remove-Variable -Name GlobalPhase -Scope GLOBAL -ErrorAction Ignore -Force
+                        $GLOBAL:GlobalPhase    = $null
                     }
-
-                    # Match up this action with the resource object in $dry_var_ResolvedResources
-                    Remove-Variable -Name Resource -ErrorAction Ignore 
-                    $Resource = $dry_var_ResolvedResources.Resources | Where-Object { 
-                        $_.Resource_Guid -eq $Action.Resource_Guid
-                    }
-
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-                    
-                        Resource Variables
                         
-                        $dry_var_global_ResourceVariables are invoked for each action, so they may contain 
-                        values specific to the Resource (or Action, actually)
+                        Make an ass out of you and me (assume) the worst. In the Plan written to file, make
+                        sure the Action has a status of 'Failed' before it starts. The only way the Action
+                        in the Plan on file may switch to a status of 'Success' is if all goes well
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-                    if ($dry_var_global_Configuration.resource_variables) {
-                        $ResolveDryVariablesParams = @{
-                            Variables              = $dry_var_global_Configuration.resource_variables
-                            Configuration          = $dry_var_global_Configuration
-                            VariablesList          = $dry_var_CommonVariables
-                            Resource               = $Resource
-                            OutputType             = 'list'
-                        }
-                        $ResourceVariables = Resolve-DryVariables @ResolveDryVariablesParams
-                        $ResolveDryVariablesParams = $null  
+                    $dry_var_Action.Status = 'Failed'
+                    $dry_var_Plan.Save($dry_var_PlanFile,$False)
+
+                    <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                        
+                        Read the Action's top Config.json, and resolve paths, variables etc
+
+                    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+                    $dry_var_ResolveActionOptionsParams = @{
+                        Action        = $dry_var_Action 
+                        Configuration = $dry_var_global_Configuration 
+                        ConfigCombo   = $dry_var_global_ConfigCombo
                     }
+                    $dry_var_Resolved = Resolve-DryActionOptions @dry_var_ResolveActionOptionsParams
 
-                    # Assume the worst
-                    $Action.Status = 'Failed'
-                    $ActionName = "dry.action.$($Action.Action)"
-                    ol i @('Action Module/Name',"$ActionName")
-                    $ActionName | Import-Module -Force -ErrorAction Stop
+                    <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                        
+                        Import the action function
 
-                    $ActionParameters     = @{
-                        Action            = $Action 
-                        Resource          = $Resource
-                        Configuration     = $dry_var_global_Configuration
-                        ResourceVariables = $ResourceVariables
+                    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+                    
+                    $dry_var_ActionName = "dry.action.$($dry_var_Action.Action)"
+                    ol i @('Action Module/Name',"$dry_var_ActionName")
+                    $dry_var_ActionName | Import-Module -Force -ErrorAction Stop
+
+                    <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                        
+                        Params to send to the action function
+
+                    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+                    $dry_var_ActionParams = @{
+                        Action        = $dry_var_Action 
+                        Configuration = $dry_var_global_Configuration
+                        Resolved      = $dry_var_Resolved
                     }
                     
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                     
                         You may call ".\DryDeploy.ps1 -Apply -ActionParams @{'param1'='value1'}" to pass a hashtable
                         of names and values to the action-function if it supports some way of filtering on certain 
-                        parts of the configuration, however this params are highly Action specific, som the action
+                        parts of the configuration, however this params are highly Action specific, so the action
                         function will automatically quit after this.
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
                     if ($ActionParams) {
-                        $ActionParameters+=@{'ActionParams'=$ActionParams}
+                        $dry_var_ActionParams+=@{'ActionParams'=$ActionParams}
                         $Quit = $true
                     }
 
@@ -1042,11 +1270,11 @@ try {
                         This is where the Action Function get's called
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-                    $ActionStartTime = Get-Date
-                    & $ActionName @ActionParameters
-                    $ActionEndTime = Get-Date
+                    $dry_var_ActionStartTime = Get-Date
+                    & $dry_var_ActionName @dry_var_ActionParams
+                    $dry_var_ActionEndTime = Get-Date
                     # No Catch?  
-                    $Action.Status = 'Success'
+                    $dry_var_Action.Status = 'Success'
 
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -1072,19 +1300,19 @@ try {
                     
                         You may call 
                             .\DryDeploy.ps1 -Apply -Step
-                        to make DD wait for you to press ENTER to continue to the next Actions, or q/quit to 
-                        just quit, if you're unhappy about something. You probably are, but don't push it
-
+                        to make DryDeploy wait for you to press ENTER before continuing to the next 
+                        Action, or Q to quit, if you're unhappy about something. 
+                         
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
                     if ($Step) {
-                        $StepResponse = Read-Host -Prompt "Press ENTER to continue or Q(uit) to quit"
-                        if (($StepResponse -eq 'q') -or ($StepResponse -eq 'quit')) { 
+                        $dry_var_StepResponse = Read-Host -Prompt "Press ENTER to continue or Q(uit) to quit"
+                        if (($dry_var_StepResponse -eq 'q') -or ($dry_var_StepResponse -eq 'quit')) { 
                             break
                         }
                     }
                 }
                 catch {
-                    $Action.Status = 'Failed'
+                    $dry_var_Action.Status = 'Failed'
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
                         On certain exceptions it may be pertinent to see the chain of errors in the stack. If
@@ -1108,7 +1336,7 @@ try {
                                 ol i " "
                             }
                             if ($Error[$ec].GetType().Name -eq 'ErrorRecord') {
-                                Show-DryError -Err $Error[$ec]
+                                Show-DryUtilsError -Err $Error[$ec]
                             }
                             else {
                                 ol i "Not Error, type is: $($Error[$ec].GetType().Name)"
@@ -1123,7 +1351,7 @@ try {
                     else {
                         ol i "The terminating exception: " -sh
                         ol i " "
-                        Show-DryError -Err $_
+                        Show-DryUtilsError -Err $_
                     }
 
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -1131,21 +1359,21 @@ try {
                         If we reach a catch, create a warning on the DD Action, but throw the original exception
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-                    $dry_var_WarningString = "Failed action: [$($Action.action)]"
-                    if ($Action.Phase) {
-                        $dry_var_WarningString += " - Phase [$($Action.Phase)]"
+                    $dry_var_WarningString = "Failed action: [$($dry_var_Action.action)]"
+                    if ($dry_var_Action.Phase) {
+                        $dry_var_WarningString += " - Phase [$($dry_var_Action.Phase)]"
                     }
                     ol w $dry_var_WarningString
                     $PSCmdLet.ThrowTerminatingError($_)
                 }
                 finally {
-                    $dry_var_PlanObj.SaveToFile($dry_var_PlanFile,$False)
-                    $ActionEndTime = Get-Date
+                    $dry_var_Plan.Save($dry_var_PlanFile,$False)
+                    $dry_var_ActionEndTime = Get-Date
                     $GLOBAL:GlobalResourceName = $null 
                     $GLOBAL:GlobalActionName = $null
                     $GLOBAL:GlobalPhase = $null
-                    Remove-Module -Name "dry.action.$($Action.Action)" -ErrorAction Ignore
-                    Show-DryActionEnd -Action $Action -StartTime $ActionStartTime -EndTime $ActionEndTime
+                    Remove-Module -Name "dry.action.$($dry_var_Action.Action)" -ErrorAction Ignore
+                    Show-DryActionEnd -Action $dry_var_Action -StartTime $dry_var_ActionStartTime -EndTime $dry_var_ActionEndTime
                 }
             }
         }
@@ -1161,17 +1389,19 @@ finally {
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
     $GLOBAL:GlobalResourceName = $null 
-    $GLOBAL:GlobalActionName = $null
-    $GLOBAL:GlobalPhase = $null
+    $GLOBAL:GlobalActionName   = $null
+    $GLOBAL:GlobalPhase        = $null
     
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         Reset Powershell's Global Preference variables
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-    $GLOBAL:VerbosePreference = $dry_var_GlobalVerbosePreference
-    $GLOBAL:DebugPreference = $dry_var_GlobalDebugPreference
+    $GLOBAL:VerbosePreference     = $dry_var_GlobalVerbosePreference
+    $GLOBAL:DebugPreference       = $dry_var_GlobalDebugPreference
     $GLOBAL:ErrorActionPreference = $dry_var_GlobalErrorActionPreference
+    ol i "DryDeploy $($PSCmdLet.ParameterSetName): outro" -sh -air
+    ol i ' '
 
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -1180,44 +1410,21 @@ finally {
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
     $env:PSModulePath = $dry_var_OriginalPSModulePath
     
-    ol i "DryDeploy $($PSCmdLet.ParameterSetName): outro" -sh -air
-    ol i ' '
-
-    
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-        Remove all DD-specific modules
+        Remove all DryDeploy modules
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-    foreach ($DryModule in  @((Get-Module | 
-        Where-Object { (($_.Name -match "^dry\.action\.") -or ($_.Name -match "^dry\.module\."))}) | 
-        Select-Object Name).Name) {
-        Get-Module $DryModule | Remove-Module -Verbose:$False -Force -ErrorAction Ignore
-    }
+    Get-Module | Where-Object { 
+        ($_.Name -match "^dry\.action\.*") -or 
+        ($_.Name -match "^dry\.module\.*")} | 
+    Remove-Module -Force
 
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-        Remove all Common Variables from both the GLOBAL and LOCAL scope
+        Remove all DryDeploy variables
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-    $dry_var_CommonVariables.foreach({
-        if (Get-Variable -Name $_.Name -Scope GLOBAL -ErrorAction Ignore) {
-            Remove-Variable -Name $_.Name -Scope GLOBAL
-        }
-        if (Get-Variable -Name $_.Name -Scope LOCAL -ErrorAction Ignore) {
-            Remove-Variable -Name $_.Name -Scope LOCAL
-        }
-    })
-
-    <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-        Remove any variable in the GLOBAL and LOCAL scope that may remain
-
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-    (Get-Variable -Scope GLOBAL | Where-Object {$_.Name -match "^dry_var_"}) | ForEach-Object  { 
-        Remove-Variable -Name "$_" -Scope Global -ErrorAction 'Ignore'
-    }
-    (Get-Variable -Scope LOCAL | Where-Object {$_.Name -match "^dry_var_"}) | ForEach-Object  { 
-        Remove-Variable -Name "$_" -Scope Local -ErrorAction 'Ignore'
-    }
+    Get-Variable -Scope Local | Where-Object {$_.Name -match '^dry_var_*'} | Remove-Variable -Scope Local -Force
+    Get-Variable -Scope Global | Where-Object {$_.Name -match '^dry_var_*'} | Remove-Variable -Scope Global -Force
 }

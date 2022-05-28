@@ -90,11 +90,11 @@ Function Install-DryDSCmodule {
             Else {
                 Try {
                     If (get-module -ListAvailable -Name $ModuleName | Where-Object { $_.version -eq $Version } ) {
-                       ol -t 3 -m "Module already installed: '$ModuleName', version: '$Version'" 
+                        ol v 'DSC Module already installed',"$ModuleName ($Version)"  
                         $Result = "AlreadyInstalled"
                     } 
                     Else {
-                       ol -t 3 -m "Module not installed: '$ModuleName', version: '$Version', trying to install." 
+                       ol v "Module not installed: '$ModuleName', version: '$Version', trying to install." 
                         
                         #Install-PackageProvider -Name 'nuget' -Scope CurrentUser -force 4>>$GLOBAL:VerboseStreamFile 6>>$GLOBAL:InfoStreamFile 1>>$GLOBAL:SuccessStreamFile
                         #Output-Streams 
@@ -105,7 +105,7 @@ Function Install-DryDSCmodule {
                     }
                 }
                 Catch {
-                    ol -t 2 -m "Some error occured during update/install of modules"
+                    ol e "Some error occured during update/install of modules"
                     $PSCmdlet.ThrowTerminatingError($_)
                 }
             }
@@ -115,14 +115,14 @@ Function Install-DryDSCmodule {
         }
         Finally {
             If ($Result -is [System.Management.Automation.ErrorRecord]) {
-               ol -t 2 -m "Unable to install DSC module '$name'"
+               ol v 'Unable to install DSC module',"$name"
                $PSCmdlet.ThrowTerminatingError($Result)
             } 
             ElseIf ($Result -eq "AlreadyInstalled") {
-                ol -t 3 -m "The DSC module '$ModuleName' ($Version) was already installed" 
+                ol i 'DSC Module already installed',"$ModuleName ($Version)" 
             } 
             ElseIf ($Result -eq "Installed") {
-                ol -t 3 -m "The DSC module '$ModuleName' ($Version) was installed" 
+                ol i 'DSC Module installed',"$ModuleName ($Version)" 
             } 
             Else {
                 throw "Unknown return type? ($Result)"

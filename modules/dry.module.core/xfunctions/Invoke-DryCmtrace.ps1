@@ -24,10 +24,12 @@ function Invoke-DryCmtrace {
     param ()
 
     try {
+        #! not implemented
+        throw "not implemented - databjorn must skjerpe seg"
         
     }
     catch {
         ol w @('Unable to save to',"$Path")
-        $PSCmdlet.ThrowTerminatingError($_)
+        $PSCmdlet.ThrowTerminatingError($_) 
     }
 }

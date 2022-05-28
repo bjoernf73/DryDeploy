@@ -38,6 +38,10 @@ function Resolve-DryVariables {
         [PSObject]
         $Resource,
 
+        [Parameter(HelpMessage="The resolved credentials list for the action. Not in use by the function, but may be used by expressions that resolves a value")]
+        [PSCustomObject]
+        $Credentials,
+
         [Parameter(HelpMessage="The resolved environment configuration object. Not in use by the function, but may be used by expressions that resolves a value")]
         [PSObject]
         $Configuration,
@@ -49,7 +53,7 @@ function Resolve-DryVariables {
     try {
         Switch ($OutPutType) {
             'hashtable' {
-                $PRIVATE:PrivateVariablesHash = [HastTable]::New()
+                $PRIVATE:PrivateVariablesHash = [HashTable]::New()
             }
             'list' {
                 $PRIVATE:PrivateVariablesList = [System.Collections.Generic.List[PSObject]]::New()
@@ -129,7 +133,7 @@ function Resolve-DryVariables {
                         }
                     }
                 }
-                'bool' {
+                {$_ -in 'bool','boolean'} {
                     # The variable value is a boolean
                     Try {
                         [Boolean]$VarValue = $Var.Value
@@ -158,7 +162,7 @@ function Resolve-DryVariables {
                     # The variable value is a function call
                     Try {
                         Remove-Variable -name VarValue,FunctionParamsHash,FunctionParamsNameArr,FunctionParamsName -ErrorAction Ignore
-                        $FunctionParamsHash = [HastTable]::New()
+                        $FunctionParamsHash = [HashTable]::New()
                         $FunctionParamsNameArr = @($Var.parameters | Get-Member -MemberType NoteProperty | Select-Object -Property Name).Name
                         
                         ForEach ($FunctionParamsName in $FunctionParamsNameArr) {
