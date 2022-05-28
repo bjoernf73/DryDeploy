@@ -100,6 +100,7 @@ function Resolve-DryActionOptions {
             }
         }
 
+
         <#
             Resolve all credentials 
         #>
@@ -135,38 +136,43 @@ function Resolve-DryActionOptions {
                     }
                 }
 
-                <#
-                    An action may 'follow' another Action's type. For instance, the 'MoveToOU'
-                    Action has a 'default' equalling the ad.import 'default' for a specific
-                    Role, but if that Role's type is modified by $Action.Resource.options.ad.import_type,
-                    then MoveToOU must modify accordingly. The ActionMetaConfig's 'follow_type' property 
-                    specifies which Action's type to follow 
-                #>
-                #! doesn't really work. If an action defined in BaseConfig needs to follow the type
-                #! of an action in the RoleConfig, for instance ad.import, and perhaps a specific 
-                #! phase of that action, then this fails. However, what if one role has 2 phases
-                #! of ad.import, and another is unphased? grmpf
-                if ($null -ne $ActionMetaConfig.follow_type) {
-                    $ResourceFollowType = "$($ActionMetaConfig.follow_type)_type"
-                    if ($Action.Resource.Options."$ResourceFollowType") {
-                        if ($Action.Resource.options."$ResourceFollowType" -in $SupportedTypes) {
-                            $ActionType = $Action.Resource.Options."$ResourceFollowType"
-                        }
-                    }
-                }
+                
                 [String]$ConfigSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath $ActionType
                 [String]$TypeFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'files'
                 [String]$TypeMetaConfigFile = Join-Path -Path $ConfigSourcePath -ChildPath 'Config.json'
                 [PSCustomObject]$TypeMetaConfig = Get-DryFromJson -Path $TypeMetaConfigFile
                 
             }
-            else {
-
+            <#
+                An action may 'follow' another Action's type. For instance, the 'MoveToOU'
+                Action has a 'default' equalling the ad.import 'default' for a specific
+                Role, but if that Role's type is modified by $Action.Resource.options.ad.import_type,
+                then MoveToOU must modify accordingly. The ActionMetaConfig's 'follow_type' property 
+                specifies which Action's type to follow 
+            #>
+            if ($ActionMetaConfig.follow_type) {
+                $ActionType = $ActionMetaConfig.default
+                $FollowType = $ActionMetaConfig.follow_type
+                if ($Action.Resource.Options."$FollowType") {
+                    $ActionType = $Action.Resource.Options."$FollowType"
+                }
             } 
         }
 
-        if ($TypeMetaConfig.vars) {
+        if ($ActionMetaConfig.vars) {
             # There are variables to be resolved for the Action
+            $ResolveDryVarParams = @{
+                Variables     = $ActionMetaConfig.vars
+                Action        = $Action
+                Resource      = $Action.Resource
+                Configuration = $Configuration
+                Credentials   = $Credentials
+            }
+            $MetaConfigVars = Resolve-DryVariables @ResolveDryVarParams
+            $ResolveDryVarParams = $null
+        }
+        elseif ($TypeMetaConfig.vars) {
+            # There are variables to be resolved for the Action Type
             $ResolveDryVarParams = @{
                 Variables     = $TypeMetaConfig.vars
                 Action        = $Action
@@ -174,7 +180,7 @@ function Resolve-DryActionOptions {
                 Configuration = $Configuration
                 Credentials   = $Credentials
             }
-            $TypeMetaConfigVars = Resolve-DryVariables @ResolveDryVarParams
+            $MetaConfigVars = Resolve-DryVariables @ResolveDryVarParams
             $ResolveDryVarParams = $null
         }
 
@@ -202,11 +208,9 @@ function Resolve-DryActionOptions {
         if ($ActionMetaConfig) {
             $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ActionMetaConfig' -Value $ActionMetaConfig
         }
-        
         if ($TypeMetaConfig) {
             $OptionsObject | Add-Member -MemberType NoteProperty -Name 'TypeMetaConfig' -Value $TypeMetaConfig
         }
-
         if ($ModuleFilesSourcePath) {
             if (Test-Path -Path $ModuleFilesSourcePath -ErrorAction Ignore) {
                 $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ModuleFilesSourcePath' -Value $ModuleFilesSourcePath
@@ -232,12 +236,11 @@ function Resolve-DryActionOptions {
                 $OptionsObject | Add-Member -MemberType NoteProperty -Name 'TypeFilesSourcePath' -Value $TypeFilesSourcePath
             }
         }
-
         if ($TypeMetaConfigFile) {
             $OptionsObject | Add-Member -MemberType NoteProperty -Name 'TypeMetaConfigFile' -Value $TypeMetaConfigFile
         }
-        if ($TypeMetaConfigVars) {
-            $OptionsObject | Add-Member -MemberType NoteProperty -Name 'Vars' -Value $TypeMetaConfigVars
+        if ($MetaConfigVars) {
+            $OptionsObject | Add-Member -MemberType NoteProperty -Name 'Vars' -Value $MetaConfigVars
         }
         
         #ol -Type 'i' -MsgObject $OptionsObject -MsgTitle "Resolved Options"

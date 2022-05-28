@@ -58,9 +58,9 @@ Function dry.action.win.reboot {
         #   defined previously
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-        if ($Resolved.MetaConfig) {
-            [Int]$NumberOfReboots = $Resolved.MetaConfig.reboots
-            [Bool]$GPUpdate = $Resolved.MetaConfig.gpupdate
+        if ($Resolved.ActionMetaConfig) {
+            [Int]$NumberOfReboots = $Resolved.ActionMetaConfig.reboots
+            [Bool]$GPUpdate = $Resolved.ActionMetaConfig.gpupdate
             [String]$ConfigOrDefault        = 'Config'
         }
         
@@ -150,10 +150,10 @@ Function dry.action.win.reboot {
     
             $WinRMStatus = Wait-DryWinRM @WaitWinRMInterfaceParams
             switch ($WinRMStatus) {
-                $False {
+                $false {
                     throw "Failed to Connect to $($Action.Resource.name) (IP: $($Action.Resource.resolved_network.ip_address))"
                 }
-                $True {
+                $true {
                     ol i @('Successfully connected',"$($Action.Resource.name) (IP: $($Action.Resource.resolved_network.ip_address))")
                 }  
             }
@@ -166,8 +166,8 @@ Function dry.action.win.reboot {
         #   on the restartet resource come up
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #   
-        if ($null -ne $Resolved.MetaConfig.sleep_after_seconds) {
-            Start-DryUtilsSleep -Seconds $Resolved.MetaConfig.sleep_after_seconds -Message "Sleeping $($Resolved.MetaConfig.sleep_after_seconds) seconds before continuing..."
+        if ($null -ne $Resolved.ActionMetaConfig.sleep_after_seconds) {
+            Start-DryUtilsSleep -Seconds $Resolved.ActionMetaConfig.sleep_after_seconds -Message "Sleeping $($Resolved.ActionMetaConfig.sleep_after_seconds) seconds before continuing..."
         }
         ol i "All reboots were successful" -sh    
     }

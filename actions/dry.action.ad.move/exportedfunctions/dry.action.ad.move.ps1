@@ -17,7 +17,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-Function dry.action.ad.move {
+function dry.action.ad.move { 
     [CmdletBinding()]  
     param (
         [Parameter(Mandatory,HelpMessage="The resolved action object")]
@@ -40,13 +40,15 @@ Function dry.action.ad.move {
     )
 
     try {
-        $MetaConfig = $Resolved.MetaConfig
-        $RoleOU = $MetaConfig.ous."$($MetaConfig.ActionType)"
+        $MetaConfig = $Resolved.ActionMetaConfig
+        $RoleOUType = $Resolved.ActionType
+        $RoleOU = $MetaConfig.ous."$RoleOUType"
+        
         if ($null -eq $RoleOU) {
-            throw "Action does not contain an OU of type '$ActionType'"
+            throw "Action does not contain an OU of type '$RoleOUType'"
         }
-        # Replace replacement patterns
-        $RoleOU = Resolve-DryReplacementPattern -InputText $RoleOU -Variables $Resolved.MetaConfig.vars
+        # Replace replacement patterns                             
+        $RoleOU = Resolve-DryReplacementPattern -InputText "$RoleOU" -Variables $Resolved.vars
         
         # Convert the RoleOU to a distinguished name
         $RoleOU = ConvertTo-DryUtilsDistinguishedName -Name $RoleOU

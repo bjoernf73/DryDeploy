@@ -756,7 +756,7 @@ try {
     [String]$dry_var_ConfigComboFile    = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'dry_deploy_config_combo.json'
     [String]$dry_var_UserOptionsFile    = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'UserOptions.json' # the user may create this file to override the defaults
     [String]$dry_var_TempConfigsDir     = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'TempConfigs'
-    [String]$dry_var_ArchiveDir     = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'Archived'
+    [String]$dry_var_ArchiveDir         = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'Archived'
     [String]$dry_var_SystemOptionsFile  = Join-Path -Path $dry_var_global_ScriptPath           -ChildPath 'SystemOptions.json'
     [String]$GLOBAL:dry_var_global_CredentialsFile    = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'dry_deploy_credentials.json'
 

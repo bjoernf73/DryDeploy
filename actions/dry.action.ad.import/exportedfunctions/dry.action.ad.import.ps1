@@ -3,7 +3,7 @@ Using Module dry.module.ad
 # Using Module GroupPolicy
 Function dry.action.ad.import {
     [CmdletBinding()]  
-    Param (
+    param (
         [Parameter(Mandatory,HelpMessage="The resolved action object")]
         [PSObject]
         $Action,

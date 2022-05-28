@@ -88,14 +88,14 @@ Function dry.action.dsc.run {
             $GetDryPSSessionParams += @{ SessionType = 'PSSession' }
             $DSCSession = New-DrySession @GetDryPSSessionParams
             
-            ol i @('trying to install DSC modules on',"Target ($($Resolved.target))'")
+            ol i @('trying to install DSC modules on',"Target ($($Resolved.target))")
             $Resolved.TypeMetaConfig.dsc_modules | Install-DryDSCModule -Session $DSCSession  
             ol i 'DSC modules sucessfully installed' -sh
         }
 
-        if ($Resolved.MetaConfig.dsc_sleep_before_seconds) {
-            ol i @('Sleep before applying',"$($Resolved.MetaConfig.dsc_sleep_before_seconds) seconds")
-            Start-DryUtilsSleep -seconds $Resolved.MetaConfig.dsc_sleep_before_seconds
+        if ($Resolved.TypeMetaConfig.dsc_sleep_before_seconds) {
+            ol i @('Sleep before applying',"$($Resolved.TypeMetaConfig.dsc_sleep_before_seconds) seconds")
+            Start-DryUtilsSleep -seconds $Resolved.TypeMetaConfig.dsc_sleep_before_seconds
         }
         
         # Delete any *.mof and *.meta.mof from previous runs
@@ -160,6 +160,10 @@ Function dry.action.dsc.run {
             $DscTargetSystemPOSTCredentialsArray = @($Resolved.Credentials.credential1)
         }
         
+        $SessionConfig = $Configuration.CoreConfig.connections | Where-Object { 
+            $_.type -eq 'winrm'
+        }
+
         $WaitWinRMInterfaceParams = @{
             IP                       = "$($Resolved.target)"
             Computername             = $Action.Resource.name
@@ -190,8 +194,8 @@ Function dry.action.dsc.run {
 
         
         [int]$DscTestIntervalSeconds = 60
-        if ($Resolved.MetaConfig.dsc_test_interval_seconds) {
-            [int]$DscTestIntervalSeconds = $Resolved.MetaConfig.dsc_test_interval_seconds
+        if ($Resolved.TypeMetaConfig.dsc_test_interval_seconds) {
+            [int]$DscTestIntervalSeconds = $Resolved.TypeMetaConfig.dsc_test_interval_seconds
         }
 
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -201,8 +205,8 @@ Function dry.action.dsc.run {
             that for very large or very small configs. 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         [int]$DscTestBeforeSeconds = 15
-        if ($Resolved.MetaConfig.dsc_test_before_seconds) {
-            [int]$DscTestBeforeSeconds = $Resolved.MetaConfig.dsc_test_before_seconds
+        if ($Resolved.TypeMetaConfig.dsc_test_before_seconds) {
+            [int]$DscTestBeforeSeconds = $Resolved.TypeMetaConfig.dsc_test_before_seconds
         }
 
         Start-DryUtilsSleep -Seconds $DscTestBeforeSeconds -Message "Sleeping before testing configuration"
@@ -230,8 +234,8 @@ Function dry.action.dsc.run {
                     }
                 })
                 
-                if (($Resolved.MetaConfig.dsc_allowed_not_in_desired_state).count -gt 0) {
-                    [array]$AllowedNotInDesiredState = $Resolved.MetaConfig.dsc_allowed_not_in_desired_state
+                if (($Resolved.TypeMetaConfig.dsc_allowed_not_in_desired_state).count -gt 0) {
+                    [array]$AllowedNotInDesiredState = $Resolved.TypeMetaConfig.dsc_allowed_not_in_desired_state
                     
                     $NotInDesiredStateCount = 0
                     $ResourceInstancesNotInDesiredState.ForEach({
@@ -255,15 +259,26 @@ Function dry.action.dsc.run {
 
         }
         while (-not $LcmInDesiredState)
-        
         $CimSession | Remove-CimSession -ErrorAction Ignore
-        if ($Resolved.MetaConfig.dsc_restart_after_lcm_finish) {
+
+        if (($Action.credentials.credential1 -ne $Action.credentials.credential2) -and ($null -ne $Action.credentials.credential2)) {
+            # alternating credentials
+            $DscTargetSystemPOSTCredentialsArray = @($Resolved.Credentials.credential1,$Resolved.Credentials.credential2)
+        }
+        else {
+            $DscTargetSystemPOSTCredentialsArray = @($Resolved.Credentials.credential1)
+        }
+        
+        $SessionConfig = $Configuration.CoreConfig.connections | Where-Object { 
+            $_.type -eq 'winrm'
+        }
+        if ($Resolved.TypeMetaConfig.dsc_restart_after_lcm_finish) {
             # Restart the target system
-            Restart-Computer -ComputerName $Resolved.target -Credential $DscTargetSystemPOSTCredentials -Force
+            Restart-Computer -ComputerName $Resolved.target -Credential $DscTargetSystemPOSTCredentialsArray -Force
  
             [int]$DscWaitForRebootSeconds = 30
-            if ($Resolved.MetaConfig.dsc_wait_for_reboot_seconds) {
-                [int]$DscWaitForRebootSeconds = $Resolved.MetaConfig.dsc_wait_for_reboot_seconds
+            if ($Resolved.TypeMetaConfig.dsc_wait_for_reboot_seconds) {
+                [int]$DscWaitForRebootSeconds = $Resolved.TypeMetaConfig.dsc_wait_for_reboot_seconds
             }
 
             ol i @('Waiting for the target to restart',"$DscWaitForRebootSeconds seconds" )
@@ -279,14 +294,13 @@ Function dry.action.dsc.run {
             specify how long to wait for the verification events before I will fail the 
             action
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        $VerificationObject = $Resolved.MetaConfig.dsc_verification_log_events
+        $VerificationObject = $Resolved.TypeMetaConfig.dsc_verification_log_events
 
-        if ($Resolved.MetaConfig.dsc_verification_log_events) {
+        if ($Resolved.TypeMetaConfig.dsc_verification_log_events) {
             ol i @('DSC verification log events defined','Yes')
-            
             $GetDrySessionParams = @{
                 Computername  = $($Resolved.target)
-                Credential    = $DscTargetSystemPOSTCredentials
+                Credential    = $DscTargetSystemPOSTCredentialsArray
                 SessionConfig = $SessionConfig
                 SessionType   = 'PSSession'
             }
