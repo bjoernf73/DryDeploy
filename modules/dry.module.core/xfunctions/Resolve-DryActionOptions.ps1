@@ -159,30 +159,18 @@ function Resolve-DryActionOptions {
             } 
         }
 
-        if ($ActionMetaConfig.vars) {
-            # There are variables to be resolved for the Action
-            $ResolveDryVarParams = @{
-                Variables     = $ActionMetaConfig.vars
-                Action        = $Action
-                Resource      = $Action.Resource
-                Configuration = $Configuration
-                Credentials   = $Credentials
-            }
-            $MetaConfigVars = Resolve-DryVariables @ResolveDryVarParams
-            $ResolveDryVarParams = $null
-        }
-        elseif ($TypeMetaConfig.vars) {
-            # There are variables to be resolved for the Action Type
-            $ResolveDryVarParams = @{
-                Variables     = $TypeMetaConfig.vars
-                Action        = $Action
-                Resource      = $Action.Resource
-                Configuration = $Configuration
-                Credentials   = $Credentials
-            }
-            $MetaConfigVars = Resolve-DryVariables @ResolveDryVarParams
-            $ResolveDryVarParams = $null
-        }
+        <#
+        $Paths = New-Object -TypeName PSCustomObject
+        $Paths | Add-Member -MemberType NoteProperty -Name 'ConfigTargetPath' -Value $ConfigTargetPath
+        $Paths | Add-Member -MemberType NoteProperty -Name 'ConfigSourcePath' -Value $ConfigSourcePath
+        $Paths | Add-Member -MemberType NoteProperty -Name 'ModuleFilesSourcePath' -Value $ModuleFilesSourcePath
+        $Paths | Add-Member -MemberType NoteProperty -Name 'RoleFilesSourcePath' -Value $RoleFilesSourcePath
+        $Paths | Add-Member -MemberType NoteProperty -Name 'ActionFilesSourcePath' -Value $ActionFilesSourcePath
+        $Paths | Add-Member -MemberType NoteProperty -Name 'PhaseFilesSourcePath' -Value $PhaseFilesSourcePath
+        $Paths | Add-Member -MemberType NoteProperty -Name 'TypeFilesSourcePath' -Value $TypeFilesSourcePath
+        #>
+
+        # fjernet herfra, lagt nederst 
 
         if ($TypeMetaConfig.target_expression) {
             [String]$Target = Invoke-Expression -Command $TypeMetaConfig.target_expression 
@@ -211,6 +199,7 @@ function Resolve-DryActionOptions {
         if ($TypeMetaConfig) {
             $OptionsObject | Add-Member -MemberType NoteProperty -Name 'TypeMetaConfig' -Value $TypeMetaConfig
         }
+
         if ($ModuleFilesSourcePath) {
             if (Test-Path -Path $ModuleFilesSourcePath -ErrorAction Ignore) {
                 $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ModuleFilesSourcePath' -Value $ModuleFilesSourcePath
@@ -239,11 +228,38 @@ function Resolve-DryActionOptions {
         if ($TypeMetaConfigFile) {
             $OptionsObject | Add-Member -MemberType NoteProperty -Name 'TypeMetaConfigFile' -Value $TypeMetaConfigFile
         }
+        
+        
+        if ($ActionMetaConfig.vars) {
+            # There are variables to be resolved for the Action
+            $ResolveDryVarParams = @{
+                Variables     = $ActionMetaConfig.vars
+                Action        = $Action
+                Resource      = $Action.Resource
+                Configuration = $Configuration
+                Credentials   = $Credentials
+                Resolved      = $OptionsObject
+            }
+            $MetaConfigVars = Resolve-DryVariables @ResolveDryVarParams
+            $ResolveDryVarParams = $null
+        }
+        elseif ($TypeMetaConfig.vars) {
+            # There are variables to be resolved for the Action Type
+            $ResolveDryVarParams = @{
+                Variables     = $TypeMetaConfig.vars
+                Action        = $Action
+                Resource      = $Action.Resource
+                Configuration = $Configuration
+                Credentials   = $Credentials
+                Resolved      = $OptionsObject
+            }
+            $MetaConfigVars = Resolve-DryVariables @ResolveDryVarParams
+            $ResolveDryVarParams = $null
+        }
+
         if ($MetaConfigVars) {
             $OptionsObject | Add-Member -MemberType NoteProperty -Name 'Vars' -Value $MetaConfigVars
         }
-        
-        #ol -Type 'i' -MsgObject $OptionsObject -MsgTitle "Resolved Options"
         return $OptionsObject
     }
     catch {

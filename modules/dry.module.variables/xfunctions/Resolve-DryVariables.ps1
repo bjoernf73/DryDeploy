@@ -46,6 +46,10 @@ function Resolve-DryVariables {
         [PSObject]
         $Configuration,
 
+        [Parameter(HelpMessage="Resolved Paths ++ from Resolve-DryActionOptions. Not in use by the function, but may be used by expressions that resolves a value")]
+        [PSObject]
+        $Resolved,
+
         [Parameter(Helpmessage="Specify the output you want, either 'hashtable' or 'list'. Defaults to 'list'")]
         [ValidateSet('hashtable', 'list')]
         [String]$OutPutType = 'list'
