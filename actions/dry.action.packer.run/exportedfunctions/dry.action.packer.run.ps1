@@ -164,7 +164,7 @@ function dry.action.packer.run {
         #   Build the config
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         ol i @('Packer Build',"& $PackerExe build $DisplayArguments")
-        ol i @('Packer Build',"& $PackerExe build $Arguments")
+        # ol i @('Packer Build',"& $PackerExe build $Arguments")
         & $PackerExe build $Arguments
         if ($LastExitCode -ne 0) {
             Throw "Packer Build failed: $LastExitCode" 
