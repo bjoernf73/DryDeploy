@@ -1,4 +1,4 @@
-Using Namespace System.Collections.Generic
+using namespace System.Collections.Generic
 function dry.action.packer.run {
     [CmdletBinding()]  
     param (
@@ -20,7 +20,7 @@ function dry.action.packer.run {
         [HashTable]
         $ActionParams
     )
-    Try {
+    try {
         $TestedPackerVersion = [Version]"1.8.0"
         Push-Location
         $ConfigSourcePath  = $Resolved.ConfigSourcePath
@@ -41,13 +41,13 @@ function dry.action.packer.run {
         ol i @('Packer vars file',"$TargetVarsFile")
        
         # Remove files that may exist from a previous run
-        If (Test-Path -Path $ConfigTargetPath -ErrorAction Ignore) {
+        if (Test-Path -Path $ConfigTargetPath -ErrorAction Ignore) {
             ol i @('Removing ConfigFiles from',"$ConfigTargetPath")
             Remove-Item -Path $ConfigTargetPath -Recurse -Force -Confirm:$false
         }
         
         # Create the target folder
-        If (-not (Test-Path -Path $ConfigTargetPath -ErrorAction Ignore)) {
+        if (-not (Test-Path -Path $ConfigTargetPath -ErrorAction Ignore)) {
             New-Item -Path $ConfigTargetPath -ItemType Directory -Confirm:$false -Force | Out-Null
         }
         
@@ -61,10 +61,10 @@ function dry.action.packer.run {
                     $RawFileContents = Get-Content -Path $SourceFile -Raw -ErrorAction Stop
                     # Replace all replacement patterns, i.e. '###some_pattern###'
                     $ReplacedFileContents = Resolve-DryReplacementPatterns -InputText $RawFileContents -Variables $Resolved.vars
-                    $ReplacedFileContents | Out-File -FilePath $TargetFile -Encoding Default -Force
+                    $ReplacedFileContents | Out-File -FilePath $TargetFile -Encoding default -Force
                     Remove-Variable -Name RawFileContents,ReplacedFileContents -ErrorAction Ignore
                 }
-                Default {
+                default {
                     # just copy
                     Copy-Item -Path $SourceFile -Destination $TargetFile -Confirm:$false -Force
                 }
@@ -124,7 +124,7 @@ function dry.action.packer.run {
         ol i @('Packer Validate',"& $PackerExe validate $ValidateDisplayArguments")
         & $PackerExe validate $ValidateArguments
         if ($LastExitCode -ne 0) {
-            Throw "Packer Validate failed: $LastExitCode" 
+            throw "Packer Validate failed: $LastExitCode" 
         }
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -167,22 +167,22 @@ function dry.action.packer.run {
         # ol i @('Packer Build',"& $PackerExe build $Arguments")
         & $PackerExe build $Arguments
         if ($LastExitCode -ne 0) {
-            Throw "Packer Build failed: $LastExitCode" 
+            throw "Packer Build failed: $LastExitCode" 
         }
         
         # & packer apply -auto-approve $Arguments *>&1 | Tee-Object -Variable ApplyResul
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    Finally {
+    finally {
         Pop-Location
 
         # Remove temporary files
-        If ($GLOBAL:dry_var_global_KeepConfigFiles) {
+        if ($GLOBAL:dry_var_global_KeepConfigFiles) {
             ol i @('Keeping ConfigFiles in',"$ConfigTargetPath")
         }
-        Else {
+        else {
             ol i @('Removing ConfigFiles from',"$ConfigTargetPath")
             Remove-Item -Path $ConfigTargetPath -Recurse -Force -Confirm:$false
         }
