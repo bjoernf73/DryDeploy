@@ -81,10 +81,10 @@ class Credentials {
             if ($This.TestCredential($Alias,$EnvConfig)) {
                 ol w "Credential '$Alias' in '$EnvConfig' exists already - removing, and adding the new instance"
             }
-            $This.Credentials = $This.Credentials | 
+            $This.Credentials = @($This.Credentials | 
             Where-Object { 
                 (-not (($_.Alias -eq $Alias) -and ($_.EnvConfig -eq $EnvConfig)))
-            }
+            })
             $This.Credentials += @($CredObj)
             $This.WriteToFile()
         }
@@ -114,10 +114,10 @@ class Credentials {
             if ($This.TestCredential($Alias,$EnvConfig)) {
                 ol w "The Credential '$Alias' exists already - removing it, and adding the new instance"
             }
-            $This.Credentials = $This.Credentials | 
+            $This.Credentials = @($This.Credentials | 
             Where-Object { 
                 (-not (($_.Alias -eq $Alias) -and ($_.EnvConfig -eq $EnvConfig)))
-            }
+            })
             $This.Credentials += @($CredObj)
             $This.WriteToFile()
         }
