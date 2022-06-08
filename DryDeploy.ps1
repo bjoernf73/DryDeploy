@@ -408,10 +408,7 @@ param (
     HelpMessage='Array of one or more Resource names to include. 
     All others are excluded. If not specified, all Resources are 
     included')]
-    [ArgumentCompleter({((Get-Content -Path (Join-Path ((Get-Content `
-    (Join-Path (Join-Path $home 'DryDeploy') 'dry_deploy_config_combo.json') | 
-    ConvertFrom-Json).EnvConfig.CoreConfigPath) resources.json) | 
-    ConvertFrom-Json).resources) | Select-Object -ExpandProperty Name })]
+    [ArgumentCompleter({((Get-Content -Path (Join-Path -Path ((Get-Content -Path (Join-Path -Path (Join-Path -Path $home -ChildPath 'DryDeploy') -ChildPath 'dry_deploy_config_combo.json') | ConvertFrom-Json).envconfig.coreconfigpath) -ChildPath 'resources.json')) -replace '("(\\.|[^\\"])*")|/\*[\S\s]*?\*/|//.*', '$1' | ConvertFrom-Json).resources | Select-Object -ExpandProperty Name})]
     [String[]]
     $Resources,
 
@@ -423,10 +420,7 @@ param (
     HelpMessage='Array of one or more Resource names to exclude. 
     All others are included. If not specified, no Resources are 
     excluded')]
-    [ArgumentCompleter({((Get-Content -Path (Join-Path ((Get-Content `
-    (Join-Path (Join-Path $home 'DryDeploy') 'dry_deploy_config_combo.json') | 
-    ConvertFrom-Json).EnvConfig.CoreConfigPath) resources.json) | 
-    ConvertFrom-Json).resources) | Select-Object -ExpandProperty Name })]
+    [ArgumentCompleter({((Get-Content -Path (Join-Path -Path ((Get-Content -Path (Join-Path -Path (Join-Path -Path $home -ChildPath 'DryDeploy') -ChildPath 'dry_deploy_config_combo.json') | ConvertFrom-Json).envconfig.coreconfigpath) -ChildPath 'resources.json')) -replace '("(\\.|[^\\"])*")|/\*[\S\s]*?\*/|//.*', '$1' | ConvertFrom-Json).resources | Select-Object -ExpandProperty Name})]
     [String[]]
     $ExcludeResources,
 
@@ -438,10 +432,7 @@ param (
     HelpMessage='Array of one or more Role names to include. 
     All others are excluded. If not specified, all Reles are 
     included')]
-    [ArgumentCompleter({((Get-Content -Path (Join-Path ((Get-Content `
-    (Join-Path (Join-Path $home 'DryDeploy') 'dry_deploy_config_combo.json') | 
-    ConvertFrom-Json).EnvConfig.CoreConfigPath) resources.json) | 
-    ConvertFrom-Json).resources) | Select-Object -ExpandProperty Role })]
+    [ArgumentCompleter({((Get-Content -Path (Join-Path -Path ((Get-Content -Path (Join-Path -Path (Join-Path -Path $home -ChildPath 'DryDeploy') -ChildPath 'dry_deploy_config_combo.json') | ConvertFrom-Json).envconfig.coreconfigpath) -ChildPath 'resources.json')) -replace '("(\\.|[^\\"])*")|/\*[\S\s]*?\*/|//.*', '$1' | ConvertFrom-Json).resources | Select-Object -ExpandProperty Role})]
     [String[]]
     $Roles,
 
@@ -453,10 +444,7 @@ param (
     HelpMessage='Array of one or more Role names to exclude. 
     All others are included. If not specified, no Roles are 
     excluded')]
-    [ArgumentCompleter({((Get-Content -Path (Join-Path ((Get-Content `
-    (Join-Path (Join-Path $home 'DryDeploy') 'dry_deploy_config_combo.json') | 
-    ConvertFrom-Json).EnvConfig.CoreConfigPath) resources.json) | 
-    ConvertFrom-Json).resources) | Select-Object -ExpandProperty Role })]
+    [ArgumentCompleter({((Get-Content -Path (Join-Path -Path ((Get-Content -Path (Join-Path -Path (Join-Path -Path $home -ChildPath 'DryDeploy') -ChildPath 'dry_deploy_config_combo.json') | ConvertFrom-Json).envconfig.coreconfigpath) -ChildPath 'resources.json')) -replace '("(\\.|[^\\"])*")|/\*[\S\s]*?\*/|//.*', '$1' | ConvertFrom-Json).resources | Select-Object -ExpandProperty Role})]
     [String[]]
     $ExcludeRoles,
 
@@ -715,6 +703,7 @@ try {
     $GLOBAL:dry_var_global_ShowStatus                 = $ShowStatus
     $GLOBAL:dry_var_global_SuppressInteractivePrompts = $SuppressInteractivePrompts
     $GLOBAL:dry_var_global_Force                      = $Force
+    $GLOBAL:dry_var_global_DestroyOnFailedBuild       = $DestroyOnFailedBuild
     $GLOBAL:dry_var_global_ShowPasswords              = $ShowPasswords
     $GLOBAL:dry_var_global_KeepConfigFiles            = $KeepConfigFiles
     $GLOBAL:dry_var_global_WarnOnTooNarrowConsole     = $true #! lagt i options som 'warn_on_too_narrow_console'
@@ -1188,11 +1177,11 @@ try {
                 try {
                     if ($dry_var_Action.Status -eq 'Todo') {
                         $dry_var_Action.Status = 'Starting'
-                        $dry_var_Plan.Save($dry_var_PlanFile,$False)
+                        $dry_var_Plan.Save($dry_var_PlanFile,$false,$null)
                     }
                     elseif ($dry_var_Action.Status -eq 'Failed') {
                         $dry_var_Action.Status = 'Retrying'
-                        $dry_var_Plan.Save($dry_var_PlanFile,$False)
+                        $dry_var_Plan.Save($dry_var_PlanFile,$false,$null)
                     }
                     
                     Show-DryPlan -Plan $dry_var_Plan -Mode 'Apply' -ConfigCombo $dry_var_global_ConfigCombo
@@ -1215,7 +1204,7 @@ try {
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
                     $dry_var_Action.Status = 'Failed'
-                    $dry_var_Plan.Save($dry_var_PlanFile,$False)
+                    $dry_var_Plan.Save($dry_var_PlanFile,$false,$null)
 
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                         
@@ -1367,7 +1356,7 @@ try {
                     $PSCmdLet.ThrowTerminatingError($_)
                 }
                 finally {
-                    $dry_var_Plan.Save($dry_var_PlanFile,$False)
+                    $dry_var_Plan.Save($dry_var_PlanFile,$false,$null)
                     $dry_var_ActionEndTime = Get-Date
                     $GLOBAL:GlobalResourceName = $null 
                     $GLOBAL:GlobalActionName = $null

@@ -37,7 +37,6 @@
         if ($null -ne $this.envconfig.path) {
             ol i 'Name',$this.envconfig.name
             ol i 'Path',$this.envconfig.path
-            ol i 'Name',$this.envconfig.name
             ol i 'Description',$this.envconfig.description
         }
         else {
@@ -49,7 +48,6 @@
         if ($null -ne $this.moduleconfig.path) {
             ol i 'Name',$this.moduleconfig.name
             ol i 'Path',$this.moduleconfig.path
-            ol i 'Name',$this.moduleconfig.name
             ol i 'Description',$this.moduleconfig.description
         }
         else {

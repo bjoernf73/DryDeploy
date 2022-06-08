@@ -102,6 +102,6 @@ function New-DryPlan {
     
     # Set the PlanOrder based on PlanSelected
     $Plan.ResolvePlanOrder($PlanFile)
-    $Plan.Save($PlanFile,$true)
+    $Plan.Save($PlanFile,$true,$ArchiveFolder)
     return $Plan
 }

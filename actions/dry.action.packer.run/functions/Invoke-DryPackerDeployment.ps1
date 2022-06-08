@@ -192,9 +192,17 @@ function Invoke-DryPackerDeployment {
         
         # BUILD
         try {
+            switch ($GLOBAL:dry_var_global_DestroyOnFailedBuild) {
+                $true {
+                    $OnError = 'cleanup'
+                }
+                default {
+                    $OnError = 'abort'
+                }
+            }
             ol -t 0 -m "Running Packer build..."
             Remove-Variable -Name PackerOutput -Scope Local -ErrorAction Ignore
-            & Packer.exe build $ArgumentArray | Tee-Object -Variable PackerOutput 
+            & Packer.exe build -on-error=$OnError $ArgumentArray | Tee-Object -Variable PackerOutput 
             
             # Occurances of every success string must be found in the output
             $PackerSuccessStrings = @("Builds finished\. The artifacts of successful builds are")

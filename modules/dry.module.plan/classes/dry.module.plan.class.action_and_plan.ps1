@@ -407,7 +407,7 @@ class Plan {
                 }
             }
         }
-        $This.Save($PlanFile,$False)
+        $This.Save($PlanFile,$false,$null)
     }
 
     [Void] ResolveApplyOrder($PlanFile) {
@@ -435,21 +435,20 @@ class Plan {
                 }
             }
         }
-        $This.Save($PlanFile,$False)
+        $This.Save($PlanFile,$false,$null)
     }
 
-
-    [Void] Save($PlanFile,$Archive) {
-
+    [Void] Save ($PlanFile,$Archive,$ArchiveFolder) {
         if ($Archive) {
-            if (Test-Path -Path $PlanFile -ErrorAction Ignore) {
-                ol v "Plan '$PlanFile' exists, archiving"
-                Save-DryArchiveFile -ArchiveFile $PlanFile -ArchiveFolder $GLOBAL:dry_global_var_PlanFile
+            # Archive previous Plan-file and create new
+            if (Test-Path -Path $PlanFile -ErrorAction SilentlyContinue) {
+                ol v "ResourcesFile '$PlanFile' exists, archiving" 
+                Save-DryArchiveFile -ArchiveFile $PlanFile -ArchiveFolder $ArchiveFolder
             }
         }
-        ol d "Saving planfile '$PlanFile'"
-        #! har vi ikke en funksjon for dette - kanskje en som tar seg av hele greia?
-        Set-Content -Path $PlanFile -Value (ConvertTo-Json -InputObject $This -Depth 50) -Force
+        
+        ol v "Saving Planfile '$PlanFile'"
+        Set-Content -Path $PlanFile -Value (ConvertTo-Json -InputObject $This -Depth 100) -Force
     }
 
 
