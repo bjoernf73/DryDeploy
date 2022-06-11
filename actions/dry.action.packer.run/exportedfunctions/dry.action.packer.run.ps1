@@ -101,8 +101,8 @@ function dry.action.packer.run {
         }
 
         # Packer Arguments
-        [Array]$Arguments = @("-var-file=""$TargetVarsFile""")
-        $DisplayArguments = $Arguments
+        [System.Collections.ArrayList]$Arguments = @("-var-file=""$TargetVarsFile""")
+        [System.Collections.ArrayList]$DisplayArguments = $Arguments
         foreach ($Var in $Resolved.vars | Where-Object { $_.secret -eq $true}) {
             $Arguments += "-var"
             $Arguments += "$($Var.Name)=`"$($Var.Value)`""
@@ -158,6 +158,25 @@ function dry.action.packer.run {
         $Arguments += "$($PackerFile.FullName)"
         $DisplayArguments += "$($PackerFile.FullName)"
 
+        # add force
+        if ($GLOBAL:dry_var_global_Force) {
+            $Arguments.Insert(0,"-force")
+            $DisplayArguments.Insert(0,"-force")
+            
+        }
+
+        # add on-error
+        switch ($GLOBAL:dry_var_global_DestroyOnFailedBuild) {
+            $true {
+                $OnError = 'cleanup'
+            }
+            default {
+                $OnError = 'abort'
+            }
+        }
+        $Arguments.Insert(0,"-on-error=$OnError")
+        $DisplayArguments.Insert(0,"-on-error=$OnError")
+        
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   Packer Build
         #   

@@ -200,8 +200,10 @@ function Invoke-DryPackerDeployment {
                     $OnError = 'abort'
                 }
             }
-            ol -t 0 -m "Running Packer build..."
+            
+
             Remove-Variable -Name PackerOutput -Scope Local -ErrorAction Ignore
+            ol i ('Packer Build',"& Packer.exe build -on-error=$OnError $ArgumentArray")
             & Packer.exe build -on-error=$OnError $ArgumentArray | Tee-Object -Variable PackerOutput 
             
             # Occurances of every success string must be found in the output
