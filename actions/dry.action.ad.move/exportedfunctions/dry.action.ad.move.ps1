@@ -144,14 +144,14 @@ function dry.action.ad.move {
             }
         }
 
-        ol i @("Moving '$($Resource.name)' computer object to","$RoleOU")
+        ol i @("Moving '$($Action.Resource.name)' computer object to","$RoleOU")
         Move-DryADComputer @MoveDryADComputerParams
 
         ol i "Sleeping 10 seconds before testing the new state"
         Start-Sleep -Seconds 10
 
         $MoveDryADComputerParams+= @{'Test'=$True}
-        ol i @("Testing location of '$($Resource.name)' computer object","$RoleOU")
+        ol i @("Testing location of '$($Action.Resource.name)' computer object","$RoleOU")
         
         if ((Move-DryADComputer @MoveDryADComputerParams) -eq $True) {
             ol i "Successfully completed the MoveToOU Action"
