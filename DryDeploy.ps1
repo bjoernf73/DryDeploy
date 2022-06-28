@@ -1,8 +1,7 @@
 <#
 .SYNOPSIS
-DryDeploy is an indecent, promiscuous deployment orchestrator - 
-thrashing traditional values of selecting a mate and sticking 
-with it - swinging among available technologies. 
+DryDeploy is a deployment orchestrator - swinging among available 
+technologies. 
 
 Do you really want to marry an automation platform? What if you 
 could use any technology for what it is good, scrapping it for 
@@ -22,7 +21,7 @@ What hinders you to use all of them? Must you chose? Nope!
 Common for DSC, Terraform, Packer and SaltStack is that: 
  - you create one or more file containing your configuration, using
  variables for environment specific values and secrets
- - when you deploy, you suppply the tool with the path to the config,
+ - when you deploy, you supply the tool with the path to the config,
  and all the variables that the configuration needs.
  - ...and you don't need a specific platform.  
 
@@ -34,9 +33,11 @@ Common for DSC, Terraform, Packer and SaltStack is that:
 
  DryDeploy seeks to do that. And all you need is a client.  
  
- Define your environment in an environment config (EnvConfig). Then
- define your system modules in a module config (ModuleConfig). 
- Combine the two to instantiate your system modules. 
+ Define your environments in environment configs (EnvConfig). Then
+ define your system modules in module configs (ModuleConfig). 
+ Tell DryDeploy which ModuleConfig and which EnvConfig you wanna 
+ work with, and DryDeploy combines them, carriying out any plan
+ you define. 
  
  Each action of a role provides a set of expressions that resolves
  variable values from the cimbined config. Those values are then 
@@ -620,7 +621,7 @@ function Get-DryScriptPath {
     catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    Finally {
+    finally {
     }
 }
 
@@ -683,7 +684,7 @@ function Set-DryPSModulePath {
     catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    Finally {
+    finally {
     }
 }
 #endregion PreModulesFunctions
