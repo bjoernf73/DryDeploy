@@ -93,7 +93,7 @@ function dry.action.packer.run {
             else {
                 ol i "Packer version installed","v$($Version.ToString())"
             }
-            $PackerExe = (Get-Command -CommandType Application -Name 'packer' | 
+            $PackerExe = (Get-Command -Name 'packer' | 
                 Select-Object -Property Source).Source
         } 
         else { 
