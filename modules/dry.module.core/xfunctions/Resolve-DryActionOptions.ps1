@@ -62,16 +62,16 @@ function Resolve-DryActionOptions {
 
         switch ($Action.source) {
             'role' {
-                [String]$RolesConfigSourcePath = Join-Path -Path $Configuration.Paths.ModuleConfigDirectory -ChildPath 'roles'
+                [String]$RolesConfigSourcePath = Join-Path -Path $Configuration.Paths.ModuleConfigDirectory -ChildPath 'Roles'
                 [String]$RoleConfigSourcePath  = Join-Path -Path $RolesConfigSourcePath -ChildPath $Action.Role
                 [String]$ConfigSourcePath      = Join-Path -Path $RoleConfigSourcePath -ChildPath $Action.Action
 
-                [String]$ModuleFilesSourcePath = Join-Path -Path $Configuration.Paths.ModuleConfigDirectory -ChildPath 'files'
-                [String]$RoleFilesSourcePath   = Join-Path -Path $RoleConfigSourcePath -ChildPath 'files'
-                [String]$ActionFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'files'
+                [String]$ModuleFilesSourcePath = Join-Path -Path $Configuration.Paths.ModuleConfigDirectory -ChildPath 'Files'
+                [String]$RoleFilesSourcePath   = Join-Path -Path $RoleConfigSourcePath -ChildPath 'Files'
+                [String]$ActionFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
                 if ($Action.Phase -gt 0) {
                     [String]$ConfigSourcePath       = Join-Path -Path $ConfigSourcePath -ChildPath $Action.Phase
-                    [String]$PhaseFilesSourcePath   = Join-Path -Path $ConfigSourcePath -ChildPath 'files'
+                    [String]$PhaseFilesSourcePath   = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
                     [String]$ActionTypePropertyName = "$($Action.Action)_type$($Action.Phase)"
                     [String]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.Phase
                 }
@@ -85,11 +85,11 @@ function Resolve-DryActionOptions {
                 [String]$BaseConfigSourcePath = Join-Path -Path $Configuration.Paths.BaseConfigDirectory -ChildPath $Action.Resource.BaseConfig
                 [String]$ConfigSourcePath     = Join-Path -Path $BaseConfigSourcePath -ChildPath $Action.Action
                 
-                [String]$RoleFilesSourcePath   = Join-Path -Path $BaseConfigSourcePath -ChildPath 'files'
-                [String]$ActionFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'files'
+                [String]$RoleFilesSourcePath   = Join-Path -Path $BaseConfigSourcePath -ChildPath 'Files'
+                [String]$ActionFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
                 if ($Action.Phase -gt 0) {
                     [String]$ConfigSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath $Action.Phase
-                    [String]$PhaseFilesSourcePath   = Join-Path -Path $ConfigSourcePath -ChildPath 'files'
+                    [String]$PhaseFilesSourcePath   = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
                     [String]$ActionTypePropertyName = "$($Action.Action)_type$($Action.Phase)"
                     [String]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.Phase
                 }
@@ -138,7 +138,7 @@ function Resolve-DryActionOptions {
 
                 
                 [String]$ConfigSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath $ActionType
-                [String]$TypeFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'files'
+                [String]$TypeFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
                 [String]$TypeMetaConfigFile = Join-Path -Path $ConfigSourcePath -ChildPath 'Config.json'
                 [PSCustomObject]$TypeMetaConfig = Get-DryFromJson -Path $TypeMetaConfigFile
                 
