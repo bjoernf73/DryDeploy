@@ -31,7 +31,7 @@ function Invoke-DryPackerDeployment {
         $TestedPackerVersion = [Version]"1.7.2"
         
         if (Get-Command -CommandType Application -Name Packer) { 
-            $PackerExe = Get-Command -CommandType Application -Name Packer
+            $PackerExe = Get-Command -CommandType Application -Name packer
             $VersionString = & packer version
             [Version]$Version = ("{0}" -f ($VersionString -replace "^Packer v"))
             if ($Version -lt $TestedPackerVersion) {
@@ -162,7 +162,7 @@ function Invoke-DryPackerDeployment {
         Remove-Variable -Name PackerOutput -Scope Local -ErrorAction Ignore
         try {
             ol -t 6 -m "Running Packer validate..."
-            & Packer.exe validate $ArgumentArray | Tee-Object -Variable PackerOutput 
+            & packer validate $ArgumentArray | Tee-Object -Variable PackerOutput 
             
             # Validate gives no output on success on 1.7.6. Somewhere between 1.7.6 and 1.7.8 it says 'The configuration is valid.'
             $PackerValidated = $false
@@ -179,7 +179,6 @@ function Invoke-DryPackerDeployment {
                 $PackerValidated = $true
             } 
             if (-not ($PackerValidated)) {
-                ol e 'Packer validate', 'Fail'
                 throw "Packer validate: Failed"
             }
             else {
@@ -203,8 +202,8 @@ function Invoke-DryPackerDeployment {
             
 
             Remove-Variable -Name PackerOutput -Scope Local -ErrorAction Ignore
-            ol i ('Packer Build',"& Packer.exe build -on-error=$OnError $ArgumentArray")
-            & Packer.exe build -on-error=$OnError $ArgumentArray | Tee-Object -Variable PackerOutput 
+            ol i ('Packer Build',"& packer build -on-error=$OnError $ArgumentArray")
+            & packer build -on-error=$OnError $ArgumentArray | Tee-Object -Variable PackerOutput 
             
             # Occurances of every success string must be found in the output
             $PackerSuccessStrings = @("Builds finished\. The artifacts of successful builds are")
