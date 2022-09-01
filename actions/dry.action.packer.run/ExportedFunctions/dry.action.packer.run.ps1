@@ -85,7 +85,7 @@ function dry.action.packer.run {
         # The $TestedPackerVersion is defined in the top of this file. Eventually, as
         # dry.module.pkgmgmt is implemented, this will call a function in that module 
         # instead
-        if (Get-Command -CommandType Application -Name 'Packer') { 
+        if (Get-Command -CommandType Application -Name 'packer') { 
             [Version]$Version = ("{0}" -f ((& packer version) -replace "^Packer v"))
             if ($Version -lt $TestedPackerVersion) {
                 throw "You need Packer $($TestedPackerVersion.ToString()) or newer installed and in path"
@@ -93,7 +93,7 @@ function dry.action.packer.run {
             else {
                 ol i "Packer version installed","v$($Version.ToString())"
             }
-            $PackerExe = (Get-Command -CommandType Application -Name 'Packer' | 
+            $PackerExe = (Get-Command -Name 'packer' | 
                 Select-Object -Property Source).Source
         } 
         else { 

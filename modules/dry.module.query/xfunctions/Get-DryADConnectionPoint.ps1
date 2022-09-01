@@ -94,7 +94,7 @@ function Get-DryADConnectionPoint {
                 throw "The site $($Site.name) does not contain an array of entries in it's active_directory_connection_points property"
             }
 
-            $SessionConfig = $Configuration.connections | Where-Object { $_.type -eq 'winrm'}
+            $SessionConfig = $Configuration.CoreConfig.connections | Where-Object { $_.type -eq 'winrm'}
 
             [Bool]$ConnectionPointVerified = $False
             $PRIVATE:count = 0
