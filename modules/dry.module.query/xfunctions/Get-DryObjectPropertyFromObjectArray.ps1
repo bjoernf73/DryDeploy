@@ -71,6 +71,17 @@ function Get-DryObjectPropertyFromObjectArray {
     )
     
     try {
+        ol 5 @('IDProperty',$IDProperty)
+        ol 5 @('IDPropertyValue',$IDPropertyValue)
+        ol 5 @('Property',$Property)
+        ol 5 @('First',$First)
+        ol 5 @('Last',$Last)
+        ol 5 @('Number',$Number)
+        ol 5 @('AllowMultipleMatches',$AllowMultipleMatches)
+        ol 5 @('AllowNoMatch',$AllowNoMatch)
+        ol 5 @('AllowNoProperty',$AllowNoProperty)
+
+
         if ($First -or $Last -or $Number) {
             $AllowMultipleMatches = $true
         }
@@ -138,6 +149,19 @@ function Get-DryObjectPropertyFromObjectArray {
         }
     }
     catch {
+        ol 3 "The input object array is returned below:"
+        $ObjectArray
+        
+        ol 3 "And these are the input params:"
+        ol 3 @('IDProperty',$IDProperty)
+        ol 3 @('IDPropertyValue',$IDPropertyValue)
+        ol 3 @('Property',$Property)
+        ol 3 @('First',$First)
+        ol 3 @('Last',$Last)
+        ol 3 @('Number',$Number)
+        ol 3 @('AllowMultipleMatches',$AllowMultipleMatches)
+        ol 3 @('AllowNoMatch',$AllowNoMatch)
+        ol 3 @('AllowNoProperty',$AllowNoProperty)
         $PSCmdlet.ThrowTerminatingError($_)
     }
     finally {
