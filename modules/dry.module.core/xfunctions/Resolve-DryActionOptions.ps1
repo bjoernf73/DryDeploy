@@ -37,15 +37,15 @@ function Resolve-DryActionOptions {
     
     try {
         <#
-            Paths in Configuration: 
+            Example Paths in Configuration: 
             
-            RootWorkingDirectory  : C:\Users\bjoernf\DryDeploy
-            PlanFile              : C:\Users\bjoernf\DryDeploy\dry_deploy_plan.json
-            ResourcesFile         : C:\Users\bjoernf\DryDeploy\dry_deploy_resources.json
-            ConfigComboFile       : C:\Users\bjoernf\DryDeploy\dry_deploy_config_combo.json
-            UserOptionsFile       : C:\Users\bjoernf\DryDeploy\UserOptions.json
-            TempConfigsDir        : C:\Users\bjoernf\DryDeploy\TempConfigs
-            ArchiveDir            : C:\Users\bjoernf\DryDeploy\Archived
+            RootWorkingDirectory  : C:\Users\user\DryDeploy
+            PlanFile              : C:\Users\user\DryDeploy\dry_deploy_plan.json
+            ResourcesFile         : C:\Users\user\DryDeploy\dry_deploy_resources.json
+            ConfigComboFile       : C:\Users\user\DryDeploy\dry_deploy_config_combo.json
+            UserOptionsFile       : C:\Users\user\DryDeploy\UserOptions.json
+            TempConfigsDir        : C:\Users\user\DryDeploy\TempConfigs
+            ArchiveDir            : C:\Users\user\DryDeploy\Archived
             SystemOptionsFile     : C:\GITs\DRY\DryDeploy\SystemOptions.json
             BaseConfigDirectory   : C:\GITs\DRY\EnvConfigs\utv.local\BaseConfig
             ModuleConfigDirectory : C:\GITs\DRY\ModuleConfigs\DomainRoot\
@@ -156,7 +156,21 @@ function Resolve-DryActionOptions {
                 if ($Action.Resource.Options."$FollowType") {
                     $ActionType = $Action.Resource.Options."$FollowType"
                 }
-            } 
+            }
+
+            <#
+                An action may resolve a dhcp-configured device' allocated IP from dhcp. For that
+                to happen, there must be a property 'resolve_ip' that is true in that actions 
+                ActionMetaConfig or TypeMetaConfig. TypeMetaConfig.resolve_ip, if defined, will
+                override any value of the ActionMetaConfig. 
+            #>
+            $ResolveIP = $false
+            if ($null -ne $ActionMetaConfig.resolve_ip) {
+                $ResolveIP = $ActionMetaConfig.resolve_ip
+            }
+            if ($null -ne $TypeMetaConfig.resolve_ip) {
+                $ResolveIP = $TypeMetaConfig.resolve_ip
+            }
         }
 
         <#
@@ -192,10 +206,12 @@ function Resolve-DryActionOptions {
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'Credentials' -Value $Credentials
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'Target' -Value $Target
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'RoleTargetRootPath' -Value $RoleTargetRootPath
+        $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ResolveIP' -Value $ResolveIP
 
         if ($ActionMetaConfig) {
             $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ActionMetaConfig' -Value $ActionMetaConfig
         }
+
         if ($TypeMetaConfig) {
             $OptionsObject | Add-Member -MemberType NoteProperty -Name 'TypeMetaConfig' -Value $TypeMetaConfig
         }

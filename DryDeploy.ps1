@@ -1,60 +1,45 @@
 <#
 .SYNOPSIS
-DryDeploy is a deployment orchestrator - swinging among available 
-technologies. 
+DryDeploy is a promicuous deployment orchestrator - swinging among 
+available technologies. 
 
-Do you really want to marry an automation platform? What if you 
-could use any technology for what it is good, scrapping it for 
-what it is bad?
+A full autodeploy of an information system may require you to use 
+a variety of configuration technologies. For instance, Terraform 
+is great for configuring cloud platforms and instantiate resources, 
+but it's inside-OS-capabilities are bad to say the least. Traditional
+DSC (Desired State Configuration) is great for configuring Windows 
+roles, but does nothing for your platform provider. You may want to 
+use Packer to automate creation of templates for your platform, and 
+SaltStack to manage packages within OS's - and so on.  
 
-A complete autodeploy of an information system may require you 
-to use a variety of technologies. For instance, Terraform is great
-for configuring any cloud platform and instantiate your resources, 
-but it's inside-OS-capabilities are breathtakenly bad. DSC 
-(Desired State Configuration) is great for configuring Windows 
-roles, but does nothing for your platform provider. You may want 
-to use Packer to automate creation of templates for your platform, 
-and SaltStack to manage packages within OS's. 
-
-What hinders you to use all of them? Must you chose? Nope! 
-
-Common for DSC, Terraform, Packer and SaltStack is that: 
+Common for DSC, Terraform, Packer, Ansible and SaltStack is that: 
  - you create one or more file containing your configuration, using
  variables for environment specific values and secrets
  - when you deploy, you supply the tool with the path to the config,
  and all the variables that the configuration needs.
- - ...and you don't need a specific platform.  
 
- Manually, this is a pretty tedious task, given that you must do this 
- for every action that configures some part of your role, for every 
- role that your system module, or information system, consists of. 
- Moreover, if you first took the time to put everything in code - 
- shouldn't that enable you to just 'click play' to deploy everything?
+At the core of DryDeploy lies the separation between 
+ - ModuleConfig (the configuration of a system module), and
+ - EnvConfig (that defines the environment into which you will 
+ deploy your system modules).
 
- DryDeploy seeks to do that. And all you need is a client.  
- 
- Define your environments in environment configs (EnvConfig). Then
- define your system modules in module configs (ModuleConfig). 
- Tell DryDeploy which ModuleConfig and which EnvConfig you wanna 
- work with, and DryDeploy combines them, carriying out any plan
- you define. 
- 
- Each action of a role provides a set of expressions that resolves
- variable values from the cimbined config. Those values are then 
- passed to the technology that performs the action, be it Terraform, 
- Packer, DSC or any other.
+DryDeploy combines a ModuleConfig, which defines all details of how
+to bring one or multiple roles (resource templates) into a ready to 
+use state, with an EnvConfig, which contain all environment specific
+values. Separate properly, and you may deploy an otherwise identical 
+instance of a service into a dev, a test, a ref, and a production 
+environment. 
 
- ...one command to Plan...
-   
-   .\DryDeploy.ps1 -Plan
- 
- ...and one to Apply....
+Once you have testet your deployment into say, dev and test, and 
+gotten rid of all bugs, it's only a couple of commands to deploy
+the same module into ref and prod:
 
-   .\DryDeploy.ps1 -Apply
- 
- If something fails, edit your code, and -Apply again. DryDeploy 
- retries the failed Action and continues to Apply the rest of the 
- Plan.
+> .\DryDeploy.ps1 -Plan
+> .\DryDeploy.ps1 -Apply
+
+If something fails, edit your code, and -Apply again. DryDeploy 
+retries the failed Action and continues to Apply the rest of the 
+Plan.
 
 .DESCRIPTION
 DryDeploy prepares your deployment platform (-Init), stores paths to a 
@@ -1255,16 +1240,62 @@ try {
 
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+                        An action may resolve a dhcp-configured device' allocated IP from dhcp. For that
+                        to happen, there must be a property 'resolve_ip' that is true in that actions 
+                        ActionMetaConfig or TypeMetaConfig. TypeMetaConfig.resolve_ip if defined overrides
+                        any value of the ActionMetaConfig. The global vars dry_var_global_ResolvedIPv4 and
+                        dry_var_global_ResolvedIPv6 will be updated by the action function with either or 
+                        both IPs
+
+                    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+                    $dry_var_IPMustBeResolved = $false
+                    if ($dry_var_Resolved.ResolveIP) {
+                        $dry_var_IPMustBeResolved = $true
+                        $GLOBAL:dry_var_global_ResolvedIPv4 = $null
+                        $GLOBAL:dry_var_global_ResolvedIPv6 = $null
+                    }
+
+                    <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
                         Execute Action
                     
                         This is where the Action Function get's called
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+                    
                     $dry_var_ActionStartTime = Get-Date
                     & $dry_var_ActionName @dry_var_ActionParams
                     $dry_var_ActionEndTime = Get-Date
                     # No Catch?  
                     $dry_var_Action.Status = 'Success'
+
+                    <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+                        Update the IP of the resource in the plan if the Action is an IP-resolving Action. If
+                        it is, $dry_var_IPMustBeResolved should be true, and $GLOBAL:dry_var_global_ResolvedIPv4 
+                        and/or $GLOBAL:dry_var_global_ResolvedIPv6 should have been populated with a value from 
+                        the action function. P.t. only a terra.run-action has this functionality, but custom script
+                        actions may be created - it only requires that the ActionMetaConfig or TypeMetaConfig has
+                        a property resolve_ip that is true, and that the action puts an ip into either of the
+                        globally defined values above
+
+                    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+                    if ($true -eq $dry_var_IPMustBeResolved) {
+                        # [regex]$dry_var_ipv4regex = "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+            
+                        if ($null -ne $GLOBAL:dry_var_global_ResolvedIPv4) {
+                            foreach ($dry_var_SetIPAction in ($dry_var_Plan.Actions | Where-Object { $_.resource.resource_guid -eq $dry_var_Action.resource.resource_guid})) {
+                                $dry_var_SetIPAction.resource.resolved_network.ip_address = $GLOBAL:dry_var_global_ResolvedIPv4
+                            }
+                            $dry_var_Plan.Save($dry_var_PlanFile,$false,$null)
+                        }
+                        if ($null -ne $GLOBAL:dry_var_global_ResolvedIPv6) {
+                            foreach ($dry_var_SetIPAction in ($dry_var_Plan.Actions | Where-Object { $_.resource.resource_guid -eq $dry_var_Action.resource.resource_guid})) {
+                                $dry_var_SetIPAction.resource.resolved_network.ip_address6 = $GLOBAL:dry_var_global_ResolvedIPv6
+                            }
+                            $dry_var_Plan.Save($dry_var_PlanFile,$false,$null)
+                        }
+                    }
 
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
