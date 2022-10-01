@@ -8,72 +8,52 @@ schema: 2.0.0
 # DryDeploy.ps1
 
 ## SYNOPSIS
-DryDeploy is an indecent, promiscuous deployment orchestrator - 
-thrashing traditional values of selecting a mate and sticking 
-with it - swinging among available technologies. 
+DryDeploy is a promicuous deployment orchestrator - swinging among 
+available technologies. 
 
-Do you really want to marry an automation platform?
-What if you 
-could use any technology for what it is good, scrapping it for 
-what it is bad?
-
-A complete autodeploy of an information system may require you 
-to use a variety of technologies.
-For instance, Terraform is great
-for configuring any cloud platform and instantiate your resources, 
-but it's inside-OS-capabilities are breathtakenly bad.
-DSC 
-(Desired State Configuration) is great for configuring Windows 
+A full autodeploy of an information system may require you to use 
+a variety of configuration technologies.
+For instance, Terraform 
+is great for configuring cloud platforms and instantiate resources, 
+but it's inside-OS-capabilities are bad to say the least.
+Traditional
+DSC (Desired State Configuration) is great for configuring Windows 
 roles, but does nothing for your platform provider.
-You may want 
-to use Packer to automate creation of templates for your platform, 
-and SaltStack to manage packages within OS's. 
+You may want to 
+use Packer to automate creation of templates for your platform, and 
+SaltStack to manage packages within OS's - and so on.
+ 
 
-What hinders you to use all of them?
-Must you chose?
-Nope! 
-
-Common for DSC, Terraform, Packer and SaltStack is that: 
+Common for DSC, Terraform, Packer, Ansible and SaltStack is that: 
  - you create one or more file containing your configuration, using
  variables for environment specific values and secrets
- - when you deploy, you suppply the tool with the path to the config,
+ - when you deploy, you supply the tool with the path to the config,
  and all the variables that the configuration needs.
- - ...and you don't need a specific platform.
- 
 
- Manually, this is a pretty tedious task, given that you must do this 
- for every action that configures some part of your role, for every 
- role that your system module, or information system, consists of. 
- Moreover, if you first took the time to put everything in code - 
- shouldn't that enable you to just 'click play' to deploy everything?
+At the core of DryDeploy lies the separation between 
+ - ModuleConfig (the configuration of a system module), and
+ - EnvConfig (that defines the environment into which you will 
+ deploy your system modules).
 
- DryDeploy seeks to do that.
-And all you need is a client.
- 
- 
- Define your environment in an environment config (EnvConfig).
-Then
- define your system modules in a module config (ModuleConfig). 
- Combine the two to instantiate your system modules. 
- 
- Each action of a role provides a set of expressions that resolves
- variable values from the cimbined config.
-Those values are then 
- passed to the technology that performs the action, be it Terraform, 
- Packer, DSC or any other.
+DryDeploy combines a ModuleConfig, which defines all details of how
+to bring one or multiple roles (resource templates) into a ready to 
+use state, with an EnvConfig, which contain all environment specific
+values.
+Separate properly, and you may deploy an otherwise identical 
+instance of a service into a dev, a test, a ref, and a production 
+environment. 
 
- ...one command to Plan...
-   
-   .\DryDeploy.ps1 -Plan
- 
- ...and one to Apply....
+Once you have testet your deployment into say, dev and test, and 
+gotten rid of all bugs, it's only a couple of commands to deploy
+the same module into ref and prod:
 
-   .\DryDeploy.ps1 -Apply
- 
- If something fails, edit your code, and -Apply again.
+\> .\DryDeploy.ps1 -Plan
+\> .\DryDeploy.ps1 -Apply
+
+If something fails, edit your code, and -Apply again.
 DryDeploy 
- retries the failed Action and continues to Apply the rest of the 
- Plan.
+retries the failed Action and continues to Apply the rest of the 
+Plan.
 
 ## SYNTAX
 
