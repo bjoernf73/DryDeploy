@@ -103,9 +103,32 @@ function dry.action.terra.run {
         if ($LastExitCode -ne 0) {
             Throw "Terraform Apply failed: $LastExitCode" 
         }
-        
-        # & terraform apply -auto-approve $Arguments *>&1 | Tee-Object -Variable ApplyResult
-        # *>&1 | Tee-Object -Variable ApplyResult
+        else {
+            <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                if dhcp, update the resource with IP from terraform
+            # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+            if ($Action.Resource.Resolved_Network.IP_Address -eq 'dhcp') {
+                ol v "Getting IP of the resource"
+                $StateObj = $null 
+                $StateResource = $null
+                $StateObj = Get-Content -Path $TargetStateFile | ConvertFrom-Json
+                $StateResource = $StateObj.Resources | Where-Object {
+                    $_.instances.attributes.name -eq $Action.Resource.Name
+                }
+                if ($null -eq $StateResource) {
+                    ol w @("Unable to find resource in state",$Action.Resource.Name)
+                }
+                else {
+                    if ($null -ne $StateResource.instances.attributes.default_ip_address) {
+                        ol i @("Resource found in state with IP",$StateResource.instances.attributes.default_ip_address)
+                        $GLOBAL:dry_var_global_ResolvedIPv4 = $StateResource.instances.attributes.default_ip_address
+                    }
+                    else {
+                        ol w @("Resource found in state, but no IP",$Action.Resource.Name)
+                    }
+                }
+            }
+        }   
     }
     Catch {
         $PSCmdlet.ThrowTerminatingError($_)
