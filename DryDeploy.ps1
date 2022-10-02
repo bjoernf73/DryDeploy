@@ -4,50 +4,61 @@ DryDeploy is a promicuous deployment orchestrator - swinging among
 available technologies. 
 
 A full autodeploy of an information system may require you to use 
-a variety of configuration technologies. For instance, Terraform 
+a variety of configuration technologies. For instance, terraform 
 is great for configuring cloud platforms and instantiate resources, 
 but it's inside-OS-capabilities are bad to say the least. Traditional
-DSC (Desired State Configuration) is great for configuring Windows 
+dsc (Desired State Configuration) is great for configuring Windows 
 roles, but does nothing for your platform provider. You may want to 
-use Packer to automate creation of templates for your platform, and 
-SaltStack to manage packages within OS's - and so on.  
+use packer to automate creation of templates for your platform, and 
+saltstack to manage packages within OS's - and so on.  
 
-Common for DSC, Terraform, Packer, Ansible and SaltStack is that: 
+Common for dsc, terraform, packer, ansible, saltstack etc. is that: 
  - you create one or more file containing your configuration, using
  variables for environment specific values and secrets
- - when you deploy, you supply the tool with the path to the config,
- and all the variables that the configuration needs.
+ - when you deploy, you supply the tool with the path to the config 
+ and all the variables that it needs.
 
 At the core of DryDeploy lies the separation between 
- - ModuleConfig (the configuration of a system module), and
+ - ModuleConfig (the configuration definition of a system module)
  - EnvConfig (that defines the environment into which you will 
- deploy your system modules).
+   deploy your system modules).
 
 DryDeploy combines a ModuleConfig, which defines all details of how
 to bring one or multiple roles (resource templates) into a ready to 
 use state, with an EnvConfig, which contain all environment specific
-values. Separate properly, and you may deploy an otherwise identical 
-instance of a service into a dev, a test, a ref, and a production 
-environment. 
+values. Separate properly, and you may deploy otherwise identical 
+instances of a service, spanning multiple servers or containers, 
+into a dev (3), a test(2), a ref(1), and a production(0) environment.
 
-Once you have testet your deployment into say, dev and test, and 
-gotten rid of all bugs, it's only a couple of commands to deploy
-the same module into ref and prod:
+This separation is key to automation, although misunderstood and 
+ignored by most IT depts. When you automate, you should be able to
+test your code in a separate, non-critical environment which you 
+may never be blamed for destroying by running a faulty config. When 
+your config finally works, it should be a no effort task to move on
+to the next environment (one closer to production). In DryDeploy, 
+you run a simple command to change the EnvConfig, then you -Plan, 
+then you -Apply. 
 
 > .\DryDeploy.ps1 -Plan
 > .\DryDeploy.ps1 -Apply
 
+Go shopping while DryDeploy works through your build. Want it in a 
+pipeline? No problem - I'd recommend DevOps Server, but you may use 
+Jenkins or Gitlab if you so fancy.
+
 If something fails, edit your code, and -Apply again. DryDeploy 
-retries the failed Action and continues to Apply the rest of the 
-Plan.
+retries the failed Action and continues to apply the rest of the 
+plan.
 
 .DESCRIPTION
 DryDeploy prepares your deployment platform (-Init), stores paths to a 
-configuration combination of an environment configuration (EnvConfig)
-and a module configuration (ModuleConfig), creates a Plan of Actions 
-to perform based on the configurations and any filters specified (-Plan), 
-and applies the plan in the configured order (-Apply). Run DryDeploy
-parameterless to show the status of the current Plan. 
+configuration combination (ConfigCombo) of an environment configuration
+(-EnvConfig) and a module configuration (-ModuleConfig). Create a Plan 
+of Actions to execute (-Plan). Multiple include- and exclude-filters may
+be used to create a partial Plan. You may evaluate and resolve all params 
+passed to each Action in a Plan before you execute it (-Resolve), but they
+will also resolve when you Apply the Plan (-Apply). Run DryDeploy without
+parameters to show the status of the current Plan. 
 
 Dryeploy needs 2 configuration repositories: 
 
@@ -59,12 +70,13 @@ Dryeploy needs 2 configuration repositories:
    generic configurations which every (or selected) instances of an 
    operating system should invoke.  
 
- - ModuleConfig: Contains Roles and a Build. Roles are the blueprint
-   configuration of some type of resource, be it a Windows domain
-   controller, a linux gitlab server, or simply a container instance.
+ - ModuleConfig: contains Roles and a Build. Roles are the blueprint
+   configurations of some type of resource, be it a Windows domain
+   controller, an Ubuntu Gitlab Server, or simply a container instance.
    A module may contain one or multiple roles, and roles may be re-used 
-   in multiple system modules. The Role contain the configuration files
-   used by any Action that the role build addresses. It also contain a
+   in multiple system modules (DryDeploy works at the filesystem level, 
+   and it is recommended to add roles as git submodules in a ModuleConfig).
+   A Role contain the configuration files used by any Action that the role build addresses. It also contain a
    set of expressions that when run against the EnvConfig, they resolve 
    the variable values that in turn will be passed to the technology 
    behind the Action (i.e. Terraform, Packer, DSC, SaltStack and so on)
