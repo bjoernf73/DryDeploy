@@ -56,9 +56,9 @@ In DryDeploy,
 you run a simple command to change the EnvConfig, then you -Plan, 
 then you -Apply. 
 
-\> .\DryDeploy.ps1 -Plan
+PS C:\DryDeploy\> .\DryDeploy.ps1 -Plan
 
-\> .\DryDeploy.ps1 -Apply
+PS C:\DryDeploy\> .\DryDeploy.ps1 -Apply
 
 Go shopping while DryDeploy works through your build.
 Want it in a 
