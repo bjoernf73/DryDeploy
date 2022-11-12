@@ -33,6 +33,10 @@
                         {
                             "Name": "PowershellGet",
                             "MinimumVersion": "2.2.5"
+                        },
+                        {
+                            "Name": "GPRegistryPolicyParser",
+                            "MinimumVersion": "1.0.0"
                         }
                     ]
                 },
@@ -92,6 +96,10 @@
                         {
                             "Name": "PowershellGet",
                             "MinimumVersion": "2.2.5"
+                        },
+                        {
+                            "Name": "GPRegistryPolicyParser",
+                            "MinimumVersion": "1.0.0"
                         }
                     ]
                 },

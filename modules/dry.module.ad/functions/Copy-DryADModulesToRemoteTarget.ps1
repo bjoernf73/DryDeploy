@@ -28,10 +28,10 @@ function Copy-DryADModulesToRemoteTarget {
         [Parameter(Mandatory)]
         [string]$RemoteRootPath,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [array]$Modules,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [array]$Folders,
 
         [Parameter(HelpMessage = 'Remove the remote root before copy')]
@@ -72,6 +72,14 @@ function Copy-DryADModulesToRemoteTarget {
             }
             else {
                 $ModuleFolder = Split-Path -Path $ModuleObj.Path
+                try { 
+                    [system.version](Split-Path -Path $ModuleFolder -Leaf) | Out-Null
+                    ol v "Module '$Module' is a versioned module, it's root folder must be: '$(Split-Path -Path $ModuleFolder)'"
+                    $ModuleFolder = Split-Path -Path $ModuleFolder
+                } 
+                catch { 
+                    ol v "Module '$Module' is not a versioned module, it's root folder must be: '$ModuleFolder'"
+                }
                 $CopyItemsParams = @{
                     Path        = $ModuleFolder
                     Destination = $RemoteRootPath 
@@ -94,7 +102,7 @@ function Copy-DryADModulesToRemoteTarget {
                     Recurse     = $True
                     Force       = $True
                 }
-                ol d @("Copying module to '($PSSession.ComputerName)'", "'$ModuleFolder'")
+                ol d @("Copying module to '$($PSSession.ComputerName)'", "'$ModuleFolder'")
                 Copy-Item @CopyItemsParams
             }
             catch {

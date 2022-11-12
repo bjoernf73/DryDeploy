@@ -2861,8 +2861,8 @@ function Import-DryADConfiguration {
                     # Only invoke if json-gpos in configuration
                     if ($RequiresGPOHelper) {
                         ol i "GPO Imports - Copying helper module to remote target" -sh
-                        $DryADGPOHelpersPath = Join-Path -Path (Get-Module -Name dry.module.ad).Path -ChildPath 'helpers\dry.ad.gpohelper' 
-                        Copy-DryADModulesToRemoteTarget -PSSession $PSSession -RemoteRootPath $RemoteRootPath -Folders @("$DryADGPOHelpersPath") -Force | Out-Null
+                        $DryADGPOHelpersPath = Join-Path -Path (Split-Path -Path ((Get-Module -Name dry.module.ad).Path)) -ChildPath 'helpers\dry.ad.gpohelper' 
+                        Copy-DryADFilesToRemoteTarget -PSSession $PSSession -TargetPath $RemoteRootPath -SourcePath $DryADGPOHelpersPath | Out-Null
                         Copy-DryADModulesToRemoteTarget -PSSession $PSSession -RemoteRootPath $RemoteRootPath -Modules @("GPRegistryPolicyParser") | Out-Null
                     }
 

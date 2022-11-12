@@ -253,6 +253,19 @@ When you -Apply, you may -Quit to make the script quit after
 every Action. Useful for CI/CD Pipelines, since the run may 
 be devided into blocks that are visually pleasing. 
 
+.PARAMETER Rewind
+In an existing plan, rewinds one buildstep. That is, searches 
+for the first occurance of a buildstep with status 'todo', and
+sets status 'todo' on the action just before it in the current
+plan. Will only work when you Apply a continuous plan - not if 
+you have applied random steps here and there.
+
+.PARAMETER FastForward
+In an existing plan, fastforwards one buildstep. That is, 
+searches for the first occurance of a buildstep with a status 
+that is not 'Success', and sets that Action's status to 
+'Success' so DryDeploy perceives it as applied. 
+
 .PARAMETER CMTrace
 Will open the log file in cmtrace som you may follow the output-
 to-log interactively. You will need CMTrace.exe on you system 
@@ -582,6 +595,22 @@ param (
     [Switch]
     $Quit,
 
+    [Parameter(ParameterSetName='Rewind',
+    HelpMessage='In an existing plan, rewinds one buildstep. That is, 
+    the function searches for the first occurance of a buildstep with
+    status ''todo'', and sets status = ''todo'' on the action just 
+    before it')]
+    [Switch]
+    $Rewind,
+
+    [Parameter(ParameterSetName='FastForward',
+    HelpMessage='In an existing plan, fastforwards one buildstep. That is, 
+    the function searches for the first occurance of a buildstep with
+    a status that is not ''Success'', and sets status = ''Success'' on
+    that action')]
+    [Switch]
+    $FastForward,
+
     [Parameter(ParameterSetName='Plan',
     HelpMessage='Launches CmTrace.exe with the log file at the start 
     of execution, if CmTrace.exe exists in path')]
@@ -908,16 +937,17 @@ try {
         }
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
-            Parameterset: ShowPlan
+            Parameterset: ShowPlan, Rewind and FastForward
             
-            Shows the state of the current Plan.
+            All Sets shows the state of the current Plan, however Rewind set's it back one buildstep, 
+            and FastForward one forward. 
 
             ShowPlan is an inferiour, mundane parameterset for lesser mortals. It's like having to 
-            physically move the piece on a chess board in other realise what option the opponent has. 
-            In other words, it's for me...  
+            physically move pieces on a chess board to analyze the game. In other words, it's for 
+            me... Prints out the status of the current Plan.   
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        'ShowPlan' {
+        {$_ -in 'ShowPlan','Rewind', 'FastForward'} {
             
             $dry_var_global_ConfigCombo.show()
             
@@ -937,6 +967,15 @@ try {
             }
             $dry_var_Plan = Get-DryPlan @GetDryPlanParams -ErrorAction Stop
             $ShowDryPlanParams = $null
+
+            if ($PSCmdlet.ParameterSetName -eq 'Rewind') {
+                ol i "Rewinding one buildstep..."
+                $dry_var_Plan.RewindPlanOrder($dry_var_PlanFile)
+            }
+            elseif ($PSCmdlet.ParameterSetName -eq 'FastForward') {
+                ol i "Fast-Forward one buildstep..."
+                $dry_var_plan.FastForwardPlanOrder($dry_var_PlanFile)
+            }
             
             $ShowDryPlanParams       = @{
                 Plan                 = $dry_var_Plan
@@ -948,7 +987,6 @@ try {
             Show-DryPlan @ShowDryPlanParams
             
             $GetDryPlanParams = $null
-
         }
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
