@@ -199,6 +199,9 @@ Environment and Module are combined into one configuration object.
 Run -GetConfig to just return this configuration object, and then 
 quit. Assign the output to a variable to examine the configuration.
 
+.PARAMETER GitHub
+Launches the DryDeploy Github page in your favouritemost browser.
+
 .PARAMETER NoLog
 By default, a log file will be written. If you're opposed to that, 
 use -NoLog.
@@ -324,8 +327,13 @@ Returns the configuration object, and assigns it to the variable
 '$Config' so you may inspect it's content 'offline' 
 #>
 [CmdLetBinding(DefaultParameterSetName='ShowPlan')]
-param (
-    
+param ( 
+    [Parameter(ParameterSetName='Github',
+    HelpMessage='Launches the DryDeploy Github page in your 
+    favouritemost browser.')]
+    [Switch]
+    $GitHub,
+
     [Parameter(ParameterSetName='Init',
     HelpMessage='Downloads dependencies for DD. Must run 
     once on the system you are working from, and must run elevated 
@@ -730,7 +738,7 @@ try {
 
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-        Define som paths
+        Define paths
     
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
     [String]$dry_var_PlanFile           = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'dry_deploy_plan.json'
@@ -808,6 +816,9 @@ try {
     $GetDryConfigComboParams = $null
     
     switch ($PSCmdLet.ParameterSetName) {
+        'GitHub' {
+            Start-Process 'https://github.com/bjoernf73/DryDeploy' -Wait:$False
+        }
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
             Parameterset: Init
@@ -883,7 +894,10 @@ try {
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         'SetConfig' {
-            
+            # ensure plan is removed when config changes
+            if (Test-Path -Path $dry_var_PlanFile -ErrorAction Ignore) {
+                Remove-Item -Path $dry_var_PlanFile -Force | Out-Null
+            }
             if ($EnvConfig) {
                 $dry_var_global_ConfigCombo.change($EnvConfig,'environment')    
             }
@@ -1015,9 +1029,14 @@ try {
                 ExcludePhases        = $ExcludePhases
                 ArchiveFolder        = $dry_var_ArchiveDir
             }
-            $dry_var_Plan = New-DryPlan @dry_var_NewDryPlanParams
+            if ($false -eq $dry_var_global_ConfigCombo.moduleconfig.interactive) {
+                $dry_var_Plan = New-DryPlan @dry_var_NewDryPlanParams
+            }
+            else {
+                $dry_var_Plan = New-DryInteractivePlan @dry_var_NewDryPlanParams
+            }
+
             $dry_var_NewDryPlanParams = $null
-            
             $dry_var_ShowDryPlanParams = @{
                 Plan                 = $dry_var_Plan
                 Mode                 = 'Plan' 

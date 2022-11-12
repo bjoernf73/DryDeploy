@@ -173,9 +173,7 @@ function Import-DryADConfiguration {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         # 
         #   REPLACEMENT HASH
-        #   The Replacement Hash is mainly used for string replacement in the module 
-        #   'GPOManagement', which is not part of DryDeploy or dry.module.ad. Only
-        #   in use if you have access to that module and use 'jsonified' GPOs. 
+        #   Only used for json-formatted GPOs
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         $ReplacementHash = @{}
@@ -1097,9 +1095,9 @@ function Import-DryADConfiguration {
                 $JsonGPOImports = @($RoleConfiguration.gpo_imports | Where-Object {  
                         $_.type -eq 'json' 
                     })
-                $RequiresAccessToGPOManagement = $False
+                $RequiresGPOHelper = $False
                 if ($JsonGPOImports.count -gt 0) {
-                    $RequiresAccessToGPOManagement = $True
+                    $RequiresGPOHelper = $True
                 }
  
                 $NumberOfElementsToProcess += ($DomainGPOImports.Count + $SiteGPOImports.Count + $ComputerGPOImports.Count)
@@ -2857,19 +2855,19 @@ function Import-DryADConfiguration {
         if ($ProcessGPOImports) {
             switch ($ExecutionType) {
                 'Remote' {
-                    [String]$RemoteRootPath = "C:\DryDeploy\$ComputerName\"
+                    [String]$RemoteRootPath = "C:\DryDeploy\"
                     [String]$GPOsPath = Join-Path -Path $RemoteRootPath -ChildPath 'gpo_imports'
 
                     # Only invoke if json-gpos in configuration
-                    if ($RequiresAccessToGPOManagement) {
+                    if ($RequiresGPOHelper) {
                         ol i "GPO Imports - Copying helper module to remote target" -sh
-                        Copy-DryADModulesToRemoteTarget -PSSession $PSSession -RemoteRootPath $RemoteRootPath -Modules @('GPOManagement') | 
-                            Out-Null
+                        $DryADGPOHelpersPath = Join-Path -Path (Get-Module -Name dry.module.ad).Path -ChildPath 'helpers\dry.ad.gpohelper' 
+                        Copy-DryADModulesToRemoteTarget -PSSession $PSSession -RemoteRootPath $RemoteRootPath -Folders @("$DryADGPOHelpersPath") -Force | Out-Null
+                        Copy-DryADModulesToRemoteTarget -PSSession $PSSession -RemoteRootPath $RemoteRootPath -Modules @("GPRegistryPolicyParser") | Out-Null
                     }
 
                     ol i "GPO Imports - Copying GPOs to remote target" -sh
-                    Copy-DryADFilesToRemoteTarget -PSSession $PSSession -TargetPath $RemoteRootPath -SourcePath $SourceGPOsPath | 
-                        Out-Null
+                    Copy-DryADFilesToRemoteTarget -PSSession $PSSession -TargetPath $RemoteRootPath -SourcePath $SourceGPOsPath | Out-Null
                 }
                 'Local' {
                     [String]$GPOsPath = $SourceGPOsPath

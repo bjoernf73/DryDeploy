@@ -42,8 +42,7 @@
     $Result = @($False, $Null, '')
     
     try {
-        # To import json-gpos, you must have access to the GPOManagement module
-        Import-Module -Name 'GPOManagement' -Force -ErrorAction 'Stop' | Out-Null
+        Import-Module -Name 'dry.ad.gpohelper' -Force -ErrorAction 'Stop' | Out-Null
         
         $GPOExistsAlreadyParams = @{
             Name             = $Name

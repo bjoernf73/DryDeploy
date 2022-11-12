@@ -1,5 +1,5 @@
-﻿Using NameSpace System.Management.Automation
-Using NameSpace System.Management.Automation.Runspaces
+﻿using NameSpace System.Management.Automation
+using NameSpace System.Management.Automation.Runspaces
 <#  
     This is an AD Config module for use with DryDeploy, or by itself.
     Copyright (C) 2021  Bjørn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -19,24 +19,23 @@ Using NameSpace System.Management.Automation.Runspaces
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
-Function Copy-DryADModulesToRemoteTarget {
+function Copy-DryADModulesToRemoteTarget {
     [CmdletBinding()]
-    Param (
+    param (
         [Parameter(Mandatory)]
-        [PSSession]
-        $PSSession,
+        [PSSession]$PSSession,
 
         [Parameter(Mandatory)]
-        [String]
-        $RemoteRootPath,
+        [string]$RemoteRootPath,
 
         [Parameter(Mandatory)]
-        [Array]
-        $Modules,
+        [array]$Modules,
 
-        [Parameter(HelpMessage = 'Forcefully import the modules, so any previously imported versions are replaced')]
-        [Switch]
-        $Import
+        [Parameter(Mandatory)]
+        [array]$Folders,
+
+        [Parameter(HelpMessage = 'Remove the remote root before copy')]
+        [switch]$Force
     )
 
     try {
@@ -44,27 +43,29 @@ Function Copy-DryADModulesToRemoteTarget {
         $OriginalProgressPreference = $ProgressPreference
         $ProgressPreference = 'SilentlyContinue'
        
-        $InvokeDirParams = @{
-            ScriptBlock  = $DryAD_SB_RemoveAndReCreateDir
-            Session      = $PSSession
-            ArgumentList = @($RemoteRootPath)
-        }
-        $DirResult = Invoke-Command @InvokeDirParams
-        
-        Switch ($DirResult) {
-            $True {
-                ol d 'Created remote directory', "$RemoteRootPath"
+        if ($Force) {
+            $InvokeDirParams = @{
+                ScriptBlock  = $DryAD_SB_RemoveAndReCreateDir
+                Session      = $PSSession
+                ArgumentList = @($RemoteRootPath)
             }
-            { $DirResult -is [ErrorRecord] } {
-                ol w 'Unable to create remote directory', "$RemoteRootPath"
-                $PSCmdlet.ThrowTerminatingError($DirResult)
-            }
-            Default {
-                Throw "Unable to create remote directory: $($DirResult.ToString())"
+            $DirResult = Invoke-Command @InvokeDirParams
+            
+            switch ($DirResult) {
+                $True {
+                    ol d 'Created remote directory', "$RemoteRootPath"
+                }
+                { $DirResult -is [ErrorRecord] } {
+                    ol w 'Unable to create remote directory', "$RemoteRootPath"
+                    $PSCmdlet.ThrowTerminatingError($DirResult)
+                }
+                default {
+                    throw "Unable to create remote directory: $($DirResult.ToString())"
+                }
             }
         }
 
-        ForEach ($Module in $Modules) {
+        foreach ($Module in $Modules) {
             [PSModuleInfo]$ModuleObj = Get-Module -Name $Module -ListAvailable -ErrorAction Stop
             if ($null -eq $ModuleObj) {
                 throw "Unable to find module '$Module'"
@@ -80,6 +81,24 @@ Function Copy-DryADModulesToRemoteTarget {
                 }
                 ol d @("Copying module to '($PSSession.ComputerName)'", "'$ModuleFolder'")
                 Copy-Item @CopyItemsParams
+            }
+        }
+
+        foreach ($ModuleFolder in $Folders) {
+            try {
+                [system.io.directoryinfo]$ModuleObj = Get-Item -Name $ModuleFolder -ErrorAction Stop
+                $CopyItemsParams = @{
+                    Path        = $ModuleFolder
+                    Destination = $RemoteRootPath 
+                    ToSession   = $PSSession 
+                    Recurse     = $True
+                    Force       = $True
+                }
+                ol d @("Copying module to '($PSSession.ComputerName)'", "'$ModuleFolder'")
+                Copy-Item @CopyItemsParams
+            }
+            catch {
+                throw "Failed to copy '$ModuleFolder' to remote target"
             }
         }
         
@@ -100,17 +119,17 @@ Function Copy-DryADModulesToRemoteTarget {
         $RemotePSModulePaths = Invoke-Command @InvokePSModPathParams
 
         ol d @('The PSModulePath on remote system', "'$RemotePSModulePaths'")
-        Switch ($RemotePSModulePaths) {
+        switch ($RemotePSModulePaths) {
             { $RemotePSModulePaths -Match $RemoteRootPathRegEx } {
                 ol v @('Successfully added to remote PSModulePath', "'$RemoteRootPath'")
             }
-            Default {
+            default {
                 ol w @('Failed to add path to remote PSModulePath', "'$RemoteRootPath'")
-                Throw "The RemoteRootPath '$RemoteRootPath' was not added to the PSModulePath in the remote session"
+                throw "The RemoteRootPath '$RemoteRootPath' was not added to the PSModulePath in the remote session"
             }
         }
 
-        If ($Import) {
+        if ($Force) {
             $ImportModsParams = @{
                 Session      = $PSSession 
                 ScriptBlock  = $DryAD_SB_ImportMods 
@@ -119,23 +138,23 @@ Function Copy-DryADModulesToRemoteTarget {
             }   
             $ImportResult = Invoke-Command @ImportModsParams
     
-            Switch ($ImportResult) {
+            switch ($ImportResult) {
                 $True {
                     ol s "Modules were imported into the session"
                     ol v "The modules '$Modules' were imported into PSSession to $($PSSession.ComputerName)"
                 }
-                Default {
+                default {
                     ol f "Modules were not imported into the session"
                     ol w "The modules '$Modules' were not imported into PSSession to $($PSSession.ComputerName)"
-                    Throw "The modules '$Modules' were not imported into PSSession to $($PSSession.ComputerName)"
+                    throw "The modules '$Modules' were not imported into PSSession to $($PSSession.ComputerName)"
                 }
             }
         }
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    Finally {
+    finally {
         $ProgressPreference = $OriginalProgressPreference
     }
 }

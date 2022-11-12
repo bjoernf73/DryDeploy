@@ -42,7 +42,7 @@
     Copyright = '(c) 2021 bjoernf73. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description           = "Creates and configures Active Directory objects. Supports creation of OUs, creation of groups and user accounts, users' and groups' group memberships, adding ACLs to AD objects, import, migration and linking of backup-GPOs, import, linking and migration of json-formatted-GPOs (requires the 'GPOManagement' module which is not openly available), import and linking of WMIFilters, copying of administrative templates to the central PolicyDefinitions folder, copying NETLOGON files, AD schema extensions (from .ldf's). If you pass in a PSSession to a domain controller to Import-DryADConfiguration, all scriptblocks will execute in that session. If not, scriptblocks will run on the local system in context of the executing user."
+    Description           = "Creates and configures Active Directory objects. Supports creation of OUs, creation of groups and user accounts, users' and groups' group memberships, adding ACLs to AD objects, import, migration and linking of backup-GPOs, import, linking and migration of json-formatted-GPOs, import and linking of WMIFilters, copying of administrative templates to the central PolicyDefinitions folder, copying NETLOGON files, AD schema extensions (from .ldf's). If you pass in a PSSession to a domain controller to Import-DryADConfiguration, all scriptblocks will execute in that session. If not, scriptblocks will run on the local system in context of the executing user."
 
     # Minimum version of the Windows PowerShell engine required by this module
     PowerShellVersion     = '5.1'
@@ -72,9 +72,6 @@
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
-
-    # Script files (.ps1) that are run in the caller's environment prior to importing this module.
-    # ScriptsToProcess = '.\helper\Install-DependentModules.ps1'
 
     # Type files (.ps1xml) to be loaded when importing this module
     # TypesToProcess = @()

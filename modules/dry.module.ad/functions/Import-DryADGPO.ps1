@@ -107,7 +107,7 @@ Function Import-DryADGPO {
             }
         }
         'json' {
-            # GPO in json-format, exported with GPOManagement module
+            # GPO in json-format
             $JsonGPOFilePath = Join-Path -Path $GPOsPath -ChildPath "$($GPO.Name).json"
             ol v @('GPO File Path', "'$JsonGPOFilePath'")
 

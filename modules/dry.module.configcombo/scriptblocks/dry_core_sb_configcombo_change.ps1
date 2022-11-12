@@ -43,6 +43,12 @@
                     $this.moduleconfig.buildpath       = (Join-Path -Path $FullPath -ChildPath 'Build')
                     $this.moduleconfig.rolespath       = (Join-Path -Path $FullPath -ChildPath 'Roles')
                     $this.moduleconfig.credentialspath = (Join-Path -Path $FullPath -ChildPath 'Credentials')
+                    if ($null -eq $RootConfig.interactive) {
+                        $this.moduleconfig.interactive   = $false
+                    }
+                    else {
+                        $this.moduleconfig.interactive   = $RootConfig.interactive
+                    }
                 }
             }
 
