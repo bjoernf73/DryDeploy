@@ -1122,12 +1122,9 @@ try {
             selected system module.  
               
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        'Interactive' {
-
-            $GLOBAL:dry_var_global_Configuration = Get-DryInteractiveResources -Configuration $dry_var_global_Configuration
-            
+        'Interactive' {       
             $dry_var_NewDryPlanParams = @{
-                ResourcesFile        = $dry_var_IResourceFile
+                ResourcesFile        = $dry_var_ResourcesFile
                 PlanFile             = $dry_var_PlanFile
                 Configuration        = $dry_var_global_Configuration
                 ConfigCombo          = $dry_var_global_ConfigCombo
@@ -1142,7 +1139,7 @@ try {
                 ArchiveFolder        = $dry_var_ArchiveDir
             }
             
-            $dry_var_Plan = New-DryPlan @dry_var_NewDryPlanParams
+            $dry_var_Plan = New-DryInteractivePlan @dry_var_NewDryPlanParams
             $dry_var_NewDryPlanParams = $null
             $dry_var_ShowDryPlanParams = @{
                 Plan                 = $dry_var_Plan

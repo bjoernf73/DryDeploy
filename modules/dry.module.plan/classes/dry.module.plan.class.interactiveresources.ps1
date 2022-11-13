@@ -21,19 +21,34 @@ class InteractiveResources {
         
         $This.InteractiveResources = [ArrayList]::New()
         
-        # Create a loop that interactively builds each resource
-        # Write-Host ($Configuration.Build.roles | Select-Object -Property order,role,description | Out-String)
-        $iRolesRToSelectFrom = [ArrayList]::New()
+        # Get Available Roles
+        $iRolesToSelectFrom = [ArrayList]::New()
         foreach ($iRole in $Configuration.Build.roles) {
             $iIndex = $iRole.order
             $iRoleName = $iRole.role
             $iDescription = $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $iRoleName -Property 'description')
-            $iRolesRToSelectFrom+=[PSCustomObject]@{index=$iIndex;role=$iRoleName;description=$iDescription}
+            $iRolesToSelectFrom+=[PSCustomObject]@{index=$iIndex;role=$iRoleName;description=$iDescription}
         }
         #ol i "er no feil her..."
-        foreach ($iString in $($($iRolesRToSelectFrom | Out-String) -split "`n")) {
+        
+        $iRolesStrings = ($($iRolesToSelectFrom | Out-String) -split "`r`n") | Where-Object { $_.Trim() -ne ''}
+        foreach ($iString in $iRolesStrings) {
             ol i "$iString"
+            ol i " "
         }
+        
+        # let user select role index
+        $GetDryInputParams = @{
+            Prompt = "Enter index of a role"
+            Description = "The list above are roles that you may select from in interactive mode. You may select a different module if the role you are looking for is not in the list"
+            FailedMessage = "You need to select the index of the role, i.e. one of '$($Configuration.Build.roles.order)'"
+            ValidateSet = $Configuration.Build.roles.order
+        }
+
+        [int]$sRoleIndex = Get-DryInput @GetDryInputParams
+
+        Read-Host -Prompt "what happened"
+        
         # Loop through the resources in the build
         foreach ($Resource in $Configuration.CoreConfig.resources | Where-Object { $_.role -in @($Configuration.Build.roles.role) }) {
             $Resource = [Resource]::New(
