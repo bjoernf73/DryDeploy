@@ -260,7 +260,7 @@ sets status 'todo' on the action just before it in the current
 plan. Will only work when you Apply a continuous plan - not if 
 you have applied random steps here and there.
 
-.PARAMETER FastForward
+.PARAMETER FastFwd
 In an existing plan, fastforwards one buildstep. That is, 
 searches for the first occurance of a buildstep with a status 
 that is not 'Success', and sets that Action's status to 
@@ -603,13 +603,13 @@ param (
     [Switch]
     $Rewind,
 
-    [Parameter(ParameterSetName='FastForward',
+    [Parameter(ParameterSetName='FastFwd',
     HelpMessage='In an existing plan, fastforwards one buildstep. That is, 
     the function searches for the first occurance of a buildstep with
     a status that is not ''Success'', and sets status = ''Success'' on
     that action')]
     [Switch]
-    $FastForward,
+    $FastFwd,
 
     [Parameter(ParameterSetName='Plan',
     HelpMessage='Launches CmTrace.exe with the log file at the start 
@@ -937,17 +937,17 @@ try {
         }
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
-            Parameterset: ShowPlan, Rewind and FastForward
+            Parameterset: ShowPlan, Rewind and FastFwd
             
             All Sets shows the state of the current Plan, however Rewind set's it back one buildstep, 
-            and FastForward one forward. 
+            and FastFwd one forward. 
 
             ShowPlan is an inferiour, mundane parameterset for lesser mortals. It's like having to 
             physically move pieces on a chess board to analyze the game. In other words, it's for 
             me... Prints out the status of the current Plan.   
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        {$_ -in 'ShowPlan','Rewind', 'FastForward'} {
+        {$_ -in 'ShowPlan','Rewind', 'FastFwd'} {
             
             $dry_var_global_ConfigCombo.show()
             
@@ -972,7 +972,7 @@ try {
                 ol i "Rewinding one buildstep..."
                 $dry_var_Plan.RewindPlanOrder($dry_var_PlanFile)
             }
-            elseif ($PSCmdlet.ParameterSetName -eq 'FastForward') {
+            elseif ($PSCmdlet.ParameterSetName -eq 'FastFwd') {
                 ol i "Fast-Forward one buildstep..."
                 $dry_var_plan.FastForwardPlanOrder($dry_var_PlanFile)
             }
