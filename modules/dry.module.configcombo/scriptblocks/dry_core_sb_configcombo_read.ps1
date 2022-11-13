@@ -30,12 +30,6 @@
             $this.moduleconfig.guid              = $Moduleconfig.guid 
             $this.moduleconfig.description       = $Moduleconfig.description 
             $this.moduleconfig.dependencies      = $Moduleconfig.dependencies."$($this.platform)"."$($this.edition)"
-            if ($null -eq $Moduleconfig.interactive) {
-                $this.moduleconfig.interactive   = $false
-            }
-            else {
-                $this.moduleconfig.interactive   = $Moduleconfig.interactive
-            }
             
             # the dependencies_hash is a calculated property - but we read the value already on file, if any
             $this.moduleconfig.dependencies_hash = $ConfigCombo.moduleconfig.dependencies_hash

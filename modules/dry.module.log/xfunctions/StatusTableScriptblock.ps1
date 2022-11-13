@@ -28,4 +28,4 @@ $StatusScriptBlock = [ScriptBlock]{
 # Create the file
  
 
-$StatusObject | ConvertTo-Json | Out-File -FilePath 'C:\GITs\NoGit\test2.json' -Encoding UTF8 -Force
+#$StatusObject | ConvertTo-Json | Out-File -FilePath 'C:\GITs\NoGit\test2.json' -Encoding UTF8 -Force

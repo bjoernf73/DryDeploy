@@ -123,6 +123,14 @@ any filter to only Apply a limited set of planned actions (-Actions,
 -ExcludeActions, -BuildSteps, -ExcludeBuildSteps, -Resources, 
 -ExcludeResources, -Roles, -ExcludeRoles, -Phases, -ExcludePhases)
 
+.PARAMETER Interactive
+Starts DryDeploy in interactive mode, which has the effect that 
+resources specified in an environment are ignored. Instead, a single
+resource will be defined from interactive prompts, and a plan for 
+that resource is created. You still need to have a module and an 
+environment selected. You may only select to build a resource from
+a role in the currently selected system module.  
+
 .PARAMETER Actions
 Array of one or more Actions to include. All others are excluded. 
 If not specified, Actions are disregarded from the filter. Supports 
@@ -373,6 +381,13 @@ param (
     to plan. If you don't, I'll only plan.")]
     [Switch]
     $Apply,
+
+    [Parameter(Mandatory,ParameterSetName='Interactive',
+    HelpMessage="Starts DryDeploy in interactive mode, which has 
+    the effect that resources specified in an environment are 
+    ignored. Builds one resource only each time you run it.")]
+    [Switch]
+    $Interactive,
 
     [Parameter(ParameterSetName='Plan',
     HelpMessage='Array of one or more Actions to include. All others 
@@ -843,6 +858,18 @@ try {
     }
     $GLOBAL:dry_var_global_ConfigCombo = Get-DryConfigCombo @GetDryConfigComboParams
     $GetDryConfigComboParams = $null
+
+    switch ($PSCmdLet.ParameterSetName) {
+        'Interactive' {
+            # -Interactive sets the interactive property to true, and will stay true until you -Plan
+            $GLOBAL:dry_var_global_ConfigCombo.systemconfig.interactive = $true
+        }
+        'Plan' {
+            # -Plan resets the interactive property back to false
+            $GLOBAL:dry_var_global_ConfigCombo.systemconfig.interactive = $false
+        }
+    }
+    $GLOBAL:dry_var_global_ConfigCombo.Save()
     
     switch ($PSCmdLet.ParameterSetName) {
         'GitHub' {
@@ -996,7 +1023,7 @@ try {
             gets and invokes common variables, prepares for credentials.
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        {$_ -in 'Plan','Apply','GetConfig','Resolve'} {
+        {$_ -in 'Plan','Apply','GetConfig','Resolve','Interactive'} {
             $dry_var_Paths | Add-Member -MemberType NoteProperty -Name 'BaseConfigDirectory' -Value (Join-Path -Path $dry_var_global_ConfigCombo.envconfig.path -ChildPath 'BaseConfig')
             $dry_var_Paths | Add-Member -MemberType NoteProperty -Name 'ModuleConfigDirectory' -Value $dry_var_global_ConfigCombo.moduleconfig.path
             $GLOBAL:dry_var_global_Configuration = Get-DryEnvConfig -ConfigCombo $dry_var_global_ConfigCombo -Paths $dry_var_Paths
@@ -1006,15 +1033,17 @@ try {
             
                 Credentials File
                 
-                The EnvConfig and/or ModuleConfig may provide placeholders for Credentials that should 
-                be put in a local credentials file. Actions contain a cedentials node that specifies
-                only an 'Alias' to a credential, however, that Alias may be specified with a UserName
-                and other properties in the EnvConfig or ModuleConfig. 
+                The EnvConfig and/or ModuleConfig may provide placeholders for Credentials that DryDeploy 
+                will store in a local credentials file. Actions contain a cedentials node that specifies
+                'Aliases' to credentials that references credentials in the credentials file. If a 
+                referenced credential does not exist in the credentials file, the user will be prompted 
+                (unless -SuppressInteractivePrompts). Make sure to -Resolve before -Apply, so that all 
+                references are prompted for before you start a four hour long run. 
                 
             # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
             New-DryCredentialsFile -Path $dry_var_global_CredentialsFile
 
-            #! currently only support for 'encryptedstring', should support 'HashicorpVault'++
+            #! currently only support for 'encryptedstring', should support 'HashicorpVault', 1Password...
             if (-not $GLOBAL:dry_var_global_Configuration.CredentialsType) {
                 $GLOBAL:dry_var_global_Configuration | Add-Member -MemberType NoteProperty -Name 'CredentialsType' -Value 'encryptedstring'
             }
@@ -1067,13 +1096,53 @@ try {
                 ExcludePhases        = $ExcludePhases
                 ArchiveFolder        = $dry_var_ArchiveDir
             }
-            if ($false -eq $dry_var_global_ConfigCombo.moduleconfig.interactive) {
-                $dry_var_Plan = New-DryPlan @dry_var_NewDryPlanParams
+            
+            $dry_var_Plan = New-DryPlan @dry_var_NewDryPlanParams
+            $dry_var_NewDryPlanParams = $null
+            $dry_var_ShowDryPlanParams = @{
+                Plan                 = $dry_var_Plan
+                Mode                 = 'Plan' 
+                ConfigCombo          = $dry_var_global_ConfigCombo 
+                ShowConfigCombo      = $True
+                ShowDeselected       = $ShowDeselected
             }
-            else {
-                $dry_var_Plan = New-DryInteractivePlan @dry_var_NewDryPlanParams
-            }
+            Show-DryPlan @dry_var_ShowDryPlanParams
+            $dry_var_Plan = $null
+            $dry_var_ShowDryPlanParams = $null
+        }
 
+        <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+            
+            Parameterset: Interactive
+
+            Starts DryDeploy in interactive mode, which has the effect that resources specified in an 
+            environment are ignored. Instead, a single resource will be defined from interactive 
+            prompts, and a plan for that resource is created. You still need to have a module and an 
+            environment selected. You may only select to build a resource from a role in the currently 
+            selected system module.  
+              
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+        'Interactive' {
+
+            $GLOBAL:dry_var_global_Configuration = Get-DryInteractiveResources -Configuration $dry_var_global_Configuration
+            
+            $dry_var_NewDryPlanParams = @{
+                ResourcesFile        = $dry_var_IResourceFile
+                PlanFile             = $dry_var_PlanFile
+                Configuration        = $dry_var_global_Configuration
+                ConfigCombo          = $dry_var_global_ConfigCombo
+                RoleNames            = $Roles
+                ExcludeRoleNames     = $ExcludeRoles
+                ActionNames          = $Actions
+                ExcludeActionNames   = $ExcludeActions
+                BuildSteps           = $BuildSteps
+                ExcludeBuildSteps    = $ExcludeBuildSteps
+                Phases               = $Phases
+                ExcludePhases        = $ExcludePhases
+                ArchiveFolder        = $dry_var_ArchiveDir
+            }
+            
+            $dry_var_Plan = New-DryPlan @dry_var_NewDryPlanParams
             $dry_var_NewDryPlanParams = $null
             $dry_var_ShowDryPlanParams = @{
                 Plan                 = $dry_var_Plan
