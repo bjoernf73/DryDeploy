@@ -178,6 +178,9 @@
         },
         "error": {
             "foreground_color": "Red"
+        },
+        "input": {
+            "foreground_color": "Yellow"
         } 
     }
 }

@@ -33,6 +33,11 @@ function Get-DryInput {
         [Parameter(ParameterSetName="prompt",Mandatory)]
         [String]$Prompt,
 
+        [Parameter(ParameterSetName="prompt",HelpMessage = "May be used for simple values like 
+        a list of allowed numbers to choose from in a prompt. Will automatically be shown in 
+        the prompt allowed values 'box' (in from of the prompt in [<here>])")]
+        [String]$PromptChoiceString,
+
         [Parameter(ParameterSetName="prompt",Mandatory,
         HelpMessage="A helpmessage that is printed before the actual prompt")]
         [String]$Description,
@@ -44,33 +49,65 @@ function Get-DryInput {
         [Parameter(HelpMessage="When there is a choice between options, use a ValidateSet to ensure input
         values are in the set of allowed choices")]
         [AllowEmptyString()]
-        [Array]$ValidateSet
+        [Array]$ValidateSet,
+
+        [Parameter(HelpMessage="A scriptblock to validate the user input. The scriptblock will be passed
+        the `$ValidateScriptParams and the `$iInput as the last argument")]
+        [scriptblock]$ValidateScript, 
+
+        [array]$ValidateScriptParams
+
     )
 
     try {
-        function Get-DryInputApproval {
-            [cmdletbinding()]
+        function Get-DryInputValidation {
+            [cmdletbinding(DefaultParameterSetName = 'set')]
             param(
+                [Parameter(Mandatory)]
                 $iInput,
+
+                [Parameter(Mandatory)]
+                $FailedMessage,
+
+                [Parameter(ParameterSetName="set")]
                 $ValidateSet,
-                $FailedMessage
+
+                [Parameter(Mandatory,ParameterSetName="script")]
+                $ValidateScript,
+
+                [Parameter(ParameterSetName="script")]
+                $ValidateScriptParams
             )
             try {
                 if ($null -eq $iInput) {
                     throw "goto catch"
                 }
-                if ($ValidateSet) {
-                    if ($iInput -in $ValidateSet) {
-                        return $true
+
+                switch ($PSCmdlet.ParameterSetName) {
+                    'set' {
+                        if ($null -ne $ValidateSet) {
+                            if ($iInput -in $ValidateSet) {
+                                return $true
+                            }
+                            else {
+                                throw "goto catch"
+                            }
+                        }
+                        else {
+                            # nothing to validate
+                            return $true
+                        }
                     }
-                    else {
-                        throw "goto catch"
+                    'script' {
+                        $ValidateScriptParams += $iInput
+                        if (Invoke-Command -ScriptBlock $ValidateScript -ArgumentList $ValidateScriptParams) {
+                            return $true
+                        }
+                        else {
+                            throw "goto catch"
+                        }
                     }
-                }
-                else {
-                    # nothing to validate
-                    return $true
-                }
+                }  
             }
             catch {
                 ol w $FailedMessage
@@ -79,13 +116,19 @@ function Get-DryInput {
         }
 
         $LoggingOptions = $GLOBAL:LoggingOptions
-        $TextType = 'INPUT:  '
-        $FormattedMessage = $TextType 
+        $FormattedMessage = $LoggingOptions.input.text_type
+        if ($PromptChoiceString) {
+            $PromptChoiceString = $PromptChoiceString.Trim()
+        }
+        else {
+            $PromptChoiceString = "<value>"
+        }
+        
         # make sure left_column is a certain length
         while ($FormattedMessage.length -lt $LoggingOptions.left_column_width) {
             $FormattedMessage = $FormattedMessage + ' '
         }
-        $FormattedMessage = $FormattedMessage + $Prompt + " [ or 'quit']"
+        $FormattedMessage = $FormattedMessage + $Prompt + " [$PromptChoiceString or 'quit']"
 
         # Print the description
         if ($Description) {
@@ -93,15 +136,50 @@ function Get-DryInput {
             ol i ""
         }
         # start the prompt loop
-        Write-Host "ValidateSet is: $ValidateSet"
-        do {
-            $DryInput = Read-Host -Prompt $FormattedMessage
-            if ($DryInput -eq 'quit') {
-                break
+        $WriteHostParams = @{
+            NoNewLine = $true 
+        }
+        if ($LoggingOptions.input.foreground_color) {
+            $WriteHostParams += @{
+                ForegroundColor = $LoggingOptions.input.foreground_color
             }
         }
-        while (-not (Get-DryInputApproval -iInput $DryInput -ValidateSet $ValidateSet -FailedMessage $FailedMessage))
-
+        if ($ValidateSet) {
+            do {
+                $FormattedMessage | Write-Host @WriteHostParams
+                $DryInput = Read-Host -Prompt " "
+                if ($DryInput -eq 'quit') {
+                    break
+                }
+            }
+            while (-not (Get-DryInputValidation -iInput $DryInput -ValidateSet $ValidateSet -FailedMessage $FailedMessage))
+        }
+        elseif ($ValidateScript) {
+            do {
+                $FormattedMessage | Write-Host @WriteHostParams 
+                $DryInput = Read-Host -Prompt " "
+                if ($DryInput -eq 'quit') {
+                    break
+                }
+            }
+            while (-not (Get-DryInputValidation -iInput $DryInput -ValidateScript $ValidateScript -ValidateScriptParams $ValidateScriptParams -FailedMessage $FailedMessage))
+        }
+        else {
+            # no validation
+            do {
+                $FormattedMessage | Write-Host @WriteHostParams 
+                $DryInput = Read-Host -Prompt " "
+                if ($DryInput -eq 'quit') {
+                    break
+                }
+                elseif ($null -eq $DryInput) {
+                    # To make sure .trim() works
+                    $DryInput = " "
+                }
+            }
+            while (($DryInput.trim() -eq ''))
+        }
+        
         if ($DryInput -eq 'quit') {
             break
         }

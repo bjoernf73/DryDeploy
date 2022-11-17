@@ -171,14 +171,12 @@ function Out-DryLog {
 
         [Alias("fore")]
         [AllowNull()]
-        [Parameter(ParameterSetName="message",HelpMessage="Override the global options and the default fore color")]
-        [Parameter(ParameterSetName="array",HelpMessage="Override the global options and the default fore color")]
+        [Parameter(HelpMessage="Override the global options and the default fore color")]
         [System.ConsoleColor]$ForegroundColor,
 
         [Alias("back")]
         [AllowNull()]
-        [Parameter(ParameterSetName="message",HelpMessage="Override the global options and the default back color")]
-        [Parameter(ParameterSetName="array",HelpMessage="Override the global options and the default fore color")]
+        [Parameter(HelpMessage="Override the global options and the default fore color")]
         [System.ConsoleColor]$BackgroundColor
     )
 
@@ -196,6 +194,7 @@ function Out-DryLog {
                 warning     = [PSCustomObject]@{ foreground_color = 'Yellow';   background_color = $null; display_location = $true;  text_type = 'WARNING:' }
                 information = [PSCustomObject]@{ foreground_color = 'White';    background_color = $null; display_location = $false; text_type = '        ' }
                 error       = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $true;  text_type = 'ERROR:  ' }
+                input       = [PSCustomObject]@{ foreground_color = 'Yellow';   background_color = $null; display_location = $true;  text_type = 'INPUT:  ' }
                 success     = [PSCustomObject]@{ foreground_color = 'Green';    background_color = $null; display_location = $false; text_type = '        ' ;  status_text = 'Success'}
                 fail        = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $false; text_type = '        ' ;  status_text = 'Fail'   }
             }
@@ -283,11 +282,18 @@ function Out-DryLog {
             }
         }
 
-        $TextType = $LoggingOptions."$Type".text_type
-        $LOFore   = $LoggingOptions."$Type".foreground_color
-        $LOBack   = $LoggingOptions."$Type".background_color
-        $DisplayLocation = $LoggingOptions."$Type".display_location
-
+        if ($LoggingOptions."$Type".text_type) {
+            $TextType = $LoggingOptions."$Type".text_type
+        }
+        if ($LoggingOptions."$Type".foreground_color) {
+            $LOFore   = $LoggingOptions."$Type".foreground_color
+        }
+        if ($LoggingOptions."$Type".background_color) {
+            $LOBack   = $LoggingOptions."$Type".background_color
+        }
+        if ($LoggingOptions."$Type".display_location) {
+            $DisplayLocation = $LoggingOptions."$Type".display_location
+        }
 
         if ($ForegroundColor) {
             $LOFore = $ForegroundColor
@@ -373,33 +379,15 @@ function Out-DryLog {
             }
             elseif ($PSCmdlet.ParameterSetName -eq 'hashtable') {
                 # hashtable - loop through all key-value pairs
-                $NestedOutDryLogCallParams = @{
-                    Type            = $Type
-                    Callstacklevel  = $($Callstacklevel + 1) 
-                    Smallheader     = $true
-                }
-                if ($null -ne $LOFore) {
-                    $NestedOutDryLogCallParams += @{
-                        ForegroundColor = $LOFore
-                    }
-                }
-                if ($null -ne $LOBack) {
-                    $NestedOutDryLogCallParams += @{
-                        BackgroundColor = $LOBack
-                    }
-                }
-
                 if ($MsgTitle) {
                     $NestedOutDryLogCallParams += @{
-                        Message     = "Hashtable: $MsgTitle"
+                        Message         = "$MsgTitle"
+                        Type            = $Type
+                        Callstacklevel  = $($Callstacklevel + 1) 
+                        Smallheader     = $true
                     }
+                    Out-DryLog @NestedOutDryLogCallParams
                 }
-                else {
-                    $NestedOutDryLogCallParams += @{
-                        Message     = "Hashtable: <name missing>"
-                    }
-                }
-                Out-DryLog @NestedOutDryLogCallParams
                 $Messages = @()
                 #! Skrives om til å gjøre et nested call 
                 foreach ($Key in $MsgHash.Keys) {
@@ -468,14 +456,24 @@ function Out-DryLog {
                 # The header (name of object)
                 if ($MsgTitle) {
                     $NestedOutDryLogCallParams += @{
-                        Message     = "$MsgTitle"
+                        Message         = "$MsgTitle"
                         Type            = $Type
                         Callstacklevel  = $($Callstacklevel + 1) 
                         Smallheader     = $true
                     }
+                    if ($LOFore) {
+                        $NestedOutDryLogCallParams += @{
+                            foregroundcolor = $LOFore
+                        }
+                    }
+                    if ($LOBack) {
+                        $NestedOutDryLogCallParams += @{
+                            backgroundcolor = $LOBack
+                        }
+                    }
+                    Out-DryLog @NestedOutDryLogCallParams
                 }
 
-                Out-DryLog @NestedOutDryLogCallParams
                 # Iterate through properties
                 $MsgObj.PSObject.Properties | ForEach-Object {
                     #Write-Host "Value type $(($_.Value).Gettype().Name)"
@@ -486,22 +484,95 @@ function Out-DryLog {
                             MsgArr          = @(($(' '*$MsgObjLevel + ' ') + ($_.Name)),$_.Value) 
                             Callstacklevel  = $Callstacklevel+1
                         }
+                        if ($LOFore) {
+                            $NestedOutDryLogCallParams += @{
+                                foregroundcolor = $LOFore
+                            }
+                        }
+                        if ($LOBack) {
+                            $NestedOutDryLogCallParams += @{
+                                backgroundcolor = $LOBack
+                            }
+                        }
                         Out-DryLog @NestedOutDryLogCallParams
                     }
                     elseif ($_.Value -is [Array]) {
                         $ObjValue = $_.Value
                         $ObjName = $_.Name
-                        Out-DryLog -Type $Type -Message ($(' '*$MsgObjLevel+ ' ') + "$ObjName") -Callstacklevel $($Callstacklevel+1)  
+                        $NestedOutDryLogCallParams = @{
+                            Type            = $Type
+                            Message         = ($(' '*$MsgObjLevel+ ' ') + "$ObjName") 
+                            Callstacklevel  = $Callstacklevel+1
+                        }
+                        if ($LOFore) {
+                            $NestedOutDryLogCallParams += @{
+                                foregroundcolor = $LOFore
+                            }
+                        }
+                        if ($LOBack) {
+                            $NestedOutDryLogCallParams += @{
+                                backgroundcolor = $LOBack
+                            }
+                        }
+                        Out-DryLog @NestedOutDryLogCallParams  
                         foreach ($ObjItem in $ObjValue) {
                             if (($ObjItem -is [string]) -or ($ObjItem -is [bool]) -or ($ObjItem.Gettype().Name -match 'byte|short|int32|long|sbyte|ushort|uint32|ulong|float|double|decimal|Version')) {
-                                Out-DryLog -Type $Type -Message ($('  '*$MsgObjLevel+ ' ') + "$ObjItem") -Callstacklevel $($Callstacklevel+1) 
+                                $NestedOutDryLogCallParams = @{
+                                    Type            = $Type
+                                    Message         = ($('  '*$MsgObjLevel+ ' ') + "$ObjItem")
+                                    Callstacklevel  = $Callstacklevel+1
+                                }
+                                if ($LOFore) {
+                                    $NestedOutDryLogCallParams += @{
+                                        foregroundcolor = $LOFore
+                                    }
+                                }
+                                if ($LOBack) {
+                                    $NestedOutDryLogCallParams += @{
+                                        backgroundcolor = $LOBack
+                                    }
+                                }
+                                Out-DryLog @NestedOutDryLogCallParams
                             }
                             elseif ($ObjItem -is [PSCustomObject]) {
-                                Out-DryLog -Type $Type -MsgObj $ObjItem -Callstacklevel $($Callstacklevel+1) -MsgObjLevel $($MsgObjLevel+1)
+                                $NestedOutDryLogCallParams = @{
+                                    Type            = $Type
+                                    MsgObj          = $ObjItem 
+                                    Callstacklevel  = $Callstacklevel+1
+                                    MsgObjLevel     = $MsgObjLevel+1
+                                }
+                                if ($LOFore) {
+                                    $NestedOutDryLogCallParams += @{
+                                        foregroundcolor = $LOFore
+                                    }
+                                }
+                                if ($LOBack) {
+                                    $NestedOutDryLogCallParams += @{
+                                        backgroundcolor = $LOBack
+                                    }
+                                }
+                                Out-DryLog @NestedOutDryLogCallParams
                             }
                         }
                     } 
                     elseif ($_.Value -is [PSCustomObject]) {
+                        $NestedOutDryLogCallParams = @{
+                            Type            = $Type
+                            MsgObj          = $_.Name 
+                            Callstacklevel  = $Callstacklevel+1
+                            MsgObjLevel     = $MsgObjLevel+1
+                        }
+                        if ($LOFore) {
+                            $NestedOutDryLogCallParams += @{
+                                foregroundcolor = $LOFore
+                            }
+                        }
+                        if ($LOBack) {
+                            $NestedOutDryLogCallParams += @{
+                                backgroundcolor = $LOBack
+                            }
+                        }
+                        Out-DryLog @NestedOutDryLogCallParams
                         Out-DryLog -Type $Type -MsgObj $_.Name -Callstacklevel $($Callstacklevel+1) -MsgObjLevel $($MsgObjLevel+1)
                         Out-DryLog -Type $Type -MsgObj $_.Value -Callstacklevel $($Callstacklevel+1) -MsgObjLevel $($MsgObjLevel+1)
                     }

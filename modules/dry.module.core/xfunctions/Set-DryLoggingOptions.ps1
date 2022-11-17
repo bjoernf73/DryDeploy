@@ -73,11 +73,12 @@ function Set-DryLoggingOptions {
             warning     = [PSCustomObject]@{ foreground_color = 'Yellow';   background_color = $null; display_location = $true;  text_type = 'WARNING:' }
             information = [PSCustomObject]@{ foreground_color = 'White';    background_color = $null; display_location = $false; text_type = '        ' }
             error       = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $true;  text_type = 'ERROR:  ' }
+            input       = [PSCustomObject]@{ foreground_color = 'Yellow';   background_color = $null; display_location = $false; text_type = 'INPUT:  ' }
             success     = [PSCustomObject]@{ foreground_color = 'Green';    background_color = $null; display_location = $false; text_type = '        ' ;  status_text = 'Success'}
             fail        = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $false; text_type = '        ' ;  status_text = 'Fail'   }
         }
 
-        $Streams  = @('verbose','debug','warning','information','error','success','fail')
+        $Streams  = @('verbose','debug','warning','information','error','input','success','fail')
 
         # set properties defined by the system
         if ($null -ne $SystemConfig.log_to_file)                {$LoggingOptions.log_to_file =                $SystemConfig.log_to_file}
