@@ -1386,26 +1386,6 @@ try {
 
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-                        An action may resolve a dhcp-configured device' allocated IP from dhcp. For that
-                        to happen, there must be a property 'resolve_ip' that is true in that actions 
-                        ActionMetaConfig or TypeMetaConfig. TypeMetaConfig.resolve_ip if defined overrides
-                        any value of the ActionMetaConfig. The global vars dry_var_global_ResolvedIPv4 and
-                        dry_var_global_ResolvedIPv6 will be updated by the action function with either or 
-                        both IPs
-
-
-                        !overkomplisert tull! Hvis $dry_var_action.resource.resolved_network.ip_address = 'dhcp', så må ip resolves...............
-
-                    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-                    $dry_var_IPMustBeResolved = $false
-                    if ($dry_var_Resolved.ResolveIP) {
-                        $dry_var_IPMustBeResolved = $true
-                        $GLOBAL:dry_var_global_ResolvedIPv4 = $null
-                        $GLOBAL:dry_var_global_ResolvedIPv6 = $null
-                    }
-
-                    <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
                         Execute Action
                     
                         This is where the Action Function get's called
@@ -1420,29 +1400,44 @@ try {
 
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-                        Update the IP of the resource in the plan if the Action is an IP-resolving Action. If
-                        it is, $dry_var_IPMustBeResolved should be true, and $GLOBAL:dry_var_global_ResolvedIPv4 
-                        and/or $GLOBAL:dry_var_global_ResolvedIPv6 should have been populated with a value from 
-                        the action function. P.t. only a terra.run-action has this functionality, but custom script
-                        actions may be created - it only requires that the ActionMetaConfig or TypeMetaConfig has
-                        a property resolve_ip that is true, and that the action puts an ip into either of the
-                        globally defined values above
+                        Update the IP of the resource in the plan if the Action is an IP-resolving Action. P.t. 
+                        only a terra.run-action has this functionality, but custom script actions may be created,
+                        it only requires that the action puts an ip into either of the globally defined variables 
+                        $GLOBAL:dry_var_global_ResolvedIPv4 or $GLOBAL:dry_var_global_ResolvedIPv6
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-                    if ($true -eq $dry_var_IPMustBeResolved) {
-                        # [regex]$dry_var_ipv4regex = "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-            
+                    if ($dry_var_Action.resource.resolved_network.ip_address -eq 'dhcp') {
+                        $dry_var_AnIpWasResolved = $false
                         if ($null -ne $GLOBAL:dry_var_global_ResolvedIPv4) {
                             foreach ($dry_var_SetIPAction in ($dry_var_Plan.Actions | Where-Object { $_.resource.resource_guid -eq $dry_var_Action.resource.resource_guid})) {
                                 $dry_var_SetIPAction.resource.resolved_network.ip_address = $GLOBAL:dry_var_global_ResolvedIPv4
                             }
                             $dry_var_Plan.Save($dry_var_PlanFile,$false,$null)
+                            $GLOBAL:dry_var_global_ResolvedIPv4 = $null
+                            $dry_var_AnIpWasResolved = $true
                         }
                         if ($null -ne $GLOBAL:dry_var_global_ResolvedIPv6) {
                             foreach ($dry_var_SetIPAction in ($dry_var_Plan.Actions | Where-Object { $_.resource.resource_guid -eq $dry_var_Action.resource.resource_guid})) {
                                 $dry_var_SetIPAction.resource.resolved_network.ip_address6 = $GLOBAL:dry_var_global_ResolvedIPv6
                             }
                             $dry_var_Plan.Save($dry_var_PlanFile,$false,$null)
+                            $GLOBAL:dry_var_global_ResolvedIPv6 = $null
+                            $dry_var_AnIpWasResolved = $true
+                        }
+                        if ($dry_var_AnIpWasResolved) {
+                            if ($dry_var_Action.resource.resolved_network.ip_address -ne 'dhcp') {
+                                ol i "The resource uses DHCP, and it's IP was resolved to $($dry_var_Action.resource.resolved_network.ip_address)"
+                            }
+                            elseif ($dry_var_Action.resource.resolved_network.ip_address6 -ne 'dhcp') {
+                                ol i "The resource uses DHCP, and it's IPv6 was resolved to $($dry_var_Action.resource.resolved_network.ip_address6)"
+                            }
+                            else {
+                                ol w "The resource's IP should have been resolved, but wasn't?"
+                                throw "The resource's IP should have been resolved, but wasn't?"
+                            }
+                        }
+                        else {
+                            ol w "The resource uses DHCP, but IP not resolved yet. It may be scheduled to be resolved later in plan"
                         }
                     }
 
