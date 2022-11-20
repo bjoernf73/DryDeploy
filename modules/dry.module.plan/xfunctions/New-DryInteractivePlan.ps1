@@ -83,7 +83,9 @@ function New-DryInteractivePlan {
         [Int[]] 
         $ExcludePhases
     )
-    
+
+    $InteractiveIntro = "In interactive mode, you create a plan sporadically without having to specify resources in your environment (EnvConfig). For instance, you may use a module (ModuleConfig) of basic, non-specialized roles to rapidly get an instance of an OS up and running. While in non-interactive mode the role (or blueprint) decides the role's short name, in interactive mode you specify it. This may be practical if the role is a domain member, and the Active Directory configuration separates and categorizes different roles into OU's based on the role short name."
+    ol i $InteractiveIntro
     $Resources = $null 
     $Resources = [Resources]::New($Configuration,$ConfigCombo,$true)
     $Resources.Save($ResourcesFile,$true,$ArchiveFolder)
