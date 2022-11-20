@@ -20,7 +20,7 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function New-DryPlan {
+function New-DryInteractivePlan {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
@@ -85,7 +85,7 @@ function New-DryPlan {
     )
     
     $Resources = $null 
-    $Resources = [Resources]::New($Configuration,$ConfigCombo,$false)
+    $Resources = [Resources]::New($Configuration,$ConfigCombo,$true)
     $Resources.Save($ResourcesFile,$true,$ArchiveFolder)
     $Plan = [Plan]::New($Resources)
     $PlanFilter = [PlanFilter]::New($ResourceNames,$ExcludeResourceNames,$RoleNames,$ExcludeRoleNames,$ActionNames,$ExcludeActionNames,$Phases,$ExcludePhases,$BuildSteps,$ExcludeBuildSteps)

@@ -10,7 +10,7 @@ dry.module.ad is a module for configuration of Active Directory objects, namely
 - Rights on AD objects (acl's on any object in any AD naming context)
 - GPO imports with migrations
   - native support for backup-GPO's
-  - support for *automigrating json-GPOs* (requires access to the *GPOManagement* module)
+  - support for *automigrating json-GPOs* 
 - GPO links (supports replacement of *lower-versioned-GPO's* with *higher-versioned-GPO's* of versioning formats `v1.2.3` and `v1r2`)
 - WMI Filter creation 
 - WMI Filter links on GPOs

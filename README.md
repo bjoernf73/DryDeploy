@@ -78,6 +78,11 @@ plan.
 DryDeploy.ps1 [-ShowDeselected] [<CommonParameters>]
 ```
 
+### Github
+```
+DryDeploy.ps1 [-GitHub] [<CommonParameters>]
+```
+
 ### Init
 ```
 DryDeploy.ps1 [-Init] [<CommonParameters>]
@@ -113,6 +118,16 @@ DryDeploy.ps1 [-EnvConfig <String>] [-ModuleConfig <String>] [<CommonParameters>
 ### GetConfig
 ```
 DryDeploy.ps1 [-GetConfig] [<CommonParameters>]
+```
+
+### Rewind
+```
+DryDeploy.ps1 [-Rewind] [<CommonParameters>]
+```
+
+### FastForward
+```
+DryDeploy.ps1 [-FastForward] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -271,6 +286,21 @@ Returns the configuration object, and assigns it to the variable
 '$Config' so you may inspect it's content 'offline'
 
 ## PARAMETERS
+
+### -GitHub
+Launches the DryDeploy Github page in your favouritemost browser.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: Github
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ### -Init
 Inistializes the local system for package management, and installs 
@@ -827,6 +857,46 @@ be devided into blocks that are visually pleasing.
 ```yaml
 Type: SwitchParameter
 Parameter Sets: Apply
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Rewind
+In an existing plan, rewinds one buildstep.
+That is, searches 
+for the first occurance of a buildstep with status 'todo', and
+sets status 'todo' on the action just before it in the current
+plan.
+Will only work when you Apply a continuous plan - not if 
+you have applied random steps here and there.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: Rewind
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -FastForward
+In an existing plan, fastforwards one buildstep.
+That is, 
+searches for the first occurance of a buildstep with a status 
+that is not 'Success', and sets that Action's status to 
+'Success' so DryDeploy perceives it as applied.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: FastForward
 Aliases:
 
 Required: False

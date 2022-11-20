@@ -33,6 +33,10 @@
                         {
                             "Name": "PowershellGet",
                             "MinimumVersion": "2.2.5"
+                        },
+                        {
+                            "Name": "GPRegistryPolicyParser",
+                            "MinimumVersion": "1.0.0"
                         }
                     ]
                 },
@@ -52,6 +56,14 @@
                         {
                             "Name": "Packer",
                             "Description": "Hashicorp Packer"
+                        },
+                        {
+                            "Name": "Terraform",
+                            "Description": "Hashicorp Terraform"
+                        },
+                        {
+                            "Name": "windows-adk-oscdimg",
+                            "Description": "Windows ADK with oscdimg in path, may be required for packer"
                         }
                     ]
                 },
@@ -92,6 +104,10 @@
                         {
                             "Name": "PowershellGet",
                             "MinimumVersion": "2.2.5"
+                        },
+                        {
+                            "Name": "GPRegistryPolicyParser",
+                            "MinimumVersion": "1.0.0"
                         }
                     ]
                 },
@@ -115,6 +131,10 @@
                         {
                             "Name": "Terraform",
                             "Description": "Hashicorp Terraform"
+                        },
+                        {
+                            "Name": "windows-adk-oscdimg",
+                            "Description": "Windows ADK with oscdimg in path, may be required for packer"
                         }
                     ]
                 },
@@ -158,6 +178,9 @@
         },
         "error": {
             "foreground_color": "Red"
+        },
+        "input": {
+            "foreground_color": "Yellow"
         } 
     }
 }

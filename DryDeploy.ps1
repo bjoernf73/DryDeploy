@@ -123,6 +123,14 @@ any filter to only Apply a limited set of planned actions (-Actions,
 -ExcludeActions, -BuildSteps, -ExcludeBuildSteps, -Resources, 
 -ExcludeResources, -Roles, -ExcludeRoles, -Phases, -ExcludePhases)
 
+.PARAMETER Interactive
+Starts DryDeploy in interactive mode, which has the effect that 
+resources specified in an environment are ignored. Instead, a single
+resource will be defined from interactive prompts, and a plan for 
+that resource is created. You still need to have a module and an 
+environment selected. You may only select to build a resource from
+a role in the currently selected system module.  
+
 .PARAMETER Actions
 Array of one or more Actions to include. All others are excluded. 
 If not specified, Actions are disregarded from the filter. Supports 
@@ -199,6 +207,9 @@ Environment and Module are combined into one configuration object.
 Run -GetConfig to just return this configuration object, and then 
 quit. Assign the output to a variable to examine the configuration.
 
+.PARAMETER GitHub
+Launches the DryDeploy Github page in your favouritemost browser.
+
 .PARAMETER NoLog
 By default, a log file will be written. If you're opposed to that, 
 use -NoLog.
@@ -249,6 +260,19 @@ interactively confirm each jump to next Action.
 When you -Apply, you may -Quit to make the script quit after 
 every Action. Useful for CI/CD Pipelines, since the run may 
 be devided into blocks that are visually pleasing. 
+
+.PARAMETER Rewind
+In an existing plan, rewinds one buildstep. That is, searches 
+for the first occurance of a buildstep with status 'todo', and
+sets status 'todo' on the action just before it in the current
+plan. Will only work when you Apply a continuous plan - not if 
+you have applied random steps here and there.
+
+.PARAMETER FastFwd
+In an existing plan, fastforwards one buildstep. That is, 
+searches for the first occurance of a buildstep with a status 
+that is not 'Success', and sets that Action's status to 
+'Success' so DryDeploy perceives it as applied. 
 
 .PARAMETER CMTrace
 Will open the log file in cmtrace som you may follow the output-
@@ -324,8 +348,13 @@ Returns the configuration object, and assigns it to the variable
 '$Config' so you may inspect it's content 'offline' 
 #>
 [CmdLetBinding(DefaultParameterSetName='ShowPlan')]
-param (
-    
+param ( 
+    [Parameter(ParameterSetName='Github',
+    HelpMessage='Launches the DryDeploy Github page in your 
+    favouritemost browser.')]
+    [Switch]
+    $GitHub,
+
     [Parameter(ParameterSetName='Init',
     HelpMessage='Downloads dependencies for DD. Must run 
     once on the system you are working from, and must run elevated 
@@ -352,6 +381,13 @@ param (
     to plan. If you don't, I'll only plan.")]
     [Switch]
     $Apply,
+
+    [Parameter(Mandatory,ParameterSetName='Interactive',
+    HelpMessage="Starts DryDeploy in interactive mode, which has 
+    the effect that resources specified in an environment are 
+    ignored. Builds one resource only each time you run it.")]
+    [Switch]
+    $Interactive,
 
     [Parameter(ParameterSetName='Plan',
     HelpMessage='Array of one or more Actions to include. All others 
@@ -574,6 +610,22 @@ param (
     [Switch]
     $Quit,
 
+    [Parameter(ParameterSetName='Rewind',
+    HelpMessage='In an existing plan, rewinds one buildstep. That is, 
+    the function searches for the first occurance of a buildstep with
+    status ''todo'', and sets status = ''todo'' on the action just 
+    before it')]
+    [Switch]
+    $Rewind,
+
+    [Parameter(ParameterSetName='FastFwd',
+    HelpMessage='In an existing plan, fastforwards one buildstep. That is, 
+    the function searches for the first occurance of a buildstep with
+    a status that is not ''Success'', and sets status = ''Success'' on
+    that action')]
+    [Switch]
+    $FastFwd,
+
     [Parameter(ParameterSetName='Plan',
     HelpMessage='Launches CmTrace.exe with the log file at the start 
     of execution, if CmTrace.exe exists in path')]
@@ -730,7 +782,7 @@ try {
 
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-        Define som paths
+        Define paths
     
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
     [String]$dry_var_PlanFile           = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'dry_deploy_plan.json'
@@ -804,10 +856,35 @@ try {
         Platform      = $GLOBAL:dry_var_global_Platform
         SystemOptions = $dry_var_SystemOptions
     }
+    if ($EnvConfig) {
+        $GetDryConfigComboParams += @{
+            NewEnvConfig = $true
+        }
+    }
+    if ($ModuleConfig) {
+        $GetDryConfigComboParams += @{
+            NewModuleConfig = $true
+        }
+    }
     $GLOBAL:dry_var_global_ConfigCombo = Get-DryConfigCombo @GetDryConfigComboParams
     $GetDryConfigComboParams = $null
+
+    switch ($PSCmdLet.ParameterSetName) {
+        'Interactive' {
+            # -Interactive sets the interactive property to true, and will stay true until you -Plan
+            $GLOBAL:dry_var_global_ConfigCombo.systemconfig.interactive = $true
+        }
+        'Plan' {
+            # -Plan resets the interactive property back to false
+            $GLOBAL:dry_var_global_ConfigCombo.systemconfig.interactive = $false
+        }
+    }
+    $GLOBAL:dry_var_global_ConfigCombo.Save()
     
     switch ($PSCmdLet.ParameterSetName) {
+        'GitHub' {
+            Start-Process 'https://github.com/bjoernf73/DryDeploy' -Wait:$False
+        }
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
             Parameterset: Init
@@ -883,7 +960,10 @@ try {
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         'SetConfig' {
-            
+            # ensure plan is removed when config changes
+            if (Test-Path -Path $dry_var_PlanFile -ErrorAction Ignore) {
+                Remove-Item -Path $dry_var_PlanFile -Force | Out-Null
+            }
             if ($EnvConfig) {
                 $dry_var_global_ConfigCombo.change($EnvConfig,'environment')    
             }
@@ -894,16 +974,17 @@ try {
         }
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
-            Parameterset: ShowPlan
+            Parameterset: ShowPlan, Rewind and FastFwd
             
-            Shows the state of the current Plan.
+            All Sets shows the state of the current Plan, however Rewind set's it back one buildstep, 
+            and FastFwd one forward. 
 
             ShowPlan is an inferiour, mundane parameterset for lesser mortals. It's like having to 
-            physically move the piece on a chess board in other realise what option the opponent has. 
-            In other words, it's for me...  
+            physically move pieces on a chess board to analyze the game. In other words, it's for 
+            me... Prints out the status of the current Plan.   
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        'ShowPlan' {
+        {$_ -in 'ShowPlan','Rewind', 'FastFwd'} {
             
             $dry_var_global_ConfigCombo.show()
             
@@ -923,6 +1004,15 @@ try {
             }
             $dry_var_Plan = Get-DryPlan @GetDryPlanParams -ErrorAction Stop
             $ShowDryPlanParams = $null
+
+            if ($PSCmdlet.ParameterSetName -eq 'Rewind') {
+                ol i "Rewinding one buildstep..."
+                $dry_var_Plan.RewindPlanOrder($dry_var_PlanFile)
+            }
+            elseif ($PSCmdlet.ParameterSetName -eq 'FastFwd') {
+                ol i "Fast-Forward one buildstep..."
+                $dry_var_plan.FastForwardPlanOrder($dry_var_PlanFile)
+            }
             
             $ShowDryPlanParams       = @{
                 Plan                 = $dry_var_Plan
@@ -934,7 +1024,6 @@ try {
             Show-DryPlan @ShowDryPlanParams
             
             $GetDryPlanParams = $null
-
         }
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
@@ -944,7 +1033,7 @@ try {
             gets and invokes common variables, prepares for credentials.
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        {$_ -in 'Plan','Apply','GetConfig','Resolve'} {
+        {$_ -in 'Plan','Apply','GetConfig','Resolve','Interactive'} {
             $dry_var_Paths | Add-Member -MemberType NoteProperty -Name 'BaseConfigDirectory' -Value (Join-Path -Path $dry_var_global_ConfigCombo.envconfig.path -ChildPath 'BaseConfig')
             $dry_var_Paths | Add-Member -MemberType NoteProperty -Name 'ModuleConfigDirectory' -Value $dry_var_global_ConfigCombo.moduleconfig.path
             $GLOBAL:dry_var_global_Configuration = Get-DryEnvConfig -ConfigCombo $dry_var_global_ConfigCombo -Paths $dry_var_Paths
@@ -954,15 +1043,17 @@ try {
             
                 Credentials File
                 
-                The EnvConfig and/or ModuleConfig may provide placeholders for Credentials that should 
-                be put in a local credentials file. Actions contain a cedentials node that specifies
-                only an 'Alias' to a credential, however, that Alias may be specified with a UserName
-                and other properties in the EnvConfig or ModuleConfig. 
+                The EnvConfig and/or ModuleConfig may provide placeholders for Credentials that DryDeploy 
+                will store in a local credentials file. Actions contain a cedentials node that specifies
+                'Aliases' to credentials that references credentials in the credentials file. If a 
+                referenced credential does not exist in the credentials file, the user will be prompted 
+                (unless -SuppressInteractivePrompts). Make sure to -Resolve before -Apply, so that all 
+                references are prompted for before you start a four hour long run. 
                 
             # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
             New-DryCredentialsFile -Path $dry_var_global_CredentialsFile
 
-            #! currently only support for 'encryptedstring', should support 'HashicorpVault'++
+            #! currently only support for 'encryptedstring', should support 'HashicorpVault', 1Password...
             if (-not $GLOBAL:dry_var_global_Configuration.CredentialsType) {
                 $GLOBAL:dry_var_global_Configuration | Add-Member -MemberType NoteProperty -Name 'CredentialsType' -Value 'encryptedstring'
             }
@@ -1015,9 +1106,51 @@ try {
                 ExcludePhases        = $ExcludePhases
                 ArchiveFolder        = $dry_var_ArchiveDir
             }
+            
             $dry_var_Plan = New-DryPlan @dry_var_NewDryPlanParams
             $dry_var_NewDryPlanParams = $null
+            $dry_var_ShowDryPlanParams = @{
+                Plan                 = $dry_var_Plan
+                Mode                 = 'Plan' 
+                ConfigCombo          = $dry_var_global_ConfigCombo 
+                ShowConfigCombo      = $True
+                ShowDeselected       = $ShowDeselected
+            }
+            Show-DryPlan @dry_var_ShowDryPlanParams
+            $dry_var_Plan = $null
+            $dry_var_ShowDryPlanParams = $null
+        }
+
+        <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
+            Parameterset: Interactive
+
+            Starts DryDeploy in interactive mode, which has the effect that resources specified in an 
+            environment are ignored. Instead, a single resource will be defined from interactive 
+            prompts, and a plan for that resource is created. You still need to have a module and an 
+            environment selected. You may only select to build a resource from a role in the currently 
+            selected system module.  
+              
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+        'Interactive' {       
+            $dry_var_NewDryPlanParams = @{
+                ResourcesFile        = $dry_var_ResourcesFile
+                PlanFile             = $dry_var_PlanFile
+                Configuration        = $dry_var_global_Configuration
+                ConfigCombo          = $dry_var_global_ConfigCombo
+                RoleNames            = $Roles
+                ExcludeRoleNames     = $ExcludeRoles
+                ActionNames          = $Actions
+                ExcludeActionNames   = $ExcludeActions
+                BuildSteps           = $BuildSteps
+                ExcludeBuildSteps    = $ExcludeBuildSteps
+                Phases               = $Phases
+                ExcludePhases        = $ExcludePhases
+                ArchiveFolder        = $dry_var_ArchiveDir
+            }
+            
+            $dry_var_Plan = New-DryInteractivePlan @dry_var_NewDryPlanParams
+            $dry_var_NewDryPlanParams = $null
             $dry_var_ShowDryPlanParams = @{
                 Plan                 = $dry_var_Plan
                 Mode                 = 'Plan' 
@@ -1259,6 +1392,9 @@ try {
                         any value of the ActionMetaConfig. The global vars dry_var_global_ResolvedIPv4 and
                         dry_var_global_ResolvedIPv6 will be updated by the action function with either or 
                         both IPs
+
+
+                        !overkomplisert tull! Hvis $dry_var_action.resource.resolved_network.ip_address = 'dhcp', så må ip resolves...............
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
                     $dry_var_IPMustBeResolved = $false

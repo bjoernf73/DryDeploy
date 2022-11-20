@@ -410,6 +410,53 @@ class Plan {
         $This.Save($PlanFile,$false,$null)
     }
 
+    [Void] RewindPlanOrder($PlanFile) {
+        for ($ROrder = 1; $ROrder -le ($This.Actions | Where-Object { $_.PlanOrder -gt 0}).Count; $ROrder++) {
+            $CurrentAction = $Null
+            $CurrentAction = $This.Actions | 
+            Where-Object {
+                $_.PlanOrder -eq $ROrder
+            }
+
+            if ($CurrentAction.Status -eq 'Todo') {
+                if ($ROrder -eq 1) {
+                     break
+                }
+                else {
+                    ($This.Actions | Where-Object { $_.PlanOrder -eq ($ROrder-1)}).Status = 'Todo'
+                    break
+                }
+            }
+            elseif ($ROrder -eq (($This.Actions | Where-Object { $_.PlanOrder -gt 0}).Count)) {
+                ($This.Actions | Where-Object { $_.PlanOrder -eq ($ROrder)}).Status = 'Todo'
+                break
+            }
+        }
+        $This.Save($PlanFile,$false,$null)
+    }
+
+    [Void] FastForwardPlanOrder($PlanFile) {
+        for ($ROrder = 1; $ROrder -le ($This.Actions | Where-Object { $_.PlanOrder -gt 0}).Count; $ROrder++) {
+            $CurrentAction = $Null
+            $CurrentAction = $This.Actions | 
+            Where-Object {
+                $_.PlanOrder -eq $ROrder
+            }
+
+            if ($CurrentAction.Status -eq 'Success') {
+                # the last element in plan - break and no change if we've reached that
+                if ($ROrder -eq (($This.Actions | Where-Object { $_.PlanOrder -gt 0}).Count)) {
+                     break
+                }
+            }
+            else {
+                ($This.Actions | Where-Object { $_.PlanOrder -eq ($ROrder)}).Status = 'Success'
+                break
+            }
+        }
+        $This.Save($PlanFile,$false,$null)
+    }
+
     [Void] ResolveApplyOrder($PlanFile) {
 
         if ($This.UnresolvedActions) {

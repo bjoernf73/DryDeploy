@@ -33,7 +33,7 @@ class Resource {
         $This.role_short_name          = $role_short_name
         $This.Role                     = $Role
         $This.BaseConfig               = $BaseConfig
-        $This.BaseConfigPath             = Join-Path -Path $BaseConfigPath -ChildPath $BaseConfig -Resolve
+        $This.BaseConfigPath           = Join-Path -Path $BaseConfigPath -ChildPath $BaseConfig -Resolve
         $This.Description              = $Description
         $This.ResourceOrder            = 0
         $This.Network                  = $Network
