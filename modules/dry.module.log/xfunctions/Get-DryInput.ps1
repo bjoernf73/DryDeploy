@@ -33,12 +33,15 @@ function Get-DryInput {
         [Parameter(ParameterSetName="prompt",Mandatory)]
         [String]$Prompt,
 
+        [Parameter(ParameterSetName="prompt")]
+        $DefaultValue,
+
         [Parameter(ParameterSetName="prompt",HelpMessage = "May be used for simple values like 
         a list of allowed numbers to choose from in a prompt. Will automatically be shown in 
         the prompt allowed values 'box' (in from of the prompt in [<here>])")]
         [String]$PromptChoiceString,
 
-        [Parameter(ParameterSetName="prompt",Mandatory,
+        [Parameter(ParameterSetName="prompt",
         HelpMessage="A helpmessage that is printed before the actual prompt")]
         [String]$Description,
 
@@ -82,32 +85,33 @@ function Get-DryInput {
                 if ($null -eq $iInput) {
                     throw "goto catch"
                 }
-
-                switch ($PSCmdlet.ParameterSetName) {
-                    'set' {
-                        if ($null -ne $ValidateSet) {
-                            if ($iInput -in $ValidateSet) {
+                else {
+                    switch ($PSCmdlet.ParameterSetName) {
+                        'set' {
+                            if ($null -ne $ValidateSet) {
+                                if ($iInput -in $ValidateSet) {
+                                    return $true
+                                }
+                                else {
+                                    throw "goto catch"
+                                }
+                            }
+                            else {
+                                # nothing to validate
+                                return $true
+                            }
+                        }
+                        'script' {
+                            $ValidateScriptParams += $iInput
+                            if (Invoke-Command -ScriptBlock $ValidateScript -ArgumentList $ValidateScriptParams) {
                                 return $true
                             }
                             else {
                                 throw "goto catch"
                             }
                         }
-                        else {
-                            # nothing to validate
-                            return $true
-                        }
-                    }
-                    'script' {
-                        $ValidateScriptParams += $iInput
-                        if (Invoke-Command -ScriptBlock $ValidateScript -ArgumentList $ValidateScriptParams) {
-                            return $true
-                        }
-                        else {
-                            throw "goto catch"
-                        }
-                    }
-                }  
+                    } 
+                }
             }
             catch {
                 ol w $FailedMessage
@@ -148,7 +152,10 @@ function Get-DryInput {
             do {
                 $FormattedMessage | Write-Host @WriteHostParams
                 $DryInput = Read-Host -Prompt " "
-                if ($DryInput -eq 'quit') {
+                if (($null -ne $DefaultValue) -and ($DryInput.Trim() -eq '')) {
+                    $DryInput = $DefaultValue
+                }
+                elseif ($DryInput -eq 'quit') {
                     break
                 }
             }
@@ -158,7 +165,10 @@ function Get-DryInput {
             do {
                 $FormattedMessage | Write-Host @WriteHostParams 
                 $DryInput = Read-Host -Prompt " "
-                if ($DryInput -eq 'quit') {
+                if (($null -ne $DefaultValue) -and ($DryInput.Trim() -eq '')) {
+                    $DryInput = $DefaultValue
+                }
+                elseif ($DryInput -eq 'quit') {
                     break
                 }
             }
@@ -169,7 +179,10 @@ function Get-DryInput {
             do {
                 $FormattedMessage | Write-Host @WriteHostParams 
                 $DryInput = Read-Host -Prompt " "
-                if ($DryInput -eq 'quit') {
+                if (($null -ne $DefaultValue) -and ($DryInput.Trim() -eq '')) {
+                    $DryInput = $DefaultValue
+                }
+                elseif ($DryInput -eq 'quit') {
                     break
                 }
                 elseif ($null -eq $DryInput) {
