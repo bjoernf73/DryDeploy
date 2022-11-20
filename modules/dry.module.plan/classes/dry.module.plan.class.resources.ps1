@@ -33,6 +33,7 @@ class Resources {
                     $sSeclected = $null
                     $sSeclected = [PSCustomObject]@{
                         Role   = $null
+                        Short  = $null
                         Name   = $null
                         Site   = $null
                         Subnet = $null
@@ -82,7 +83,54 @@ class Resources {
                     $sSeclected.Role = $sRoleName
                     ol i -obj $sSeclected -msgtitle "Selection" -Fore $SelectionColor
                     ol i " "
-                    
+
+
+                    <#
+                        Short: A short name of the role. The short (short_role_name) should be used in the resource name, and 
+                        for a domain member, the server may be separated from other roles in an OU with the same name as the
+                        short.  
+                    #>
+                    ol i "Enter short (short name of role)" -sh
+                    ol i " "
+                    $iRolesToSelectFrom = $null
+                    $iRolesStrings = $null
+                    [scriptblock]$ValidateShortRoleNameScript =  {
+                        param($DryInput)
+                        $DryInput = $DryInput.Trim()
+                        ($DryInput -is [string]) -and 
+                        ($DryInput.length -ge 2) -and
+                        ($DryInput.length -le 6) -and
+                        ($DryInput -notmatch "\d$") -and
+                        ($DryInput -notmatch "^\d")
+                    }
+                    $iRolesToSelectFrom = [ArrayList]::New()
+                    foreach ($iRole in $Configuration.build.roles) {
+                        $iRoleName           = $iRole.role
+                        $iRoleShortName      = $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $iRoleName -Property 'role_short_name')
+                        $iRolesToSelectFrom += [PSCustomObject]@{role=$iRoleName;role_short_name=$iRoleShortName}
+                    }
+                    $iRolesStrings = ($($iRolesToSelectFrom | Out-String).Split("`r`n")) | Where-Object { $_.Trim() -ne ''}
+                    foreach ($iString in $iRolesStrings) {
+                        ol i "$iString"
+                    }
+                    ol i " "
+                    $GetDryInputParams = @{
+                        Prompt               = "Enter the short (2-6 characters) role name"
+                        PromptChoiceString   = "<short>"
+                        Description          = "The list above is an example of roles and corresponding short role names for inspiration"
+                        FailedMessage        = "The short role name should be 2-6 chars, not contain special chars but plain letters, and not start or end with a number"
+                        ValidateScript       = $ValidateShortRoleNameScript
+                        ValidateScriptParams = @()
+                    }
+                    [string]$sShortRoleName = Get-DryInput @GetDryInputParams
+                    if (-not $sShortRoleName) {
+                        break
+                    }
+
+                    $sSeclected.Short = $sShortRoleName
+                    ol i -obj $sSeclected -msgtitle "Selection" -Fore $SelectionColor
+                    ol i " "
+
                     <#
                         Subnet: Get Available Sites and Subnets, display the list for 
                         the user, prompt for and get selection found in 
@@ -198,9 +246,9 @@ class Resources {
                 while ($HappyWithTheSelection -eq $false)
                 
                 if ($HappyWithTheSelection) {
-                    $This.InteractiveResources += [Resource]::New(
+                    $This.Resources += [Resource]::New(
                         $sSeclected.Name,
-                        $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $sSeclected.Role -Property 'role_short_name'),
+                        $sSeclected.Short,
                         $sSeclected.Role,
                         $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $sSeclected.Role -Property 'base_config'),
                         $Configuration.Paths.BaseConfigDirectory,

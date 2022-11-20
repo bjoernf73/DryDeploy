@@ -85,7 +85,7 @@ function New-DryInteractivePlan {
     )
     
     $Resources = $null 
-    $Resources = [InteractiveResources]::New($Configuration,$ConfigCombo) 
+    $Resources = [Resources]::New($Configuration,$ConfigCombo,$true)
     $Resources.Save($ResourcesFile,$true,$ArchiveFolder)
     $Plan = [Plan]::New($Resources)
     $PlanFilter = [PlanFilter]::New($ResourceNames,$ExcludeResourceNames,$RoleNames,$ExcludeRoleNames,$ActionNames,$ExcludeActionNames,$Phases,$ExcludePhases,$BuildSteps,$ExcludeBuildSteps)

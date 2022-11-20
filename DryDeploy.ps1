@@ -856,6 +856,16 @@ try {
         Platform      = $GLOBAL:dry_var_global_Platform
         SystemOptions = $dry_var_SystemOptions
     }
+    if ($EnvConfig) {
+        $GetDryConfigComboParams += @{
+            NewEnvConfig = $true
+        }
+    }
+    if ($ModuleConfig) {
+        $GetDryConfigComboParams += @{
+            NewModuleConfig = $true
+        }
+    }
     $GLOBAL:dry_var_global_ConfigCombo = Get-DryConfigCombo @GetDryConfigComboParams
     $GetDryConfigComboParams = $null
 
@@ -1382,6 +1392,9 @@ try {
                         any value of the ActionMetaConfig. The global vars dry_var_global_ResolvedIPv4 and
                         dry_var_global_ResolvedIPv6 will be updated by the action function with either or 
                         both IPs
+
+
+                        !overkomplisert tull! Hvis $dry_var_action.resource.resolved_network.ip_address = 'dhcp', så må ip resolves...............
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
                     $dry_var_IPMustBeResolved = $false
