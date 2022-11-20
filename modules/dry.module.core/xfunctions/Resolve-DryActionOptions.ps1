@@ -157,20 +157,6 @@ function Resolve-DryActionOptions {
                     $ActionType = $Action.Resource.Options."$FollowType"
                 }
             }
-
-            <#
-                An action may resolve a dhcp-configured device' allocated IP from dhcp. For that
-                to happen, there must be a property 'resolve_ip' that is true in that actions 
-                ActionMetaConfig or TypeMetaConfig. TypeMetaConfig.resolve_ip, if defined, will
-                override any value of the ActionMetaConfig. 
-            #>
-            $ResolveIP = $false
-            if ($null -ne $ActionMetaConfig.resolve_ip) {
-                $ResolveIP = $ActionMetaConfig.resolve_ip
-            }
-            if ($null -ne $TypeMetaConfig.resolve_ip) {
-                $ResolveIP = $TypeMetaConfig.resolve_ip
-            }
         }
 
         <#
@@ -206,7 +192,6 @@ function Resolve-DryActionOptions {
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'Credentials' -Value $Credentials
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'Target' -Value $Target
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'RoleTargetRootPath' -Value $RoleTargetRootPath
-        $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ResolveIP' -Value $ResolveIP
 
         if ($ActionMetaConfig) {
             $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ActionMetaConfig' -Value $ActionMetaConfig
