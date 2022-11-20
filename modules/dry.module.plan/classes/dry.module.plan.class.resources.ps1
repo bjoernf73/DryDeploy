@@ -27,238 +27,255 @@ class Resources {
                 }
              }
             $true {
-                [System.ConsoleColor]$SelectionColor = 'DarkGreen'
                 do {
-                    $HappyWithTheSelection = $false
-                    $sSeclected = $null
-                    $sSeclected = [PSCustomObject]@{
-                        Role   = $null
-                        Short  = $null
-                        Name   = $null
-                        Site   = $null
-                        Subnet = $null
-                        IP     = $null
-                    }
-                    $sSite = [PSCustomObject]@{
-                        site        = $null
-                        subnet_name = $null
-                        ip_address  = $null
-                        net         = $null
-                        mask        = $null
-                        dns         = $null
-                    }
-                    
-                    <#
-                        Role: Get Available Roles, display the list for the 
-                        user, prompt for and get selection  
-                    #>
-                    ol i "Select role" -sh
-                    ol i " "
-                    $iRolesToSelectFrom = [ArrayList]::New()
-                    foreach ($iRole in $Configuration.build.roles) {
-                        $iIndex              = $iRole.order
-                        $iRoleName           = $iRole.role
-                        $iDescription        = $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $iRoleName -Property 'description')
-                        $iRolesToSelectFrom += [PSCustomObject]@{index=$iIndex;role=$iRoleName;description=$iDescription}
-                    }
-                    $iRolesStrings = ($($iRolesToSelectFrom | Out-String).Split("`r`n")) | Where-Object { $_.Trim() -ne ''}
-                    foreach ($iString in $iRolesStrings) {
-                        ol i "$iString"
-                    }
-                    ol i " "
-                    $GetDryInputParams = @{
-                        Prompt             = "Enter index of a role"
-                        PromptChoiceString = "$($Configuration.build.roles.order)"
-                        Description        = "The list above are roles that you may select from in interactive mode. You may select a different module (.\DryDeploy.ps1 -ModuleConfig ..\path\to\config) if the role you are looking for is not in the list"
-                        FailedMessage      = "You need to select the index of the role, i.e. one of '$($Configuration.build.roles.order)'"
-                        ValidateSet        = $Configuration.build.roles.order
-                    }
-                    [int]$sRoleIndex = Get-DryInput @GetDryInputParams
-                    if ($sRoleIndex) {
-                        $sRoleName = ($iRolesToSelectFrom | Where-Object { $_.index -eq $sRoleIndex}).role
-                    }
-                    else {
-                        break
-                    }
-                    $sSeclected.Role = $sRoleName
-                    ol i -obj $sSeclected -msgtitle "Selection" -Fore $SelectionColor
-                    ol i " "
+                    [System.ConsoleColor]$SelectionColor = 'DarkGreen'
+                    do {
+                        $AddAnotherResource = $true
+                        $HappyWithTheSelection = $false
+                        $sSelected = $null
+                        $sSelected = [PSCustomObject]@{
+                            Role   = $null
+                            Short  = $null
+                            Name   = $null
+                            Site   = $null
+                            Subnet = $null
+                            IP     = $null
+                        }
+                        $sSite = [PSCustomObject]@{
+                            site        = $null
+                            subnet_name = $null
+                            ip_address  = $null
+                            net         = $null
+                            mask        = $null
+                            dns         = $null
+                        }
+                        
+                        <#
+                            Role: Get Available Roles, display the list for the 
+                            user, prompt for and get selection  
+                        #>
+                        #ol i "Select role" -sh
+                        #ol i " "
+                        $iRolesToSelectFrom = [ArrayList]::New()
+                        foreach ($iRole in $Configuration.build.roles) {
+                            $iIndex              = $iRole.order
+                            $iRoleName           = $iRole.role
+                            $iShort              = $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $iRoleName -Property 'role_short_name')
+                            $iDescription        = $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $iRoleName -Property 'description')
+                            $iRolesToSelectFrom += [PSCustomObject]@{index=$iIndex;role=$iRoleName;short=$iShort;description=$iDescription}
+                        }
+                        $iRolesStrings = ($($iRolesToSelectFrom | Out-String).Split("`r`n")) | Where-Object { $_.Trim() -ne ''}
+                        foreach ($iString in $iRolesStrings) {
+                            ol i "$iString"
+                        }
+                        ol i " "
+                        $GetDryInputParams = @{
+                            Prompt             = "Enter index of a role"
+                            PromptChoiceString = "$($Configuration.build.roles.order)"
+                            #Description        = "The list above are roles that you may select from in interactive mode. You may select a different module (.\DryDeploy.ps1 -ModuleConfig ..\path\to\config) if the role you are looking for is not in the list"
+                            FailedMessage      = "You need to select the index of the role, i.e. one of '$($Configuration.build.roles.order)'"
+                            ValidateSet        = $Configuration.build.roles.order
+                        }
+                        [int]$sRoleIndex = Get-DryInput @GetDryInputParams
+                        if ($sRoleIndex) {
+                            $sSelected.Role  = ($iRolesToSelectFrom | Where-Object { $_.index -eq $sRoleIndex}).role
+                            $sSelected.Short = ($iRolesToSelectFrom | Where-Object { $_.index -eq $sRoleIndex}).short
+                            #$sSelected.Short = Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $sSelected.Role -Property 'role_short_name'
+                        }
+                        else {
+                            break
+                        }
+                        #ol i " "
+                        #ol i -obj $sSelected -msgtitle "Your Selections" -Fore $SelectionColor
+                        
 
+                        <#
+                            Short: A short name of the role. The short (short_role_name) should be used in the resource name, and 
+                            for a domain member, the server may be separated from other roles in an OU with the same name as the
+                            short.  
+                        #>
+                        #ol i "Enter short (short name of role)" -sh
+                        #ol i " "
+                        $iRolesToSelectFrom = $null
+                        $iRolesStrings = $null
+                        [scriptblock]$ValidateShortRoleNameScript =  {
+                            param($DryInput)
+                            $DryInput = $DryInput.Trim()
+                            ($DryInput -is [string]) -and 
+                            ($DryInput.length -ge 2) -and
+                            ($DryInput.length -le 6) -and
+                            ($DryInput -notmatch "\d$") -and
+                            ($DryInput -notmatch "^\d")
+                        }
+                        
+                        ol i " "
+                        $GetDryInputParams = @{
+                            Prompt               = "Customize the Short (2-6 characters), or ENTER for default ('$($sSelected.Short)')"
+                            PromptChoiceString   = ""
+                            #Description          = "The list above is an example of roles and corresponding short role names for inspiration"
+                            FailedMessage        = "The short role name should be 2-6 chars, not contain special chars but plain letters, and not start or end with a number. The role short name is significant it you have an Active Directory that separates roles into OU's based on the role short name. If you don't, just accept the defult"
+                            ValidateScript       = $ValidateShortRoleNameScript
+                            ValidateScriptParams = @()
+                            DefaultValue         = "$($sSelected.Short)"
+                        }
+                        [string]$sShortRoleName = Get-DryInput @GetDryInputParams
+                        if (-not $sShortRoleName) {
+                            break
+                        }
 
-                    <#
-                        Short: A short name of the role. The short (short_role_name) should be used in the resource name, and 
-                        for a domain member, the server may be separated from other roles in an OU with the same name as the
-                        short.  
-                    #>
-                    ol i "Enter short (short name of role)" -sh
-                    ol i " "
-                    $iRolesToSelectFrom = $null
-                    $iRolesStrings = $null
-                    [scriptblock]$ValidateShortRoleNameScript =  {
-                        param($DryInput)
-                        $DryInput = $DryInput.Trim()
-                        ($DryInput -is [string]) -and 
-                        ($DryInput.length -ge 2) -and
-                        ($DryInput.length -le 6) -and
-                        ($DryInput -notmatch "\d$") -and
-                        ($DryInput -notmatch "^\d")
-                    }
-                    $iRolesToSelectFrom = [ArrayList]::New()
-                    foreach ($iRole in $Configuration.build.roles) {
-                        $iRoleName           = $iRole.role
-                        $iRoleShortName      = $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $iRoleName -Property 'role_short_name')
-                        $iRolesToSelectFrom += [PSCustomObject]@{role=$iRoleName;role_short_name=$iRoleShortName}
-                    }
-                    $iRolesStrings = ($($iRolesToSelectFrom | Out-String).Split("`r`n")) | Where-Object { $_.Trim() -ne ''}
-                    foreach ($iString in $iRolesStrings) {
-                        ol i "$iString"
-                    }
-                    ol i " "
-                    $GetDryInputParams = @{
-                        Prompt               = "Enter the short (2-6 characters) role name"
-                        PromptChoiceString   = "<short>"
-                        Description          = "The list above is an example of roles and corresponding short role names for inspiration"
-                        FailedMessage        = "The short role name should be 2-6 chars, not contain special chars but plain letters, and not start or end with a number"
-                        ValidateScript       = $ValidateShortRoleNameScript
-                        ValidateScriptParams = @()
-                    }
-                    [string]$sShortRoleName = Get-DryInput @GetDryInputParams
-                    if (-not $sShortRoleName) {
-                        break
-                    }
+                        $sSelected.Short = $sShortRoleName
+                        ol i " "
+                        ol i -obj $sSelected -msgtitle "Your Selections" -Fore $SelectionColor
+                        ol i " "
 
-                    $sSeclected.Short = $sShortRoleName
-                    ol i -obj $sSeclected -msgtitle "Selection" -Fore $SelectionColor
-                    ol i " "
-
-                    <#
-                        Subnet: Get Available Sites and Subnets, display the list for 
-                        the user, prompt for and get selection found in 
-                        CoreConfig.network.sites[n].subnets 
-                    #>
-                    ol i "Select network" -sh
-                    ol i " "
-                    $iSubnetsToSelectFrom = [ArrayList]::New()
-                    $iSubnetsIndex = 0
-                    $iSubnetsIndexArray = $null; $iSubnetsIndexArray = @()
-                    foreach ($iSite in $Configuration.CoreConfig.network.sites) {
-                        foreach ($iSubnet in $iSite.subnets) {
-                            $iSubnetsIndex++
-                            $iSubnetsIndexArray   += $iSubnetsIndex
-                            $iSubnetsToSelectFrom += [PSCustomObject]@{
-                                index       = $iSubnetsIndex;
-                                site        = $iSite.name;
-                                subnet_name = $iSubnet.name;
-                                ip_subnet   = $iSubnet.ip_subnet;
-                                subnet_mask = $iSubnet.subnet_mask;
-                                dns         = $iSubnet.dns
+                        <#
+                            Subnet: Get Available Sites and Subnets, display the list for 
+                            the user, prompt for and get selection found in 
+                            CoreConfig.network.sites[n].subnets 
+                        #>
+                        #ol i "Select network" -sh
+                        #ol i " "
+                        $iSubnetsToSelectFrom = [ArrayList]::New()
+                        $iSubnetsIndex = 0
+                        $iSubnetsIndexArray = $null; $iSubnetsIndexArray = @()
+                        foreach ($iSite in $Configuration.CoreConfig.network.sites) {
+                            foreach ($iSubnet in $iSite.subnets) {
+                                $iSubnetsIndex++
+                                $iSubnetsIndexArray   += $iSubnetsIndex
+                                $iSubnetsToSelectFrom += [PSCustomObject]@{
+                                    index       = $iSubnetsIndex;
+                                    site        = $iSite.name;
+                                    subnet_name = $iSubnet.name;
+                                    ip_subnet   = $iSubnet.ip_subnet;
+                                    subnet_mask = $iSubnet.subnet_mask;
+                                    dns         = $iSubnet.dns
+                                }
                             }
                         }
+            
+                        $iSubnetsStrings = ($($iSubnetsToSelectFrom | Format-Table * | Out-String).Split("`r`n")) | Where-Object { $_.Trim() -ne ''}
+                        foreach ($iString in $iSubnetsStrings) {
+                            ol i "$iString"
+                        }
+                        ol i " "
+                        $GetDryInputParams = @{
+                            Prompt             = "Enter index of a subnet"
+                            PromptChoiceString = "$iSubnetsIndexArray"
+                            #Description        = "The list above are subnets that you may select from. You may select a different environment (.\DryDeploy.ps1 -EnvConfig ..\path\to\config) if the subnet you are looking for is not in the list"
+                            FailedMessage      = "You need to select the index of the subnet, i.e. one of '$iSubnetsIndexArray'"
+                            ValidateSet        = $iSubnetsIndexArray
+                        }
+                        [int]$sSiteIndex = Get-DryInput @GetDryInputParams
+                        if ($sSiteIndex) {
+                            [PSCustomObject]$sSite = ($iSubnetsToSelectFrom | Where-Object { $_.index -eq $sSiteIndex}) | Select-Object -Property site,subnet_name,ip_subnet,subnet_mask,dns
+                        }
+                        else {
+                            break
+                        }
+                        $sSubnetMaskBits = Convert-DryUtilsIpAddressToMaskLength -IPAddress $sSite.subnet_mask
+                        $sSubnetCidrString = "$($sSite.ip_subnet)/$sSubnetMaskBits"
+                        $sSelected.Site   = $sSite.site
+                        $sSelected.Subnet = $sSubnetCidrString
+                        #ol i -obj $sSelected -msgtitle "Your Selections" -Fore $SelectionColor
+                        #ol i " "
+            
+                        <#
+                            IP: Get the IP of the resource
+                        #>
+                        #ol i "Enter IP of the resource" -sh
+                        #ol i " "
+                        [scriptblock]$ValidateScript =  {
+                            param(
+                                $sSiteNet,
+                                $sSiteMask,
+                                $DryInput
+                            )
+                            ($DryInput -eq 'dhcp') -or (Invoke-PSipcalc -NetworkAddress "$($sSiteNet)/$($sSiteMask)" -Contains "$DryInput")
+                        }
+                        $GetDryInputParams = @{
+                            Prompt               = "Enter IP in the $sSubnetCidrString network"
+                            PromptChoiceString   = "<IP>, 'dhcp'"
+                            #Description          = "Enter an ipv4 address in the subnet you've selected, or simply enter 'dhcp'"
+                            FailedMessage        = "You need to enter a proper ip in the correct subnet"
+                            ValidateScript       = $ValidateScript
+                            ValidateScriptParams = @($sSite.ip_subnet,$sSite.subnet_mask)
+                        }
+                        [string]$sResourceIP = Get-DryInput @GetDryInputParams
+                        $sSelected.IP = $sResourceIP
+                        $sSite | Add-Member -MemberType NoteProperty -Name 'ip_address' -Value $sResourceIP
+                        #ol i -obj $sSelected -msgtitle "Your Selections" -Fore $SelectionColor
+                        #ol i " "
+            
+                        <#
+                            Name: Get the name of the resource
+                        #>
+                        #ol i "Enter a resource name" -sh
+                        #ol i " "
+                        <#
+                            $iResourcesExample = $Configuration.CoreConfig.resources | Select-Object -Property name,role
+                            $iResourcesStrings = ($($iResourcesExample | Out-String).Split("`r`n")) | Where-Object { $_.Trim() -ne ''}
+                            foreach ($iString in $iResourcesStrings) {
+                                ol i "$iString"
+                            }
+                            ol i " "
+                        #>
+                        ol i -obj $sSelected -msgtitle "Your Selections" -Fore $SelectionColor
+                        $GetDryInputParams = @{
+                            Prompt        = "Enter name of the resource"
+                            #Description   = "If you see a list above, they are names and corresponding roles of resources specified in your current environment config. If the list is empty, you probably clickops eveything, don't you? If you do see some names there, they are only listed here to inspire you to make the slightest effort to approximate the current naming convention used in your environment. If no such convention is obvious, well...that's on you."
+                            FailedMessage = "You need to enter a name for your resource"
+                            ValidateScript = {param($DryInput); (($DryInput -ne '') -and ($null -ne $DryInput))}
+                        }
+                        [string]$sResourceName = Get-DryInput @GetDryInputParams
+                        if (!($sResourceName)) {
+                            break
+                        }
+                        $sSelected.Name = $sResourceName
+                        ol i -obj $sSelected -msgtitle "Your Selections" -Fore $SelectionColor
+                        $GetDryInputParams = @{
+                            Prompt             = "Submit to plan?"
+                            PromptChoiceString = "'y' ('yes'), 'n' ('no')"
+                            #Description        = "Happy with the selection? Select 'yes' ('y') or 'no' ('n')"
+                            FailedMessage      = "You need to enter 'yes' ('y') or 'no' ('n') or 'q' to quit"
+                            ValidateSet        = @('y','yes','n','no')
+                        }
+                        $sHappyWithSelection = $null
+                        [string]$sHappyWithSelection = Get-DryInput @GetDryInputParams
+                        if ($sHappyWithSelection -in 'y','yes') {
+                            $HappyWithTheSelection = $true
+                        }
+            
                     }
-        
-                    $iSubnetsStrings = ($($iSubnetsToSelectFrom | Format-Table * | Out-String).Split("`r`n")) | Where-Object { $_.Trim() -ne ''}
-                    foreach ($iString in $iSubnetsStrings) {
-                        ol i "$iString"
-                    }
-                    ol i " "
-                    $GetDryInputParams = @{
-                        Prompt             = "Enter index of a subnet"
-                        PromptChoiceString = "$iSubnetsIndexArray"
-                        Description        = "The list above are subnets that you may select from. You may select a different environment (.\DryDeploy.ps1 -EnvConfig ..\path\to\config) if the subnet you are looking for is not in the list"
-                        FailedMessage      = "You need to select the index of the subnet, i.e. one of '$iSubnetsIndexArray'"
-                        ValidateSet        = $iSubnetsIndexArray
-                    }
-                    [int]$sSiteIndex = Get-DryInput @GetDryInputParams
-                    if ($sSiteIndex) {
-                        [PSCustomObject]$sSite = ($iSubnetsToSelectFrom | Where-Object { $_.index -eq $sSiteIndex}) | Select-Object -Property site,subnet_name,ip_subnet,subnet_mask,dns
-                    }
-                    else {
-                        break
-                    }
-                    $sSubnetMaskBits = Convert-DryUtilsIpAddressToMaskLength -IPAddress $sSite.subnet_mask
-                    $sSubnetCidrString = "$($sSite.ip_subnet)/$sSubnetMaskBits"
-                    $sSeclected.Site   = $sSite.site
-                    $sSeclected.Subnet = $sSubnetCidrString
-                    ol i -obj $sSeclected -msgtitle "Selection" -Fore $SelectionColor
-                    ol i " "
-        
-                    <#
-                        IP: Get the IP of the resource
-                    #>
-                    ol i "Enter IP of the resource" -sh
-                    ol i " "
-                    [scriptblock]$ValidateScript =  {
-                        param(
-                            $sSiteNet,
-                            $sSiteMask,
-                            $DryInput
+                    while ($HappyWithTheSelection -eq $false)
+                    
+                    if ($HappyWithTheSelection) {
+                        $This.Resources += [Resource]::New(
+                            $sSelected.Name,
+                            $sSelected.Short,
+                            $sSelected.Role,
+                            $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $sSelected.Role -Property 'base_config'),
+                            $Configuration.Paths.BaseConfigDirectory,
+                            $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $sSelected.Role -Property 'description'),
+                            $sSite,
+                            $ConfigCombo,
+                            $Configuration,
+                            $null
                         )
-                        ($DryInput -eq 'dhcp') -or (Invoke-PSipcalc -NetworkAddress "$($sSiteNet)/$($sSiteMask)" -Contains "$DryInput")
                     }
+
                     $GetDryInputParams = @{
-                        Prompt               = "Enter IP in the $sSubnetCidrString network"
-                        Description          = "Enter an ipv4 address in the subnet you've selected, or simply enter 'dhcp'"
-                        FailedMessage        = "You need to enter a proper ip in the correct subnet"
-                        ValidateScript       = $ValidateScript
-                        ValidateScriptParams = @($sSite.ip_subnet,$sSite.subnet_mask)
+                        Prompt             = "Add another resource to plan?"
+                        PromptChoiceString = "'y' ('yes'), 'n' ('no')"
+                        FailedMessage      = "You need to enter 'yes' ('y') or 'no' ('n') or 'q' to quit"
+                        ValidateSet        = @('y','yes','n','no')
                     }
-                    [string]$sResourceIP = Get-DryInput @GetDryInputParams
-                    $sSeclected.IP = $sResourceIP
-                    $sSite | Add-Member -MemberType NoteProperty -Name 'ip_address' -Value $sResourceIP
-                    ol i -obj $sSeclected -msgtitle "Selection" -Fore $SelectionColor
-                    ol i " "
-        
-                    <#
-                        Name: Get the name of the resource
-                    #>
-                    ol i "Enter a resource name" -sh
-                    ol i " "
-                    $iResourcesExample = $Configuration.CoreConfig.resources | Select-Object -Property name,role
-                    $iResourcesStrings = ($($iResourcesExample | Out-String).Split("`r`n")) | Where-Object { $_.Trim() -ne ''}
-                    foreach ($iString in $iResourcesStrings) {
-                        ol i "$iString"
+                    $AddAnotherResource = $true
+                    [string]$AddAnotherResponse = Get-DryInput @GetDryInputParams
+                    if ($AddAnotherResponse -in 'n','no') {
+                        $AddAnotherResource = $false
                     }
-                    ol i " "
-                    $GetDryInputParams = @{
-                        Prompt        = "Enter name of the resource"
-                        Description   = "If you see a list above, they are names and corresponding roles of resources specified in your current environment config. If the list is empty, you probably clickops eveything, don't you? If you do see some names there, they are only listed here to inspire you to make the slightest effort to approximate the current naming convention used in your environment. If no such convention is obvious, well...that's on you."
-                        FailedMessage = "You need to enter a name for your resource"
-                    }
-                    [string]$sResourceName = Get-DryInput @GetDryInputParams
-                    if (!($sResourceName)) {
-                        break
-                    }
-                    $sSeclected.Name = $sResourceName
-                    ol i -obj $sSeclected -msgtitle "Selection" -Fore $SelectionColor
-                    $GetDryInputParams = @{
-                        Prompt        = "Happy, pappy?"
-                        Description   = "Happy with the selection? Select 'yes' ('y') or 'no' ('n')"
-                        FailedMessage = "You need to enter 'yes' ('y') or 'no' ('n') or 'quit'"
-                        ValidateSet   = @('y','yes','n','no') 
-                    }
-                    $sHappyWithSelection = $null
-                    [string]$sHappyWithSelection = Get-DryInput @GetDryInputParams
-                    if ($sHappyWithSelection -in 'y','yes') {
-                        $HappyWithTheSelection = $true
-                    }
-        
                 }
-                while ($HappyWithTheSelection -eq $false)
-                
-                if ($HappyWithTheSelection) {
-                    $This.Resources += [Resource]::New(
-                        $sSeclected.Name,
-                        $sSeclected.Short,
-                        $sSeclected.Role,
-                        $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $sSeclected.Role -Property 'base_config'),
-                        $Configuration.Paths.BaseConfigDirectory,
-                        $(Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $sSeclected.Role -Property 'description'),
-                        $sSite,
-                        $ConfigCombo,
-                        $Configuration,
-                        $null
-                    )
-                }
+                while ($true -eq $AddAnotherResource)
             }
         }
         
