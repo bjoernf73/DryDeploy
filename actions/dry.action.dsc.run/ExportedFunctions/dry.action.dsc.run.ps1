@@ -196,7 +196,7 @@ Function dry.action.dsc.run {
             }  
         }
 
-        ol i "Waiting for Local Configuration Manager (LCM) to finish..." -sh
+        ol i "Waiting for LCM to finish..." -sh
         $LcmInDesiredState = $false
         
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
