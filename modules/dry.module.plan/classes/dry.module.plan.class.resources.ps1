@@ -124,9 +124,9 @@ class Resources {
                         }
 
                         $sSelected.Short = $sShortRoleName
-                        ol i " "
-                        ol i -obj $sSelected -msgtitle "Your Selections" -Fore $SelectionColor
-                        ol i " "
+                        #ol i " "
+                        #ol i -obj $sSelected -msgtitle "Your Selections" -Fore $SelectionColor
+                        #ol i " "
 
                         <#
                             Subnet: Get Available Sites and Subnets, display the list for 
@@ -219,7 +219,7 @@ class Resources {
                             }
                             ol i " "
                         #>
-                        ol i -obj $sSelected -msgtitle "Your Selections" -Fore $SelectionColor
+                        #ol i -obj $sSelected -msgtitle "Your Selections" -Fore $SelectionColor
                         $GetDryInputParams = @{
                             Prompt        = "Enter name of the resource"
                             #Description   = "If you see a list above, they are names and corresponding roles of resources specified in your current environment config. If the list is empty, you probably clickops eveything, don't you? If you do see some names there, they are only listed here to inspire you to make the slightest effort to approximate the current naming convention used in your environment. If no such convention is obvious, well...that's on you."
@@ -231,10 +231,10 @@ class Resources {
                             break
                         }
                         $sSelected.Name = $sResourceName
-                        ol i -obj $sSelected -msgtitle "Your Selections" -Fore $SelectionColor
+                        ol i -obj $sSelected -msgtitle "Your Selection" -Fore $SelectionColor
                         $GetDryInputParams = @{
                             Prompt             = "Submit to plan?"
-                            PromptChoiceString = "'y' ('yes'), 'n' ('no')"
+                            PromptChoiceString = "y(es),  n(o)"
                             #Description        = "Happy with the selection? Select 'yes' ('y') or 'no' ('n')"
                             FailedMessage      = "You need to enter 'yes' ('y') or 'no' ('n') or 'q' to quit"
                             ValidateSet        = @('y','yes','n','no')
@@ -263,9 +263,10 @@ class Resources {
                         )
                     }
 
+                    ol i " "
                     $GetDryInputParams = @{
                         Prompt             = "Add another resource to plan?"
-                        PromptChoiceString = "'y' ('yes'), 'n' ('no')"
+                        PromptChoiceString = "y(es), n(o)"
                         FailedMessage      = "You need to enter 'yes' ('y') or 'no' ('n') or 'q' to quit"
                         ValidateSet        = @('y','yes','n','no')
                     }
