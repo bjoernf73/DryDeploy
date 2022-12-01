@@ -8,7 +8,7 @@ schema: 2.0.0
 # DryDeploy.ps1
 
 ## SYNOPSIS
-DryDeploy is a promicuous deployment orchestrator - swinging among 
+DryDeploy is a promiscuous deployment orchestrator - swinging among 
 available technologies. 
 
 A full autodeploy of an information system may require you to use 
