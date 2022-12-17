@@ -343,16 +343,33 @@ function Show-DryPlan {
                 ol i " "
             }
         }
-        
-        ol i $(Get-DryPlanString -action $Header -LongestActionString $LongestActionString -LongestResourceString $LongestResourceString -LongestRoleString $LongestRoleString)
-        ol i $(Get-DryPlanString -action $Headerline -LongestActionString $LongestActionString -LongestResourceString $LongestResourceString -LongestRoleString $LongestRoleString)
+        $GetDryPlanStringParams = @{
+            Action                = $Header
+            LongestActionString   = $LongestActionString
+            LongestResourceString = $LongestResourceString
+            LongestRoleString     = $LongestRoleString
+        }
+        ol i $(Get-DryPlanString @GetDryPlanStringParams)
+        $GetDryPlanStringParams = @{
+            Action                = $Headerline
+            LongestActionString   = $LongestActionString
+            LongestResourceString = $LongestResourceString
+            LongestRoleString     = $LongestRoleString
+        }
+        ol i $(Get-DryPlanString @GetDryPlanStringParams)
         $ResourceString = ''
         foreach ($Action in $PlanArray) {
             if (
                 ($Action.Resource -ne $ResourceString) -And 
                 ($ResourceString -ne '')
             ) {
-                ol i $(Get-DryPlanString -action $Separatorline -LongestActionString $LongestActionString -LongestResourceString $LongestResourceString -LongestRoleString $LongestRoleString)
+                $GetDryPlanStringParams = @{
+                    Action = $Separatorline
+                    LongestActionString = $LongestActionString
+                    LongestResourceString = $LongestResourceString
+                    LongestRoleString = $LongestRoleString
+                }
+                ol i $(Get-DryPlanString @GetDryPlanStringParams)
             }
             $ResourceString = $Action.Resource
             
@@ -381,8 +398,13 @@ function Show-DryPlan {
             else {
                 $Fore = [System.ConsoleColor]'White'
             }
-            
-            ol i $(Get-DryPlanString -action $Action -LongestActionString $LongestActionString -LongestResourceString $LongestResourceString -LongestRoleString $LongestRoleString) -Fore $Fore
+            $GetDryPlanStringParams = @{
+                Action                = $Action
+                LongestActionString   = $LongestActionString
+                LongestResourceString = $LongestResourceString
+                LongestRoleString     = $LongestRoleString
+            }
+            ol i $(Get-DryPlanString @GetDryPlanStringParams) -Fore $Fore
         }
     }
 
@@ -393,12 +415,31 @@ function Show-DryPlan {
             ol i " "
             ol i "Deselected" -sh -air -Fore 'DarkGray'
             ol i " "
-            ol i $(Get-DryPlanString -action $Header -LongestActionString $LongestActionString -LongestResourceString $LongestResourceString -LongestRoleString $LongestRoleString) -Fore 'DarkGray'
-            ol i $(Get-DryPlanString -action $Headerline -LongestActionString $LongestActionString -LongestResourceString $LongestResourceString -LongestRoleString $LongestRoleString) -Fore 'DarkGray'
+            $GetDryPlanStringParams = @{
+                Action                = $Header
+                LongestActionString   = $LongestActionString
+                LongestResourceString = $LongestResourceString
+                LongestRoleString     = $LongestRoleString
+            }
+            ol i $(Get-DryPlanString @GetDryPlanStringParams) -Fore 'DarkGray'
+            $GetDryPlanStringParams = @{
+                Action                = $Headerline
+                LongestActionString   = $LongestActionString
+                LongestResourceString = $LongestResourceString
+                LongestRoleString     = $LongestRoleString
+            }
+            ol i $(Get-DryPlanString @GetDryPlanStringParams) -Fore 'DarkGray'
             foreach ($Action in $NoPlanArray) {
-                ol i $(Get-DryPlanString -action $Action -LongestActionString $LongestActionString -LongestResourceString $LongestResourceString -LongestRoleString $LongestRoleString) -Fore 'DarkGray'
+                $GetDryPlanStringParams = @{
+                    Action                = $Action
+                    LongestActionString   = $LongestActionString
+                    LongestResourceString = $LongestResourceString
+                    LongestRoleString     = $LongestRoleString
+                }
+                ol i $(Get-DryPlanString @GetDryPlanStringParams) -Fore 'DarkGray'
             }
         }
     }
-    ol i -h "" 
+    ol i -h ""
+    $GetDryPlanStringParams = $null
 }
