@@ -31,7 +31,7 @@ function ConvertTo-DryUtilsDomainFQDN {
         [ValidateScript({
             [RegEx]$rx = "^(dc|DC|Dc|dC)=.*,(dc|DC|Dc|dC)=.*"; 
             $Parts = $_ -Split ',';
-            (($rx.Match($_)).Success -eq $True) -and ($Parts.foreach({
+            (($rx.Match($_)).Success -eq $true) -and ($Parts.foreach({
                     $_ -match "^(dc|DC|Dc|dC)=.*"
                 })
             )

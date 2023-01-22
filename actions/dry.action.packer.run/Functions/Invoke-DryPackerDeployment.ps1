@@ -77,7 +77,7 @@ function Invoke-DryPackerDeployment {
             $TargetFile = $workingDirectory.FullName + '\' + $File.Name
             
             switch ($File.replace) {
-                $True {
+                $true {
                     # Get the contents from file
                     $RawFileContents = Get-Content -Path $SourceFile -Raw -ErrorAction Stop
 

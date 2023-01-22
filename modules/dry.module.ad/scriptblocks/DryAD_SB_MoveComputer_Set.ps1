@@ -51,7 +51,7 @@
         }
         $TargetComputer | 
             Move-ADObject @MoveADObjectParams
-        $True
+        $true
     }
     catch {
         $_

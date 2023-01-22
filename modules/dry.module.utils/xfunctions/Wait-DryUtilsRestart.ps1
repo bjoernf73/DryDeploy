@@ -33,10 +33,10 @@ function Wait-DryUtilsRestart {
 
     throw "This function does not do anything until it is written"
      
-    [bool]$RebootConfirmed = $False
+    [bool]$RebootConfirmed = $false
     $TestResults = @()
     for ($i=0; $i -lt $MinimumTimeOuts; $i++) {
-        $TestResults += $False
+        $TestResults += $false
     }
 
     do {

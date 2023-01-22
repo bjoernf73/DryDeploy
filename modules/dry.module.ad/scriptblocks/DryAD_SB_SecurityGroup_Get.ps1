@@ -30,10 +30,10 @@
             ErrorAction = 'Stop'
         }
         Get-ADGroup @GetADGroupParams | Out-Null
-        $True
+        $true
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-        $False
+        $false
     }
     catch {
         $_

@@ -92,12 +92,12 @@ function New-DryADSecurityGroup {
         $GetResult = Invoke-Command @GetParams
 
         switch ($GetResult) {
-            $True {
+            $true {
                 ol v @("The AD Group exists already", $Name)
                 ol s 'Group exists already'
                 Return
             }
-            $False {
+            $false {
                 ol v @("The Group does not exist, and must be created", $Name)
             }
             default {
@@ -111,7 +111,7 @@ function New-DryADSecurityGroup {
         throw $_
     }
     
-    if ($GetResult -eq $False) {
+    if ($GetResult -eq $false) {
         $SetArgumentList = @($Name, $Path, $Description, $GroupCategory, $Type, $Server)
         $SetParams = @{
             ScriptBlock  = $DryAD_SB_SecurityGroup_Set
@@ -125,7 +125,7 @@ function New-DryADSecurityGroup {
         $SetResult = Invoke-Command @SetParams
         
         switch ($SetResult) {
-            $True {
+            $true {
                 ol s "Group was created"
                 ol v @("AD Group was created", $Name)
             }

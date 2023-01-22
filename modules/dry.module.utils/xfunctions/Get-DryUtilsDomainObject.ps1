@@ -49,10 +49,10 @@ function Get-DryUtilsDomainObject {
     $DCObject = [DomainController]::findone($Context,$SiteObject.Name) 
     if ($NULL -eq $DCObject) {
         $DCObject = [DomainController]::findone($Context)
-        $Object | Add-Member -MemberType NoteProperty -Name "LocalDC" -Value $False
+        $Object | Add-Member -MemberType NoteProperty -Name "LocalDC" -Value $false
     } 
     else {
-        $Object | Add-Member -MemberType NoteProperty -Name "LocalDC" -Value $True
+        $Object | Add-Member -MemberType NoteProperty -Name "LocalDC" -Value $true
     }
     $Object | Add-Member -MemberType NoteProperty -Name  "DomainControllerFQDN" -Value $DCObject.Name
 

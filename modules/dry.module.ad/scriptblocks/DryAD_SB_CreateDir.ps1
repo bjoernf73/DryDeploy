@@ -27,7 +27,7 @@
             New-Item -Path $Directory -ItemType Directory -Force -ErrorAction Stop |
                 Out-Null
         }
-        $True
+        $true
     }
     catch {
         $_

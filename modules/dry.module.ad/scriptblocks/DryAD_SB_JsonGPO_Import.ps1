@@ -39,7 +39,7 @@
         [HashTable]
         $Replacements
     )
-    $Result = @($False, $Null, '')
+    $Result = @($false, $Null, '')
     
     try {
         Import-Module -Name 'dry.ad.gpohelper' -Force -ErrorAction 'Stop' | Out-Null
@@ -52,7 +52,7 @@
     
         if ($GPOExistsAlready -and (-not $Force)) {
             $Result[2] = 'GPO exists already and you didn''t -force (no change)'
-            $Result[0] = $True
+            $Result[0] = $true
         }
         else {
             $ImportGroupPolicyToADParams = @{
@@ -62,12 +62,12 @@
                 DefaultPermissions      = $DefaultPermissions
                 Replacements            = $Replacements
                 PerformBackup           = $Force # If we overwrite, we also perform a backup of the existing GPO
-                RemoveLinks             = $True
-                DoNotLinkGPO            = $True
+                RemoveLinks             = $true
+                DoNotLinkGPO            = $true
             }
             
             Import-GroupPolicyToAD @ImportGroupPolicyToADParams
-            $Result[0] = $True
+            $Result[0] = $true
             
             if ($GPOExistsAlready -and $Force) {
                 $Result[2] = 'An existing GPO was replaced (original renamed)'
@@ -79,7 +79,7 @@
         return $Result
     }
     catch {
-        $Result[0] = $False
+        $Result[0] = $false
         $Result[1] = $_
         $Result[2] = 'The GPO import failed'
         return $Result    

@@ -166,11 +166,11 @@ function Set-DryADGPLink {
                 $GPLink | Add-Member -MemberType NoteProperty -Name 'Version' -Value $Version 
 
                 # Links get enabled by default. Override if explicitly set to disabled in GPLink object
-                # Accept boolean $False as well as 'No'. The GP-cmdlets uses 'Yes' and 'No'
+                # Accept boolean $false as well as 'No'. The GP-cmdlets uses 'Yes' and 'No'
                 $LinkEnabled = 'Yes'
                 if (
                     ($GpLink.LinkEnabled -eq 'No') -or 
-                    ($GpLink.LinkEnabled -eq $False)
+                    ($GpLink.LinkEnabled -eq $false)
                 ) {
                     $LinkEnabled = 'No'
                 }
@@ -179,7 +179,7 @@ function Set-DryADGPLink {
                 $Enforced = 'No'
                 if (
                     ($GpLink.Enforced -eq 'Yes') -or 
-                    ($GpLink.Enforced -eq $True)
+                    ($GpLink.Enforced -eq $true)
                 ) {
                     $Enforced = 'Yes'
                 }
@@ -215,7 +215,7 @@ function Set-DryADGPLink {
                     ol i @('GPO', "$($GPLink.Name)")
                     $SetLinkRet = Invoke-Command @InvokeSetLinkParams
                     
-                    if ($SetLinkRet[0] -eq $True) {
+                    if ($SetLinkRet[0] -eq $true) {
                         ol v "Successfully updated GPlink properties for '$($GPLink.Name)' on $($GPOLinkObject.Path)"
                         ol s "Link updated"
                     }
@@ -266,7 +266,7 @@ function Set-DryADGPLink {
                     }
                     $RemoveLinkRet = Invoke-Command @InvokeRemoveLinkParams 
                     
-                    if ($RemoveLinkRet[0] -eq $True) {
+                    if ($RemoveLinkRet[0] -eq $true) {
                         ol s "Successfully removed link for GPO '$LinkToRemove'"
                     }
                     else {
@@ -298,7 +298,7 @@ function Set-DryADGPLink {
                 }
                 $NewLinkRet = Invoke-Command @InvokeNewLinkParams
                 
-                if ($NewLinkRet[0] -eq $True) {
+                if ($NewLinkRet[0] -eq $true) {
                     ol s 'GPO Linked'
                 }
                 else {

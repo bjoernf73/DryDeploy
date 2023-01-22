@@ -43,7 +43,7 @@
                 #   - 'Server Authentiaction' as part of the Enhanced Key Usage
                 $Cert = Get-ChildItem -Path Cert:\LocalMachine\My -ErrorAction Stop | 
                     Where-Object { 
-                    ($_.HasPrivateKey -eq $True) -and 
+                    ($_.HasPrivateKey -eq $true) -and 
                     ($_.SignatureAlgorithm.FriendlyName -eq 'SHA256RSA') -and
                     (@(($_.EnhancedKeyUsageList).FriendlyName) -contains 'Server Authentication')  
                     }
@@ -55,7 +55,7 @@
                 
                 if ($Cert) {
                     $EncryptedByteArray = [Convert]::FromBase64String($EncryptedBase64String)
-                    $ClearText = [System.Text.Encoding]::UTF8.GetString($Cert.PrivateKey.Decrypt($EncryptedByteArray, $True))
+                    $ClearText = [System.Text.Encoding]::UTF8.GetString($Cert.PrivateKey.Decrypt($EncryptedByteArray, $true))
                 }
                 else {
                     throw "Server Authentication Certificate with Private Key not found!"
@@ -91,9 +91,9 @@
         $UserSpec += @{'AccountPassword' = $SecureStringPassword }
 
         New-ADUser @UserSpec -Server $Server -ErrorAction Stop
-        $True, ''
+        $true, ''
     }
     catch {
-        $False, "$($_.ToString())"
+        $false, "$($_.ToString())"
     }
 }

@@ -28,7 +28,7 @@
         $DomainController
     ) 
     
-    $Status = $False
+    $Status = $false
     $ErrorString = ''
     try {
         $SetLinkParams = @{
@@ -41,7 +41,7 @@
             Server      = $DomainController
         }
         Set-GPLink @SetLinkParams | Out-Null
-        $Status = $True
+        $Status = $true
         return @($Status, $ErrorString)
     }
     catch {

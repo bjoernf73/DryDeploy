@@ -74,7 +74,7 @@ function Copy-DryADFilesToRemoteTarget {
 
             $Result = Invoke-Command @InvokeCommandParams
             switch ($Result) {
-                $True {
+                $true {
                     ol v @('Successfully created directory', $TargetDirectory)
                 }
                 { $Result -is [ErrorRecord] } {
@@ -90,9 +90,9 @@ function Copy-DryADFilesToRemoteTarget {
         $CopyItemParams = @{
             Path        = $SourcePath
             Destination = $TargetPath
-            Recurse     = $True
-            Container   = $True
-            Force       = $True
+            Recurse     = $true
+            Container   = $true
+            Force       = $true
             ErrorAction = 'Stop'
         }
         if ($PSSession) {

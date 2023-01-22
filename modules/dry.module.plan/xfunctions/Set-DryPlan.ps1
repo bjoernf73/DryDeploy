@@ -30,5 +30,5 @@ function Set-DryPlan {
         [Parameter(Mandatory)]
         [Plan]   $Plan
     )
-    $Plan.Save($PlanFile,$False)
+    $Plan.Save($PlanFile,$false)
 }

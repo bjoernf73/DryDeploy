@@ -35,10 +35,10 @@
             ErrorAction = 'Stop'
         }
         if (Get-ADObject @GetADObjectParams ) {
-            $True
+            $true
         } 
         else {
-            $False
+            $false
         }
     }
     catch {

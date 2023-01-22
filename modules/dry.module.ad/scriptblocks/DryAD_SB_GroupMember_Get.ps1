@@ -31,10 +31,10 @@
             ErrorAction = 'Stop'
         }
         if ((Get-ADGroupMember @GetADGroupMemberParams | Select-Object -Property Name).Name -Contains $Member) {
-            $True
+            $true
         } 
         else {
-            $False
+            $false
         }
     }
     catch {

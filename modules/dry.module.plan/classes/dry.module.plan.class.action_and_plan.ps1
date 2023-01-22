@@ -31,7 +31,7 @@ class DryAction {
         [Resources]                  $Resources,
         [Plan]                       $Plan) 
     {
-        $This.ResolvedActionOrder  = $False
+        $This.ResolvedActionOrder  = $false
         $This.Action               = $ActionObject.Action
         $This.Description          = $ActionObject.Description
         $This.Role                 = $Resource.Role
@@ -42,8 +42,8 @@ class DryAction {
         $This.ResourceName         = $Resource.Name
         $This.Resource             = $Resource 
         $This.Status               = 'Todo'
-        $This.PlanSelected         = $False
-        $This.ApplySelected        = $False
+        $This.PlanSelected         = $false
+        $This.ApplySelected        = $false
         if ($ActionObject.Credentials) {
             $This.Credentials      = $ActionObject.Credentials
         }
@@ -122,7 +122,7 @@ class DryAction {
         [String]                     $Dependency_Guid,
         [String]                     $Action_Guid) {
 
-        $This.ResolvedActionOrder  = $False
+        $This.ResolvedActionOrder  = $false
         $This.Action               = $ActionObject.Action
         $This.Description          = $ActionObject.Description
         $This.Role                 = $Resource.Role
@@ -133,8 +133,8 @@ class DryAction {
         $This.ResourceName         = $Resource.Name
         $This.Resource             = $Resource
         $This.Status               = 'Todo'
-        $This.PlanSelected         = $False
-        $This.ApplySelected        = $False
+        $This.PlanSelected         = $false
+        $This.ApplySelected        = $false
         $This.Dependency_Guid      = $Dependency_Guid
         $This.Dependency_Guids     = $Null
 
@@ -169,7 +169,7 @@ class DryAction {
         [PSCustomObject]             $ActionObject,
         [String]                     $ActionGuid) {
 
-        $This.ResolvedActionOrder  = $False
+        $This.ResolvedActionOrder  = $false
         $This.Action               = $ActionObject.Action
         $This.Description          = $ActionObject.Description
         $This.Role                 = $ActionObject.Role
@@ -180,8 +180,8 @@ class DryAction {
         $This.ResourceName         = $ActionObject.ResourceName
         $This.Resource             = $ActionObject.Resource
         $This.Status               = 'Todo'
-        $This.PlanSelected         = $False
-        $This.ApplySelected        = $False
+        $This.PlanSelected         = $false
+        $This.ApplySelected        = $false
         $This.Dependency_Guid      = $Null
         $This.Dependency_Guids     = $Null
         if ($ActionObject.Credentials) {
@@ -221,7 +221,7 @@ class DryAction {
         $This.Resource             = $ActionObject.Resource
         $This.Status               = $ActionObject.Status
         $This.PlanSelected         = $ActionObject.PlanSelected
-        $This.ApplySelected        = $False # <-- Re-evaluated at every run
+        $This.ApplySelected        = $false # <-- Re-evaluated at every run
         
         # Properties from data
         $This.Action               = $ActionObject.Action
@@ -271,7 +271,7 @@ class Plan {
                     throw "Unable to find action order $ActionOrderCount on resource $($CurrentResource.Name)"
                 }
 
-                $ResolveUnresolvedActions = $False
+                $ResolveUnresolvedActions = $false
 
                 # Create the action object
                 $Action = [DryAction]::New(
@@ -298,7 +298,7 @@ class Plan {
                     }
                     # Since one or more Action were added to the Plan, Chained actions
                     # in the UnresolvedActionsList may now resolve
-                    $ResolveUnresolvedActions = $True
+                    $ResolveUnresolvedActions = $true
                 }
                 elseif ($Action.Chained_Guid) {
                     $This.UnresolvedActionsList += $Action
@@ -307,7 +307,7 @@ class Plan {
                     $This.Actions += $Action
                     # Since an Action was added to the Plan, Chained actions
                     # in the UnresolvedActionsList may now resolve
-                    $ResolveUnresolvedActions = $True
+                    $ResolveUnresolvedActions = $true
                 }
 
                 if (($ResolveUnresolvedActions -eq $true) -and ($This.UnresolvedActionsList.Count -gt 0)) {
@@ -378,7 +378,7 @@ class Plan {
             $ActionCount++
             $_.ActionOrder = $ActionCount
         })
-        $This.UnresolvedActions = $False
+        $This.UnresolvedActions = $false
     }
 
     [Void] ResolvePlanOrder($PlanFile) {
@@ -615,13 +615,13 @@ class Plan {
             
             :ActionLoop for ($Count = 1; $Count -lt 9999; $Count++) {
                 $ActionGuidMatch = $DependentActionOrderPart + ('{0:d4}' -f $Count)
-                $MatchFound = $False
+                $MatchFound = $false
                 $This.Actions.foreach({
                     if ($_.Action_Guid -Match "^$ActionGuidMatch") {
-                        $MatchFound = $True
+                        $MatchFound = $true
                     }
                 })
-                if ($MatchFound -eq $False) {
+                if ($MatchFound -eq $false) {
                     $ActionOrderPart = $ActionGuidMatch
                     Break ActionLoop
                 }

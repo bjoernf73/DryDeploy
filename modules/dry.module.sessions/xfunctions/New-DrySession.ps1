@@ -43,7 +43,7 @@ function New-DrySession {
     )
 
     try {
-        $Established = $False
+        $Established = $false
         $CredCounter = 0
         <#
             .SYNOPSIS
@@ -82,7 +82,7 @@ function New-DrySession {
 
         # Optionals
         if ($SessionConfig) {
-            if ($SessionConfig.usessl -eq $True) {
+            if ($SessionConfig.usessl -eq $true) {
                 
                 switch ($SessionType) {
                     'PSSession' {
@@ -95,7 +95,7 @@ function New-DrySession {
                             ol v "Configuring Sessiontype","$SessionType to $ComputerName over SSL/HTTPS"
                             $SessionTypeOption = "https"
                             $SessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck
-                            $DrySessionParams += @{ 'UseSSL'=$True }
+                            $DrySessionParams += @{ 'UseSSL'=$true }
                             $DrySessionParams += @{ 'SessionOption'=$SessionOption }
                         }
                     }
@@ -126,7 +126,7 @@ function New-DrySession {
                     try {   
                         $Session = New-PSSession @DrySessionParams -ErrorAction 'Stop'
                         if ($Session.Availability -eq "Available") {
-                            $Established = $True
+                            $Established = $true
                         } 
                         else { 
                             if ($RetryCount -ge $MaxRetries) {
@@ -159,7 +159,7 @@ function New-DrySession {
                     
                     try {
                         $Session = New-CIMSession @DrySessionParams -ErrorAction 'Stop'
-                        $Established = $True
+                        $Established = $true
                     }
                     catch {
                         if ($RetryCount -ge $MaxRetries) {
@@ -175,7 +175,7 @@ function New-DrySession {
             }
         }
 
-        if ($Established -eq $True) {
+        if ($Established -eq $true) {
             ol i "$SessionType","ESTABLISHED"
             $Session
         }

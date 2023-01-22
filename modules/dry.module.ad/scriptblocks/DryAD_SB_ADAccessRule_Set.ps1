@@ -64,7 +64,7 @@
     )
     try {
         $ReturnError = $Null
-        $ReturnValue = $False
+        $ReturnValue = $false
         $DebugReturnStrings = @("Entered Scriptblock")
         $DebugReturnStrings += @("'Path'                               = '$Path'")
         $DebugReturnStrings += @("'TargetName'                         = '$TargetName'")
@@ -293,7 +293,7 @@
         }
 
         # If we reached this, assume success
-        $ReturnValue = $True
+        $ReturnValue = $true
         return @($DebugReturnStrings, $ReturnValue, $ReturnError)
     }
     catch {

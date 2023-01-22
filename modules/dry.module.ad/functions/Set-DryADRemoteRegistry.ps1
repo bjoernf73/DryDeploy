@@ -85,7 +85,7 @@ function Set-DryADRemoteRegistry {
                         [Uint32] $ValueData
                     )
 
-                    $Result = @($False, $Null)
+                    $Result = @($false, $Null)
                     try {     
                         $InvokeCimMethodParams = @{
                             'Namespace'   = 'root\cimv2' 
@@ -95,7 +95,7 @@ function Set-DryADRemoteRegistry {
                             'ErrorAction' = 'Stop'
                         }
                         Invoke-CimMethod @InvokeCimMethodParams | Out-Null
-                        $Result[0] = $True
+                        $Result[0] = $true
                     } 
                     catch {
                         $Result[1] = $_
@@ -139,10 +139,10 @@ function Set-DryADRemoteRegistry {
         }
 
         switch ($Result[0]) {
-            $True {
+            $true {
                 ol v "Successfully configured remote registry"
             }
-            $False {
+            $false {
                 ol e "Failed to configure remote registry"
                 throw $Result[1]
             }

@@ -71,11 +71,11 @@ function New-DryADWmiFilter {
         $GetResult = Invoke-Command @InvokeGetParams
 
         switch ($GetResult) {
-            $True {
+            $true {
                 ol s 'WMI Filter exists already'
                 ol v "The WMIFilter '$Name' exists already"
             }
-            $False {
+            $false {
                 ol v "The WMIFilter '$Name' does not exist, must be created"
             }
             default {
@@ -88,7 +88,7 @@ function New-DryADWmiFilter {
         $PSCmdlet.ThrowTerminatingError($_)
     }  
 
-    if ($GetResult -eq $False) {
+    if ($GetResult -eq $false) {
         try {
             $SetArgumentList = @($Name, $Description, $Query, $Server)
             $InvokeSetParams = @{
@@ -103,7 +103,7 @@ function New-DryADWmiFilter {
             }
             $SetResult = Invoke-Command @InvokeSetParams
             switch ($SetResult) {
-                $True {
+                $true {
                     ol s "WMIFilter was created"
                     ol v "WMIFilter '$Name' was created"
                 }

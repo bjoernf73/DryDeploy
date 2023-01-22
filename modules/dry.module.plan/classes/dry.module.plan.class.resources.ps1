@@ -349,11 +349,11 @@ class Resources {
         }
         elseif ( $FirstActionGuid -eq $ActionGuid ) {
             Remove-Variable -Name FirstActionGuid -ErrorAction Ignore
-            return $True
+            return $true
         }
         else {
             Remove-Variable -Name FirstActionGuid -ErrorAction Ignore
-            return $False
+            return $false
         }
     }
 

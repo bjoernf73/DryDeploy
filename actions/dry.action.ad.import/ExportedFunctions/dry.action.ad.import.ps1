@@ -129,7 +129,7 @@ function dry.action.ad.import {
     finally {
         @('ActiveDirectory','GroupPolicy','GPOManagement','RegistryPolicyParser','dry.module.ad'
         ).foreach({
-            Remove-Module -Name $_ -ErrorAction 'Ignore' -Verbose:$False |
+            Remove-Module -Name $_ -ErrorAction 'Ignore' -Verbose:$false |
             Out-Null
         })
 

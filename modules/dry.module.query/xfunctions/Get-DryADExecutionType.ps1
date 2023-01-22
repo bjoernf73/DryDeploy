@@ -39,30 +39,30 @@ function Get-DryAdExecutionType {
     )
     
     $LocalPrereqs = @{
-        DomainComputer               = $False
-        DomainComputerInTargetDomain = $False
-        ADModuleInstalled            = $False
-        GPOModuleInstalled           = $False
+        DomainComputer               = $false
+        DomainComputerInTargetDomain = $false
+        ADModuleInstalled            = $false
+        GPOModuleInstalled           = $false
     }
     
     try {
         # Test: If executing system is in a domain and that domain is our target
         if ((Get-WmiObject -Class Win32_ComputerSystem -ErrorAction SilentlyContinue).PartOfDomain) {
-            $LocalPrereqs['DomainComputer'] = $True
+            $LocalPrereqs['DomainComputer'] = $true
         }
 
         # Test: If executing system is in target domain
         if ((Get-WmiObject -Class Win32_ComputerSystem -ErrorAction SilentlyContinue).Domain -eq $Configuration.CoreConfig.network.domain.domain_fqdn) {
-            $LocalPrereqs['DomainComputerInTargetDomain'] = $True
+            $LocalPrereqs['DomainComputerInTargetDomain'] = $true
         }
 
         # Test: If the ActiveDirectory module is installed
         if (Get-Module -ListAvailable -Name 'ActiveDirectory') {
-            $LocalPrereqs['ADModuleInstalled'] = $True
+            $LocalPrereqs['ADModuleInstalled'] = $true
         }
         # Test: If the GroupPolicy module is installed
         if (Get-Module -ListAvailable -Name 'GroupPolicy') {
-            $LocalPrereqs['GPOModuleInstalled'] = $True
+            $LocalPrereqs['GPOModuleInstalled'] = $true
         }
 
         ol v "Local/Remote Execution prerequisites hash below..."
@@ -71,7 +71,7 @@ function Get-DryAdExecutionType {
         # Loop through all
         $ExecutionType = 'Local'
         $LocalPrereqs.Keys | foreach-Object {
-            if ($LocalPrereqs["$_"] -eq $False) {
+            if ($LocalPrereqs["$_"] -eq $false) {
                 $ExecutionType = 'Remote'
             }
         }

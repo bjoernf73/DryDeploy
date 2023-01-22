@@ -96,26 +96,26 @@ function Get-DryADConnectionPoint {
 
             $SessionConfig = $Configuration.CoreConfig.connections | Where-Object { $_.type -eq 'winrm'}
 
-            [Bool]$ConnectionPointVerified = $False
+            [Bool]$ConnectionPointVerified = $false
             $PRIVATE:count = 0
             do {
                 try {
                     if ($NoValidate) {
-                        $ConnectionPointVerified = $True
+                        $ConnectionPointVerified = $true
                         $ADConnectionPoint = $ADConnectionPoints[$PRIVATE:count]
                     }
                     else {
                         if ($ExecutionType -eq 'Remote') {
                             # test remoting
                             if (Test-DryWinrm -ComputerName $ADConnectionPoints[$PRIVATE:count] -Credential $Credential -SessionConfig $SessionConfig) {
-                                $ConnectionPointVerified = $True
+                                $ConnectionPointVerified = $true
                                 $ADConnectionPoint = $ADConnectionPoints[$PRIVATE:count]
                             }
                         }
                         else {
                             # don't test remoting
                             if (Test-Connection -ComputerName $ADConnectionPoints[$PRIVATE:count] -Count 2 -ErrorAction Ignore ) {
-                                $ConnectionPointVerified = $True
+                                $ConnectionPointVerified = $true
                                 $ADConnectionPoint = $ADConnectionPoints[$PRIVATE:count]
                             }
                         }
@@ -129,7 +129,7 @@ function Get-DryADConnectionPoint {
                 }
             }
             while (
-                ($ConnectionPointVerified -eq $False) -and 
+                ($ConnectionPointVerified -eq $false) -and 
                 ($PRIVATE:count -lt $ADConnectionPoints.count)
             )
         }

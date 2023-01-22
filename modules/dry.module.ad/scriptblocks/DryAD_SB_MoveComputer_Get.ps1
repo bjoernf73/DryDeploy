@@ -44,10 +44,10 @@
             Identity = $ComputerName
         }
         if ((Get-ADComputer @GetADComputerParams | Select-Object -Property distinguishedName).distinguishedName -eq "$TargetComputerDN") {
-            $True
+            $true
         } 
         else {
-            $False
+            $false
         }
     }
     catch {

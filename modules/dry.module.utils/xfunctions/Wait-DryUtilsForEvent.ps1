@@ -47,10 +47,10 @@ function Wait-DryUtilsForEvent {
     # Preprocess Filter properties
     foreach ($Filter in $Filters) {
 
-        # If 'AfterBoot' is $True, I will create a datetime object of the last boot time, and use
+        # If 'AfterBoot' is $true, I will create a datetime object of the last boot time, and use
         # that as the After-parameter. If in addition 'SecondsAfter' is specified, I will subtract
         # that number of seconds from the boot time. 
-        if (($Filter.ContainsKey('AfterBoot')) -and ($Filter['AfterBoot'] -eq $True)) {
+        if (($Filter.ContainsKey('AfterBoot')) -and ($Filter['AfterBoot'] -eq $true)) {
             
             $LastBootTime = Get-DryUtilsLastBootTime -Session $Session
             
@@ -67,10 +67,10 @@ function Wait-DryUtilsForEvent {
                 $Filter.Remove('SecondsBefore')
             }
         }
-        # If 'BeforeBoot' is $True, I will create a datetime object of the last boot time, and use
+        # If 'BeforeBoot' is $true, I will create a datetime object of the last boot time, and use
         # that as the Before-parameter. If in addition 'SecondsBefore' is specified, I will subtract
         # that number of seconds from the boot time. 
-        elseif (($Filter.ContainsKey('BeforeBoot')) -and ($Filter['BeforeBoot'] -eq $True)) {
+        elseif (($Filter.ContainsKey('BeforeBoot')) -and ($Filter['BeforeBoot'] -eq $true)) {
             # Get time of last boot
             $LastBootTime = Get-DryUtilsLastBootTime -Session $Session
             
@@ -113,7 +113,7 @@ function Wait-DryUtilsForEvent {
             }
         }
         # Add the Found bool to the filter
-        $Filter['Found'] = $False
+        $Filter['Found'] = $false
     }
 
     # Remove the session used so far. Create a new session at each try to avoid broken sessions
@@ -157,7 +157,7 @@ function Wait-DryUtilsForEvent {
             }   
             Write-Progress @WriteProgressParameters    
             
-            foreach ($Filter in ($Filters | Where-Object {$_['Found'] -eq $False})) {
+            foreach ($Filter in ($Filters | Where-Object {$_['Found'] -eq $false})) {
                 $Session | Remove-PSSession -ErrorAction Ignore
                 $Session = New-DrySession @SessionParameters
                 $Found = Invoke-Command -Session $Session -ScriptBlock {
@@ -192,20 +192,20 @@ function Wait-DryUtilsForEvent {
                         }
                         
                         if ($Events.count -ge 1) {
-                            $True
+                            $true
                         } 
                         else {
-                            $False
+                            $false
                         }
                     }
                     catch {
-                        $False
+                        $false
                     }
                 } -ArgumentList $Filter
     
                 if ($Found) {
                     $FoundCount++
-                    $Filter['Found'] = $True
+                    $Filter['Found'] = $true
                     ol i "Found verification Event with the following properties:"
                     @('LogName','EventID','Source','EntryType','Message','After','Before') | 
                     foreach-Object {

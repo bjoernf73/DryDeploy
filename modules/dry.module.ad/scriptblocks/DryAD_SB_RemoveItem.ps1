@@ -29,7 +29,7 @@
         $ErrorAction = 'Stop'
     )
     try {
-        Remove-Item -Path $Path -Confirm:$False -ErrorAction $ErrorAction
+        Remove-Item -Path $Path -Confirm:$false -ErrorAction $ErrorAction
     }
     catch {
         $_

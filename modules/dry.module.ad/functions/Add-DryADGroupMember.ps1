@@ -71,12 +71,12 @@ function Add-DryADGroupMember {
         $GetResult = Invoke-Command @GetParams
 
         switch ($GetResult) {
-            $True {
+            $true {
                 ol v @("$Member is already member of", "$Group")
                 ol s "Already member"
                 return
             }
-            $False {
+            $false {
                 ol v @("$Member will be added to", "$Group")
             }
             { $GetResult -is [System.Management.Automation.ErrorRecord] } {
@@ -105,7 +105,7 @@ function Add-DryADGroupMember {
         $SetResult = Invoke-Command @SetParams 
 
         switch ($SetResult) {
-            $True {
+            $true {
                 ol s "Member added to Group"
                 ol v @("$Member was added to Group", $Group)
             }

@@ -40,10 +40,10 @@
         $Force
     )    
     try {
-        $Status = $False
-        $DoImport = $False
+        $Status = $false
+        $DoImport = $false
         
-        [Bool]$GPOExists = $False  # only true if so proven during the calling of ImportGPO()
+        [Bool]$GPOExists = $false  # only true if so proven during the calling of ImportGPO()
         [Array]$RemoteMessages = @("Importing Backup-GPO '$BackupName' as target '$TargetName'")
 
         function Get-RandomHex {
@@ -94,48 +94,48 @@
 
         try {
             Get-GPO -Name $TargetName -Server $Server -ErrorAction Stop | Out-Null
-            $GPOExists = $True
+            $GPOExists = $true
             $RemoteMessages += "Target Backup-GPO '$TargetName' exists already"
             if ($Force) {
                 $RenamedGPO = "$($TargetName)-OLD-$((Get-Date -Format s).Replace(':','-'))" 
                 $GPO = Get-GPO -Name $TargetName -Server $Server -ErrorAction 'Stop'
                 Rename-GPO -Guid $GPO.ID -TargetName $RenamedGPO  -Server $Server -ErrorAction 'Stop' | Out-Null
-                # Set this to $False so it will be imported later
-                $GPOExists = $False
-                $DoImport = $True
+                # Set this to $false so it will be imported later
+                $GPOExists = $false
+                $DoImport = $true
             } 
             else {
                 $RemoteMessages += "-Force not passed, so I will do nothing"
-                $Status = $True
-                $DoImport = $False
+                $Status = $true
+                $DoImport = $false
             }
             
         } 
         catch { 
             if ("$($_.ToString())" -match "GPO was not found") {
-                $GPOExists = $False
-                $DoImport = $True
+                $GPOExists = $false
+                $DoImport = $true
                 $RemoteMessages += "Target Backup-GPO '$TargetName' does not exist - importing it."
             } 
             else {
                 $RemoteMessages += "Unexpected error running Get-GPO -Name '$TargetName' "
                 $RemoteMessages += "Error: $($_.ToString()) "
-                $DoImport = $False
+                $DoImport = $false
                 # Some other error record - throw a terminating error
-                $Status = $False
+                $Status = $false
                 # $PSCmdlet.ThrowTerminatingError($_)
             } 
         } 
 
         if (
-            ($GPOExists -eq $False) -and 
-            ($DoImport -eq $True)
+            ($GPOExists -eq $false) -and 
+            ($DoImport -eq $true)
         ) { 
             $ImportGPOParams = @{          
                 BackupGpoName  = $BackupName
                 TargetName     = $TargetName
                 Server         = $Server
-                CreateIfNeeded = $True
+                CreateIfNeeded = $true
                 Path           = $Path
                 ErrorAction    = 'Stop'
             }
@@ -162,7 +162,7 @@
                    
             try {
                 Import-GPO @ImportGPOParams | Out-Null
-                $Status = $True
+                $Status = $true
                 $RemoteMessages += "Success importing GPO '$TargetName'"
             } 
             catch {
@@ -176,7 +176,7 @@
                     ErrorAction = 'Ignore'
                 }
                 $RemoveGPOParams = @{
-                    Confirm     = $False
+                    Confirm     = $false
                     ErrorAction = 'Ignore'
                 }
                 Get-GPO @GetGPOParams | Remove-GPO @RemoveGPOParams | Out-Null
@@ -184,7 +184,7 @@
             }
             finally {
                 if ($TempMigTable) {
-                    Remove-Item -Path $TempMigTable -Confirm:$False -Force -ErrorAction Ignore | Out-Null
+                    Remove-Item -Path $TempMigTable -Confirm:$false -Force -ErrorAction Ignore | Out-Null
                 }
             }
         }

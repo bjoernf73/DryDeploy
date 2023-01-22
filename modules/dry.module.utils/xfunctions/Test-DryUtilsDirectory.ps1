@@ -79,22 +79,22 @@ function Test-DryUtilsDirectory {
     )
     
     try {
-        $Validated = $False
+        $Validated = $false
         
         if ($EmptyOrNotExist) {
             # Will pass if the directory does not exist, or if it exists and is empty
             if (-not (Test-Path -Path $Path -ErrorAction Ignore)) {
-                $Validated = $True
+                $Validated = $true
             }
             elseif (
                 (Test-Path -Path $Path -ErrorAction Ignore) -and
-                ((Get-Item -Path $Path).PSisContainer -eq $True) -and
+                ((Get-Item -Path $Path).PSisContainer -eq $true) -and
                 ($Null -eq (Get-ChildItem -Path $Path ))
             ) {
-                $Validated = $True
+                $Validated = $true
             }
 
-            if ($Validated -eq $False) {
+            if ($Validated -eq $false) {
                 throw "Could not validate test on '$Path'"
             }
         }
@@ -102,10 +102,10 @@ function Test-DryUtilsDirectory {
         if ($NotExist) {
             # Will pass if the directory does not exist
             if (-not (Test-Path -Path $Path -ErrorAction Ignore)) {
-                $Validated = $True
+                $Validated = $true
             }
 
-            if ($Validated -eq $False) {
+            if ($Validated -eq $false) {
                 throw "Could not validate test on '$Path'"
             }
         }
@@ -114,12 +114,12 @@ function Test-DryUtilsDirectory {
             # Will pass if the directory exists
             if (
                 (Test-Path -Path $Path -ErrorAction Ignore) -and 
-                ((Get-Item -Path $Path).PSisContainer -eq $True)
+                ((Get-Item -Path $Path).PSisContainer -eq $true)
             ) {
-                $Validated = $True
+                $Validated = $true
             }
 
-            if ($Validated -eq $False) {
+            if ($Validated -eq $false) {
                 throw "Could not validate test on '$Path'"
             }
         }

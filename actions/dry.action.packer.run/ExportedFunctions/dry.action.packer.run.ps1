@@ -57,7 +57,7 @@ function dry.action.packer.run {
             $SourceFile = Join-Path -Path $ConfigSourcePath -ChildPath $File.Name
             $TargetFile = Join-Path -Path $ConfigTargetPath -ChildPath $File.Name
             switch ($File.replace) {
-                $True {
+                $true {
                     $RawFileContents = Get-Content -Path $SourceFile -Raw -ErrorAction Stop
                     # Replace all replacement patterns, i.e. '###some_pattern###'
                     $ReplacedFileContents = Resolve-DryReplacementPatterns -InputText $RawFileContents -Variables $Resolved.vars

@@ -62,7 +62,7 @@
             ErrorAction     = 'Stop'
         }
         New-ADObject @NewADObjectParams
-        $True
+        $true
     }
     catch {
         $_

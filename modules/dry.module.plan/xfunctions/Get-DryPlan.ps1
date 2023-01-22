@@ -81,9 +81,9 @@ function Get-DryPlan {
         current Plan (i.e. when you -Plan). At each -Apply, the ApplySelected is reevaluated. 
     #>
     $Plan.Actions.foreach({
-        if ($_.PlanSelected -eq $True) {
+        if ($_.PlanSelected -eq $true) {
             if ($PlanFilter.InFilter($_.ResourceName,$_.Role,$_.Action,$_.Phase,$_.ActionOrder)) {
-                $_.ApplySelected = $True
+                $_.ApplySelected = $true
                 if ($ShowStatus) {  # If the Action was previously 'Retrying', change to 'Failed' if $ShowStatus
                     if ($_.Status -eq 'Retrying') {
                         $_.Status = 'Failed'
@@ -91,7 +91,7 @@ function Get-DryPlan {
                 }
             }
             else {
-                $_.ApplySelected = $False
+                $_.ApplySelected = $false
             }
             if ($_.Status -eq 'Success') {  # However, if the Action has a status of 'Success', deselect
                 $_.ApplySelected = $false
@@ -104,7 +104,7 @@ function Get-DryPlan {
     $Plan.ResolveApplyOrder($PlanFile) # Set the ApplyOrder based on PlanSelected
     $Plan.ActiveActions = 0            # Set ApplyOrder and number of active actions
     $Plan.Actions.foreach({
-        if ($_.ApplySelected -eq $True) {
+        if ($_.ApplySelected -eq $true) {
             $Plan.ActiveActions++
         }
     })

@@ -26,9 +26,9 @@
         if (Test-Path -Path $Path -ErrorAction Ignore) {
             $RemoveItemParams = @{
                 Path        = "$Path*" 
-                Recurse     = $True
-                Force       = $True
-                Confirm     = $False 
+                Recurse     = $true
+                Force       = $true
+                Confirm     = $false 
                 ErrorAction = 'Stop'
             }
             Remove-Item @RemoveItemParams
@@ -36,11 +36,11 @@
         $NewItemParams = @{
             Path        = $Path 
             ItemType    = 'Directory' 
-            Force       = $True
+            Force       = $true
             ErrorAction = 'Stop'
         }
         New-Item @NewItemParams | Out-Null
-        $True
+        $true
     }
     catch {
         $_

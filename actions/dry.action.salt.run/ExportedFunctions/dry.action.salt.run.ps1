@@ -13,7 +13,7 @@ function dry.action.salt.run {
         [Parameter(Mandatory,HelpMessage="ResourceVariables contains resolved variable values from the configurations common_variables and resource_variables combined")]
         [System.Collections.Generic.List[PSObject]]$ResourceVariables,
 
-        [Parameter(Mandatory=$False,HelpMessage="Hash directly from the command line to be added as parameters to the function that iniates the action")]
+        [Parameter(Mandatory=$false,HelpMessage="Hash directly from the command line to be added as parameters to the function that iniates the action")]
         [HashTable]$ActionParams
     )
     try {
@@ -416,9 +416,9 @@ function dry.action.salt.run {
             AllNodes = @(
                 @{
                     NodeName                    = $DscTarget
-                    PSDscAllowPlainTextPassword = $True
-                    PSDscAllowDomainUser        = $True
-                    RebootNodeIfNeeded          = $True
+                    PSDscAllowPlainTextPassword = $true
+                    PSDscAllowDomainUser        = $true
+                    RebootNodeIfNeeded          = $true
                     ActionAfterReboot           = 'ContinueConfiguration'            
                     ConfigurationMode           = 'ApplyOnly'
                 }
@@ -510,7 +510,7 @@ function dry.action.salt.run {
         $WinRMStatus = Wait-DryWinRM @WaitWinRMInterfaceParams
         
         switch ($WinRMStatus) {
-            $False {
+            $false {
                 throw "Failed to Connect to DSC Target: $($DSCTarget))"
             }
             default {

@@ -74,11 +74,11 @@ function Move-DryADComputer {
         $GetResult = Invoke-Command @InvokeGetParams 
 
         switch ($GetResult) {
-            $True {
+            $true {
                 ol s "Computer  is already in correct OU"
                 ol v "'$ComputerName' is already in OU '$TargetOU'"
             }
-            $False {
+            $false {
                 ol v "'$ComputerName' is not in OU '$TargetOU' - trying to move it"
             }
             { $GetResult -is [System.Management.Automation.ErrorRecord] } {
@@ -96,7 +96,7 @@ function Move-DryADComputer {
     if ($Test) {
         return $GetResult
     }
-    elseif ($GetResult -eq $False) {
+    elseif ($GetResult -eq $false) {
         try {     
             
             $SetArgumentList = @($ComputerName, $TargetOU, $Server)
@@ -112,7 +112,7 @@ function Move-DryADComputer {
             $SetResult = Invoke-Command @InvokeSetParams
 
             switch ($SetResult) {
-                $True {
+                $true {
                     ol s "Computer object was moved"
                     ol v "'$ComputerName' was moved into OU '$TargetOU'"
                 }

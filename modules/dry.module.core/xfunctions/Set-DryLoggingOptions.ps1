@@ -129,7 +129,7 @@ function Set-DryLoggingOptions {
         Set-Variable -Name LoggingOptions -Value $LoggingOptions -Scope GLOBAL
 
         # Make path to logfile global, archive existing log and create new log file
-        if (($LoggingOptions.path) -and ($LoggingOptions.log_to_file -eq $True)) {
+        if (($LoggingOptions.path) -and ($LoggingOptions.log_to_file -eq $true)) {
             if (Test-Path -Path $LoggingOptions.path -ErrorAction SilentlyContinue) {
                 Save-DryArchiveFile -ArchiveFile $LoggingOptions.path -ArchiveFolder $ArchiveDirectory     
             }

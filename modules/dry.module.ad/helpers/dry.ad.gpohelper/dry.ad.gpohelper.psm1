@@ -64,13 +64,13 @@ class GroupPolicy : BaseSettings {
     ) {
         $Utils = [Utils]::new()
         $properties = @("gPCFileSysPath","versionNumber")
-        $Retry = $True
+        $Retry = $true
         $Count = 0
         $gpContainer = $null
         do {
             $gpContainer = Get-ADObject -LDAPFilter "(&(CN={$id})(objectclass=groupPolicyContainer))" -properties $properties -Server $DomainController
             if ($gpContainer) {
-                $Retry = $False
+                $Retry = $false
             } else {
                 Start-Sleep -seconds 1
                 $count++
@@ -1148,9 +1148,9 @@ class Utils : BaseSettings {
                 }
                 
                 if ($Value -eq "true") {
-                    $Value = $True
+                    $Value = $true
                 } elseif ($Value -eq "false") {
-                    $Value = $False
+                    $Value = $false
                 }
                 
                 $ini[$Section][$NameValue] = $Value
@@ -1833,10 +1833,10 @@ function Test-GroupPolicyExistenceInAD {
     try {
         Get-GPO -Name $Name -Server $DomainController -ErrorAction 'Stop' | 
         Out-Null
-        $True
+        $true
     } 
     catch {
-        $False
+        $false
     }
 }
 

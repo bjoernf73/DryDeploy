@@ -47,7 +47,7 @@
             ErrorAction   = 'Stop'
         }
         New-ADGroup @NewADGroupParams | Out-Null
-        $True
+        $true
     }
     catch {
         $_

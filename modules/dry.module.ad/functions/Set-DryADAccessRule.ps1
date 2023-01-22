@@ -136,10 +136,10 @@ function Set-DryADAccessRule {
         }
         
         # Test the ReturnValue in $Return[1]
-        if ($Return[1] -eq $True) {
+        if ($Return[1] -eq $true) {
             ol s 'AD right set'
             ol v "Successfully configured AD right"
-            $True
+            $true
         } 
         else {
             ol f 'AD right not set'

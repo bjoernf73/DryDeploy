@@ -21,19 +21,19 @@ function Install-DryDSCmodule {
     
     [cmdletbinding()] 
     param (
-        [Parameter(Mandatory=$True,ValueFromPipeline=$true)]
+        [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
         [PSObject[]]$ModuleObject,
 
-        [Parameter(Mandatory=$False,ValueFromPipeline=$false)]
+        [Parameter(Mandatory=$false,ValueFromPipeline=$false)]
         [System.Management.Automation.Runspaces.PSSession]$Session
     )
     Begin {
         if ($Session) {
-           $Remote = $True
+           $Remote = $true
             ol v "Installing modules on remote target '$($Session.Computername)'" 
         }
         else {
-            $Remote = $False
+            $Remote = $false
             ol v "Installing modules on local system" 
         }
     }
@@ -74,8 +74,8 @@ function Install-DryDSCmodule {
                                 'Name'=$ModuleName
                                 'RequiredVersion'=$Version
                                 'ErrorAction'='Stop'
-                                'Confirm'=$False
-                                'Force'=$True
+                                'Confirm'=$false
+                                'Force'=$true
                             }
                             
                             Install-Module @InstallModuleParams

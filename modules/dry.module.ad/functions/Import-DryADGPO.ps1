@@ -98,7 +98,7 @@ function Import-DryADGPO {
                 ol d "[BACKUPGPO] $ResultMessage"
             }
 
-            if ($GPOImportResult[0] -eq $True) {
+            if ($GPOImportResult[0] -eq $true) {
                 ol v @('Successful import of backup GPO', "'$($GPO.Name)'")
             }
             else {
@@ -115,7 +115,7 @@ function Import-DryADGPO {
             # meaning that permissions in the json-GPO is ignored, and the default security descriptor of the 
             # groupPolicyContainer schema class is used.      
             if ($Null -eq $GPO.defaultpermissions) {
-                [Bool]$GPODefaultPermissions = $True
+                [Bool]$GPODefaultPermissions = $true
             }
             else {
                 [Bool]$GPODefaultPermissions = $GPO.defaultpermissions
@@ -145,7 +145,7 @@ function Import-DryADGPO {
             $GPOImportResult = Invoke-Command @InvokeCommandParams
 
             switch ($GPOImportResult[0]) {
-                $True {
+                $true {
                     ol s "$($GPOImportResult[2])"
                 }
                 default {

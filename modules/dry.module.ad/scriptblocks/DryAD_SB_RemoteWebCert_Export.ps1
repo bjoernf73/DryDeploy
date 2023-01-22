@@ -27,7 +27,7 @@
     )
     try {
         $Cert = Get-ChildItem -Path Cert:\LocalMachine\My -ErrorAction Stop | Where-Object { 
-            ($_.HasPrivateKey -eq $True) -and 
+            ($_.HasPrivateKey -eq $true) -and 
             ($_.SignatureAlgorithm.FriendlyName -in $SignatureAlgorithms) -and
             (@(($_.EnhancedKeyUsageList).FriendlyName) -contains $KeyUsage)  
         }
@@ -44,9 +44,9 @@
         else {
             throw "Certificate not found"
         }
-        return @($True, '')
+        return @($true, '')
     }
     catch {
-        return @($False, "$($_.ToString())")
+        return @($false, "$($_.ToString())")
     }
 }

@@ -52,7 +52,7 @@ function Copy-DryADModulesToRemoteTarget {
             $DirResult = Invoke-Command @InvokeDirParams
             
             switch ($DirResult) {
-                $True {
+                $true {
                     ol d 'Created remote directory', "$RemoteRootPath"
                 }
                 { $DirResult -is [ErrorRecord] } {
@@ -84,8 +84,8 @@ function Copy-DryADModulesToRemoteTarget {
                     Path        = $ModuleFolder
                     Destination = $RemoteRootPath 
                     ToSession   = $PSSession 
-                    Recurse     = $True
-                    Force       = $True
+                    Recurse     = $true
+                    Force       = $true
                 }
                 ol d @("Copying module to '($PSSession.ComputerName)'", "'$ModuleFolder'")
                 Copy-Item @CopyItemsParams
@@ -99,8 +99,8 @@ function Copy-DryADModulesToRemoteTarget {
                     Path        = $ModuleFolder
                     Destination = $RemoteRootPath 
                     ToSession   = $PSSession 
-                    Recurse     = $True
-                    Force       = $True
+                    Recurse     = $true
+                    Force       = $true
                 }
                 ol d @("Copying module to '$($PSSession.ComputerName)'", "'$ModuleFolder'")
                 Copy-Item @CopyItemsParams
@@ -147,7 +147,7 @@ function Copy-DryADModulesToRemoteTarget {
             $ImportResult = Invoke-Command @ImportModsParams
     
             switch ($ImportResult) {
-                $True {
+                $true {
                     ol s "Modules were imported into the session"
                     ol v "The modules '$Modules' were imported into PSSession to $($PSSession.ComputerName)"
                 }

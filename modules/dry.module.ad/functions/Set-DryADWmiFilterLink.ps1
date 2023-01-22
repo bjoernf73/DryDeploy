@@ -69,7 +69,7 @@ function Set-DryADWmiFilterLink {
                 if ($Null -eq $ADObject) {
                     throw "Object not found"
                 }
-                $True
+                $true
             }
             catch {
                 throw $_
@@ -95,7 +95,7 @@ function Set-DryADWmiFilterLink {
                     }
                 }
                 switch (Invoke-Command @InvokeTestParams) {
-                    $True {
+                    $true {
                         ol v "Verified that '$Filter' returned an object from AD"
                     }
                     default {
@@ -148,7 +148,7 @@ function Set-DryADWmiFilterLink {
                 }
 
                 $GPOADObject | Set-ADObject @SetParams | Out-Null
-                $True
+                $true
             }
             catch {
                 throw $_
@@ -167,7 +167,7 @@ function Set-DryADWmiFilterLink {
         $SetResult = Invoke-Command @InvokeSetParams
 
         switch ($SetResult) {
-            $True {
+            $true {
                 ol s "WMIFilter applied to GPO"
                 ol v "The WMIFilter '$WMIFilterName' was applied to GPO '$GPOName'"
             }

@@ -31,7 +31,7 @@ function Test-DryWinRM {
         [Parameter()]
         [PSObject]$SessionConfig
     )
-    [Bool]$AvailableSession = $False
+    [Bool]$AvailableSession = $false
     try {
         $NewDrySessionParams = @{
             ComputerName  = $ComputerName
@@ -43,7 +43,7 @@ function Test-DryWinRM {
         }
         $Session = New-DrySession @NewDrySessionParams
         if ($Session.Availability -eq "Available") {
-            $AvailableSession = $True
+            $AvailableSession = $true
             $Session | Remove-PSSession -ErrorAction Ignore 
         }
         $AvailableSession

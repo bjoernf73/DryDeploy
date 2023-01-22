@@ -54,7 +54,7 @@ class Credentials {
             $SetContentParams   = @{
                 Path            = $This.Path 
                 Value           = (ConvertTo-Json -InputObject $This -Depth 20) 
-                Force           = $True 
+                Force           = $true 
                 ErrorAction     = 'Stop'
             }
             Set-Content @SetContentParams

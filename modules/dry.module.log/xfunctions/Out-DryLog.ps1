@@ -201,7 +201,7 @@ function Out-DryLog {
         }
         $LoggingOptions = $GLOBAL:LoggingOptions
 
-        if ($LoggingOptions.log_to_file -eq $True) {
+        if ($LoggingOptions.log_to_file -eq $true) {
             if ($LoggingOptions.path) {
                 $LogFile = $LoggingOptions.path
             }
@@ -216,14 +216,14 @@ function Out-DryLog {
         # Check that $LogFile is defined, turn off logging to file if not
         if (($null -eq $LogFile) -or ($LogFile -eq "")) {
             # Only warn once, don't nag all the time
-            if ($GLOBAL:DoNotLogToFile -ne $True) {
+            if ($GLOBAL:DoNotLogToFile -ne $true) {
                 Write-Warning -Message "`$LogFile is undefined -> logging to file is disabled. Define LoggingOptions.path to enable it!" -WarningAction Continue
-                [Bool]$GLOBAL:DoNotLogToFile = $True
+                [Bool]$GLOBAL:DoNotLogToFile = $true
             }
         }
         else {
-            # Make sure $LogFile exist if $GLOBAL:DoNotLogToFile -ne $True
-            if (($GLOBAL:DoNotLogToFile -ne $True) -and (-not (Test-Path $LogFile))) {
+            # Make sure $LogFile exist if $GLOBAL:DoNotLogToFile -ne $true
+            if (($GLOBAL:DoNotLogToFile -ne $true) -and (-not (Test-Path $LogFile))) {
                 New-Item -ItemType File -Path $LogFile -Force -ErrorAction Stop | Out-Null
             }
         }
@@ -233,7 +233,7 @@ function Out-DryLog {
         [String] $Location = ($Caller.location).Replace(' line ','')
         [String] $LocationString = "[$Location $(get-date -Format HH:mm:ss)]"
 
-        $DisplayLogMessage = $False
+        $DisplayLogMessage = $false
         <#
             Windows Output Streams:
             1 OutPut/Success - not in use here
@@ -243,7 +243,7 @@ function Out-DryLog {
             5 Debug
             6 Information
         #>
-        $DisplayLogMessage = $True
+        $DisplayLogMessage = $true
         switch ($Type) {
             {$_ -in ('2','e','error')} {
                 $Type = 'error'
@@ -604,7 +604,7 @@ function Out-DryLog {
 
         # Log to file
         switch ($LoggingOptions.log_to_file) {
-            $True {
+            $true {
                 switch ($PSCmdlet.ParameterSetName) {
                     'message' {
                         if (-not $Header) {

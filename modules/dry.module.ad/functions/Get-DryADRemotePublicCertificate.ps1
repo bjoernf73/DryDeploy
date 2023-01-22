@@ -38,7 +38,7 @@ function Get-DryADRemotePublicCertificate {
         }
         $Result = Invoke-Command @InvokeCommandParams
         
-        if ($Result[0] -eq $True) {
+        if ($Result[0] -eq $true) {
             Copy-Item -FromSession $PSSession -Path 'C:\PublicCertificate.cer' -Destination "$CertificateFile" -Force -ErrorAction Stop
             ol i @('Fetched public certificate', "$CertificateFile")
         }

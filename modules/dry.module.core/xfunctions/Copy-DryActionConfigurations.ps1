@@ -36,7 +36,7 @@ function Copy-DryActionConfigurations {
         # Make sure TargetFolderPath is empty
         if (Test-Path -Path $ConfigTargetPath -ErrorAction Ignore) {
             ol w "The Target temporary directory exists - removing contents"
-            Remove-Item -Path "$ConfigTargetPath\*" -Recurse -Force -Confirm:$False
+            Remove-Item -Path "$ConfigTargetPath\*" -Recurse -Force -Confirm:$false
             Start-Sleep -Seconds 1
         }
         ol i "Copy target","$ConfigTargetPath"

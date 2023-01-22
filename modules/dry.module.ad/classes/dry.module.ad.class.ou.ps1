@@ -163,11 +163,11 @@ Class OU {
                             }
                             Get-ADOBject @GetADObjectParams | Out-Null
                             # The Object exists already
-                            $True
+                            $true
                         }
                         Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
                             # The Object does not exist
-                            $False
+                            $false
                         }
                         catch {
                             $PSCmdlet.ThrowTerminatingError($_)
@@ -187,11 +187,11 @@ Class OU {
                     $GetResult       = Invoke-Command @GetParams
 
                     switch ($GetResult) {
-                        $True {
+                        $true {
                             ol s "The OU exists already"
                             ol d "The OU '$CurrentName' in parent '$CurrentParent' exists already."
                         }
-                        $False {
+                        $false {
                             ol d "The OU '$CurrentName' in parent '$CurrentParent' does not exist, must be created"
                         }
                         default {
@@ -205,7 +205,7 @@ Class OU {
                     throw $_
                 }  
 
-                if ($GetResult -eq $False) {
+                if ($GetResult -eq $false) {
                     [ScriptBlock] $SetResultScriptBlock = { 
                         param (
                             $Name,
@@ -230,7 +230,7 @@ Class OU {
                             }
                             New-ADOBject @NewADObjectParams | Out-Null
                             # The Object was created
-                            $True
+                            $true
                         }
                         catch {
                             $_
@@ -250,10 +250,10 @@ Class OU {
                     $SetResult       = Invoke-Command @SetParams
 
                     switch ($SetResult) {
-                        $True {
+                        $true {
                             ol s "The OU was created"
                             ol d "OU '$CurrentName' in parent '$CurrentParent' was created"
-                            $OUsWasCreated = $True
+                            $OUsWasCreated = $true
                         }
                         
                         default {

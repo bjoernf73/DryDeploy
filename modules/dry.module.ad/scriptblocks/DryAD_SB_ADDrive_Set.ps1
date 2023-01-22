@@ -22,7 +22,7 @@
     param ($Server)
     try {
         $ReturnError = $Null
-        $ReturnValue = $False
+        $ReturnValue = $false
         $VerboseReturnStrings = @("Entered Scriptblock")
 
         # Make sure ActiveDirectory module is loaded, so the AD drive is mounted
@@ -75,7 +75,7 @@
         $ADDrive.Server = "$Server"
 
         # If we reached this, assume success
-        $ReturnValue = $True
+        $ReturnValue = $true
     }
     catch {
         $VerboseReturnStrings += "Set-DryADDrive failed"

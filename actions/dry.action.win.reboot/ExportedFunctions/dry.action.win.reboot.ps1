@@ -47,7 +47,7 @@ function dry.action.win.reboot {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
         [Int]    $NumberOfReboots  = 1
-        [Bool]   $GPUpdate         = $True
+        [Bool]   $GPUpdate         = $true
         [String] $ConfigOrDefault  = 'Default'
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -65,7 +65,7 @@ function dry.action.win.reboot {
         }
         
         switch ($GPUpdate) {
-            $True {
+            $true {
                 $WithOrWithout = 'with'
             }
             default {
@@ -131,7 +131,7 @@ function dry.action.win.reboot {
 
             $InvokeInPSSessionParams = @{
                 Command       = 'Restart-Computer' 
-                Arguments     = @{'Force'=$True} 
+                Arguments     = @{'Force'=$true} 
                 Credential    = $Credentials
                 Computername  = $Action.Resource.resolved_network.ip_address 
                 SessionConfig = $SessionConfig

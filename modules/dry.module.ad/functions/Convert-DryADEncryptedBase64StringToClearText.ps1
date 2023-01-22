@@ -32,7 +32,7 @@ function Convert-DryADEncryptedBase64StringToClearText {
         #   - 'Server Authentiaction' as part of the Enhanced Key Usage
         $Cert = Get-ChildItem -Path Cert:\LocalMachine\My -ErrorAction Stop | 
             Where-Object { 
-            ($_.HasPrivateKey -eq $True) -and 
+            ($_.HasPrivateKey -eq $true) -and 
             ($_.SignatureAlgorithm.FriendlyName -eq 'SHA256RSA') -and
             (@(($_.EnhancedKeyUsageList).FriendlyName) -contains 'Server Authentication')  
             }

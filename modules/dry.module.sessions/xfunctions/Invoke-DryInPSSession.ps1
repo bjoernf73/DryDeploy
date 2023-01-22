@@ -108,7 +108,7 @@ function Invoke-DryInPSSession {
         } 
         else {
             if ($IgnoreErrors) {
-                return $False
+                return $false
             }
             else {
                 throw "Unable to start PSSession to $ComputerName"

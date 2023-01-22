@@ -32,7 +32,7 @@ function Get-DryADRandomString {
     try {
         Add-Type -AssemblyName System.Web -ErrorAction Stop
         switch ($Secure) {
-            $True {
+            $true {
                 return [SecureString](ConvertTo-SecureString $([System.Web.Security.Membership]::GeneratePassword($Length, $NonAlphabetics)) -AsPlainText -Force)
             }
             default {

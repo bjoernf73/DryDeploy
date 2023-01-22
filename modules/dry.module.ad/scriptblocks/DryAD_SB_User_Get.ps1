@@ -25,10 +25,10 @@
     ) 
     try {
         Get-ADUser -Identity $Name -Server $Server | Out-Null
-        $True
+        $true
     }
     Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-        $False
+        $false
     }
     catch {
         $_

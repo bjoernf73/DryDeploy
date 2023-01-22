@@ -53,7 +53,7 @@ function Save-DryArchiveFile {
         # Create the new file name based on the file's LastWriteTime attribute
         $ArchiveFileNewName = "ARCH_" + $(($ArchiveFile.LastWriteTime | Get-Date -format s) -replace ':','-') + "_$ArchiveFileName"
         $ArchiveFileNewFullName = Join-Path -Path $ArchiveSourceFolder -ChildPath $ArchiveFileNewName
-        $ArchiveFile | Rename-Item -NewName $ArchiveFileNewName -Confirm:$False
+        $ArchiveFile | Rename-Item -NewName $ArchiveFileNewName -Confirm:$false
         
         if ($ArchiveSourceFolder -ne $ArchiveTargetFolder) {
             Get-Item -Path $ArchiveFileNewFullName -ErrorAction Stop | 

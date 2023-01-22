@@ -883,7 +883,7 @@ try {
     
     switch ($PSCmdLet.ParameterSetName) {
         'GitHub' {
-            Start-Process 'https://github.com/bjoernf73/DryDeploy' -Wait:$False
+            Start-Process 'https://github.com/bjoernf73/DryDeploy' -Wait:$false
         }
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -1000,7 +1000,7 @@ try {
                 ExcludeBuildSteps    = $ExcludeBuildSteps
                 Phases               = $Phases
                 ExcludePhases        = $ExcludePhases
-                ShowStatus           = $True
+                ShowStatus           = $true
             }
             $dry_var_Plan = Get-DryPlan @GetDryPlanParams -ErrorAction Stop
             $GetDryPlanParams = $null
@@ -1018,7 +1018,7 @@ try {
                 Plan                 = $dry_var_Plan
                 Mode                 = 'Plan' 
                 ConfigCombo          = $dry_var_global_ConfigCombo 
-                ShowConfigCombo      = $True
+                ShowConfigCombo      = $true
                 ShowDeselected       = $ShowDeselected
             }
             Show-DryPlan @ShowDryPlanParams
@@ -1112,7 +1112,7 @@ try {
                 Plan                 = $dry_var_Plan
                 Mode                 = 'Plan' 
                 ConfigCombo          = $dry_var_global_ConfigCombo 
-                ShowConfigCombo      = $True
+                ShowConfigCombo      = $true
                 ShowDeselected       = $ShowDeselected
             }
             Show-DryPlan @dry_var_ShowDryPlanParams
@@ -1154,7 +1154,7 @@ try {
                 Plan                 = $dry_var_Plan
                 Mode                 = 'Plan' 
                 ConfigCombo          = $dry_var_global_ConfigCombo 
-                ShowConfigCombo      = $True
+                ShowConfigCombo      = $true
                 ShowDeselected       = $ShowDeselected
             }
             Show-DryPlan @dry_var_ShowDryPlanParams

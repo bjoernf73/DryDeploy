@@ -34,7 +34,7 @@ function Wait-DryADForADWebServices {
         $WaitMinutes = 20
   
     )
-    [Boolean]$ADWebServicesUp = $False
+    [Boolean]$ADWebServicesUp = $false
     [String]$DomainControllersOUDN = "OU=Domain Controllers,$DomainDN"
     [DateTime]$StartTime = Get-Date
     Do {
@@ -43,19 +43,19 @@ function Wait-DryADForADWebServices {
             try {
                 # If this works, return true
                 Get-ADObject -Identity $DomainControllersOUDN | Out-Null
-                $True
+                $true
             } 
             catch {
-                $False
+                $false
             }
         } -ArgumentList $DomainControllersOUDN
         
         switch ($TestResult) {
-            $True {
+            $true {
                 ol i "Active Directory Web Services is now up and reachable."
-                $ADWebServicesUp = $True
+                $ADWebServicesUp = $true
             }
-            $False {
+            $false {
                 #! should Out-DryLog have a wait-option?
                 ol i "Waiting for Active Directory Web Services to become available...."
                 Start-Sleep -Seconds 30
@@ -72,7 +72,7 @@ function Wait-DryADForADWebServices {
     )
 
     switch ($ADWebServicesUp) {
-        $False {
+        $false {
             ol e "AD Webservices wasn't ready after waiting the configured $WaitMinutes minutes"
             throw "AD Webservices wasn't ready after waiting the configured $WaitMinutes minutes"
         }

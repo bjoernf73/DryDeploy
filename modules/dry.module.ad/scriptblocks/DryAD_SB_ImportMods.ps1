@@ -26,14 +26,14 @@
         $Modules.foreach({
                 $ImportParams = @{
                     Name        = $_.name
-                    Force       = $True 
+                    Force       = $true 
                     ErrorAction = 'Stop'
                 }
                 Import-Module @ImportParams
             })
-        $True
+        $true
     }
     catch {
-        $False
+        $false
     }
 }

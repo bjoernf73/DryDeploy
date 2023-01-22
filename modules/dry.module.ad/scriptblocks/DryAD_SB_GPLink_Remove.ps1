@@ -25,7 +25,7 @@
         $Server
     ) 
     
-    $Status = $False
+    $Status = $false
     $ErrorString = ''
     try {
         $RemoveLinkParams = @{
@@ -35,7 +35,7 @@
             Server      = $Server
         }
         Remove-GPLink @RemoveLinkParams | Out-Null
-        $Status = $True
+        $Status = $true
         return @($Status, $ErrorString)
     }
     catch {

@@ -44,7 +44,7 @@ function Test-DryUtilsPort {
     Begin {  
         if ((-not $Tcp) -and 
             (-not $Udp)) {
-            $Tcp = $True
+            $Tcp = $true
         }
         #Typically you never do this, but in this case I felt it was for the benefit of the function  
         #as any errors will be noted in the output of the Report          
@@ -65,14 +65,14 @@ function Test-DryUtilsPort {
                     $TcpClient   = New-Object System.Net.Sockets.TcpClient
                     $StopWatch.Start()
                     $Connect     = $TcpClient.BeginConnect($Computer, $Port, $null, $null)
-                    $Wait        = $Connect.AsyncWaitHandle.WaitOne($TcpTimeout, $False)
+                    $Wait        = $Connect.AsyncWaitHandle.WaitOne($TcpTimeout, $false)
                     
                     if (-not $Wait) {
                         $TcpClient.Close()
                         $StopWatch.Stop()
                         ol v "$($Computer): Connection Timeout"
 
-                        $Result.Open  = $False
+                        $Result.Open  = $false
                         $Result.Notes = 'Connection to Port Timed Out'
                         $Result.ResponseTime = $StopWatch.ElapsedMilliseconds
                     }
@@ -81,7 +81,7 @@ function Test-DryUtilsPort {
                         $TcpClient.Close()
                         $StopWatch.Stop()
 
-                        $Result.Open = $True
+                        $Result.Open = $true
                     }
                     $Result.ResponseTime = $StopWatch.ElapsedMilliseconds
                 }
@@ -112,12 +112,12 @@ function Test-DryUtilsPort {
                         
                         ol v "$($Computer): Connection Successful"
                             
-                        $Result.Open  = $True
+                        $Result.Open  = $true
                         $Result.Notes = $ReturnedData
                     }
                     catch {
                         ol v "$($Computer): Host maybe unavailable"
-                        $Result.Open  = $False
+                        $Result.Open  = $false
                         $Result.Notes = 'Unable to verify if port is open or if host is unavailable.'
                     }
                     finally {

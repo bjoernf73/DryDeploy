@@ -32,7 +32,7 @@
             ErrorAction = 'Stop'
         }
         Add-ADGroupMember @AddADGroupMemberParams | Out-Null
-        $True
+        $true
     }
     catch {
         $_

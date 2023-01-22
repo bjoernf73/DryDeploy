@@ -64,7 +64,7 @@ function Set-DryADDrive {
         }
         
         # Test the ReturnValue in $Return[2]
-        if ($Return[1] -eq $True) {
+        if ($Return[1] -eq $true) {
             ol s 'AD Drive Configured'
             ol v "Successfully set AD Drive to target Domain Controller"
         } 

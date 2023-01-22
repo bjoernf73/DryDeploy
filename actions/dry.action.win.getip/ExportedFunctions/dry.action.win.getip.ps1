@@ -43,7 +43,7 @@ function dry.action.win.getip {
     try {
         [ArrayList] $DnsServers = $Action.Resource.Resolved_Network.Dns
         [String]    $ResourceFQDNName = $Action.Resource.Name + '.' + $Action.Resource.Resolved_Network.DomainFQDN
-        [Boolean]   $IPResolved = $False 
+        [Boolean]   $IPResolved = $false 
         foreach ($DnsServer in $DnsServers) {
             $ResourceIPobj = Resolve-DnsName -Name $ResourceFQDNName -Server $DnsServer -Type A -ErrorAction SilentlyContinue
             if ($null -ne $ResourceIPobj.IPAddress) {
