@@ -19,7 +19,7 @@
 #>
 
 [ScriptBlock]$DryAD_SB_User_Get = {
-    Param (
+    param (
         $Name,
         $Server
     ) 
@@ -30,7 +30,7 @@
     Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
         $False
     }
-    Catch {
+    catch {
         $_
     }
 }

@@ -20,9 +20,9 @@ Using Namespace System.Management.Automation.Runspaces
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-Function Add-DryADGroupMember {
+function Add-DryADGroupMember {
     [CmdletBinding(DefaultParameterSetName = 'Local')]
-    Param (
+    param (
         [Parameter(Mandatory, HelpMessage = "The Group to add the Member to")]
         [String] 
         $Group,
@@ -46,35 +46,35 @@ Function Add-DryADGroupMember {
         If executing on a remote session to a DC, use localhost as  
         server. If not, the $DomainController param is required
     #>
-    If ($PSCmdlet.ParameterSetName -eq 'Remote') {
+    if ($PSCmdlet.ParameterSetName -eq 'Remote') {
         $Server = 'localhost'
         ol v @('Session Type', 'Remote')
         ol v @('Remoting to Domain Controller', $PSSession.ComputerName)
     }
-    Else {
+    else {
         $Server = $DomainController
         ol v @('Session Type', 'Local')
         ol v @('Using Domain Controller', $Server)
     }
 
-    Try {     
+    try {     
         $GetArgumentList = @($Group, $Member, $Server)
         $GetParams = @{
             ScriptBlock  = $DryAD_SB_GroupMember_Get
             ArgumentList = $GetArgumentList
         }
-        If ($PSCmdlet.ParameterSetName -eq 'Remote') {
+        if ($PSCmdlet.ParameterSetName -eq 'Remote') {
             $GetParams += @{
                 Session = $PSSession
             }
         }
         $GetResult = Invoke-Command @GetParams
 
-        Switch ($GetResult) {
+        switch ($GetResult) {
             $True {
                 ol v @("$Member is already member of", "$Group")
                 ol s "Already member"
-                Return
+                return
             }
             $False {
                 ol v @("$Member will be added to", "$Group")
@@ -82,29 +82,29 @@ Function Add-DryADGroupMember {
             { $GetResult -is [System.Management.Automation.ErrorRecord] } {
                 $PSCmdlet.ThrowTerminatingError($GetResult)
             }
-            Default {
-                Throw "GetResult in Add-DryADGroupMember failed: $($GetResult.ToString())"
+            default {
+                throw "GetResult in Add-DryADGroupMember failed: $($GetResult.ToString())"
             }
         }
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
  
-    Try {     
+    try {     
         $SetArgumentList = @($Group, $Member, $Server)
         $SetParams = @{
             ScriptBlock  = $DryAD_SB_GroupMember_Set
             ArgumentList = $SetArgumentList
         }
-        If ($PSCmdlet.ParameterSetName -eq 'Remote') {
+        if ($PSCmdlet.ParameterSetName -eq 'Remote') {
             $SetParams += @{
                 Session = $PSSession
             }
         }
         $SetResult = Invoke-Command @SetParams 
 
-        Switch ($SetResult) {
+        switch ($SetResult) {
             $True {
                 ol s "Member added to Group"
                 ol v @("$Member was added to Group", $Group)
@@ -113,13 +113,13 @@ Function Add-DryADGroupMember {
                 ol f "Member not added to Group"
                 $PSCmdlet.ThrowTerminatingError($GetResult)
             }
-            Default {
+            default {
                 ol f "Member not added to Group"
-                Throw "SetResult in Add-DryADGroupMember failed: $($GetResult.ToString())"
+                throw "SetResult in Add-DryADGroupMember failed: $($GetResult.ToString())"
             }
         }
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }  
 }

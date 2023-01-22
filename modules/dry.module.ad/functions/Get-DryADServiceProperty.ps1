@@ -20,7 +20,7 @@
 #>
 function Get-DryADServiceProperty {
     [CmdletBinding(DefaultParameterSetName = 'Local')] 
-    Param ( 
+    param ( 
         [Parameter(Mandatory, HelpMessage = "The property to get")]
         [String] 
         $Property,
@@ -71,10 +71,10 @@ function Get-DryADServiceProperty {
                 Session = $PSSession
             }
         }
-        $Return = $Null; 
-        $Return = Invoke-Command @InvokeParams
+        $return = $Null; 
+        $return = Invoke-Command @InvokeParams
 
-        if ($Return -is [ErrorRecord]) {
+        if ($return -is [ErrorRecord]) {
             throw $Return
         }
         else {

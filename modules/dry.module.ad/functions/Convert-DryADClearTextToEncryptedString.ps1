@@ -17,10 +17,10 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
-Function Convert-DryADClearTextToEncryptedString {
+function Convert-DryADClearTextToEncryptedString {
     [CmdletBinding()]
     [OutputType([System.String])]
-    Param ( 
+    param ( 
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [String]$ClearText,
@@ -38,9 +38,9 @@ Function Convert-DryADClearTextToEncryptedString {
         $ByteArray = [System.Text.Encoding]::UTF8.GetBytes($ClearText)
         $EncryptedByteArray = $PublicCert.PublicKey.Key.Encrypt($ByteArray, $true)
         $EncryptedBase64String = [Convert]::ToBase64String($EncryptedByteArray)
-        Return $EncryptedBase64String 
+        return $EncryptedBase64String 
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

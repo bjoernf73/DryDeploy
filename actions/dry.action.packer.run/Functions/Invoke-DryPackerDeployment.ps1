@@ -89,7 +89,7 @@ function Invoke-DryPackerDeployment {
                     Out-File -FilePath $TargetFile -Encoding Default -Force
                     Remove-Variable -Name RawFileContents,ReplacedFileContents -ErrorAction Ignore
                 }
-                Default {
+                default {
                     # just copy
                     Copy-Item -Path $SourceFile -Destination $TargetFile -Confirm:$false
                 }
@@ -103,7 +103,7 @@ function Invoke-DryPackerDeployment {
 
         # Accumulate the parameters for packer. $Config.connection is either
         # winrm or ssh
-        Switch ($Config.connection) {
+        switch ($Config.connection) {
             'winrm' {
                 $ArgumentArray = @(
                     "-var",
@@ -124,7 +124,7 @@ function Invoke-DryPackerDeployment {
                     "`"ssh_host=$($resource.resolved_network.ip_address)`""
                 )
             }
-            Default {
+            default {
                 throw "Unknown connection: '$($Config.Connection)'. Expected 'winrm' or 'ssh'"
             }
         }

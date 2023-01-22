@@ -77,7 +77,7 @@ function Save-DryArchiveFile {
         $SortedOldArchivedFilesList = [System.Collections.Generic.List[PSObject]]::New()
         $OldArchivedFilesList | 
         Sort-Object -Property 'Date' | 
-        ForEach-Object {
+        foreach-Object {
             $SortedOldArchivedFilesList.Add($_)
         }
         while ($SortedOldArchivedFilesList.count -gt $ToKeep) {

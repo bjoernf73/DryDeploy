@@ -17,9 +17,9 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
-Function Get-DryADOUPathFromAlias {
+function Get-DryADOUPathFromAlias {
     [cmdletbinding()]
-    Param (
+    param (
         [Parameter(Mandatory)]
         [String]$Alias,
 
@@ -41,24 +41,24 @@ Function Get-DryADOUPathFromAlias {
     ol d 'Scope', "$Scope"
     ol d 'Child', "$Child"
 
-    If ($Null -eq $ReferencedOU) {
+    if ($Null -eq $ReferencedOU) {
         ol e @('Unable to resolve OU from Alias', 'No OUs found')
-        Throw "Unable to find OU for Alias '$Alias': No references found"
+        throw "Unable to find OU for Alias '$Alias': No references found"
     } 
 
-    If ($ReferencedOU -is [Array]) {
+    if ($ReferencedOU -is [Array]) {
         ol e @('Unable to resolve OU from Alias', 'Multiple OUs found')
-        Throw "Unable to find single OU for Alias '$Alias': Multiple references found"
+        throw "Unable to find single OU for Alias '$Alias': Multiple references found"
     }
     
     $Path = $ReferencedOU.Path
-    If ($Null -eq $Path) {
+    if ($Null -eq $Path) {
         ol e "Found OU '$($OU.Alias)', but it contains no path"
-        Throw "Found OU '$($OU.Alias)', but it contains no path"
+        throw "Found OU '$($OU.Alias)', but it contains no path"
     }
 
     # If child, add that
-    If ($Child) {
+    if ($Child) {
         $Path = $Path + '/' + $Child -replace '//', '/'
     }
 

@@ -19,7 +19,7 @@
 #>
 
 [ScriptBlock]$DryAD_SB_GPLink_Set = {
-    Param (
+    param (
         $OU,
         $GPO,
         $Order,
@@ -42,11 +42,11 @@
         }
         Set-GPLink @SetLinkParams | Out-Null
         $Status = $True
-        Return @($Status, $ErrorString)
+        return @($Status, $ErrorString)
     }
-    Catch {
+    catch {
         # If caught, get the string
         $ErrorString = $_.ToString()
-        Return @($Status, $ErrorString)
+        return @($Status, $ErrorString)
     }
 }

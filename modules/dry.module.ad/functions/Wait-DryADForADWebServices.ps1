@@ -18,9 +18,9 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
-Function Wait-DryADForADWebServices {
+function Wait-DryADForADWebServices {
     [CmdletBinding()]
-    Param (
+    param (
         [Parameter(Mandatory)]
         [String]
         $DomainDN,
@@ -39,18 +39,18 @@ Function Wait-DryADForADWebServices {
     [DateTime]$StartTime = Get-Date
     Do {
         $TestResult = Invoke-Command -Session $PSSession -ScriptBlock { 
-            Param ($DomainControllersOUDN); 
+            param ($DomainControllersOUDN); 
             try {
                 # If this works, return true
                 Get-ADObject -Identity $DomainControllersOUDN | Out-Null
                 $True
             } 
-            Catch {
+            catch {
                 $False
             }
         } -ArgumentList $DomainControllersOUDN
         
-        Switch ($TestResult) {
+        switch ($TestResult) {
             $True {
                 ol i "Active Directory Web Services is now up and reachable."
                 $ADWebServicesUp = $True
@@ -60,9 +60,9 @@ Function Wait-DryADForADWebServices {
                 ol i "Waiting for Active Directory Web Services to become available...."
                 Start-Sleep -Seconds 30
             }
-            Default {
+            default {
                 ol e "Error testing Active Directory Web Services"
-                Throw $TestResult
+                throw $TestResult
             }
         } 
     }
@@ -71,12 +71,12 @@ Function Wait-DryADForADWebServices {
         (Get-Date -lt ($StartTime.AddMinutes($WaitMinutes)))
     )
 
-    Switch ($ADWebServicesUp) {
+    switch ($ADWebServicesUp) {
         $False {
             ol e "AD Webservices wasn't ready after waiting the configured $WaitMinutes minutes"
-            Throw "AD Webservices wasn't ready after waiting the configured $WaitMinutes minutes"
+            throw "AD Webservices wasn't ready after waiting the configured $WaitMinutes minutes"
         }
-        Default {
+        default {
         }
     }
 }

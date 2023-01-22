@@ -34,15 +34,15 @@ function New-DryItem {
         foreach ($Item in $Items) {
             if (Test-Path -Path "$Item" -ErrorAction Ignore) {
                 $ExistingItem = Get-Item -Path "$Item" -ErrorAction Stop
-                Switch ($ItemType) {
+                switch ($ItemType) {
                     'Directory' {
                         if ($false -eq $ExistingItem.PSIsContainer) {
-                            Throw "Item '$($ExistingItem.FullName)' is of wrong type"
+                            throw "Item '$($ExistingItem.FullName)' is of wrong type"
                         }
                     }
                     'File' {
                         if ($true -eq $ExistingItem.PSIsContainer) {
-                            Throw "Item '$($ExistingItem.FullName)' is of wrong type"
+                            throw "Item '$($ExistingItem.FullName)' is of wrong type"
                         }
                     }
                 }

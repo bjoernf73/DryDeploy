@@ -1,9 +1,9 @@
 using Namespace System.Collections.Generic
 using Namespace System.Management.Automation
 using Namespace System.IO
-Function dry.action.dsc.run {
+function dry.action.dsc.run {
     [CmdletBinding()]  
-    Param (
+    param (
         [Parameter(Mandatory,HelpMessage="The resolved action object")]
         [PSObject]
         $Action,
@@ -46,7 +46,7 @@ Function dry.action.dsc.run {
            DSC config at execution time to handle modules and versioning of them dynamic
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         $DSCTemplate = Get-Content -Path $SourceFile -ErrorAction Stop
-        If ($Resolved.TypeMetaConfig.dsc_modules) {
+        if ($Resolved.TypeMetaConfig.dsc_modules) {
             [String]$DscImportModulesString = "# Importing Desired State Modules `n"
             [String]$DscImportResourcesString = "# Importing Desired State Resources `n"
             
@@ -225,7 +225,7 @@ Function dry.action.dsc.run {
                 $ResourceInstancesNotInDesiredState = $null
                 $ResourceInstancesNotInDesiredState = @($LcmObject.ResourcesNotInDesiredState.InstanceName)
 
-                $ResourceInstancesNotInDesiredState.ForEach({
+                $ResourceInstancesNotInDesiredState.foreach({
                     # This is sometimes $null, so $_.trim() failes
                     if ($null -ne $_) {
                         if (($_.Trim()) -ne '') {
@@ -238,7 +238,7 @@ Function dry.action.dsc.run {
                     [array]$AllowedNotInDesiredState = $Resolved.TypeMetaConfig.dsc_allowed_not_in_desired_state
                     
                     $NotInDesiredStateCount = 0
-                    $ResourceInstancesNotInDesiredState.ForEach({
+                    $ResourceInstancesNotInDesiredState.foreach({
                         if ($AllowedNotInDesiredState -contains $_) {
                             ol d @("Instances allowed to not be in it's desired state","$_")
                             $NotInDesiredStateCount++
@@ -326,7 +326,7 @@ Function dry.action.dsc.run {
                 $VerificationObject.filters.foreach({
                     $Filter = @{}
                     $_.psobject.properties | 
-                    ForEach-Object { 
+                    foreach-Object { 
                         $Filter.Add($_.Name,$_.Value) 
                     }
                     $Filters += $Filter

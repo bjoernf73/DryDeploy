@@ -18,9 +18,9 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
-Function Import-DryADGPO {
+function Import-DryADGPO {
     [CmdletBinding(DefaultParameterSetName = 'Local')]
-    Param (
+    param (
         [Parameter(Mandatory)]
         [PSObject]
         $GPO,
@@ -51,12 +51,12 @@ Function Import-DryADGPO {
         $Force
     )
 
-    If ($PSCmdlet.ParameterSetName -eq 'Remote') {
+    if ($PSCmdlet.ParameterSetName -eq 'Remote') {
         $Server = 'localhost'
         ol v @('Session Type', 'Remote')
         ol v @('Remoting to Domain Controller', "$($PSSession.ComputerName)")
     }
-    Else {
+    else {
         $Server = $DomainController
         ol v @('Session Type', 'Local')
         ol v @('Using Domain Controller', "$Server")
@@ -65,7 +65,7 @@ Function Import-DryADGPO {
     ol v @('GPO Name', "'$($GPO.TargetName)'")
     ol v @('GPO Type', "'$($GPO.Type)'")
     
-    Switch ($GPO.type) {
+    switch ($GPO.type) {
         'backup' {
             $BackupGPOPath = Join-Path -Path $GPOsPath -ChildPath $GPO.Name
             ol v @('GPO Folder Path', "'$BackupGPOPath'")
@@ -85,7 +85,7 @@ Function Import-DryADGPO {
                 ErrorAction  = 'Continue'
             }
 
-            If ($PSCmdlet.ParameterSetName -eq 'Remote') {
+            if ($PSCmdlet.ParameterSetName -eq 'Remote') {
                 $InvokeCommandParams += @{
                     Session = $PSSession
                 }
@@ -94,16 +94,16 @@ Function Import-DryADGPO {
             $GPOImportResult = Invoke-Command @InvokeCommandParams
             
             # Log all remote messages to Out-DryLog regardless of result
-            Foreach ($ResultMessage in $GPOImportResult[2]) {
+            foreach ($ResultMessage in $GPOImportResult[2]) {
                 ol d "[BACKUPGPO] $ResultMessage"
             }
 
-            If ($GPOImportResult[0] -eq $True) {
+            if ($GPOImportResult[0] -eq $True) {
                 ol v @('Successful import of backup GPO', "'$($GPO.Name)'")
             }
-            Else {
+            else {
                 ol e "Failed to import backup GPO $($GPO.Name): $($GPOImportResults[1].ToString())"
-                Throw "Failed to import backup GPO $($GPO.Name): $($GPOImportResults[1].ToString())"
+                throw "Failed to import backup GPO $($GPO.Name): $($GPOImportResults[1].ToString())"
             }
         }
         'json' {
@@ -114,10 +114,10 @@ Function Import-DryADGPO {
             # Unless the json-gpo specifies a (bool) value for defaultpermissions, it is set to true, meaning
             # meaning that permissions in the json-GPO is ignored, and the default security descriptor of the 
             # groupPolicyContainer schema class is used.      
-            If ($Null -eq $GPO.defaultpermissions) {
+            if ($Null -eq $GPO.defaultpermissions) {
                 [Bool]$GPODefaultPermissions = $True
             }
-            Else {
+            else {
                 [Bool]$GPODefaultPermissions = $GPO.defaultpermissions
             }
 
@@ -136,7 +136,7 @@ Function Import-DryADGPO {
                 ErrorAction  = 'Continue'
             }
 
-            If ($PSCmdlet.ParameterSetName -eq 'Remote') {
+            if ($PSCmdlet.ParameterSetName -eq 'Remote') {
                 $InvokeCommandParams += @{
                     Session = $PSSession
                 }
@@ -144,18 +144,18 @@ Function Import-DryADGPO {
             $GPOImportResult = $Null
             $GPOImportResult = Invoke-Command @InvokeCommandParams
 
-            Switch ($GPOImportResult[0]) {
+            switch ($GPOImportResult[0]) {
                 $True {
                     ol s "$($GPOImportResult[2])"
                 }
-                Default {
+                default {
                     ol f "$($GPOImportResult[2])"
-                    Throw $GPOImportResult[1].ToString()
+                    throw $GPOImportResult[1].ToString()
                 }
             }
         }
-        Default {
-            Throw "Unknown GPO type: $($GPO.Type)"
+        default {
+            throw "Unknown GPO type: $($GPO.Type)"
         }
     }
 }

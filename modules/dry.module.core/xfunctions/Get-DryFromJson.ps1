@@ -41,7 +41,7 @@ function Get-DryFromJson {
         $MaybePath
     )
     try {
-        Switch ($PSCmdlet.ParameterSetName) {
+        switch ($PSCmdlet.ParameterSetName) {
             'StringPath' {
                 ol d 'Trying to get file from [string]',$Path
                 [String]$StrPath = $Path  

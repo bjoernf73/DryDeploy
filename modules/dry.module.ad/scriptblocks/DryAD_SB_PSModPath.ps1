@@ -19,17 +19,17 @@
 #>
 
 [ScriptBlock]$DryAD_SB_PSModPath = { 
-    Param (
+    param (
         $Path,
         $PathRegEx
     )
     try {
-        If ($($ENV:PSModulePath) -notmatch "$PathRegEx") {
+        if ($($ENV:PSModulePath) -notmatch "$PathRegEx") {
             $ENV:PSModulePath = "$($ENV:PSModulePath);$Path"
         }
-        Return "$($ENV:PSModulePath)"
+        return "$($ENV:PSModulePath)"
     }
-    Catch {
+    catch {
         # just ignore, we will test the output instead
     }
 }

@@ -78,15 +78,15 @@
         $DebugReturnStrings += @("'Server'                             = '$Server'")
         
         # Remove any blank optional parameter value to ensure correct constructor of System.DirectoryServices.ActiveDirectoryAccessRule
-        If ($ObjectType -eq '') { 
+        if ($ObjectType -eq '') { 
             $DebugReturnStrings += "Removing 'ObjectType' (it is blank)"
             Remove-Variable -Name ObjectType 
         }
-        If ($InheritedObjectType -eq '') { 
+        if ($InheritedObjectType -eq '') { 
             $DebugReturnStrings += "Removing 'InheritedObjectType' (it is blank)"
             Remove-Variable -Name InheritedObjectType 
         }
-        If ($ActiveDirectorySecurityInheritance -eq '') { 
+        if ($ActiveDirectorySecurityInheritance -eq '') { 
             $DebugReturnStrings += "Removing 'ActiveDirectorySecurityInheritance' (it is blank)"
             Remove-Variable -Name ActiveDirectorySecurityInheritance 
         }
@@ -98,11 +98,11 @@
                 $DebugReturnStrings += @("The AD PSModule was not loaded, but I loaded it successfully")
                 Start-Sleep -Seconds 4
             }
-            Catch {
+            catch {
                 $PSCmdlet.ThrowTerminatingError($_)
             }
         }
-        Else {
+        else {
             $DebugReturnStrings += @("The AD PSModule was already loaded in session")
         }
 
@@ -124,12 +124,12 @@
                 }
                 New-PSDrive @NewPSDriveParams | Out-Null
             }
-            Catch {
+            catch {
                 $DebugReturnStrings += @("Failed to create the AD Drive: $($_.ToString())")
                 $PSCmdlet.ThrowTerminatingError($_)
             }
         }
-        Catch {
+        catch {
             $DebugReturnStrings += @("The AD Drive did not exist, and an error occurred trying to get it?")
             $PSCmdlet.ThrowTerminatingError($_)
         }
@@ -146,7 +146,7 @@
         # Create a hashtable to store the GUID value of each schema class and attribute
         $ObjectTypeGUIDs = @{}
         Get-ADObject -SearchBase ($RootDSE.SchemaNamingContext) -LDAPFilter "(schemaidguid=*)" -Properties lDAPDisplayName, schemaIDGUID -ErrorAction Stop | 
-            ForEach-Object {
+            foreach-Object {
                 $ObjectTypeGUIDs[$_.lDAPDisplayName] = [System.GUID]$_.schemaIDGUID
             }
         $ObjectTypeGUIDs['All'] = [GUID]::Empty
@@ -155,7 +155,7 @@
         # Create a hashtable to store the GUID value of each extended right in the forest
         $ExtendedRightsMap = @{}
         Get-ADObject -SearchBase ($RootDSE.ConfigurationNamingContext) -LDAPFilter "(&(objectclass=controlAccessRight)(rightsguid=*))" -Properties displayName, rightsGuid -ErrorAction Stop | 
-            ForEach-Object {
+            foreach-Object {
                 $ExtendedRightsMap[$_.displayName] = [System.GUID]$_.rightsGuid
             }
         $DebugReturnStrings += "Success getting ExtendedRightsMap"
@@ -168,7 +168,7 @@
         $DebugReturnStrings += "PathObject: $($PathObject.distinguishedName)"
 
         # Get the object to deletegate rights to
-        Switch ($TargetType) {
+        switch ($TargetType) {
             'group' {
                 $ADGroup = Get-ADGroup -Identity $TargetName -ErrorAction Stop -Properties SID
                 [System.Security.Principal.IdentityReference]$Target = $ADGroup.SID
@@ -275,7 +275,7 @@
                 $AccessRule = New-Object System.DirectoryServices.ActiveDirectoryAccessRule($Target, $ActiveDirectoryRight, $AccessControlType, $ObjectTypeGuid, $ActiveDirectorySecurityInheritance, $InheritedObjectTypeGUID) -ErrorAction Stop
             }
             else {
-                Throw "Unable to determine constructor"
+                throw "Unable to determine constructor"
             }
 
             try { 

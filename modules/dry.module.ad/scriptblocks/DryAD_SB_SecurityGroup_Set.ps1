@@ -19,7 +19,7 @@
 #>
 
 [ScriptBlock] $DryAD_SB_SecurityGroup_Set = { 
-    Param (
+    param (
         $Name,
         $Path,
         $Description,
@@ -32,7 +32,7 @@
     $DomainDN = $ADRootDSE.DefaultNamingContext
     
     # Add DomainDN to path if not already added
-    If ($Path -notmatch "$DomainDN$") {
+    if ($Path -notmatch "$DomainDN$") {
         $Path = $Path + ",$DomainDN"
     }
     
@@ -49,7 +49,7 @@
         New-ADGroup @NewADGroupParams | Out-Null
         $True
     }
-    Catch {
+    catch {
         $_
     }
 }

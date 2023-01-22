@@ -19,14 +19,14 @@
 #>
 
 [ScriptBlock]$DryAD_SB_ADDomainProperty_Get = {
-    Param (
+    param (
         $Property,
         $Server
     ) 
     try {
         (Get-ADDomain -Server $Server -ErrorAction Stop)."$Property"
     }
-    Catch {
+    catch {
         $_
     }
 }

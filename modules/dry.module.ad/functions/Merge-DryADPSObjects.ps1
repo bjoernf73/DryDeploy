@@ -17,9 +17,9 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
-Function Merge-DryADPSObjects {
+function Merge-DryADPSObjects {
     [CmdLetBinding()]
-    Param (
+    param (
         $FirstObject,
          
         $SecondObject,
@@ -34,38 +34,38 @@ Function Merge-DryADPSObjects {
         $Private:ProcessedConflictingPropertyNames = @()
 
         # is both are arrays, merge
-        If (($FirstObject -is [Array]) -and ($SecondObject -is [Array])) {
+        if (($FirstObject -is [Array]) -and ($SecondObject -is [Array])) {
             $Private:ResultArray += $FirstObject
             $Private:ResultArray += $SecondObject
-            Return $Private:ResultArray 
+            return $Private:ResultArray 
         }
-        ElseIf ( ($FirstObject -is [String]) -and $SecondObject -is [String] ) {
+        elseif ( ($FirstObject -is [String]) -and $SecondObject -is [String] ) {
             # This happens when properties are identical in above iterations. By default, the property from 
             # $FirstObject is returned, unless the switch $PreferSecondObjectOnConflict is passed - then 
             # the property from $SecondObject is returned. In any case, if the switch $FailOnConflict, 
             # is passed, we throw an error
-            If ($FailOnConflict) {
-                Throw "There was conflict (identical properties) and you passed -FailonConflict"
+            if ($FailOnConflict) {
+                throw "There was conflict (identical properties) and you passed -FailonConflict"
             }
-            Else {
-                If ($PreferSecondObjectOnConflict) {
-                    Return $SecondObject
+            else {
+                if ($PreferSecondObjectOnConflict) {
+                    return $SecondObject
                 } 
-                Else {
-                    Return $FirstObject
+                else {
+                    return $FirstObject
                 }
             }
         }
-        ElseIf ( ($FirstObject -is [PSCustomObject]) -and $SecondObject -is [PSCustomObject] ) {
+        elseif ( ($FirstObject -is [PSCustomObject]) -and $SecondObject -is [PSCustomObject] ) {
             # Iterate through each object property of $FirstObject
-            ForEach ($Property in $FirstObject | Get-Member -Type NoteProperty, Property) {
+            foreach ($Property in $FirstObject | Get-Member -Type NoteProperty, Property) {
                 # does SecondObject have a matching node?
-                If ($null -eq $SecondObject.$($Property.Name)) {
+                if ($null -eq $SecondObject.$($Property.Name)) {
                     # $SecondObject does not contain the current property from $FirstObject, so 
                     # the property can be added to $Private:Resultobject as it is
                     $Private:Resultobject | Add-Member -MemberType $Property.MemberType -Name $Property.Name -Value $FirstObject.($Property.Name)
                 }
-                Else {
+                else {
                     # $SecondObject contains the current property from $FirstObject, so 
                     # the two must be merged. Call Merge-DryADPSObject
                     $Private:Resultobject | Add-Member $Property.MemberType -Name $Property.Name -Value ( Merge-DryADPSObjects -FirstObject ($FirstObject.$($Property.Name)) -SecondObject ($SecondObject.$($Property.Name)) -PreferSecondObjectOnConflict:$PreferSecondObjectOnConflict -FailOnConflict:$FailOnConflict)
@@ -75,24 +75,24 @@ Function Merge-DryADPSObjects {
 
             # Members in $SecondObject that are not yet processed, has no 
             # match in $FirstObject, and may be added to the result as is
-            ForEach ($Property in $SecondObject | Get-Member -type NoteProperty, Property) {
-                If ($Private:ProcessedConflictingPropertyNames -notcontains $Property.Name) {
+            foreach ($Property in $SecondObject | Get-Member -type NoteProperty, Property) {
+                if ($Private:ProcessedConflictingPropertyNames -notcontains $Property.Name) {
                     ol d "Trying to add property '$($Property.Name)', type '$($Property.MemberType)', Value '$($SecondObject.($Property.Name))' "
 
                     $Private:Resultobject | Add-Member -MemberType $Property.MemberType -Name $Property.Name -Value $SecondObject.($Property.Name)
                 }
-                Else {
+                else {
                     ol d "Property '$($Property.Name)' is already processed"
                 }
             }
-            Return $Private:Resultobject
+            return $Private:Resultobject
         }
-        Else {
+        else {
             ol e "FirstObject type: $($($FirstObject.Gettype()).Name) (Basetype: $($($FirstObject.Gettype()).BaseType))"
             $PSCmdlet.ThrowTerminatingError($_)
         }
     }
-    Catch {
+    catch {
         $PSCmdLet.ThrowTerminatingError($_)
     }
 }

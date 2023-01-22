@@ -89,7 +89,7 @@ function Set-DryLoggingOptions {
         if ($null -ne $SystemConfig.left_column_width)          {$LoggingOptions.left_column_width =          $SystemConfig.left_column_width}
         if ($null -ne $SystemConfig.post_buffer)                {$LoggingOptions.post_buffer =                $SystemConfig.post_buffer}
 
-        $Streams.ForEach({
+        $Streams.foreach({
             if ($null -ne $SystemConfig."$_".foreground_color) {$LoggingOptions."$_".foreground_color = $SystemConfig."$_".foreground_color}
             if ($null -ne $SystemConfig."$_".background_color) {$LoggingOptions."$_".background_color = $SystemConfig."$_".background_color}
             if ($null -ne $SystemConfig."$_".display_location) {$LoggingOptions."$_".display_location = $SystemConfig."$_".display_location}
@@ -110,7 +110,7 @@ function Set-DryLoggingOptions {
         if ($null -ne $UserConfig.left_column_width)          {$LoggingOptions.left_column_width =          $UserConfig.left_column_width}
         if ($null -ne $UserConfig.post_buffer)                {$LoggingOptions.post_buffer =                $UserConfig.post_buffer}
         
-        $Streams.ForEach({
+        $Streams.foreach({
             if ($null -ne $UserConfig."$_".foreground_color) {$LoggingOptions."$_".foreground_color = $UserConfig."$_".foreground_color}
             if ($null -ne $UserConfig."$_".background_color) {$LoggingOptions."$_".background_color = $UserConfig."$_".background_color}
             if ($null -ne $UserConfig."$_".display_location) {$LoggingOptions."$_".display_location = $UserConfig."$_".display_location}

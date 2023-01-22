@@ -76,8 +76,8 @@ function Import-DryADConfiguration {
     try {
         ol i 'Import-DryADConfiguration started' -sh
         
-        If ($DebugPreference) { 
-            If ($DebugPreference -eq 'Inquire') {
+        if ($DebugPreference) { 
+            if ($DebugPreference -eq 'Inquire') {
                 $DebugPreference = 'Continue'
             }
         }
@@ -88,7 +88,7 @@ function Import-DryADConfiguration {
         $ConfigurationPath = (Resolve-Path -Path $ConfigurationPath -ErrorAction Stop).Path
         ol i 'ConfigurationPath', "$ConfigurationPath"
 
-        If ($VariablesPath) {
+        if ($VariablesPath) {
             $VariablesPath = (Resolve-Path -Path $VariablesPath -ErrorAction Stop).Path
             ol i 'VariablesPath', "$VariablesPath"
         }
@@ -123,21 +123,21 @@ function Import-DryADConfiguration {
         #    
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        If ($VariablesPath) {
-            If ($Variables) {
+        if ($VariablesPath) {
+            if ($Variables) {
                 ol w "You should not pass both `$Variables and `VariablesPath - select one"
-                Throw "You should not pass both `$Variables and `VariablesPath - select one"
+                throw "You should not pass both `$Variables and `VariablesPath - select one"
             }
             $Variables = Get-DryADJson -File $VariablesPath
         }
 
         $DefaultVariables = @('DomainDN', 'DomainFQDN', 'DomainNB', 'ConfigurationNC', 'SchemaNC')
-        If ($ADSite) { $DefaultVariables += 'ADSite' }
-        If ($ComputerName) { $DefaultVariables += 'ComputerName' }
+        if ($ADSite) { $DefaultVariables += 'ADSite' }
+        if ($ComputerName) { $DefaultVariables += 'ComputerName' }
         
-        $DefaultVariables.ForEach({
+        $DefaultVariables.foreach({
                 $CurrentDefaultVariable = $_
-                If ($Null -eq ($Variables | Where-Object { $_.Name -eq $CurrentDefaultVariable })) {
+                if ($Null -eq ($Variables | Where-Object { $_.Name -eq $CurrentDefaultVariable })) {
                     $Variables += New-Object -TypeName PSObject -Property @{
                         Name  = "$CurrentDefaultVariable"
                         Value = Get-Variable -Name $CurrentDefaultVariable -Value
@@ -146,8 +146,8 @@ function Import-DryADConfiguration {
             })
         
         # For debug
-        $Variables.ForEach({
-            Param($x)
+        $Variables.foreach({
+            param ($x)
             ol i @("Var: $($x.name)","$($x.Value)")
         })
 
@@ -161,7 +161,7 @@ function Import-DryADConfiguration {
             ol i 'ADSite', "$ADSite"
         }
         
-        If ($ComputerName) {
+        if ($ComputerName) {
             ol i 'ComputerName', "$ComputerName"
         }
         elseif ($Null -ne ($Variables | Where-Object { $_.Name -eq 'ComputerName' })) {
@@ -714,21 +714,21 @@ function Import-DryADConfiguration {
                 ) {
                     $ProcessWMIFilterLinks = $True
                     $DomainWmiFilterLinksCount = 0
-                    $DomainWMIFilters.ForEach({
-                            $_.links.ForEach({
+                    $DomainWMIFilters.foreach({
+                            $_.links.foreach({
                                     $DomainWmiFilterLinksCount++
                                 })
                         })
 
                     $SiteWmiFilterLinksCount = 0
-                    $SiteWMIFilters.ForEach({
-                            $_.links.ForEach({
+                    $SiteWMIFilters.foreach({
+                            $_.links.foreach({
                                     $SiteWmiFilterLinksCount++
                                 })
                         })
                     $ComputerWmiFilterLinksCount = 0
-                    $ComputerWMIFilters.ForEach({
-                            $_.links.ForEach({
+                    $ComputerWMIFilters.foreach({
+                            $_.links.foreach({
                                     $ComputerWmiFilterLinksCount++
                                 })
                         })
@@ -1102,7 +1102,6 @@ function Import-DryADConfiguration {
  
                 $NumberOfElementsToProcess += ($DomainGPOImports.Count + $SiteGPOImports.Count + $ComputerGPOImports.Count)
                 $NumberOfGPOImports += ($DomainGPOImports.Count + $SiteGPOImports.Count + $ComputerGPOImports.Count)
-
                 $DomainGPOImports = Resolve-DryADReplacementPatterns -inputobject $DomainGPOImports -Variables $Variables
                 $SiteGPOImports = Resolve-DryADReplacementPatterns -inputobject $SiteGPOImports -Variables $Variables
                 $ComputerGPOImports = Resolve-DryADReplacementPatterns -inputobject $ComputerGPOImports -Variables $Variables
@@ -2668,7 +2667,7 @@ function Import-DryADConfiguration {
                     $SetDryADAccessRuleParams = @{}
                     
                     # Add all properties but site and scope to the rights hash
-                    $DomainRight.PSObject.Properties | ForEach-Object {
+                    $DomainRight.PSObject.Properties | foreach-Object {
                         if ($_.Name -notin @('scope')) {
                             $SetDryADAccessRuleParams.Add($_.Name, $_.Value)
                         }
@@ -2728,7 +2727,7 @@ function Import-DryADConfiguration {
                     $SetDryADAccessRuleParams = @{}
                     
                     # Add all properties but site and scope to the rights hash
-                    $SiteRight.PSObject.Properties | ForEach-Object {
+                    $SiteRight.PSObject.Properties | foreach-Object {
                         if ($_.Name -notin @('scope')) {
                             $SetDryADAccessRuleParams.Add($_.Name, $_.Value)
                         }
@@ -2788,7 +2787,7 @@ function Import-DryADConfiguration {
                     $SetDryADAccessRuleParams = @{}
                     
                     # Add all properties but site and scope to the rights hash
-                    $ComputerRight.PSObject.Properties | ForEach-Object {
+                    $ComputerRight.PSObject.Properties | foreach-Object {
                         if ($_.Name -notin @('scope')) {
                             $SetDryADAccessRuleParams.Add($_.Name, $_.Value)
                         }

@@ -55,7 +55,7 @@ function Resolve-DryVariables {
         [String]$OutPutType = 'list'
     )
     try {
-        Switch ($OutPutType) {
+        switch ($OutPutType) {
             'hashtable' {
                 $PRIVATE:PrivateVariablesHash = [HashTable]::New()
             }
@@ -81,13 +81,13 @@ function Resolve-DryVariables {
             }
         }    
 
-        ForEach ($Var in $Variables) {
+        foreach ($Var in $Variables) {
             Remove-Variable -name VarValue -ErrorAction Ignore
-            Switch ($Var.value_type) {
+            switch ($Var.value_type) {
                 'expression' {
-                    Try {
+                    try {
                         Remove-Variable -name VarValue -ErrorAction Ignore
-                        Switch ($Var.parameter_type) {
+                        switch ($Var.parameter_type) {
                             'PSCredential' {
                                 [PSCredential]$VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
                             }
@@ -106,19 +106,19 @@ function Resolve-DryVariables {
                             {$_ -in @('PSObject','PSCustomObject')} {
                                 [PSCustomObject]$VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
                             }
-                            Default {
+                            default {
                                 # Accept whatever type is returned
                                 $VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
                             }
                         }
                     }
-                    Catch {
+                    catch {
                         ol e "Error executing variable expression for: '$($Var.name)', expression: '$($Var.value)'"
                         $PSCmdlet.ThrowTerminatingError($_)
                     }  
                 }
                 {$_ -in @('string','int')} {
-                    Switch ($Var.parameter_type) {
+                    switch ($Var.parameter_type) {
                         'Array' {
                             [Array]$VarValue = $Var.value 
                         }
@@ -131,7 +131,7 @@ function Resolve-DryVariables {
                         'String' {
                             [String]$VarValue = $Var.value 
                         }
-                        Default {
+                        default {
                             # Accept whatever type is returned
                             $VarValue = $Var.value
                         }
@@ -139,9 +139,9 @@ function Resolve-DryVariables {
                 }
                 {$_ -in 'bool','boolean'} {
                     # The variable value is a boolean
-                    Try {
+                    try {
                         [Boolean]$VarValue = $Var.Value
-                        Switch ($Var.parameter_type) {
+                        switch ($Var.parameter_type) {
                             'Array' {
                                 [Array]$VarValue = @($Var.value)
                             }
@@ -151,25 +151,25 @@ function Resolve-DryVariables {
                             'String' {
                                 [String]$VarValue = ($Var.value).ToString()
                             }
-                            Default {
+                            default {
                                 # Accept whatever type is returned
                                 $VarValue = $Var.value
                             }
                         }
                     }
-                    Catch {
+                    catch {
                         ol e "Error converting '$($Var.name)' to boolean. The value was '$($Var.value)'"
                         $PSCmdlet.ThrowTerminatingError($_)
                     }  
                 }
                 'function' {
                     # The variable value is a function call
-                    Try {
+                    try {
                         Remove-Variable -name VarValue,FunctionParamsHash,FunctionParamsNameArr,FunctionParamsName -ErrorAction Ignore
                         $FunctionParamsHash = [HashTable]::New()
                         $FunctionParamsNameArr = @($Var.parameters | Get-Member -MemberType NoteProperty | Select-Object -Property Name).Name
                         
-                        ForEach ($FunctionParamsName in $FunctionParamsNameArr) {
+                        foreach ($FunctionParamsName in $FunctionParamsNameArr) {
                             # First, value of $Var.parameters."$FunctionParamsName" is now string like '$Resource' and not a variable representing the object $Resource. 
                             # Fix that by invoking the string
                             $Var.parameters."$FunctionParamsName" = Invoke-Expression -Command ($Var.parameters."$FunctionParamsName") -Erroraction 'Stop'
@@ -178,7 +178,7 @@ function Resolve-DryVariables {
                             $FunctionParamsHash+= @{ $FunctionParamsName = $Var.parameters."$FunctionParamsName" }
                         }
                     
-                        Switch ($Var.parameter_type) {
+                        switch ($Var.parameter_type) {
                             'PSCredential' {
                                 [PSCredential]$VarValue = & $Var.function @FunctionParamsHash
                             }
@@ -197,13 +197,13 @@ function Resolve-DryVariables {
                             {$_ -in @('PSObject','PSCustomObject')} {
                                 [PSCustomObject]$VarValue = & $Var.function @FunctionParamsHash
                             }
-                            Default {
+                            default {
                                 # Accept whatever type is returned
                                 $VarValue = & $Var.function @FunctionParamsHash
                             }
                         } 
                     }
-                    Catch {
+                    catch {
                         ol e "Error executing variable expression for: '$($Var.name)', expression: '$($Var.value)'"
                         $PSCmdlet.ThrowTerminatingError($_)
                     }
@@ -224,7 +224,7 @@ function Resolve-DryVariables {
             }
 
             # Add value to the correct output object
-            Switch ($OutPutType) {
+            switch ($OutPutType) {
                 'hashtable' {
                     $PrivateVariablesHash += @{$Var.Name = $VarValue}
                 }
@@ -248,7 +248,7 @@ function Resolve-DryVariables {
     finally {
     }
  
-    Switch ($OutPutType) {
+    switch ($OutPutType) {
         'hashtable' {
             return $PrivateVariablesHash
         }

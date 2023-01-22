@@ -20,7 +20,7 @@
 #>
 
 [ScriptBlock]$DryAD_SB_RemoteWebCert_Export = {
-    Param (
+    param (
         [String] $Path,
         [Array]  $SignatureAlgorithms,
         [String] $KeyUsage
@@ -33,20 +33,20 @@
         }
 
         # If multiple, use first
-        If ($Cert -is [Array]) {
+        if ($Cert -is [Array]) {
             $Cert = $Cert[0]
         }
         
-        If ($Cert -is [System.Security.Cryptography.X509Certificates.X509Certificate2]) {
+        if ($Cert -is [System.Security.Cryptography.X509Certificates.X509Certificate2]) {
             Export-Certificate -Cert $Cert -FilePath $Path -Type CERT -Force -ErrorAction Stop | 
                 Out-Null
         }
-        Else {
-            Throw "Certificate not found"
+        else {
+            throw "Certificate not found"
         }
-        Return @($True, '')
+        return @($True, '')
     }
-    Catch {
-        Return @($False, "$($_.ToString())")
+    catch {
+        return @($False, "$($_.ToString())")
     }
 }

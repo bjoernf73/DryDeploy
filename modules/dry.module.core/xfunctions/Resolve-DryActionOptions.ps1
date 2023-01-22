@@ -107,7 +107,7 @@ function Resolve-DryActionOptions {
         $Credentials = $null
         $Credentials = New-Object -TypeName PSCustomObject
         $c = 0
-        $Action.Credentials.PSObject.Properties.ForEach({$c++})
+        $Action.Credentials.PSObject.Properties.foreach({$c++})
         for ($CredCount = 1; $CredCount -le $c; $CredCount++) {
             $GetCredentialsParams = @{
                 Alias     = $Action.credentials."Credential$CredCount" 
@@ -181,7 +181,7 @@ function Resolve-DryActionOptions {
         }
 
         # Create the target folder
-        If (-not (Test-Path -Path $ConfigTargetPath -ErrorAction Ignore)) {
+        if (-not (Test-Path -Path $ConfigTargetPath -ErrorAction Ignore)) {
             New-Item -Path $ConfigTargetPath -ItemType Directory -Confirm:$false -Force | Out-Null
         }
 

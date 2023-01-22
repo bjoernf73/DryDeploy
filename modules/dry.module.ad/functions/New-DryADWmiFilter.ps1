@@ -18,9 +18,9 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
-Function New-DryADWmiFilter {
+function New-DryADWmiFilter {
     [CmdletBinding(DefaultParameterSetName = 'Local')]
-    Param (
+    param (
         [Parameter(Mandatory, HelpMessage = 'The Name of the WMI Query')]
         [String]
         $Name,
@@ -44,12 +44,12 @@ Function New-DryADWmiFilter {
         $DomainController
     )
     
-    If ($PSCmdlet.ParameterSetName -eq 'Remote') {
+    if ($PSCmdlet.ParameterSetName -eq 'Remote') {
         $Server = 'localhost'
         ol v @('Session Type', 'Remote')
         ol v @('Remoting to Domain Controller', $PSSession.ComputerName)
     }
-    Else {
+    else {
         $Server = $DomainController
         ol v @('Session Type', 'Local')
         ol v @('Using Domain Controller', $Server)
@@ -63,14 +63,14 @@ Function New-DryADWmiFilter {
             ScriptBlock  = $DryAD_SB_WMIFilter_Get
             ArgumentList = $GetArgumentList
         }
-        If ($PSCmdlet.ParameterSetName -eq 'Remote') {
+        if ($PSCmdlet.ParameterSetName -eq 'Remote') {
             $InvokeGetParams += @{
                 Session = $PSSession
             }
         }
         $GetResult = Invoke-Command @InvokeGetParams
 
-        Switch ($GetResult) {
+        switch ($GetResult) {
             $True {
                 ol s 'WMI Filter exists already'
                 ol v "The WMIFilter '$Name' exists already"
@@ -78,17 +78,17 @@ Function New-DryADWmiFilter {
             $False {
                 ol v "The WMIFilter '$Name' does not exist, must be created"
             }
-            Default {
+            default {
                 ol w "Error trying to get WMIFilter '$Name'"
-                Throw $GetResult.ToString()
+                throw $GetResult.ToString()
             }
         } 
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }  
 
-    If ($GetResult -eq $False) {
+    if ($GetResult -eq $False) {
         try {
             $SetArgumentList = @($Name, $Description, $Query, $Server)
             $InvokeSetParams = @{
@@ -96,24 +96,24 @@ Function New-DryADWmiFilter {
                 ArgumentList = $SetArgumentList
                 ErrorAction  = 'Stop'
             }
-            If ($PSCmdlet.ParameterSetName -eq 'Remote') {
+            if ($PSCmdlet.ParameterSetName -eq 'Remote') {
                 $InvokeSetParams += @{
                     Session = $PSSession
                 }
             }
             $SetResult = Invoke-Command @InvokeSetParams
-            Switch ($SetResult) {
+            switch ($SetResult) {
                 $True {
                     ol s "WMIFilter was created"
                     ol v "WMIFilter '$Name' was created"
                 }
-                Default {
+                default {
                     ol f "WMIFilter was not created"
-                    Throw $SetResult
+                    throw $SetResult
                 }
             } 
         }
-        Catch {
+        catch {
             $PSCmdlet.ThrowTerminatingError($_)
         }
     }

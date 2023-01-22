@@ -20,9 +20,9 @@ Using Namespace Microsoft.Win32
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-Function Set-DryADRemoteRegistry {
+function Set-DryADRemoteRegistry {
     [CmdletBinding()] 
-    Param (
+    param (
         [Parameter()]
         [ValidateSet('HKEY_CLASSES_ROOT', 'HKEY_CURRENT_USER', 'HKEY_LOCAL_MACHINE', 'HKEY_USERS', 'HKEY_CURRENT_CONFIG', 'HKEY_DYN_DATA')]
         [String]$BaseKey = 'HKEY_LOCAL_MACHINE',
@@ -45,7 +45,7 @@ Function Set-DryADRemoteRegistry {
     )
     try {
     
-        Switch ($BaseKey) {
+        switch ($BaseKey) {
             'HKEY_CLASSES_ROOT' { 
                 [uint32]$BaseKeyInt = 2147483648 
             }
@@ -64,13 +64,13 @@ Function Set-DryADRemoteRegistry {
             'HKEY_DYN_DATA' { 
                 [uint32]$BaseKeyInt = 2147483654 
             }
-            Default { 
-                Throw "Unknown BaseKey: $BaseKey"
+            default { 
+                throw "Unknown BaseKey: $BaseKey"
             }
         }
         $LeafKey = $LeafKey.Replace('\\', '\')
       
-        Switch ($ValueType) {
+        switch ($ValueType) {
             'Binary' {
                 # System.Management.ManagementBaseObject GetBinaryValue(System.UInt32 hDefKey, System.String sSubKeyName, System.String sValueName)
                 ol e "Value Type 'Binary' is not implemented"
@@ -78,7 +78,7 @@ Function Set-DryADRemoteRegistry {
             }
             'Dword' {
                 [ScriptBlock]$DwordScriptBlock = {
-                    Param (
+                    param (
                         [Uint32] $BaseKeyInt,
                         [String] $LeafKey,
                         [String] $ValueName,
@@ -97,10 +97,10 @@ Function Set-DryADRemoteRegistry {
                         Invoke-CimMethod @InvokeCimMethodParams | Out-Null
                         $Result[0] = $True
                     } 
-                    Catch {
+                    catch {
                         $Result[1] = $_
                     }  
-                    Finally {
+                    finally {
                         $Result
                     }
                 }
@@ -110,7 +110,7 @@ Function Set-DryADRemoteRegistry {
                     'ArgumentList' = @($BaseKeyInt, $LeafKey, $ValueName, $ValueData)
                 }
 
-                If ($PSSession) {
+                if ($PSSession) {
                     $InvokeCommandParams += @{
                         'Session' = $PSSession
                     }
@@ -138,20 +138,20 @@ Function Set-DryADRemoteRegistry {
             }
         }
 
-        Switch ($Result[0]) {
+        switch ($Result[0]) {
             $True {
                 ol v "Successfully configured remote registry"
             }
             $False {
                 ol e "Failed to configure remote registry"
-                Throw $Result[1]
+                throw $Result[1]
             }
         }
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    Finally {
+    finally {
         
     } 
 }

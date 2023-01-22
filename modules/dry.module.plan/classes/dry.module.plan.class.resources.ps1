@@ -386,7 +386,7 @@ class Resources {
                         if ($BuildRole -is [Array]) {
                             throw "Multiple Roles in the Build with order $RoleCount"
                         }
-                        elseIf ($Null -eq $BuildRole) {
+                        elseif ($Null -eq $BuildRole) {
                             throw "No Roles in the Build with order $RoleCount"
                         }
     
@@ -426,7 +426,7 @@ class Resources {
                     if ($BuildRole -is [Array]) {
                         throw "Multiple Roles in the Build with order $RoleCount"
                     }
-                    elseIf ($Null -eq $BuildRole) {
+                    elseif ($Null -eq $BuildRole) {
                         throw "No Roles in the Build with order $RoleCount"
                     }
 

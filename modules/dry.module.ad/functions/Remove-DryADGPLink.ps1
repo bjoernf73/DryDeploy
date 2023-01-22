@@ -19,9 +19,9 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-Function Remove-DryADGPLink {
+function Remove-DryADGPLink {
     [CmdletBinding(DefaultParameterSetName = 'Local')]
-    Param (
+    param (
         [Parameter(Mandatory, HelpMessage = "Object containing description ov an OU and set of ordered GPLinks")]
         [PSObject]
         $GPOLinkObject,
@@ -44,24 +44,24 @@ Function Remove-DryADGPLink {
         $DomainController
     )
 
-    If ($PSCmdLet.ParameterSetName -eq 'Remote') {
+    if ($PSCmdLet.ParameterSetName -eq 'Remote') {
         $Server = 'localhost'
         ol v @('Session Type', 'Remote')
         ol v @('Remoting to Domain Controller', "$($PSSession.ComputerName)")
     }
-    Else {
+    else {
         $Server = $DomainController
         ol v @('Session Type', 'Local')
         ol v @('Using Domain Controller', "$Server")
     }
   
     # Add the domainDN to $OU if not already done
-    If ($GPOLinkObject.Path -notmatch "$DomainDN$") {
-        If (($GPOLinkObject.Path).Trim() -eq '') {
+    if ($GPOLinkObject.Path -notmatch "$DomainDN$") {
+        if (($GPOLinkObject.Path).Trim() -eq '') {
             # The domain root
             $GPOLinkObject.Path = $DomainDN
         }
-        Else {
+        else {
             $GPOLinkObject.Path = $GPOLinkObject.Path + ',' + $DomainDN
         }
     }
@@ -73,21 +73,21 @@ Function Remove-DryADGPLink {
             ScriptBlock  = $DryAD_SB_GPLink_Remove
             ArgumentList = $RemoveLinkArgumentList
         }
-        If ($PSCmdLet.ParameterSetName -eq 'Remote') {
+        if ($PSCmdLet.ParameterSetName -eq 'Remote') {
             $InvokeRemoveLinkParams += @{
                 Session = $PSSession
             }
         }
         $RemoveLinkRet = Invoke-Command @InvokeRemoveLinkParams 
         
-        If ($RemoveLinkRet[0] -eq $True) {
+        if ($RemoveLinkRet[0] -eq $True) {
             ol s "Successfully removed link for GPO '$LinkToRemove'"
         }
-        Else {
-            Throw $RemoveLinkRet[1]
+        else {
+            throw $RemoveLinkRet[1]
         }
     }
-    Catch {
+    catch {
         $PSCmdLet.ThrowTerminatingError($_)
     }
 }

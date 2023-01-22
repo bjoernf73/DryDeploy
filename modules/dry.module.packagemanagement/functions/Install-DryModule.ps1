@@ -76,7 +76,7 @@ function Install-DryModule {
                 if ($ExistingModule.Version -lt $Module.minimumversion) {
                     if ($Module.scope -eq 'AllUsers') {
                         if (-not (Test-DryElevated)) {
-                            Throw "Some Nuget Modules must be installed in the 'AllUsers' scope - run elevated (Run as Administrator)"
+                            throw "Some Nuget Modules must be installed in the 'AllUsers' scope - run elevated (Run as Administrator)"
                         }
                     }
                     $UpdateModuleParams = @{
@@ -91,21 +91,21 @@ function Install-DryModule {
                 if ($ExistingModule.Version -gt $Module.maximumversion) {
                     # don't bother with this
                     ol w "The installed module '$($module.name) (version: $($ExistingModule.version))' must be manually uninstalled. You need the lower version $($module.version) instead"
-                    Throw "The installed module '$($module.name) (version: $($ExistingModule.version))' must be manually uninstalled. You need the lower version $($module.version) instead"
+                    throw "The installed module '$($module.name) (version: $($ExistingModule.version))' must be manually uninstalled. You need the lower version $($module.version) instead"
                 }
             }
             elseif ($module.requiredversion) {
                 if ($ExistingModule.Version -ne $Module.requiredversion) {
                     # don't bother with this
                     ol w "The installed module '$($module.name) (version: $($ExistingModule.version))' must be manually uninstalled. You need required version $($module.version) instead"
-                    Throw "The installed module '$($module.name) (version: $($ExistingModule.version))' must be manually uninstalled. You need required version $($module.version) instead"
+                    throw "The installed module '$($module.name) (version: $($ExistingModule.version))' must be manually uninstalled. You need required version $($module.version) instead"
                 }
             }
         }
         else {
             if ($Module.scope -eq 'AllUsers') {
                 if (-not (Test-DryElevated)) {
-                    Throw "Some Nuget Modules must be installed in the 'AllUsers' scope - run elevated (Run as Administrator)"
+                    throw "Some Nuget Modules must be installed in the 'AllUsers' scope - run elevated (Run as Administrator)"
                 }
             }
             Install-Module @InstallModuleParams 

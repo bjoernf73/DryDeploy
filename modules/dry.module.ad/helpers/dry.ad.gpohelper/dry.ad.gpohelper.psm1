@@ -672,7 +672,7 @@ class GroupPolicy : BaseSettings {
             }
             else {
                 Write-Warning "The GPO Comment section may only contain 2047 carachters (new line counts 2)"
-                Throw "The GPO Comment section may only contain 2047 carachters (new line counts 2)"
+                throw "The GPO Comment section may only contain 2047 carachters (new line counts 2)"
             } 
         }
 
@@ -793,7 +793,7 @@ class GroupPolicy : BaseSettings {
             $AuditFileContent = $this.PolicySettings.AuditSettings | 
             Select-Object -Property * -ExcludeProperty ObjectType | 
             ConvertTo-Csv -NoTypeInformation -Delimiter "," | 
-            ForEach-Object { $_.Replace('"', '') } 
+            foreach-Object { $_.Replace('"', '') } 
             
             try {
                 $AuditFileContent | Out-File -FilePath $AuditPath\audit.csv -Encoding utf8 -ErrorAction Stop
@@ -1252,7 +1252,7 @@ class Utils : BaseSettings {
                     }
                 } while ($Errorcount -lt 10)
                 
-                Foreach ($j in $($InputObject[$i].keys | Sort-Object)) {
+                foreach ($j in $($InputObject[$i].keys | Sort-Object)) {
                     if ($j -match "^Comment[\d]+") {
                         $Errorcount = 0
                         do {
@@ -1473,7 +1473,7 @@ class Utils : BaseSettings {
         [string]$Scope # Machine, User
     ) {
         $Utils = [Utils]::new()
-        $ScriptsToReturn = @()
+        $ScriptsToreturn = @()
 
         $ScriptCmd = [System.String]::Empty
         $Target = $null
@@ -1547,7 +1547,7 @@ class Utils : BaseSettings {
                 $ScriptComparer.ScriptParameters = $param
                 $ScriptComparer.IsPowerShell = $PowerShell
                 $ScriptComparer.Content = $ScriptContent
-                $ScriptsToReturn += $ScriptComparer
+                $ScriptsToreturn += $ScriptComparer
             }
         }
         return $ScriptsToReturn
@@ -1564,11 +1564,11 @@ class Utils : BaseSettings {
             $count = $count + 2
         })
         $count = $count - 2
-        If ($count -gt $threshold) {
-            Return $false
+        if ($count -gt $threshold) {
+            return $false
         }
-        Else  {
-            Return $true
+        else  {
+            return $true
         }  
     }
 }
@@ -1803,7 +1803,7 @@ class GroupPolicyPreference : BaseSettings {
     }
 }
 
-Function Export-GroupPolicyFromAD {
+function Export-GroupPolicyFromAD {
     param (
         [string]$Name,
         [string]$FileName,
@@ -1840,7 +1840,7 @@ function Test-GroupPolicyExistenceInAD {
     }
 }
 
-Function Import-GroupPolicyToAD {
+function Import-GroupPolicyToAD {
     param (
         [string]$Name,
         [string]$FileName,
@@ -1879,4 +1879,4 @@ Function Import-GroupPolicyToAD {
     }
 }
 
-Export-ModuleMember -Function Export-GroupPolicyFromAD,Import-GroupPolicyToAD,Compare-GroupPolicyObjects,Test-GroupPolicyExistenceInAD
+Export-ModuleMember -function Export-GroupPolicyFromAD,Import-GroupPolicyToAD,Compare-GroupPolicyObjects,Test-GroupPolicyExistenceInAD

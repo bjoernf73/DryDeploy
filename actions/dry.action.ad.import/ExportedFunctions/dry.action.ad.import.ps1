@@ -1,7 +1,7 @@
 Using Module dry.module.ad
 # Using Module ActiveDirectory
 # Using Module GroupPolicy
-Function dry.action.ad.import {
+function dry.action.ad.import {
     [CmdletBinding()]  
     param (
         [Parameter(Mandatory,HelpMessage="The resolved action object")]

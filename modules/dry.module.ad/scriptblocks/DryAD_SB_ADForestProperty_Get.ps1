@@ -19,14 +19,14 @@
 #>
 
 [ScriptBlock]$DryAD_SB_ADForestProperty_Get = {
-    Param (
+    param (
         $Property,
         $Server
     ) 
     try {
         (Get-ADForest -Server $Server -ErrorAction Stop)."$Property"
     }
-    Catch {
+    catch {
         $_
     }
 }

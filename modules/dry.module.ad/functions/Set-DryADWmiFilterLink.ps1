@@ -17,9 +17,9 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
-Function Set-DryADWmiFilterLink {
+function Set-DryADWmiFilterLink {
     [CmdletBinding(DefaultParameterSetName = 'Local')]
-    Param (
+    param (
         [Parameter(Mandatory)]
         [String]
         $GPOName,
@@ -39,12 +39,12 @@ Function Set-DryADWmiFilterLink {
         $DomainController
     )
 
-    If ($PSCmdlet.ParameterSetName -eq 'Remote') {
+    if ($PSCmdlet.ParameterSetName -eq 'Remote') {
         $Server = 'localhost'
         ol v @('Session Type', 'Remote')
         ol v @('Remoting to Domain Controller', $PSSession.ComputerName)
     }
-    Else {
+    else {
         $Server = $DomainController
         ol v @('Session Type', 'Local')
         ol v @('Using Domain Controller', $Server)
@@ -53,7 +53,7 @@ Function Set-DryADWmiFilterLink {
     try {
         # Test the existence of the GPO and the WMIFilter in AD
         [ScriptBlock]$TestADObjectScriptBlock = {
-            Param (
+            param (
                 $Filter,
                 $Server
             )
@@ -66,13 +66,13 @@ Function Set-DryADWmiFilterLink {
                 }
                 $ADObject = $Null
                 $ADObject = Get-ADObject @GetADObjectParams
-                If ($Null -eq $ADObject) {
-                    Throw "Object not found"
+                if ($Null -eq $ADObject) {
+                    throw "Object not found"
                 }
                 $True
             }
-            Catch {
-                Throw $_
+            catch {
+                throw $_
             }
         }
     
@@ -81,7 +81,7 @@ Function Set-DryADWmiFilterLink {
             WMIFilter = "(ObjectClass -eq 'msWMI-Som') -and (msWMI-name -eq '$WMIFilterName')" 
         }
     
-        $Filters.Keys.ForEach({
+        $Filters.Keys.foreach({
                 $Filter = $Filters["$_"]
                 ol v "Searching for filter", "$Filter"
                 $TestArgumentList = @($Filters["$_"], $Server)
@@ -89,25 +89,25 @@ Function Set-DryADWmiFilterLink {
                     ScriptBlock  = $TestADObjectScriptBlock
                     ArgumentList = $TestArgumentList
                 }
-                If ($PSCmdlet.ParameterSetName -eq 'Remote') {
+                if ($PSCmdlet.ParameterSetName -eq 'Remote') {
                     $InvokeTestParams += @{
                         Session = $PSSession
                     }
                 }
-                Switch (Invoke-Command @InvokeTestParams) {
+                switch (Invoke-Command @InvokeTestParams) {
                     $True {
                         ol v "Verified that '$Filter' returned an object from AD"
                     }
-                    Default {
+                    default {
                         ol v "Failed get '$Filter' in AD"
-                        Throw $_
+                        throw $_
                     }
                 }
             })
 
         # If we reached here, the GPO and WMI Filter exist
         [ScriptBlock]$SetScriptBlock = {
-            Param (
+            param (
                 $GPOName,
                 $WMIFilterName,
                 $Server
@@ -136,12 +136,12 @@ Function Set-DryADWmiFilterLink {
                     Server      = $Server
                     ErrorAction = 'Stop'
                 }
-                If ($Null -eq $GPOADObject.gPCWQLFilter) {
+                if ($Null -eq $GPOADObject.gPCWQLFilter) {
                     $SetParams += @{
                         Add = @{gPCWQLFilter = $gPCWQLFilter }
                     }
                 }
-                Else {
+                else {
                     $SetParams += @{
                         Replace = @{gPCWQLFilter = $gPCWQLFilter }
                     }
@@ -150,8 +150,8 @@ Function Set-DryADWmiFilterLink {
                 $GPOADObject | Set-ADObject @SetParams | Out-Null
                 $True
             }
-            Catch {
-                Throw $_
+            catch {
+                throw $_
             }
         }
         $SetArgumentList = @($GPOName, $WMIFilterName, $Server)
@@ -159,26 +159,26 @@ Function Set-DryADWmiFilterLink {
             ScriptBlock  = $SetScriptBlock
             ArgumentList = $SetArgumentList
         }
-        If ($PSCmdlet.ParameterSetName -eq 'Remote') {
+        if ($PSCmdlet.ParameterSetName -eq 'Remote') {
             $InvokeSetParams += @{
                 Session = $PSSession
             }
         }
         $SetResult = Invoke-Command @InvokeSetParams
 
-        Switch ($SetResult) {
+        switch ($SetResult) {
             $True {
                 ol s "WMIFilter applied to GPO"
                 ol v "The WMIFilter '$WMIFilterName' was applied to GPO '$GPOName'"
             }
-            Default {
+            default {
                 ol f "WMIFilter not applied to GPO"
                 ol e "The WMIFilter '$WMIFilterName' was not applied to GPO '$GPOName': $($SetResult.ToString())"
-                Throw $SetResult.ToString()
+                throw $SetResult.ToString()
             }
         }
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

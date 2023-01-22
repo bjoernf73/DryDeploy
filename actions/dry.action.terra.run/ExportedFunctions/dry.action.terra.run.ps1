@@ -24,7 +24,7 @@ function dry.action.terra.run {
         [HashTable]
         $ActionParams
     )
-    Try {
+    try {
         Push-Location
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             SourceFile is the top .tf file
@@ -50,13 +50,13 @@ function dry.action.terra.run {
         # Terraform Init
         & terraform init 
         if ($LastExitCode -ne 0) {
-            Throw "Terraform Init failed: $LastExitCode" 
+            throw "Terraform Init failed: $LastExitCode" 
         }
         
         # Terraform Validate
         & terraform validate
         if ($LastExitCode -ne 0) {
-            Throw "Terraform Validate failed: $LastExitCode" 
+            throw "Terraform Validate failed: $LastExitCode" 
         }
 
         # Terraform Apply
@@ -101,7 +101,7 @@ function dry.action.terra.run {
         # ol i "& terraform apply -auto-approve $Arguments"
         & terraform apply -auto-approve $Arguments
         if ($LastExitCode -ne 0) {
-            Throw "Terraform Apply failed: $LastExitCode" 
+            throw "Terraform Apply failed: $LastExitCode" 
         }
         else {
             <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -130,15 +130,15 @@ function dry.action.terra.run {
             }
         }   
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    Finally {
+    finally {
         Pop-Location
-        If ($GLOBAL:dry_var_global_KeepConfigFiles) {
+        if ($GLOBAL:dry_var_global_KeepConfigFiles) {
             ol i @('Keeping ConfigFiles in',"$ConfigTargetPath")
         }
-        Else {
+        else {
             #ol i @('Removing ConfigFiles from',"$ConfigTargetPath")
             # Remove-Item -Path $ConfigTargetPath -Recurse -Force -Confirm:$false
         }

@@ -22,12 +22,12 @@
 
 $FunctionsPath = "$PSScriptRoot\functions\*.ps1"
 $Functions     = Resolve-Path -Path $FunctionsPath -ErrorAction Stop
-ForEach ($Function in $Functions) {
+foreach ($function in $Functions) {
     . $Function.Path
 }
 
 $ExportedFunctionsPath = "$PSScriptRoot\xfunctions\*.ps1"
 $ExportedFunctions     = Resolve-Path -Path $ExportedFunctionsPath -ErrorAction Stop
-ForEach ($Function in $ExportedFunctions) {
+foreach ($function in $ExportedFunctions) {
     . $Function.Path
 }

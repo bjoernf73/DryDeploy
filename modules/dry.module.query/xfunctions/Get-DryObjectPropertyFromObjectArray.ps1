@@ -120,10 +120,10 @@ function Get-DryObjectPropertyFromObjectArray {
             }
 
             if ($ReturnMultiple) {
-                $ValuesToReturn = @()
-                $MatchObjects.ForEach({
+                $ValuesToreturn = @()
+                $MatchObjects.foreach({
                     if ($_.PSObject.Properties.Name -contains "$Property") {
-                        $ValuesToReturn += $_."$Property"
+                        $ValuesToreturn += $_."$Property"
                     }
                     else {
                         if (-not $AllowNoProperty) {

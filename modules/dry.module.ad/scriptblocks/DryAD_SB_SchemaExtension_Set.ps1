@@ -19,7 +19,7 @@
 #>
 
 [ScriptBlock]$DryAD_SB_SchemaExtension_Set = {
-    Param(
+    param (
         $LDFContent,
         $SchemaMaster
     )
@@ -27,14 +27,14 @@
         $LDFFilePath = Join-Path -Path $ENV:LOCALAPPDATA -ChildPath 'LdfContent.ldf' -ErrorAction Stop
         $LDFContent | Out-File -FilePath $LDFFilePath -Encoding ASCII -Force -ErrorAction Stop
         $LdifdeResult = & ldifde -i -k -s "$SchemaMaster" -f "$LDFFilePath" -v
-        Return @('', $LdifdeResult)
+        return @('', $LdifdeResult)
     }
-    Catch {
-        Return @($_.ToString(), $LdifdeResult)
+    catch {
+        return @($_.ToString(), $LdifdeResult)
     }
-    Finally {
+    finally {
         Remove-Item -Path $LDFFilePath -Force -ErrorAction Ignore
-        @('LDFFilePath', 'LDFContent', 'LdifdeResult').ForEach({
+        @('LDFFilePath', 'LDFContent', 'LdifdeResult').foreach({
                 Remove-Variable -Name $_ -ErrorAction Ignore
             })
     } 

@@ -17,28 +17,28 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-Function Get-DryDscADSubnet {
+function Get-DryDscADSubnet {
     [CmdletBinding()]  
-    Param (
+    param (
         [Parameter(Mandatory=$true)]
         [psobject]$Resource,
 
         [Parameter(Mandatory=$true)]
         [psobject]$Configuration
     )
-    Try {
+    try {
         # Holds all subnets at the site, but the resource's own subnet is first, then the rest
         $AllSubnetsatSite = @()
         
         # Get resource's site
         $Site = $Configuration.CoreConfig.network.sites | Where-Object { $_.Name -eq $Resource.network.site }
-        If (($Site -is [array]) -or ($Null -eq $Site)) {
+        if (($Site -is [array]) -or ($Null -eq $Site)) {
             Write-Error "Multiple or no sites matched pattern '$($Resource.network.site)'" -ErrorAction Stop
         }
 
         # Get the resource's subnet. That must exist, and there should be only one
         $Subnet = $Site.Subnets | Where-Object { $_.Name -eq $Resource.network.subnet_name }
-        If (($Subnet -is [array]) -or ($Null -eq $Subnet)) {
+        if (($Subnet -is [array]) -or ($Null -eq $Subnet)) {
             Write-Error "Multiple or no subnets matched pattern '$($Resource.network.subnet_name)'" -ErrorAction Stop
         }
 
@@ -50,14 +50,14 @@ Function Get-DryDscADSubnet {
         $AllSubnetsatSite+= "$($Subnetobject.NetworkAddress)/$($Subnetobject.NetworkLength)"
 
         # then the others
-        ForEach ($OtherSubnet in $OtherSubnets) {
+        foreach ($OtherSubnet in $OtherSubnets) {
             $Subnetobject = Invoke-PSipcalc -networkaddress "$($OtherSubnet.ip_subnet)/$($OtherSubnet.subnet_mask)"
             $AllSubnetsatSite+= "$($Subnetobject.NetworkAddress)/$($Subnetobject.NetworkLength)"
         }
 
         $AllSubnetsatSite
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

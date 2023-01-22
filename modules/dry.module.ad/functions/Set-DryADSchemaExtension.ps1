@@ -19,9 +19,9 @@ Using Namespace System.Collections.Generic
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
-Function Set-DryADSchemaExtension {
+function Set-DryADSchemaExtension {
     [CmdletBinding(DefaultParameterSetName = 'Local')] 
-    Param (
+    param (
         [Parameter(Mandatory, HelpMessage = 'The Schema Extension type')]
         [String]
         $Type,
@@ -61,14 +61,14 @@ Function Set-DryADSchemaExtension {
         )
 
         # Loop through variables and replace patterns in LDF Content
-        If ($Variables) {
-            ForEach ($Var in $Variables) {
+        if ($Variables) {
+            foreach ($Var in $Variables) {
                 $Content = $Content -Replace "###$($Var.Name)###", "$($Var.Value)"
             }
         }
 
         # Trim start of each line
-        $Content = ($Content -Split "`n" | ForEach-Object { $_.TrimStart() } ) -join "`n"
+        $Content = ($Content -Split "`n" | foreach-Object { $_.TrimStart() } ) -join "`n"
 
         $ExtendSchemaArgumentList = @(
             $Content,
@@ -79,44 +79,44 @@ Function Set-DryADSchemaExtension {
             ArgumentList = $ExtendSchemaArgumentList
             ErrorAction  = 'Stop'
         }
-        If ($PSCmdlet.ParameterSetName -eq 'Remote') {
+        if ($PSCmdlet.ParameterSetName -eq 'Remote') {
             $InvokeSchemaExtensionParams += @{
                 Session = $PSSession
             }
         }
         $ExtendSchemaResult = Invoke-Command @InvokeSchemaExtensionParams
         
-        If ($ExtendSchemaResult[0] -eq '') {
+        if ($ExtendSchemaResult[0] -eq '') {
             $MatchCount = 0
-            $ExtendSchemaResult[1].ForEach({ 
+            $ExtendSchemaResult[1].foreach({ 
                     $CurrentString = $_; 
-                    $SuccessStrings.ForEach({ 
-                            If ($CurrentString -Match $_) { 
+                    $SuccessStrings.foreach({ 
+                            if ($CurrentString -Match $_) { 
                                 $MatchCount++
                             } 
                         })
                 })
-            If ($MatchCount -eq $SuccessCount) {
+            if ($MatchCount -eq $SuccessCount) {
                 ol s "AD Schema is extended"
                 ol i @('Successfully extended AD Schema of Type', $Type)
             }
-            Else {
+            else {
                 ol f "AD Schema not extended"
                 ol w @("Target successcount $SuccessCount, actual", "$MatchCount")
                 # Display thesult in debug
-                $ExtendSchemaResult[1].ForEach({
+                $ExtendSchemaResult[1].foreach({
                         ol d $_
                     })
-                Throw "Schema extension failed"
+                throw "Schema extension failed"
             }
         }
-        Else {
+        else {
             ol f "AD Schema not extended"
             ol e "Schema extension failed"
-            Throw $ExtendSchemaResult[0]
+            throw $ExtendSchemaResult[0]
         }  
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

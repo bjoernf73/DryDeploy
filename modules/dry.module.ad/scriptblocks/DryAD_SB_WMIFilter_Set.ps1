@@ -19,7 +19,7 @@
 #>
 
 [ScriptBlock]$DryAD_SB_WMIFilter_Set = {
-    Param (
+    param (
         $Name,
         $Description,
         $Query,
@@ -36,7 +36,7 @@
         $WMIDistinguishedName = "CN=$WMIGUID,$WMIPath"
         $msWMIParm1 = "$Description " # Fails if empty, therefore the space at the end...
         $msWMIParm2 = $Query.Count.ToString() + ";"
-        $Query | ForEach-Object {
+        $Query | foreach-Object {
             $msWMIParm2 += "3;10;" + $_.Length + ";WQL;root\CIMv2;" + $_ + ";"
         }
 
@@ -64,7 +64,7 @@
         New-ADObject @NewADObjectParams
         $True
     }
-    Catch {
+    catch {
         $_
     }
 }

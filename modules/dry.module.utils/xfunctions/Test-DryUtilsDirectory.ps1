@@ -31,7 +31,7 @@ not exist
    
 .PARAMETER EmptyOrNotExist
 Will only pass if the directory either a. does exist, or, if it
-does, b. it is empty. Else, an error is thrown
+does, b. it is empty. else, an error is thrown
 
 .PARAMETER NotExist
 Will only pass if the directory either does not exist 

@@ -21,12 +21,12 @@
 
 $ScriptBlocksPath = "$PSScriptRoot\scriptblocks\*.ps1"
 $ScriptBlocks = Resolve-Path -Path $ScriptBlocksPath -ErrorAction Stop
-ForEach ($ScriptBlock in $ScriptBlocks) {
+foreach ($ScriptBlock in $ScriptBlocks) {
     . $ScriptBlock.Path
 }
 
 $ExportedFunctionsPath = "$PSScriptRoot\xfunctions\*.ps1"
 $Functions = @(Resolve-Path -Path $ExportedFunctionsPath -ErrorAction Stop)
-foreach ($Function in $Functions) {
+foreach ($function in $Functions) {
     . $Function.Path
 }

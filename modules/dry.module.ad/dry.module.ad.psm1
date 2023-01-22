@@ -32,15 +32,15 @@ $Functions             = Resolve-Path -Path $FunctionsPath -ErrorAction Stop
 $Classes               = Resolve-Path -Path $ClassesPath -ErrorAction Stop
 $ExportedFunctions     = Resolve-Path -Path $ExportedFunctionsPath -ErrorAction Stop
 
-ForEach ($ScriptBlock in $ScriptBlocks) {
+foreach ($ScriptBlock in $ScriptBlocks) {
     . $ScriptBlock.Path
 }
-ForEach ($Function in $Functions) {
+foreach ($function in $Functions) {
     . $Function.Path
 }
-ForEach ($Class in $Classes) {
+foreach ($Class in $Classes) {
     . $Class.Path
 }
-ForEach ($ExportedFunction in $ExportedFunctions) {
+foreach ($Exportedfunction in $ExportedFunctions) {
     . $ExportedFunction.Path
 }

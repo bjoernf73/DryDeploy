@@ -46,7 +46,7 @@ function Test-DryUtilsPort {
             (-not $Udp)) {
             $Tcp = $True
         }
-        #Typically you never do this, but in this case I felt it was for the benefit of the Function  
+        #Typically you never do this, but in this case I felt it was for the benefit of the function  
         #as any errors will be noted in the output of the Report          
         $ErrorActionPreference   = 'SilentlyContinue'
         $Report                  = @()

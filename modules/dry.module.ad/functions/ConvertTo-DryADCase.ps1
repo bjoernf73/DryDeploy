@@ -18,9 +18,9 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-Function ConvertTo-DryADCase {
+function ConvertTo-DryADCase {
     [CmdletBinding()]
-    Param (
+    param (
         [Parameter(Mandatory)]
         [AllowEmptyString()]
         [String]$Name,
@@ -29,42 +29,42 @@ Function ConvertTo-DryADCase {
         [Parameter(Mandatory)]
         [String]$Case 
     )
-    If ($Case -eq 'capitalize') {
+    if ($Case -eq 'capitalize') {
         $Case = 'capitalized'
     }
     ol d @("Converting '$Name' to type", "$Case") 
    
-    Function PRIVATE:Capitalize {
+    function PRIVATE:Capitalize {
         [CmdletBinding()]
-        Param (
+        param (
             [Parameter(Mandatory)]
             [AllowEmptyString()]
             [String]$Name
         )
         $Name = $Name.Trim()
 
-        If ($Name.length -le 1) {
-            Return $Name.ToUppper()
+        if ($Name.length -le 1) {
+            return $Name.ToUppper()
         } 
-        ElseIf ($Name -match ' ') {
+        elseif ($Name -match ' ') {
             $Parts = $Name.split(' ')
             [String]$AccumulatedParts = ''
-            ForEach ($Part in $Parts) {
+            foreach ($Part in $Parts) {
                 $UpperCasePart = ($Part.SubString(0, 1)).ToUpper()
                 $LowerCasePart = ($Part.Substring(1, ($Part.length - 1))).ToLower()
                 $AccumulatedParts += $UpperCasePart + $LowerCasePart + ' '
             }
-            Return $AccumulatedParts.Trim()
+            return $AccumulatedParts.Trim()
         } 
-        Else {
+        else {
             $UpperCasePart = ($Name.SubString(0, 1)).ToUpper()
             $LowerCasePart = ($Name.Substring(1, ($Name.length - 1))).ToLower()
             $ReturnString = $UpperCasePart + $LowerCasePart
-            Return $ReturnString
+            return $ReturnString
         }        
     }
     
-    Switch ($Case) {
+    switch ($Case) {
         'ignore' {
             $ReturnValue = $Name
         }
@@ -76,13 +76,13 @@ Function ConvertTo-DryADCase {
         }
         'capitalized' {
             # If distinguishedname, $Name is split into parts. First letter of each part is capitalized
-            If (($Name -match "OU=") -or 
+            if (($Name -match "OU=") -or 
                 ($Name -match "CN=") -or 
                 ($Name -match "DC=")
             ) {
                 [String]$AccumulatedStringValue = ''
                 $NameParts = @($Name.Split(','))
-                ForEach ($Part in $NameParts) {
+                foreach ($Part in $NameParts) {
                     # The first three letters are part of 
                     # delimiter, 'OU=', 'CN=' or 'DC='
                     $Delimter = $Part.SubString(0, 3)
@@ -93,11 +93,11 @@ Function ConvertTo-DryADCase {
                 }
                 $ReturnValue = $AccumulatedStringValue.TrimEnd(',')
             } 
-            Else {
-                If ($Name.length -le 1) {
+            else {
+                if ($Name.length -le 1) {
                     $ReturnValue = $Name.ToUpper()
                 } 
-                Else {
+                else {
                     $ReturnValue = Capitalize -name $Name
                 }
             }

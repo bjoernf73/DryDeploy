@@ -22,9 +22,9 @@
 .Synopsis 
     Converts Domain FQDN to distinguishedName
 #> 
-Function ConvertTo-DryADDomainDN {
+function ConvertTo-DryADDomainDN {
     [CmdLetBinding()]
-    Param (
+    param (
         [ValidateScript({ $_ -match "^[a-zA-Z0-9][a-zA-Z0-9-_]{0,61}[a-zA-Z0-9]{0,1}\.([a-zA-Z]{1,6}|[a-zA-Z0-9-]{1,30}\.[a-zA-Z]{2,3})$" })]
         [String]$DomainFQDN
     )
@@ -32,17 +32,17 @@ Function ConvertTo-DryADDomainDN {
     try {
         $FQDNParts = $DomainFQDN.Split(".")
         $DomainDN = ""
-        For ($i = 0; $i -le ($FQDNParts.Count - 1); $i++) {
+        for ($i = 0; $i -le ($FQDNParts.Count - 1); $i++) {
             $DomainDN += "DC=$(${FQDNParts}[$i]),"
         }
         $DomainDN = $DomainDN.Remove($DomainDN.Length - 1, 1)
-        Return $DomainDN
+        return $DomainDN
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    Finally {
-        @('DomainFQDN', 'FQDNParts').ForEach({
+    finally {
+        @('DomainFQDN', 'FQDNParts').foreach({
                 Remove-Variable -Name $_ -ErrorAction Ignore
             })
     }

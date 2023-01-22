@@ -1003,7 +1003,7 @@ try {
                 ShowStatus           = $True
             }
             $dry_var_Plan = Get-DryPlan @GetDryPlanParams -ErrorAction Stop
-            $ShowDryPlanParams = $null
+            $GetDryPlanParams = $null
 
             if ($PSCmdlet.ParameterSetName -eq 'Rewind') {
                 ol i "Rewinding one buildstep..."
@@ -1022,8 +1022,7 @@ try {
                 ShowDeselected       = $ShowDeselected
             }
             Show-DryPlan @ShowDryPlanParams
-            
-            $GetDryPlanParams = $null
+            $ShowDryPlanParams = $null
         }
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             
@@ -1388,7 +1387,7 @@ try {
 
                         Execute Action
                     
-                        This is where the Action Function get's called
+                        This is where the Action function get's called
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
                     
@@ -1548,6 +1547,22 @@ catch {
     $PSCmdlet.ThrowTerminatingError($_)
 }
 finally {
+    <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+        Show the final plan and it's status if apply mode
+
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+    if ($PSCmdlet.ParameterSetName -eq 'Apply') {
+        $ShowDryPlanParams       = @{
+            Plan                 = $dry_var_Plan
+            Mode                 = 'Apply' 
+            ConfigCombo          = $dry_var_global_ConfigCombo 
+            ShowConfigCombo      = $true
+            ShowDeselected       = $false
+        }
+        Show-DryPlan @ShowDryPlanParams
+        $ShowDryPlanParams = $null
+    }
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         Reset DD's global Action-specific variables

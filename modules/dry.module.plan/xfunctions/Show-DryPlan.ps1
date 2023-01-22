@@ -53,8 +53,8 @@ function Show-DryPlan {
         )
         try {
             $TargetMessageLength = $Host.UI.RawUI.WindowSize.Width - ($OffSet + $GLOBAL:LoggingOptions.left_column_width + $Postbuffer)
-            If ($TargetMessageLength -lt 10) {
-                If (($GLOBAL:dry_var_global_WarnOnTooNarrowConsole -eq $true) -or ($null -eq $GLOBAL:dry_var_global_WarnOnTooNarrowConsole)) {
+            if ($TargetMessageLength -lt 10) {
+                if (($GLOBAL:dry_var_global_WarnOnTooNarrowConsole -eq $true) -or ($null -eq $GLOBAL:dry_var_global_WarnOnTooNarrowConsole)) {
                     ol w "Increase console width for messages to display properly"
                     $GLOBAL:dry_var_global_WarnOnTooNarrowConsole = $false
                 }
@@ -62,7 +62,7 @@ function Show-DryPlan {
             } 
         }
         catch {
-            If (($GLOBAL:dry_var_global_WarnOnTooNarrowConsole -eq $true) -or ($null -eq $GLOBAL:dry_var_global_WarnOnTooNarrowConsole)) {
+            if (($GLOBAL:dry_var_global_WarnOnTooNarrowConsole -eq $true) -or ($null -eq $GLOBAL:dry_var_global_WarnOnTooNarrowConsole)) {
                 ol w "Increase console width for messages to display properly"
                 $GLOBAL:dry_var_global_WarnOnTooNarrowConsole = $false
             }

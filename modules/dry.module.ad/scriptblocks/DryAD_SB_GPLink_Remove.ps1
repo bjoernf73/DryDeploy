@@ -19,7 +19,7 @@
 #>
 
 [ScriptBlock]$DryAD_SB_GPLink_Remove = {
-    Param (
+    param (
         $OU,
         $LinkToRemove,
         $Server
@@ -36,9 +36,9 @@
         }
         Remove-GPLink @RemoveLinkParams | Out-Null
         $Status = $True
-        Return @($Status, $ErrorString)
+        return @($Status, $ErrorString)
     }
-    Catch {
+    catch {
         $ErrorString = $_.ToString()
         @($Status, $ErrorString)
     }

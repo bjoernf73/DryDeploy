@@ -17,9 +17,9 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
-Function Get-DryADRandomString {
+function Get-DryADRandomString {
     [CmdletBinding()]
-    Param (
+    param (
         [Parameter()]
         [Int]$Length = 20,
 
@@ -31,16 +31,16 @@ Function Get-DryADRandomString {
     )
     try {
         Add-Type -AssemblyName System.Web -ErrorAction Stop
-        Switch ($Secure) {
+        switch ($Secure) {
             $True {
-                Return [SecureString](ConvertTo-SecureString $([System.Web.Security.Membership]::GeneratePassword($Length, $NonAlphabetics)) -AsPlainText -Force)
+                return [SecureString](ConvertTo-SecureString $([System.Web.Security.Membership]::GeneratePassword($Length, $NonAlphabetics)) -AsPlainText -Force)
             }
-            Default {
-                Return [System.Web.Security.Membership]::GeneratePassword($Length, $NonAlphabetics)
+            default {
+                return [System.Web.Security.Membership]::GeneratePassword($Length, $NonAlphabetics)
             }
         }
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

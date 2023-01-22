@@ -19,24 +19,24 @@
 #>
 
 [ScriptBlock]$DryAD_SB_ADDrive_Set = {
-    Param ($Server)
+    param ($Server)
     try {
         $ReturnError = $Null
         $ReturnValue = $False
         $VerboseReturnStrings = @("Entered Scriptblock")
 
         # Make sure ActiveDirectory module is loaded, so the AD drive is mounted
-        If ((Get-Module | Select-Object -Property Name).Name -notcontains 'ActiveDirectory') {
+        if ((Get-Module | Select-Object -Property Name).Name -notcontains 'ActiveDirectory') {
             try {
                 Import-Module -Name 'ActiveDirectory' -ErrorAction Stop
                 $VerboseReturnStrings += @("The AD PSModule was not loaded, but I loaded it successfully")
                 Start-Sleep -Seconds 4
             }
-            Catch {
+            catch {
                 $PSCmdlet.ThrowTerminatingError($_)
             }
         }
-        Else {
+        else {
             $VerboseReturnStrings += @("The AD PSModule was already loaded in session")
         }
 
@@ -58,12 +58,12 @@
                 }
                 New-PSDrive @NewPSDriveParams | Out-Null
             }
-            Catch {
+            catch {
                 $VerboseReturnStrings += @("Failed to create the AD Drive: $($_.ToString())")
                 $PSCmdlet.ThrowTerminatingError($_)
             }
         }
-        Catch {
+        catch {
             $VerboseReturnStrings += @("The AD Drive did not exist, and an error occurred trying to get it?")
             $PSCmdlet.ThrowTerminatingError($_)
         }
@@ -77,11 +77,11 @@
         # If we reached this, assume success
         $ReturnValue = $True
     }
-    Catch {
+    catch {
         $VerboseReturnStrings += "Set-DryADDrive failed"
         $ReturnError = $_
     }
-    Finally {
+    finally {
         @($VerboseReturnStrings, $ReturnValue, $ReturnError)
     }
 }

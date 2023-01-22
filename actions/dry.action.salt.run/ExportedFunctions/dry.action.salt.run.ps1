@@ -1,6 +1,6 @@
-Function dry.action.salt.run {
+function dry.action.salt.run {
     [CmdletBinding()]  
-    Param (
+    param (
         [Parameter(Mandatory,HelpMessage="The resolved action object")]
         [PSObject]$Action,
 
@@ -16,7 +16,7 @@ Function dry.action.salt.run {
         [Parameter(Mandatory=$False,HelpMessage="Hash directly from the command line to be added as parameters to the function that iniates the action")]
         [HashTable]$ActionParams
     )
-    Try {
+    try {
         $Location = Get-Location
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   OPTIONS
@@ -62,19 +62,19 @@ Function dry.action.salt.run {
         #   on the local and remote system
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        If ($MetaConfigObject.dsc_modules) {
+        if ($MetaConfigObject.dsc_modules) {
 
             [string]$DscImportModulesString = "# Importing Desired State Modules `n"
             [string]$DscImportResourcesString = "# Importing Desired State Resources `n"
             
-            ForEach ($DscModule in $MetaConfigObject.dsc_modules) {
+            foreach ($DscModule in $MetaConfigObject.dsc_modules) {
                 # Get all property names
                 $PropertyNames = ($DscModule | Get-Member -MemberType NoteProperty | Select-Object -Property Name).Name
                 
                 # Import-Module string ex: Import-Module -Name 'xDnsServer' -RequiredVersion '1.16.0.0'
                 # To support any ---version (requiredVersion,minimumversion, maximumversion)
                 $DscImportModulesString+="Import-Module "
-                ForEach ($PropertyName in $PropertyNames) {
+                foreach ($PropertyName in $PropertyNames) {
                     $DscImportModulesString+="-$PropertyName '$($DscModule.""$PropertyName"")' "
                 }
                 $DscImportModulesString+="`n"
@@ -102,21 +102,21 @@ Function dry.action.salt.run {
         #   string that is ised as is, or a function call. 
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        If ($MetaConfigObject.dsc_params) {
+        if ($MetaConfigObject.dsc_params) {
 
             [HashTable]$ParamsHash
-            ForEach ($param in $MetaConfigObject.dsc_params) {
+            foreach ($param in $MetaConfigObject.dsc_params) {
 
-                Switch ($param.value_type) {
+                switch ($param.value_type) {
                     'expression' {
                         # The variable value is an expression
-                        Try {
+                        try {
                             Remove-Variable -name varvalue -ErrorAction Ignore
-                            Switch ($param.parameter_type) {
+                            switch ($param.parameter_type) {
                                 'pscredential' {
                                     [pscredential]$varvalue = Invoke-Expression -Command $Param.value
-                                    If ( -not ($varvalue -is [pscredential]) ) {
-                                        Throw "$($param.Name) is not a pscredential!"
+                                    if ( -not ($varvalue -is [pscredential]) ) {
+                                        throw "$($param.Name) is not a pscredential!"
                                     }
                                     ol v "$($param.Name):> user '$($varvalue.username)', password '$($varvalue.password)'"
                                     $ParamsHash += @{ $param.Name = $varvalue }
@@ -124,70 +124,70 @@ Function dry.action.salt.run {
                                 
                                 'array' {
                                     [array]$varvalue = Invoke-Expression -Command $Param.value
-                                    If ( -not ($varvalue -is [array]) ) {
-                                        Throw "$($param.Name) is not an array!"
+                                    if ( -not ($varvalue -is [array]) ) {
+                                        throw "$($param.Name) is not an array!"
                                     }
-                                    ForEach ($item in $varvalue) {
+                                    foreach ($item in $varvalue) {
                                         ol v "$($param.Name):> '$item' (may be empty If not string)"
                                     }
                                     $ParamsHash += @{ $param.Name = $varvalue }
                                 }
 
-                                Default {
+                                default {
                                     # string
                                     [string]$varvalue = Invoke-Expression -Command $Param.value
-                                    If ( -not ($varvalue -is [string]) ) {
-                                        Throw "$($param.Name) is not a string!"
+                                    if ( -not ($varvalue -is [string]) ) {
+                                        throw "$($param.Name) is not a string!"
                                     }
                                     ol v "$($param.Name):> '$varvalue'"
                                     $ParamsHash += @{ $param.Name = $varvalue }
                                 }
                             }   
                         }
-                        Catch {
+                        catch {
                             ol e "Error executing variable expression for: '$($param.name)', expression: '$($param.value)'"
                             $PSCmdlet.ThrowTerminatingError($_)
                         }  
                     }
                     'string' {
                         # The variable value is a plain string
-                        Try {
+                        try {
                             Remove-Variable -name varvalue -ErrorAction Ignore
                             
                             [string]$varvalue = $param.Value
-                            If ( -not ($varvalue -is [string]) ) {
-                                Throw "$($param.Name) is not a string!"
+                            if ( -not ($varvalue -is [string]) ) {
+                                throw "$($param.Name) is not a string!"
                             }
                             ol v "$($param.Name):> '$varvalue'"
                             $ParamsHash += @{ $param.Name = $varvalue }
                         }
-                        Catch {
+                        catch {
                             ol e "Error getting string value for: '$($param.name)', string: '$($param.value)'"
                             $PSCmdlet.ThrowTerminatingError($_)
                         }  
                     }
                     'bool' {
                         # The variable value is a boolean
-                        Try {
+                        try {
                             Remove-Variable -name varvalue -ErrorAction Ignore
                             
                             [Boolean]$varvalue = $param.Value
                             ol v "$($param.Name):> '$varvalue'"
                             $ParamsHash += @{ $param.Name = $varvalue }
                         }
-                        Catch {
+                        catch {
                             ol e "Error getting boolean value for: '$($param.name)', value: '$($param.value)'"
                             $PSCmdlet.ThrowTerminatingError($_)
                         }  
                     }
                     'function' {
                         # The variable value is a function
-                        Try {
+                        try {
                             Remove-Variable -name varvalue,FunctionParamsHash,FunctionParamsNameArr,FunctionParamsName -ErrorAction Ignore
                             [HashTable]$FunctionParamsHash
                             $FunctionParamsNameArr = @($param.parameters | Get-Member -MemberType NoteProperty | Select-Object -Property Name).Name
                             
-                            ForEach ($FunctionParamsName in $FunctionParamsNameArr) {
+                            foreach ($FunctionParamsName in $FunctionParamsNameArr) {
                                 # First, value of $param.parameters."$FunctionParamsName" is now string like '$Resource' and not a variable representing the object $Resource. 
                                 # Fix that by invoking the string
                                 $param.parameters."$FunctionParamsName" = Invoke-Expression -Command ($param.parameters."$FunctionParamsName") -Erroraction 'Stop'
@@ -196,12 +196,12 @@ Function dry.action.salt.run {
                                 $FunctionParamsHash+= @{ $FunctionParamsName = $param.parameters."$FunctionParamsName" }
                             }
                         
-                            Switch ($param.parameter_type) {
+                            switch ($param.parameter_type) {
                                 'pscredential' {
                                     [pscredential]$varvalue = & $param.function @FunctionParamsHash
                                     
-                                    If ( -not ($varvalue -is [pscredential]) ) {
-                                        Throw "$($param.Name) is not a pscredential!"
+                                    if ( -not ($varvalue -is [pscredential]) ) {
+                                        throw "$($param.Name) is not a pscredential!"
                                     }
                                     ol v "$($param.Name):> user '$($varvalue.username)', password '$($varvalue.password)'"
                                     $ParamsHash += @{ $param.Name = $varvalue }
@@ -209,26 +209,26 @@ Function dry.action.salt.run {
                                 
                                 'array' {
                                     [array]$varvalue = & $param.function @FunctionParamsHash
-                                    If ( -not ($varvalue -is [array]) ) {
-                                        Throw "$($param.Name) is not an array!"
+                                    if ( -not ($varvalue -is [array]) ) {
+                                        throw "$($param.Name) is not an array!"
                                     }
-                                    ForEach ($item in $varvalue) {
+                                    foreach ($item in $varvalue) {
                                         ol v "$($param.Name):> '$item' (may be empty if not string)"
                                     }
                                     $ParamsHash += @{ $param.Name = $varvalue }
                                 }
 
-                                Default {
+                                default {
                                     [string]$varvalue = & $param.function @FunctionParamsHash
-                                    If ( -not ($varvalue -is [string]) ) {
-                                        Throw "$($param.Name) is not a string!"
+                                    if ( -not ($varvalue -is [string]) ) {
+                                        throw "$($param.Name) is not a string!"
                                     }
                                     ol v "$($param.Name):> '$varvalue'"
                                     $ParamsHash += @{ $param.Name = $varvalue }
                                 }
                             } 
                         }
-                        Catch {
+                        catch {
                             ol e "Error executing variable expression for: '$($param.name)', expression: '$($param.value)'"
                             $PSCmdlet.ThrowTerminatingError($_)
                         }
@@ -251,20 +251,20 @@ Function dry.action.salt.run {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         $DscTarget = $Resource.resolved_network.ip_address
 
-        If ($MetaConfigObject.dsc_target) { 
+        if ($MetaConfigObject.dsc_target) { 
             $DscTarget = $Null
-            Switch ($MetaConfigObject.dsc_target.value_type) {
+            switch ($MetaConfigObject.dsc_target.value_type) {
                 'expression' {
                     # The variable value is an expression
-                    Try {
+                    try {
                         Remove-Variable -name varvalue -ErrorAction Ignore
                         [string]$varvalue = Invoke-Expression -Command $MetaConfigObject.dsc_target.value
-                        If ( -not ($varvalue -is [string]) ) {
-                            Throw "$($MetaConfigObject.dsc_target.value) is not a string!"
+                        if ( -not ($varvalue -is [string]) ) {
+                            throw "$($MetaConfigObject.dsc_target.value) is not a string!"
                         }
                         $DscTarget = $varvalue
                     }
-                    Catch {
+                    catch {
                         ol e "Error executing dsc_target value expression: $($MetaConfigObject.dsc_target.value)"
                         $PSCmdlet.ThrowTerminatingError($_)
                     }  
@@ -290,14 +290,14 @@ Function dry.action.salt.run {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-        If ($MetaConfigObject.dsc_replacements) {
+        if ($MetaConfigObject.dsc_replacements) {
 
-            ForEach ($Replacement in $MetaConfigObject.dsc_replacements) {
+            foreach ($Replacement in $MetaConfigObject.dsc_replacements) {
 
-                Switch ($Replacement.value_type) {
+                switch ($Replacement.value_type) {
                     'function' {
                         # If $Replacement has parameters, collect them in hash so we can splat
-                        If ($Replacement.parameters) {
+                        if ($Replacement.parameters) {
 
                             Remove-Variable -name ReplacementParamsHash -ErrorAction Ignore
                             [HashTable]$ReplacementParamsHash = @{}
@@ -305,7 +305,7 @@ Function dry.action.salt.run {
                                 Get-Member -MemberType NoteProperty | 
                                 Select-Object -Property Name).Name
                             
-                            ForEach ($ReplacementParamsName in $ReplacementParamsNameArr) {
+                            foreach ($ReplacementParamsName in $ReplacementParamsNameArr) {
                                 # First, value of $Replacement.parameters."$FunctionParamsName" is now string like '$Resource' and not a variable representing the object $Resource. 
                                 # Fix that by invoking the string
                                 $Replacement.parameters."$ReplacementParamsName" = Invoke-Expression -Command ($Replacement.parameters."$ReplacementParamsName") -Erroraction 'Stop'
@@ -343,7 +343,7 @@ Function dry.action.salt.run {
         #   Ensure modules are installed on the target system and executing host
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        If ($MetaConfigObject.dsc_modules) {
+        if ($MetaConfigObject.dsc_modules) {
 
             # Ensure that the local (executing) system has the requires modules
             ol -t 6 -arr 'Trying to install DSC modules on','Local System'
@@ -355,11 +355,11 @@ Function dry.action.salt.run {
             Where-Object { 
                 $_.type -eq 'winrm'
             }
-            If ($Null -eq $SessionConfig) {
+            if ($Null -eq $SessionConfig) {
                 ol -t 1 -m "Unable to find 'connection' of type 'winrm' in environment config"
-                Throw "Unable to find 'connection' of type 'winrm' in environment config"
+                throw "Unable to find 'connection' of type 'winrm' in environment config"
             }
-            Else {
+            else {
                 $GetDryPSSessionParameters += @{ 'SessionConfig'=$SessionConfig}
             }
             
@@ -375,7 +375,7 @@ Function dry.action.salt.run {
             ol -t 6 -m 'Done installing DSC modules' -sh
         }
 
-        If ($MetaConfigObject.dsc_sleep_before_seconds) {
+        if ($MetaConfigObject.dsc_sleep_before_seconds) {
             ol -t 6 -arr "Sleep before applying","$($MetaConfigObject.dsc_sleep_before_seconds) seconds"
             Start-DryUtilsSleep -seconds $MetaConfigObject.dsc_sleep_before_seconds
         }
@@ -387,15 +387,15 @@ Function dry.action.salt.run {
          $DscModuleTarget = Join-Path -Path $ConfigTargetPath -ChildPath 'dsc.psm1'
 
         # Create folders that does not exist
-        @($ConfigTargetPath,$MofTargetDir).ForEach({
-            If (-not (Test-Path -Path $_ -ErrorAction Ignore)) {
+        @($ConfigTargetPath,$MofTargetDir).foreach({
+            if (-not (Test-Path -Path $_ -ErrorAction Ignore)) {
                 New-Item -Path $_ -ItemType Directory -Confirm:$false -Force | Out-Null
             }
         })
         
         # Delete any dsc module (DSC Configuration) and mofs from previous runs
-        @($DscModuleTarget,$MofTarget,$MetaMofTarget).ForEach({
-            If (Test-Path -Path $_ -ErrorAction Ignore) {
+        @($DscModuleTarget,$MofTarget,$MetaMofTarget).foreach({
+            if (Test-Path -Path $_ -ErrorAction Ignore) {
                 Remove-Item -Path $_ -Force -Confirm:$false | Out-Null
             }
         })
@@ -441,17 +441,17 @@ Function dry.action.salt.run {
             $_.type -eq 'winrm'
         }
 
-        If ($Null -eq $SessionConfig) {
+        if ($Null -eq $SessionConfig) {
             ol v "Unable to find 'connection' of type 'winrm' in environment config"
-            Throw "Unable to find 'connection' of type 'winrm' in environment config"
+            throw "Unable to find 'connection' of type 'winrm' in environment config"
         }
-        Else {
+        else {
             $GetDryCIMSessionParameters += @{ 'SessionConfig'=$SessionConfig}
         }
         $CimSession = New-DrySession @GetDryCIMSessionParameters
         
         # If the meta.mof exists, apply it
-        If (Test-Path -Path $MetaMofTarget -ErrorAction Ignore) {
+        if (Test-Path -Path $MetaMofTarget -ErrorAction Ignore) {
             ol -t 6 -arr 'Applying meta configuration',"$MetaMofTarget"
             Set-DSCLocalConfigurationManager -Path $MofTargetDir -CimSession $CimSession -Verbose -Force
         }
@@ -481,19 +481,19 @@ Function dry.action.salt.run {
         #   will be used for the post-deployment connection as well.
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        If ($Action.credentials.credential2) {
+        if ($Action.credentials.credential2) {
             ol -t 6 -arr "Post-Credential","$($Action.credentials.credential2) (credential2 - specific Post-Credential)"
             $DscTargetSystemPOSTCredentials = Get-DryCredential -Name "$($Action.credentials.credential2)"
-            If ($MetaConfigObject.dsc_allow_alternating_post_credentials) {
+            if ($MetaConfigObject.dsc_allow_alternating_post_credentials) {
                 ol -t 6 -arr "Allowing alternating credentials. Alternating between","'$($Action.credentials.credential1)' and '$($Action.credentials.credential2)'"
                 $DscTargetSystemPOSTCredentialsArray = @($DscTargetSystemPRECredentials,$DscTargetSystemPOSTCredentials)
             }
-            Else {
+            else {
                 ol -t 6 -arr "Disallowing alternating credentials. Using","'$($Action.credentials.credential2)'"
                 $DscTargetSystemPOSTCredentialsArray = @($DscTargetSystemPOSTCredentials)
             }
         }
-        Else {
+        else {
             ol -t 6 -arr "Post-Credential","$($Action.credentials.credential2) (credential1 - same as Pre-Credential)"
             $DscTargetSystemPOSTCredentials = Get-DryCredential -Name "$($Action.credentials.credential1)"
             $DscTargetSystemPOSTCredentialsArray = @($DscTargetSystemPOSTCredentials)
@@ -509,11 +509,11 @@ Function dry.action.salt.run {
         }
         $WinRMStatus = Wait-DryWinRM @WaitWinRMInterfaceParams
         
-        Switch ($WinRMStatus) {
+        switch ($WinRMStatus) {
             $False {
-                Throw "Failed to Connect to DSC Target: $($DSCTarget))"
+                throw "Failed to Connect to DSC Target: $($DSCTarget))"
             }
-            Default {
+            default {
                 # Do nothing
             }  
         }
@@ -524,7 +524,7 @@ Function dry.action.salt.run {
         # By default, I will test the configuration status every 60 seconds until finsihed, but
         # for very large or very small configurations, you may want to increase or decrease it
         [int]$DscTestIntervalSeconds = 60
-        If ($MetaConfigObject.dsc_test_interval_seconds) {
+        if ($MetaConfigObject.dsc_test_interval_seconds) {
             [int]$DscTestIntervalSeconds = $MetaConfigObject.dsc_test_interval_seconds
         }
 
@@ -532,7 +532,7 @@ Function dry.action.salt.run {
         # some seconds to finish processing before asking it to test the configuration. By default, 
         # I wait 15 seconds, but you may increase or decrease that for very large or very small configs. 
         [int]$DscTestBeforeSeconds = 15
-        If ($MetaConfigObject.dsc_test_before_seconds) {
+        if ($MetaConfigObject.dsc_test_before_seconds) {
             [int]$DscTestBeforeSeconds = $MetaConfigObject.dsc_test_before_seconds
         }
 
@@ -543,37 +543,37 @@ Function dry.action.salt.run {
             Remove-CimSession -ErrorAction Ignore
             $CimSession = New-DrySession @GetDryCIMSessionParameters
             $LcmObject = Test-DSCConfiguration -Detailed -CimSession $CimSession -ErrorAction SilentlyContinue
-            If ($LcmObject.InDesiredState) {
+            if ($LcmObject.InDesiredState) {
                 $LcmInDesiredState = $true
                 ol -t 6 -m "Local Configuration Manager (LCM) is finished!" -sh
             } 
-            Else {
+            else {
                 ol -t 6 -m "Local Configuration Manager (LCM) not in desired state yet"
                 # test for instances that are allowed not to be in desired state
                 Remove-Variable -Name ResourceInstancesNotInDesiredState -ErrorAction Ignore
                 $ResourceInstancesNotInDesiredState = @($LcmObject.ResourcesNotInDesiredState.InstanceName)
 
-                $ResourceInstancesNotInDesiredState.ForEach({
+                $ResourceInstancesNotInDesiredState.foreach({
                     # This is sometimes $null, so $_.trim() failes
-                    If ($Null -ne $_) {
-                        If (($_.Trim()) -ne '') {
+                    if ($Null -ne $_) {
+                        if (($_.Trim()) -ne '') {
                             ol -t 6 -arr 'Resource not in desired state yet',"$_"
                         }
                     }
                 })
                 
-                If (($MetaConfigObject.dsc_allowed_not_in_desired_state).count -gt 0) {
+                if (($MetaConfigObject.dsc_allowed_not_in_desired_state).count -gt 0) {
                     [array]$AllowedNotInDesiredState = $MetaConfigObject.dsc_allowed_not_in_desired_state
                     
                     $NotInDesiredStateCount = 0
-                    $ResourceInstancesNotInDesiredState.ForEach({
-                        If ($AllowedNotInDesiredState -contains $_) {
+                    $ResourceInstancesNotInDesiredState.foreach({
+                        if ($AllowedNotInDesiredState -contains $_) {
                             ol i @("Instances allowed to be not in it's desired state","$_")
                             $NotInDesiredStateCount++
                         }
                     })
                     
-                    If ($NotInDesiredStateCount -ge $ResourceInstancesNotInDesiredState.Count) {
+                    if ($NotInDesiredStateCount -ge $ResourceInstancesNotInDesiredState.Count) {
                         ol w "Some Resources are not in the Desired State, but are allowed not to be according to the configuration. Assuming all is OK and ready to move on "
                         ol i "Assuming LCM is in it's Desired State - moving on" -sh
                         $LcmInDesiredState = $true
@@ -581,7 +581,7 @@ Function dry.action.salt.run {
                 }
             }
 
-            If (-not ($LcmInDesiredState)) {
+            if (-not ($LcmInDesiredState)) {
                 Start-DryUtilsSleep -Seconds $DscTestIntervalSeconds -Message "Sleeping $DscTestIntervalSeconds seconds before re-testing..."
             }
 
@@ -591,12 +591,12 @@ Function dry.action.salt.run {
         $CimSession | 
         Remove-CimSession -ErrorAction Ignore
         
-        If ($MetaConfigObject.dsc_restart_after_lcm_finish) {
+        if ($MetaConfigObject.dsc_restart_after_lcm_finish) {
             # Restart the target system
             Restart-Computer -ComputerName $DSCTarget -Credential $DscTargetSystemPOSTCredentials -Force
  
             [int]$DscWaitForRebootSeconds = 30
-            If ($MetaConfigObject.dsc_wait_for_reboot_seconds) {
+            if ($MetaConfigObject.dsc_wait_for_reboot_seconds) {
                 [int]$DscWaitForRebootSeconds = $MetaConfigObject.dsc_wait_for_reboot_seconds
             }
 
@@ -616,7 +616,7 @@ Function dry.action.salt.run {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         $VerificationObject = $MetaConfigObject.verification_log_events
 
-        If ($VerificationObject) {
+        if ($VerificationObject) {
             ol i "DSC Configuration contains verification log events"
             
             $GetDrySessionParams = @{
@@ -627,27 +627,27 @@ Function dry.action.salt.run {
             }
             
             $WaitDryForEventParamaters = @{}
-            If ($Null -ne $VerificationObject.seconds_to_try) {
+            if ($Null -ne $VerificationObject.seconds_to_try) {
                 $WaitDryForEventParamaters['SecondsToTry'] = $VerificationObject.seconds_to_try
             }
 
-            If ($Null -ne $VerificationObject.seconds_to_wait_between_tries) {
+            if ($Null -ne $VerificationObject.seconds_to_wait_between_tries) {
                 $WaitDryForEventParamaters['SecondsToWaitBetweenTries'] = $VerificationObject.seconds_to_wait_between_tries
             }
 
-            If ($Null -ne $VerificationObject.seconds_to_wait_before_start) {
+            if ($Null -ne $VerificationObject.seconds_to_wait_before_start) {
                 $WaitDryForEventParamaters['SecondsToWaitBeforeStart'] = $VerificationObject.seconds_to_wait_before_start
             }
             
-            If (($VerificationObject.filters).Count -eq 0) {
-                Throw "Missing filters in verification_log_events"
+            if (($VerificationObject.filters).Count -eq 0) {
+                throw "Missing filters in verification_log_events"
             }
-            Else {
+            else {
                 $Filters = @()
                 $VerificationObject.filters.foreach({
                     $Filter = @{}
                     $_.psobject.properties | 
-                    ForEach-Object { 
+                    foreach-Object { 
                         $Filter.Add($_.Name,$_.Value) 
                     }
                     $Filters += $Filter
@@ -655,43 +655,43 @@ Function dry.action.salt.run {
                 $WaitDryForEventParamaters['Filters'] = $Filters
             }
 
-            Try {
+            try {
                 # Add SessionParameters to ParamsHash
                 # $TestSession = New-DrySession @GetDrySessionParams
                 $WaitDryForEventParamaters.Add('SessionParameters',$GetDrySessionParams)
                 Wait-DryUtilsForEvent @WaitDryForEventParamaters
             }
-            Catch {
+            catch {
                 $PSCmdlet.ThrowTerminatingError($_)
             }
-            Finally {
+            finally {
                 # $TestSession | Remove-PSSession -ErrorAction Ignore
             }
         }
-        Else {
+        else {
             ol -t 6 -m "DSC Configuration contains no verification log events - moving on"
         }
     }
-    Catch {
+    catch {
         # Testing for non-error-catches
         # This should of course go into config instead
-        If ($_.Exception -match "The Active Directory Certificate Services installation is incomplete. To complete the installation, use the request file") {
+        if ($_.Exception -match "The Active Directory Certificate Services installation is incomplete. To complete the installation, use the request file") {
             ol -t 1 "Ignoring DSC Exception"
         }
-        Else {
+        else {
             $PSCmdlet.ThrowTerminatingError($_)
         }
     }
-    Finally {
+    finally {
         Set-Location $Location -ErrorAction SilentlyContinue
 
         Remove-Module -Name PSDesiredStateConfiguration,DryDSC -ErrorAction Ignore 
 
         # Remove temporary files
-        If ($GLOBAL:dry_var_global_KeepConfigFiles) {
+        if ($GLOBAL:dry_var_global_KeepConfigFiles) {
             ol i @('Keeping ConfigFiles in',"$ConfigTargetPath")
         }
-        Else {
+        else {
             ol i @('Removing ConfigFiles from',"$ConfigTargetPath")
             Remove-Item -Path $ConfigTargetPath -Recurse -Force -Confirm:$false
         }

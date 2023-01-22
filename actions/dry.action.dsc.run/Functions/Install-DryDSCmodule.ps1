@@ -17,10 +17,10 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-Function Install-DryDSCmodule {
+function Install-DryDSCmodule {
     
     [cmdletbinding()] 
-    Param (
+    param (
         [Parameter(Mandatory=$True,ValueFromPipeline=$true)]
         [PSObject[]]$ModuleObject,
 
@@ -28,11 +28,11 @@ Function Install-DryDSCmodule {
         [System.Management.Automation.Runspaces.PSSession]$Session
     )
     Begin {
-        If ($Session) {
+        if ($Session) {
            $Remote = $True
             ol v "Installing modules on remote target '$($Session.Computername)'" 
         }
-        Else {
+        else {
             $Remote = $False
             ol v "Installing modules on local system" 
         }
@@ -41,32 +41,32 @@ Function Install-DryDSCmodule {
         $Result = $null
         $ModuleName = "$($_.name)"
         # version
-        If ($_.requiredversion) {
+        if ($_.requiredversion) {
             $Version = $_.requiredversion
         } 
-        ElseIf ($_.minimumversion) {
+        elseif ($_.minimumversion) {
             $Version = $_.minimumversion
         } 
-        ElseIf ($_.maximumversion) {
+        elseif ($_.maximumversion) {
             $Version = $_.minimumversion
         }
         
         # info to log
        ol v "Checking module: '$ModuleName', version: '$Version'" 
-        Try {
-            If ($Session) {
+        try {
+            if ($Session) {
                 # remote and start
                 $Result = Invoke-Command -session $Session -ScriptBlock {
                     [CmdletBinding()]
-                    Param (
+                    param (
                             $ModuleName,
                             $Version
                     )
-                    Try {
-                        If (Get-Module -ListAvailable -Name $ModuleName | Where-Object { $_.version -eq $Version } ) {
-                            Return "AlreadyInstalled"
+                    try {
+                        if (Get-Module -ListAvailable -Name $ModuleName | Where-Object { $_.version -eq $Version } ) {
+                            return "AlreadyInstalled"
                         } 
-                        Else {
+                        else {
                             Install-PackageProvider nuget -Force | 
                             Out-Null
                             # here you should add versions, install-module supports max and min versions etc
@@ -79,21 +79,21 @@ Function Install-DryDSCmodule {
                             }
                             
                             Install-Module @InstallModuleParams
-                            Return "Installed"
+                            return "Installed"
                         }
                     } 
-                    Catch {
+                    catch {
                         $_
                     }
                 } -ArgumentList $ModuleName,$Version
             } 
-            Else {
-                Try {
-                    If (get-module -ListAvailable -Name $ModuleName | Where-Object { $_.version -eq $Version } ) {
+            else {
+                try {
+                    if (get-module -ListAvailable -Name $ModuleName | Where-Object { $_.version -eq $Version } ) {
                         ol v 'DSC Module already installed',"$ModuleName ($Version)"  
                         $Result = "AlreadyInstalled"
                     } 
-                    Else {
+                    else {
                        ol v "Module not installed: '$ModuleName', version: '$Version', trying to install." 
                         
                         #Install-PackageProvider -Name 'nuget' -Scope CurrentUser -force 4>>$GLOBAL:VerboseStreamFile 6>>$GLOBAL:InfoStreamFile 1>>$GLOBAL:SuccessStreamFile
@@ -104,36 +104,36 @@ Function Install-DryDSCmodule {
                         $Result = "Installed"
                     }
                 }
-                Catch {
+                catch {
                     ol e "Some error occured during update/install of modules"
                     $PSCmdlet.ThrowTerminatingError($_)
                 }
             }
         }
-        Catch {
+        catch {
             $PSCmdlet.ThrowTerminatingError($_)
         }
-        Finally {
-            If ($Result -is [System.Management.Automation.ErrorRecord]) {
+        finally {
+            if ($Result -is [System.Management.Automation.ErrorRecord]) {
                ol v 'Unable to install DSC module',"$name"
                $PSCmdlet.ThrowTerminatingError($Result)
             } 
-            ElseIf ($Result -eq "AlreadyInstalled") {
+            elseif ($Result -eq "AlreadyInstalled") {
                 ol i 'DSC Module already installed',"$ModuleName ($Version)" 
             } 
-            ElseIf ($Result -eq "Installed") {
+            elseif ($Result -eq "Installed") {
                 ol i 'DSC Module installed',"$ModuleName ($Version)" 
             } 
-            Else {
+            else {
                 throw "Unknown return type? ($Result)"
             }
         }
     } # Process 
     End {
-        If ($Remote) {
+        if ($Remote) {
            ol v "Done Installing modules on remote system '$($Session.Computername)'" 
         }
-        Else {
+        else {
            ol v "Done Installing modules on local system" 
         }
     }

@@ -19,17 +19,17 @@
 #>
 
 [ScriptBlock] $DryAD_SB_CreateDir = {
-    Param (
+    param (
         $Directory
     )
     try {
-        If (-not (Test-Path -Path $Directory -ErrorAction Ignore)) {
+        if (-not (Test-Path -Path $Directory -ErrorAction Ignore)) {
             New-Item -Path $Directory -ItemType Directory -Force -ErrorAction Stop |
                 Out-Null
         }
         $True
     }
-    Catch {
+    catch {
         $_
     }
 }

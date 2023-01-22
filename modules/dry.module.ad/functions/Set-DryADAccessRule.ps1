@@ -18,9 +18,9 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
-Function Set-DryADAccessRule {
+function Set-DryADAccessRule {
     [CmdletBinding(DefaultParameterSetName = 'Local')] 
-    Param ( 
+    param ( 
         [Parameter(HelpMessage = "Name of user to delegate rights to. 
         Never used by DryDeploy, since rights are always delegated to groups")]
         [String]
@@ -72,16 +72,16 @@ Function Set-DryADAccessRule {
     )
 
     try {
-        If ($Group -and (-not $User)) {
+        if ($Group -and (-not $User)) {
             $TargetName = $Group
             $TargetType = 'group'
         }
-        ElseIf ($User -and (-not $Group)) {
+        elseif ($User -and (-not $Group)) {
             $TargetName = $User
             $TargetType = 'user'
         }
-        Else {
-            Throw "Specify either a Group or a User to delegate permissions to - and not both"
+        else {
+            throw "Specify either a Group or a User to delegate permissions to - and not both"
         }
         
         ol v @('Path', "$Path")
@@ -89,13 +89,13 @@ Function Set-DryADAccessRule {
         ol v @('TargetType', "$TargetType")
         
 
-        If ($PSCmdlet.ParameterSetName -eq 'Remote') {
+        if ($PSCmdlet.ParameterSetName -eq 'Remote') {
             $Server = 'localhost'
             $ExecutionType = 'Remote'
             ol v @('Session Type', 'Remote')
             ol v @('Remoting to Domain Controller', $PSSession.ComputerName)
         }
-        Else {
+        else {
             $Server = $DomainController
             $ExecutionType = 'Local'
             ol v @('Session Type', 'Local')
@@ -103,9 +103,9 @@ Function Set-DryADAccessRule {
         }
 
         # Since parameters cannot be splatted, or named in -Argumentslist, make sure all exists
-        If (-not $ObjectType) { [String]$ObjectType = '' }
-        If (-not $InheritedObjectType) { [String]$InheritedObjectType = '' }
-        If (-not $ActiveDirectorySecurityInheritance) { [String]$ActiveDirectorySecurityInheritance = '' }
+        if (-not $ObjectType) { [String]$ObjectType = '' }
+        if (-not $InheritedObjectType) { [String]$InheritedObjectType = '' }
+        if (-not $ActiveDirectorySecurityInheritance) { [String]$ActiveDirectorySecurityInheritance = '' }
             
         $ArgumentList = @(
             $Path,
@@ -123,36 +123,36 @@ Function Set-DryADAccessRule {
             ScriptBlock  = $DryAD_SB_ADAccessRule_Set
             ArgumentList = $ArgumentList
         }
-        If ($PSCmdlet.ParameterSetName -eq 'Remote') {
+        if ($PSCmdlet.ParameterSetName -eq 'Remote') {
             $InvokeParams += @{
                 Session = $PSSession
             }
         }
-        $Return = $Null; $Return = Invoke-Command @InvokeParams
+        $return = $Null; $return = Invoke-Command @InvokeParams
 
         # Send every string in $Return[0] to Debug via Out-DryLog
-        ForEach ($ReturnString in $Return[0]) {
+        foreach ($ReturnString in $Return[0]) {
             ol d "$ReturnString"
         }
         
         # Test the ReturnValue in $Return[1]
-        If ($Return[1] -eq $True) {
+        if ($Return[1] -eq $True) {
             ol s 'AD right set'
             ol v "Successfully configured AD right"
             $True
         } 
-        Else {
+        else {
             ol f 'AD right not set'
             ol w "Failed to configure AD right"
-            If ($Null -ne $Return[2]) {
-                Throw ($Return[2]).ToString()
+            if ($Null -ne $Return[2]) {
+                throw ($Return[2]).ToString()
             } 
-            Else {
-                Throw "ReturnValue false, but no ErrorRecord returned - check debug"
+            else {
+                throw "ReturnValue false, but no ErrorRecord returned - check debug"
             }
         }  
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

@@ -17,9 +17,9 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
-Function Get-DryADJson {
+function Get-DryADJson {
     [CmdletBinding()]
-    Param (
+    param (
         [ValidateScript({ (Test-Path $_ -PathType 'leaf') -and (($_ -match ".json$") -or ($_ -match ".jsonc$")) })]
         [Parameter(Mandatory, ParameterSetName = 'stringpath')]
         [String]$Path,
@@ -29,10 +29,10 @@ Function Get-DryADJson {
         [System.IO.FileInfo]$File
     )
     try {
-        If ($Path) {
+        if ($Path) {
             [System.IO.FileInfo]$Item = Get-Item -Path $Path -ErrorAction Stop
         }
-        Else {
+        else {
             [System.IO.FileInfo]$Item = $File
         }
         
@@ -46,7 +46,7 @@ Function Get-DryADJson {
         # Convert to PSObject and return
         ConvertFrom-Json -InputObject $ContentString -ErrorAction 'Stop'
     }
-    Catch {
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

@@ -475,7 +475,7 @@ function Out-DryLog {
                 }
 
                 # Iterate through properties
-                $MsgObj.PSObject.Properties | ForEach-Object {
+                $MsgObj.PSObject.Properties | foreach-Object {
                     #Write-Host "Value type $(($_.Value).Gettype().Name)"
                     if ($null -eq $_.Value) { $_.Value = '(null)'}
                     if (($_.Value -is [string]) -or ($_.Value -is [bool]) -or (($_.Value).Gettype().Name -match 'byte|short|int32|long|sbyte|ushort|uint32|ulong|float|double|decimal|Version')) {

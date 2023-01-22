@@ -20,7 +20,7 @@
 
 [ScriptBlock]$DryAD_SB_JsonGPO_Import = {
     [CmdLetBinding()] 
-    Param (
+    param (
         [String]
         $Name,
 
@@ -50,11 +50,11 @@
         }
         [Bool]$GPOExistsAlready = Test-GroupPolicyExistenceInAD @GPOExistsAlreadyParams
     
-        If ($GPOExistsAlready -and (-not $Force)) {
+        if ($GPOExistsAlready -and (-not $Force)) {
             $Result[2] = 'GPO exists already and you didn''t -force (no change)'
             $Result[0] = $True
         }
-        Else {
+        else {
             $ImportGroupPolicyToADParams = @{
                 Name                    = $Name
                 FileName                = $FileName
@@ -69,26 +69,26 @@
             Import-GroupPolicyToAD @ImportGroupPolicyToADParams
             $Result[0] = $True
             
-            If ($GPOExistsAlready -and $Force) {
+            if ($GPOExistsAlready -and $Force) {
                 $Result[2] = 'An existing GPO was replaced (original renamed)'
             }
-            Else {
+            else {
                 $Result[2] = 'The GPO was imported'
             }
         }
-        Return $Result
+        return $Result
     }
-    Catch {
+    catch {
         $Result[0] = $False
         $Result[1] = $_
         $Result[2] = 'The GPO import failed'
-        Return $Result    
+        return $Result    
     }
-    Finally {
+    finally {
         @('GPOExistsAlreadyParams',
             'ImportGroupPolicyToADParams',
             'GPOExistsAlready'
-        ).ForEach({
+        ).foreach({
                 Remove-Variable -Name $_ -ErrorAction Ignore | Out-Null
             })
     }

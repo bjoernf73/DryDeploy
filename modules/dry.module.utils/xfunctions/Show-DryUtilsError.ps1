@@ -29,7 +29,7 @@ function Show-DryUtilsError {
     ol i " " 
     $StackTraceLine = @($Err.ScriptStackTrace -Split "`n")[0]
     $ErrParts1      = $StackTraceLine.Split(',')
-    $Function       = ($ErrParts1[0]).TrimStart('at ')
+    $function       = ($ErrParts1[0]).TrimStart('at ')
     $ErrParts2      = $ErrParts1[1] -Split ': '
     $Script         = ($ErrParts2[0]).Trim()
     $Line           = (($ErrParts2[1]).Trim()).TrimStart('line ')
@@ -40,7 +40,7 @@ function Show-DryUtilsError {
     
     $Exceptions = $Err.Exception.ToString() -split "`n"
     $Exc = 1
-    $Exceptions.ForEach({
+    $Exceptions.foreach({
         ol i @("Exception $Exc","$($_.Trim())") -Fore Red
         $Exc++
     })

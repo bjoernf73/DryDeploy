@@ -19,7 +19,7 @@
 #>
 
 [ScriptBlock] $DryAD_SB_GroupMember_Set = { 
-    Param (
+    param (
         $Group,
         $Member,
         $Server
@@ -34,7 +34,7 @@
         Add-ADGroupMember @AddADGroupMemberParams | Out-Null
         $True
     }
-    Catch {
+    catch {
         $_
     }
 }

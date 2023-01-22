@@ -19,9 +19,9 @@ using namespace System.Collections
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-Function dry.action.win.getip {
+function dry.action.win.getip {
     [CmdletBinding()]  
-    Param (
+    param (
         [Parameter(Mandatory,HelpMessage="The resolved action object")]
         [PSObject]
         $Action,
@@ -57,14 +57,14 @@ Function dry.action.win.getip {
             ol i @("Found and updated '$ResourceFQDNName' with IP","$($ResourceIPobj.IPAddress)")
         }
         else {
-            Throw "Unable to find resource '$ResourceFQDNName' at DNSServers '$DnsServers'"
+            throw "Unable to find resource '$ResourceFQDNName' at DNSServers '$DnsServers'"
         } 
     }
     catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
     finally {
-        @(Get-Variable -Scope Script).ForEach({
+        @(Get-Variable -Scope Script).foreach({
             Remove-Variable -Name $_ -ErrorAction Ignore
         })
 

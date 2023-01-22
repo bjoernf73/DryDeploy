@@ -19,7 +19,7 @@
 #>
 
 [ScriptBlock]$DryAD_SB_GPLink_Get = {
-    Param (
+    param (
         $OU,
         $DomainController
     ) 
@@ -27,11 +27,11 @@
     $ErrorString = ''
     try {
         [Array]$CurrentLinks = ((Get-GPInheritance -Target $OU -Server $DomainController).gpolinks | Select-Object -Property DisplayName).DisplayName
-        Return @($CurrentLinks, $ErrorString)
+        return @($CurrentLinks, $ErrorString)
     }
-    Catch {
+    catch {
         # If caught, get the string
         $ErrorString = $_.ToString()
-        Return @($CurrentLinks, $ErrorString)
+        return @($CurrentLinks, $ErrorString)
     }
 }

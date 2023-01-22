@@ -19,7 +19,7 @@
 #>
 
 [ScriptBlock] $DryAD_SB_MoveComputer_Get = { 
-    Param (
+    param (
         [String]
         $ComputerName,
 
@@ -34,7 +34,7 @@
         [String]$DomainDN = (Get-ADDomain -Server $Server -ErrorAction Stop | 
                 Select-Object -Property distinguishedName).distinguishedName
         
-        If ($TargetOU -notmatch "$DomainDN$") {
+        if ($TargetOU -notmatch "$DomainDN$") {
             $TargetOU = $TargetOU + ",$DomainDN"
         }
         $TargetComputerDN = "CN=$ComputerName,$TargetOU"
@@ -43,14 +43,14 @@
             Server   = $Server
             Identity = $ComputerName
         }
-        If ((Get-ADComputer @GetADComputerParams | Select-Object -Property distinguishedName).distinguishedName -eq "$TargetComputerDN") {
+        if ((Get-ADComputer @GetADComputerParams | Select-Object -Property distinguishedName).distinguishedName -eq "$TargetComputerDN") {
             $True
         } 
-        Else {
+        else {
             $False
         }
     }
-    Catch {
+    catch {
         $_
     }
 }
