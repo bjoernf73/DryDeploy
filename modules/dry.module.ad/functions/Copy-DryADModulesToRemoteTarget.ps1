@@ -82,12 +82,13 @@ function Copy-DryADModulesToRemoteTarget {
                 }
                 $CopyItemsParams = @{
                     Path        = $ModuleFolder
-                    Destination = $RemoteRootPath 
+                    Container   = $true
+                    Destination = Join-Path -Path $RemoteRootPath -ChildPath $(Split-Path -Path $ModuleFolder -Leaf)
                     ToSession   = $PSSession 
                     Recurse     = $true
                     Force       = $true
                 }
-                ol d @("Copying module to '($PSSession.ComputerName)'", "'$ModuleFolder'")
+                ol d @("Copying module to '$($PSSession.ComputerName)'", "'$ModuleFolder'")
                 Copy-Item @CopyItemsParams
             }
         }

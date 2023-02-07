@@ -2861,7 +2861,7 @@ function Import-DryADConfiguration {
                     if ($RequiresGPOHelper) {
                         ol i "GPO Imports - Copying helper module to remote target" -sh
                         $DryADGPOHelpersPath = Join-Path -Path (Split-Path -Path ((Get-Module -Name dry.module.ad).Path)) -ChildPath 'helpers\dry.ad.gpohelper' 
-                        Copy-DryADFilesToRemoteTarget -PSSession $PSSession -TargetPath $RemoteRootPath -SourcePath $DryADGPOHelpersPath | Out-Null
+                        Copy-DryADFilesToRemoteTarget -PSSession $PSSession -TargetPath $(Join-Path -Path $RemoteRootPath -ChildPath 'dry.ad.gpohelper') -SourcePath $DryADGPOHelpersPath | Out-Null
                         Copy-DryADModulesToRemoteTarget -PSSession $PSSession -RemoteRootPath $RemoteRootPath -Modules @("GPRegistryPolicyParser") | Out-Null
                     }
 
