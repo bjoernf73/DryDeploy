@@ -65,17 +65,16 @@ function Set-DryLoggingOptions {
             console_width_threshold    = 70
             warn_on_too_narrow_console = $true
             array_first_element_length = 45
-            left_column_width          = 30
             post_buffer                = 3
             
-            verbose     = [PSCustomObject]@{ foreground_color = 'Cyan';     background_color = $null; display_location = $true;  text_type = 'VERBOSE:' }
-            debug       = [PSCustomObject]@{ foreground_color = 'DarkCyan'; background_color = $null; display_location = $true;  text_type = 'DEBUG:  ' }
-            warning     = [PSCustomObject]@{ foreground_color = 'Yellow';   background_color = $null; display_location = $true;  text_type = 'WARNING:' }
-            information = [PSCustomObject]@{ foreground_color = 'White';    background_color = $null; display_location = $false; text_type = '        ' }
-            error       = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $true;  text_type = 'ERROR:  ' }
-            input       = [PSCustomObject]@{ foreground_color = 'Yellow';   background_color = $null; display_location = $false; text_type = 'INPUT:  ' }
-            success     = [PSCustomObject]@{ foreground_color = 'Green';    background_color = $null; display_location = $false; text_type = '        ' ;  status_text = 'Success'}
-            fail        = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $false; text_type = '        ' ;  status_text = 'Fail'   }
+            verbose     = [PSCustomObject]@{ foreground_color = 'Yellow';   background_color = $null; display_location = $true;  text_type = '[v]'  }
+            debug       = [PSCustomObject]@{ foreground_color = 'Magenta';  background_color = $null; display_location = $true;  text_type = '[d]' }
+            warning     = [PSCustomObject]@{ foreground_color = 'Black';    background_color = $null; display_location = $true;  text_type = '[w]' }
+            information = [PSCustomObject]@{ foreground_color = 'White';    background_color = $null; display_location = $false; text_type = '   ' }
+            error       = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $true;  text_type = '[e]' }
+            input       = [PSCustomObject]@{ foreground_color = 'Yellow';   background_color = $null; display_location = $true;  text_type = '[i]' }
+            success     = [PSCustomObject]@{ foreground_color = 'Green';    background_color = $null; display_location = $false; text_type = '[s]' ;  status_text = 'Success'}
+            fail        = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $false; text_type = '[f]' ;  status_text = 'Fail'   }
         }
 
         $Streams  = @('verbose','debug','warning','information','error','input','success','fail')
@@ -86,7 +85,6 @@ function Set-DryLoggingOptions {
         if ($null -ne $SystemConfig.console_width_threshold)    {$LoggingOptions.console_width_threshold =    $SystemConfig.console_width_threshold}
         if ($null -ne $SystemConfig.warn_on_too_narrow_console) {$LoggingOptions.warn_on_too_narrow_console = $SystemConfig.warn_on_too_narrow_console}
         if ($null -ne $SystemConfig.array_first_element_length) {$LoggingOptions.array_first_element_length = $SystemConfig.array_first_element_length}
-        if ($null -ne $SystemConfig.left_column_width)          {$LoggingOptions.left_column_width =          $SystemConfig.left_column_width}
         if ($null -ne $SystemConfig.post_buffer)                {$LoggingOptions.post_buffer =                $SystemConfig.post_buffer}
 
         $Streams.foreach({
@@ -107,7 +105,6 @@ function Set-DryLoggingOptions {
         if ($null -ne $UserConfig.console_width_threshold)    {$LoggingOptions.console_width_threshold =    $UserConfig.console_width_threshold}
         if ($null -ne $UserConfig.warn_on_too_narrow_console) {$LoggingOptions.warn_on_too_narrow_console = $UserConfig.warn_on_too_narrow_console}
         if ($null -ne $UserConfig.array_first_element_length) {$LoggingOptions.array_first_element_length = $UserConfig.array_first_element_length}
-        if ($null -ne $UserConfig.left_column_width)          {$LoggingOptions.left_column_width =          $UserConfig.left_column_width}
         if ($null -ne $UserConfig.post_buffer)                {$LoggingOptions.post_buffer =                $UserConfig.post_buffer}
         
         $Streams.foreach({

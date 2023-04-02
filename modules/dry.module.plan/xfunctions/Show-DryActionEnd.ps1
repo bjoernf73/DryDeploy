@@ -34,18 +34,24 @@ function Show-DryActionEnd {
 
     )
     try {
+        switch ($Action.Status) {
+            'SUCCESS' { $OutPutColor = 'Green' }
+            'FAILED'  { $OutPutColor = 'Red' }
+            Default   { $OutPutColor = 'Yellow' }
+        }
+
         [timespan]$ActionSpan = ($EndTime-$StartTime)
             ol i " " -h
             ol i " "
         if ($Action.Phase) {
-            ol i "Action [$($Action.action)] - Phase [$($Action.Phase)] took $($ActionSpan.ToString("dd\:hh\:mm\:ss")) to complete"
+            ol i "Action [$($Action.action)] - Phase [$($Action.Phase)] took $($ActionSpan.ToString("dd\:hh\:mm\:ss")) to complete" -ForegroundColor $OutPutColor
         }
         else {
-            ol i "Action [$($Action.action)] took $($ActionSpan.ToString("dd\:hh\:mm\:ss")) to complete"
+            ol i "Action [$($Action.action)] took $($ActionSpan.ToString("dd\:hh\:mm\:ss")) to complete" -ForegroundColor $OutPutColor
         }
         
             ol i " "
-            ol i "Status: $($Action.Status.ToUpper())"
+            ol i "Status: $($Action.Status.ToUpper())" -ForegroundColor $OutPutColor
             ol i " "
     }
     catch {

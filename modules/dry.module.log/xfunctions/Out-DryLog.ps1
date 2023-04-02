@@ -185,18 +185,17 @@ function Out-DryLog {
             $GLOBAL:LoggingOptions = [PSCustomObject]@{
                 log_to_file                = $true;
                 path                       = & { if ($PSVersionTable.Platform -eq 'Unix') { "$($env:HOME)/DryDeploy/DryDeploy.log" } else { ("$($env:UserProfile)\DryDeploy\DryDeploy.log").Replace('\','\\')}};
-                left_column_width          = 30;
                 console_width_threshold    = 70;
                 post_buffer                = 3;
                 array_first_element_length = 45;
-                verbose     = [PSCustomObject]@{ foreground_color = 'Cyan';     background_color = $null; display_location = $true;  text_type = 'VERBOSE:' }
-                debug       = [PSCustomObject]@{ foreground_color = 'DarkCyan'; background_color = $null; display_location = $true;  text_type = 'DEBUG:  ' }
-                warning     = [PSCustomObject]@{ foreground_color = 'Yellow';   background_color = $null; display_location = $true;  text_type = 'WARNING:' }
-                information = [PSCustomObject]@{ foreground_color = 'White';    background_color = $null; display_location = $false; text_type = '        ' }
-                error       = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $true;  text_type = 'ERROR:  ' }
-                input       = [PSCustomObject]@{ foreground_color = 'Yellow';   background_color = $null; display_location = $true;  text_type = 'INPUT:  ' }
-                success     = [PSCustomObject]@{ foreground_color = 'Green';    background_color = $null; display_location = $false; text_type = '        ' ;  status_text = 'Success'}
-                fail        = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $false; text_type = '        ' ;  status_text = 'Fail'   }
+                verbose     = [PSCustomObject]@{ foreground_color = 'Cyan';     background_color = $null; display_location = $true;  text_type = '[v]' }
+                debug       = [PSCustomObject]@{ foreground_color = 'DarkCyan'; background_color = $null; display_location = $true;  text_type = '[d]' }
+                warning     = [PSCustomObject]@{ foreground_color = 'Yellow';   background_color = $null; display_location = $true;  text_type = '[w]' }
+                information = [PSCustomObject]@{ foreground_color = 'White';    background_color = $null; display_location = $false; text_type = '[>]' }
+                error       = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $true;  text_type = '[e]' }
+                input       = [PSCustomObject]@{ foreground_color = 'Yellow';   background_color = $null; display_location = $true;  text_type = '[i]' }
+                success     = [PSCustomObject]@{ foreground_color = 'Green';    background_color = $null; display_location = $false; text_type = '[s]' ;  status_text = 'Success'}
+                fail        = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $false; text_type = '[f]' ;  status_text = 'Fail'   }
             }
         }
         $LoggingOptions = $GLOBAL:LoggingOptions
@@ -314,12 +313,7 @@ function Out-DryLog {
                 $StartOfMessage = $TextType + ' [' + $GLOBAL:GlobalResourceName + ']:'
             }
             else {
-                $StartOfMessage = $TextType
-            }
-
-            # make sure left_column is a certain length
-            while ($StartOfMessage.length -lt $LoggingOptions.left_column_width) {
-                $StartOfMessage = $StartOfMessage + ' '
+                $StartOfMessage = $TextType + ' '
             }
 
             if (($null -ne $GLOBAL:GlobalActionName) -and ($GLOBAL:GlobalActionName -ne '')){
@@ -592,9 +586,27 @@ function Out-DryLog {
                 else {
                     $FullMessageChunk = $StartOfMessage + $MessageChunk
                 }
-
+                # The 3 first characters are the the code, they are printed in black
                 if ($LogColors) {
-                    Write-Host @LogColors -Object $FullMessageChunk
+                    if ($LogColors["foregroundcolor"]) {
+                        $TextTypeBackGroundColor = $LogColors["foregroundcolor"]
+                    }
+                    if ($LogColors["backgroundcolor"]) {
+                        $TextTypeForeGroundColor = $LogColors["backgroundcolor"]
+                    }
+                    if ($null -eq $TextTypeBackGroundColor) {
+                        $TextTypeBackGroundColor = "White"
+                    }
+                    if ($null -eq $TextTypeForeGroundColor) {
+                        $TextTypeForeGroundColor = "Black"
+                    }
+                    if ($FullMessageChunk.Substring(0,3).Trim() -eq '') {
+                        Write-Host @LogColors -Object $FullMessageChunk
+                    }
+                    else {
+                        Write-Host -BackGroundColor $TextTypeBackGroundColor -ForeGroundColor $TextTypeForeGroundColor -Object $FullMessageChunk.Substring(0,3) -NoNewLine
+                        Write-Host @LogColors -Object $FullMessageChunk.Substring(3)
+                    }
                 }
                 else {
                     Write-Host -Object $FullMessageChunk

@@ -129,9 +129,11 @@ function Get-DryInput {
         }
         
         # make sure left_column is a certain length
+        <#
         while ($FormattedMessage.length -lt $LoggingOptions.left_column_width) {
             $FormattedMessage = $FormattedMessage + ' '
         }
+        #>
         $FormattedMessage = $FormattedMessage + $Prompt + " [$PromptChoiceString or 'quit']"
 
         # Print the description
