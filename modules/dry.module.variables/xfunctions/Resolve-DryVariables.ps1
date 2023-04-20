@@ -210,9 +210,35 @@ function Resolve-DryVariables {
                 }
             }
             # fail if it's null, unless property allow_null allows it
-            if (($null -eq $VarValue) -and ($Var.allow_null -eq $true)) {
+            if (($null -eq $VarValue) -and ($Var.allow_null -ne $true)) {
                 ol e 'Variable resolved null',"$($Var.Name)"
                 throw "Variable '$($Var.Name)' resolved null"
+            }
+
+            # fail if it's a string and it's trimmed value is an empty string, unless allow_null allows it
+            if ($VarValue -is [string]) {
+                if ($VarValue.trim() -eq '') {
+                    if ($Var.allow_null) {
+                        ol w 'Variable resolved empty string, but allowed',"$($Var.Name) (string)"
+                    }
+                    else {
+                        ol e 'Variable resolved empty string',"$($Var.Name) (string)"
+                        throw "Variable '$($Var.Name)' resolved empty string"
+                    }
+                }
+            }
+
+            # fail if it's an array with no elements, unless allow_null allows it
+            if ($VarValue -is [array]) {
+                if ($VarValue.count -eq 0) {
+                    if ($Var.allow_null) {
+                        ol w 'Variable resolved 0 elements, but allowed',"$($Var.Name) (array)"
+                    }
+                    else {
+                        ol e 'Variable resolved 0 array elements',"$($Var.Name) (array)"
+                        throw "Variable '$($Var.Name)' resolved 0 array elements"
+                    }
+                }
             }
 
             # Create the variable in the local scope, so subsequent expressions can use previously resolved variable values
