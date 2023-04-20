@@ -162,7 +162,6 @@
         "warn_on_to_narrow_console":  true,
         "console_width_threshold":    70,
         "array_first_element_length": 45,
-        "left_column_width":          30,
         "post_buffer":                 3,
         "verbose": {
             "foreground_color": "Cyan"
