@@ -31,7 +31,7 @@ function New-DryUtilsRandomHex {
         $Chars = '0123456789ABCDEF'
         [String]$Random = $null
         for ($i=1; $i -le $Length; $i++)     {
-            $Random += $Chars.Substring((Get-Random -Minimum 0 -Maximum 16),1)
+            $Random += $Chars.Substring((Get-Random -Minimum 0 -Maximum 15),1)
         }
         return $Random
     }

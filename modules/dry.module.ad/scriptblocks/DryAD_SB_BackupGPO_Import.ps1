@@ -53,7 +53,7 @@
                 $Hex = '0123456789ABCDEF'
                 [string]$return = $null
                 for ($i = 1; $i -le $Length; $i++) {
-                    $return += $Hex.Substring((Get-Random -Minimum 0 -Maximum 16), 1)
+                    $return += $Hex.Substring((Get-Random -Minimum 0 -Maximum 15), 1)
                 }
                 return $Return
             }
