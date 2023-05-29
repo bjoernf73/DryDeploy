@@ -769,15 +769,15 @@ try {
         we want to inquire, we make a breakpoint in vscode.
     
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-    $SCRIPT:dry_var_GlobalVerbosePreference      = $GLOBAL:VerbosePreference 
-    $SCRIPT:dry_var_GlobalDebugPreference        = $GLOBAL:DebugPreference
-    $SCRIPT:dry_var_GlobalErrorActionPreference  = $GLOBAL:ErrorActionPreference
-    $GLOBAL:VerbosePreference             = $PSCmdlet.GetVariableValue('VerbosePreference')
-    $GLOBAL:DebugPreference               = $PSCmdlet.GetVariableValue('DebugPreference')
-    $GLOBAL:ErrorActionPreference         = 'Stop'
+    $SCRIPT:dry_var_GlobalVerbosePreference     = $GLOBAL:VerbosePreference
+    $SCRIPT:dry_var_GlobalDebugPreference       = $GLOBAL:DebugPreference
+    $SCRIPT:dry_var_GlobalErrorActionPreference = $GLOBAL:ErrorActionPreference
+    $GLOBAL:VerbosePreference                   = $PSCmdlet.GetVariableValue('VerbosePreference')
+    $GLOBAL:DebugPreference                     = $PSCmdlet.GetVariableValue('DebugPreference')
+    $GLOBAL:ErrorActionPreference               = 'Stop'
     if ($GLOBAL:DebugPreference -eq 'Inquire') { 
-        $GLOBAL:DebugPreference           = 'Continue' 
-        $SCRIPT:DebugPreference           = 'Continue'
+        $GLOBAL:DebugPreference = 'Continue'
+        $SCRIPT:DebugPreference = 'Continue'
     }
 
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -796,13 +796,13 @@ try {
 
     $dry_var_Paths = [PSCustomObject]@{
         RootWorkingDirectory = $dry_var_global_RootWorkingDirectory
-        PlanFile = $dry_var_PlanFile
-        ResourcesFile = $dry_var_ResourcesFile
-        ConfigComboFile = $dry_var_ConfigComboFile
-        UserOptionsFile = $dry_var_UserOptionsFile
-        TempConfigsDir = $dry_var_TempConfigsDir
-        ArchiveDir = $dry_var_ArchiveDir
-        SystemOptionsFile = $dry_var_SystemOptionsFile
+        PlanFile             = $dry_var_PlanFile
+        ResourcesFile        = $dry_var_ResourcesFile
+        ConfigComboFile      = $dry_var_ConfigComboFile
+        UserOptionsFile      = $dry_var_UserOptionsFile
+        TempConfigsDir       = $dry_var_TempConfigsDir
+        ArchiveDir           = $dry_var_ArchiveDir
+        SystemOptionsFile    = $dry_var_SystemOptionsFile
     }
     
     New-DryItem -ItemType Directory -Items @($dry_var_global_RootWorkingDirectory, $dry_var_ArchiveDir, $dry_var_TempConfigsDir)
@@ -837,7 +837,6 @@ try {
     }
     Set-DryLoggingOptions @SetDryLoggingOptionsParams
     $SetDryLoggingOptionsParams = $null
-    
 
     # Greet our gullible minions
     ol i "DryDeploy $($PSCmdLet.ParameterSetName): intro" -sh -air
