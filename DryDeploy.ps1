@@ -806,7 +806,6 @@ try {
     }
     
     New-DryItem -ItemType Directory -Items @($dry_var_global_RootWorkingDirectory, $dry_var_ArchiveDir, $dry_var_TempConfigsDir)
-    
    
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -1228,7 +1227,6 @@ try {
                 }
                 catch {
                     ol i "The terminating exception: " -sh
-                    ol i " "
                     Show-DryUtilsError -Err $_
                     $dry_var_WarningString = "Failed action: [$($dry_var_Action.action)]"
                     if ($dry_var_Action.Phase) {
@@ -1407,16 +1405,18 @@ try {
                     if ($dry_var_Action.resource.resolved_network.ip_address -eq 'dhcp') {
                         $dry_var_AnIpWasResolved = $false
                         if ($null -ne $GLOBAL:dry_var_global_ResolvedIPv4) {
+                            ol i @("Detected a resolved IP", "$($GLOBAL:dry_var_global_ResolvedIPv4)")
                             foreach ($dry_var_SetIPAction in ($dry_var_Plan.Actions | Where-Object { $_.resource.resource_guid -eq $dry_var_Action.resource.resource_guid})) {
-                                $dry_var_SetIPAction.resource.resolved_network.ip_address = $GLOBAL:dry_var_global_ResolvedIPv4
+                                $dry_var_SetIPAction.resource.resolved_network.ip_address = "$($GLOBAL:dry_var_global_ResolvedIPv4)"
                             }
+                            
                             $dry_var_Plan.Save($dry_var_PlanFile,$false,$null)
                             $GLOBAL:dry_var_global_ResolvedIPv4 = $null
                             $dry_var_AnIpWasResolved = $true
                         }
                         if ($null -ne $GLOBAL:dry_var_global_ResolvedIPv6) {
                             foreach ($dry_var_SetIPAction in ($dry_var_Plan.Actions | Where-Object { $_.resource.resource_guid -eq $dry_var_Action.resource.resource_guid})) {
-                                $dry_var_SetIPAction.resource.resolved_network.ip_address6 = $GLOBAL:dry_var_global_ResolvedIPv6
+                                $dry_var_SetIPAction.resource.resolved_network.ip_address6 = "$($GLOBAL:dry_var_global_ResolvedIPv6)"
                             }
                             $dry_var_Plan.Save($dry_var_PlanFile,$false,$null)
                             $GLOBAL:dry_var_global_ResolvedIPv6 = $null
@@ -1492,11 +1492,9 @@ try {
                         for ($ec = ($Error.count-1); $ec -ge 0; $ec--) {
                             if ($ec -eq 0) {
                                 ol i "The terminating exception: " -sh
-                                ol i " "
                             }
                             else {
                                 ol i "Previous exception $ec`:" -sh
-                                ol i " "
                             }
                             if ($Error[$ec].GetType().Name -eq 'ErrorRecord') {
                                 Show-DryUtilsError -Err $Error[$ec]
@@ -1513,7 +1511,6 @@ try {
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
                     else {
                         ol i "The terminating exception: " -sh
-                        ol i " "
                         Show-DryUtilsError -Err $_
                     }
 

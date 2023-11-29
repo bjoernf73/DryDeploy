@@ -73,11 +73,11 @@ class Resources {
                             Prompt             = "Enter index of a role"
                             PromptChoiceString = "$($Configuration.build.roles.order)"
                             #Description        = "The list above are roles that you may select from in interactive mode. You may select a different module (.\DryDeploy.ps1 -ModuleConfig ..\path\to\config) if the role you are looking for is not in the list"
-                            FailedMessage      = "You need to select the index of the role, i.e. one of '$($Configuration.build.roles.order)'"
+                            FailedMessage      = "You need to select the index of the role, i.e. one of '$($Configuration.build.roles.order)' or 'q' to quit"
                             ValidateSet        = $Configuration.build.roles.order
                         }
                         [int]$sRoleIndex = Get-DryInput @GetDryInputParams
-                        if ($sRoleIndex) {
+                        if ($sRoleIndex -in $Configuration.build.roles.order) {
                             $sSelected.Role  = ($iRolesToSelectFrom | Where-Object { $_.index -eq $sRoleIndex}).role
                             $sSelected.Short = ($iRolesToSelectFrom | Where-Object { $_.index -eq $sRoleIndex}).short
                             #$sSelected.Short = Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $sSelected.Role -Property 'role_short_name'

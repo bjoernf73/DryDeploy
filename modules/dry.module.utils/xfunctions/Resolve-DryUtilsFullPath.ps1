@@ -50,7 +50,7 @@ function Resolve-DryUtilsFullPath {
                         [System.IO.FileInfo]$FullPath = Get-Item -Path $PathInfo -ErrorAction Stop
                     }
                     'DirectoryInfo' {
-                        [System.IO.DirectoryInfo]$FullPath = Get-Item -Path $PathInfo -ErrorAction Stop
+                        [System.IO.DirectoryInfo]$FullPath = Get-Item -Path $PathInfo -ErrorAction  Stop
                     }
                     default {
                         [System.String]$FullPath = $PathInfo.Path

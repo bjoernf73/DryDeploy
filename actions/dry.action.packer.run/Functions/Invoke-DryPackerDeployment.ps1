@@ -229,7 +229,7 @@ function Invoke-DryPackerDeployment {
             else {
                 ol -t 6 -arr "Packager Build status","Failed"
                 throw "Packer Build failed"
-            }    
+            }
         }
         catch {
             $PSCmdlet.ThrowTerminatingError($_)

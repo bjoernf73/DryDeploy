@@ -264,10 +264,12 @@ function Out-DryLog {
             }
             {$_ -in ('s','success')} {
                 $Type = 'success'
+                $StatusText = $LoggingOptions."$Type".status_text
                 $DisplayLogMessage = $GLOBAL:dry_var_global_ShowStatus
             }
             {$_ -in ('f','fail','failed')} {
                 $Type = 'fail'
+                $StatusText = $LoggingOptions."$Type".status_text
                 $DisplayLogMessage = $GLOBAL:dry_var_global_ShowStatus
             }
             default {

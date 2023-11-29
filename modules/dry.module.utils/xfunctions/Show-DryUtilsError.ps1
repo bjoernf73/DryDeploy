@@ -24,9 +24,6 @@ function Show-DryUtilsError {
     param (
         [Management.Automation.ErrorRecord]$Err
     )
-    ol i " " 
-    ol i "Terminating Error Info" -sh -Fore Red
-    ol i " " 
     $StackTraceLine = @($Err.ScriptStackTrace -Split "`n")[0]
     $ErrParts1      = $StackTraceLine.Split(',')
     $function       = ($ErrParts1[0]).TrimStart('at ')
@@ -50,6 +47,5 @@ function Show-DryUtilsError {
             ol i @("$($_.Name)","$($_.Value)") -Fore Red
         }
     })
-    ol i " " -h -Fore Red
-    ol i " "
+    Write-Host " "
 }

@@ -387,6 +387,11 @@ class Plan {
             throw "There are unresolved actions - planorder cannot be determined"
         }
         elseif ($This.Actions.Count -lt 1) {
+            ol w "There are no actions in the Plan. The cause of this may be one of: "
+            ol w " "
+            ol w " a. The file '[EnvConfig]/CoreConfig/Resources.json' probably contains no instances of roles defined in the selected ModuleConfig. A ModuleConfig is like a menu from which the EnvConfig may select none, one or multiple instances of roles. But the ModuleConfig has only the blueprints, not the instances."
+            ol w " "
+            ol w " b. You ran DryDeploy in interactive mode, but never submitted any instances of roles to the plan."
             throw "There are no actions to order"
         }
         else {
@@ -489,7 +494,6 @@ class Plan {
         if ($Archive) {
             # Archive previous Plan-file and create new
             if (Test-Path -Path $PlanFile -ErrorAction SilentlyContinue) {
-                ol v "ResourcesFile '$PlanFile' exists, archiving" 
                 Save-DryArchiveFile -ArchiveFile $PlanFile -ArchiveFolder $ArchiveFolder
             }
         }

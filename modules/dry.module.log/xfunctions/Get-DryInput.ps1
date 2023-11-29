@@ -134,7 +134,7 @@ function Get-DryInput {
             $FormattedMessage = $FormattedMessage + ' '
         }
         #>
-        $FormattedMessage = $FormattedMessage + $Prompt + " [$PromptChoiceString or 'quit']"
+        $FormattedMessage = $FormattedMessage + $Prompt + " [$PromptChoiceString] or 'q' to quit"
 
         # Print the description
         if ($Description) {
@@ -157,7 +157,7 @@ function Get-DryInput {
                 if (($null -ne $DefaultValue) -and ($DryInput.Trim() -eq '')) {
                     $DryInput = $DefaultValue
                 }
-                elseif ($DryInput -eq 'quit') {
+                elseif ($DryInput -eq 'q') {
                     break
                 }
             }
@@ -170,7 +170,7 @@ function Get-DryInput {
                 if (($null -ne $DefaultValue) -and ($DryInput.Trim() -eq '')) {
                     $DryInput = $DefaultValue
                 }
-                elseif ($DryInput -eq 'quit') {
+                elseif ($DryInput -eq 'q') {
                     break
                 }
             }
@@ -184,7 +184,7 @@ function Get-DryInput {
                 if (($null -ne $DefaultValue) -and ($DryInput.Trim() -eq '')) {
                     $DryInput = $DefaultValue
                 }
-                elseif ($DryInput -eq 'quit') {
+                elseif ($DryInput -eq 'q') {
                     break
                 }
                 elseif ($null -eq $DryInput) {
@@ -195,7 +195,7 @@ function Get-DryInput {
             while (($DryInput.trim() -eq ''))
         }
         
-        if ($DryInput -eq 'quit') {
+        if ($DryInput -eq 'q') {
             break
         }
         else {

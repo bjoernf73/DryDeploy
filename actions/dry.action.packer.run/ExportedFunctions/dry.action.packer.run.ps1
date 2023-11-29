@@ -27,6 +27,7 @@ function dry.action.packer.run {
         $ConfigTargetPath  = $Resolved.ConfigTargetPath
         $PackerFilePath    = Join-Path -Path $Resolved.ConfigSourcePath -ChildPath '*'
         $TargetVarsFile    = Join-Path -Path $ConfigTargetPath -ChildPath "$($Action.Resource.Name)-vars.json"
+        $IPFile            = Join-Path -Path $ConfigTargetPath -ChildPath '62f93fde-f2c1-437f-81f5-8abcdcd48444.ip4'
         [System.IO.FileInfo]$PackerFile = Get-ChildItem -Path $PackerFilePath -Include "*.pkr.hcl" -ErrorAction Stop
         [HashTable]$VariablesHash = ConvertTo-DryHashtable -Variables $Resolved.vars -NotSecrets
 
@@ -188,7 +189,51 @@ function dry.action.packer.run {
         if ($LastExitCode -ne 0) {
             throw "Packer Build failed: $LastExitCode" 
         }
-        
+
+        <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+            if dhcp, update the resource with IP from packer. 
+
+            This is dependent on the packer config containing provisioners that 
+            a. put's the ip of the target machine in a utf8-encoded file named '62f93fde-f2c1-437f-81f5-8abcdcd48444.ip4'
+            b. downloads the file to the local machine to the $Configuration.ConfigTargetPath folder
+
+            provisioner "powershell" {
+                pause_before      = "1s"
+                elevated_password = "${var.winrm_password}"
+                elevated_user     = "${var.winrm_username}"
+                inline            = [
+                    "Write-Output 'Get the IP, save to C:\\62f93fde-f2c1-437f-81f5-8abcdcd48444.ip4'", 
+                    "Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.PrefixOrigin -eq 'DHCP'} | Select-Object -ExpandProperty IPAddress | Out-File -FilePath C:\\62f93fde-f2c1-437f-81f5-8abcdcd48444.ip4 -Encoding UTF8 -Force"
+                ]
+                valid_exit_codes  = [0]
+                max_retries       = "1"
+            }
+
+            provisioner "file" {
+                destination       = "${var.ip_file_download_folder}\\62f93fde-f2c1-437f-81f5-8abcdcd48444.ip4"
+                source            = "C:\\62f93fde-f2c1-437f-81f5-8abcdcd48444.ip4"
+                direction         = "download"
+                generated         = true
+            }
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
+        $dry_var_IPRegex = [regex]"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+        if (($Action.Resource.Resolved_Network.IP_Address -eq 'dhcp') -and 
+            (Test-Path -Path $IPFile -ErrorAction Ignore)) {
+            
+            ol v "Packer IP GUID-file ($IPFile) exists. Trying to resolve IP of the resource"
+            $GLOBAL:dry_var_global_ResolvedIPv4 = Get-Content -Path $IPFile -Encoding utf8 -ErrorAction Stop
+            if ($GLOBAL:dry_var_global_ResolvedIPv4 -match $dry_var_IPRegex) {
+                ol i @("IP resolved for resource $($GLOBAL:GlobalResourceName)",$GLOBAL:dry_var_global_ResolvedIPv4)
+            }
+            else {
+                ol w "The file $IPFile does not contain a valid IP address - keeping config files"
+                $GLOBAL:dry_var_global_KeepConfigFiles = $true
+                throw "Could not resolve IP for resource $($GLOBAL:GlobalResourceName)"
+            }
+        }
+        else {
+            ol v "Resource uses fixed IP, or no IP file was found"
+        }
         # & packer apply -auto-approve $Arguments *>&1 | Tee-Object -Variable ApplyResul
     }
     catch {
