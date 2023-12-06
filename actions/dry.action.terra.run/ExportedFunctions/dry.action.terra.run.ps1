@@ -97,8 +97,8 @@ function dry.action.terra.run {
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             Terraform Apply - apply the config
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        
-        # ol i "& terraform apply -auto-approve $Arguments"
+        ol v "Ready to run terraform apply - the command is shown below"
+        ol v "& terraform apply -auto-approve $Arguments"
         & terraform apply -auto-approve $Arguments
         if ($LastExitCode -ne 0) {
             throw "Terraform Apply failed: $LastExitCode" 
