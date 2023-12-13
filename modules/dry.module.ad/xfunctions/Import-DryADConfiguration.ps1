@@ -2855,15 +2855,22 @@ function Import-DryADConfiguration {
             switch ($ExecutionType) {
                 'Remote' {
                     [String]$RemoteRootPath = "C:\DryDeploy\"
+                    [String]$RemoteModulesPath = Join-Path -Path $RemoteRootPath -ChildPath 'modules'
                     [String]$GPOsPath = Join-Path -Path $RemoteRootPath -ChildPath 'gpo_imports'
 
                     # Only invoke if json-gpos in configuration
                     if ($RequiresGPOHelper) {
                         ol i "GPO Imports - Copying helper module to remote target" -sh
+                        # Copies the dry.ad.gpohelper module to the remote target
                         $DryADGPOHelpersPath = Join-Path -Path (Split-Path -Path ((Get-Module -Name dry.module.ad).Path)) -ChildPath 'helpers\dry.ad.gpohelper' 
-                        Copy-DryADFilesToRemoteTarget -PSSession $PSSession -TargetPath $(Join-Path -Path $RemoteRootPath -ChildPath 'dry.ad.gpohelper') -SourcePath $DryADGPOHelpersPath | Out-Null
-                        Copy-DryADModulesToRemoteTarget -PSSession $PSSession -RemoteRootPath $RemoteRootPath -Modules @("GPRegistryPolicyParser") | Out-Null
+                        Copy-DryADFilesToRemoteTarget -PSSession $PSSession -TargetPath $RemoteModulesPath -SourcePath $DryADGPOHelpersPath | Out-Null
+                        # Copies the GPRegistryPolicyParser module to the remote target
+                        $DryADGPRegistryPolicyParserPath = Join-Path -Path (Split-Path -Path ((Get-Module -Name dry.module.ad).Path)) -ChildPath 'helpers\GPRegistryPolicyParser' 
+                        Copy-DryADFilesToRemoteTarget -PSSession $PSSession -TargetPath $RemoteModulesPath -SourcePath $DryADGPRegistryPolicyParserPath | Out-Null
+                        #Copy-DryADModulesToRemoteTarget -PSSession $PSSession -RemoteRootPath $RemoteRootPath -Modules @("GPRegistryPolicyParser") | Out-Null
                     }
+
+                    Add-DryADPSModulesPath -PSSession $PSSession -Path $RemoteModulesPath -Modules @('dry.ad.gpohelper','GPRegistryPolicyParser') | Out-Null
 
                     ol i "GPO Imports - Copying GPOs to remote target" -sh
                     Copy-DryADFilesToRemoteTarget -PSSession $PSSession -TargetPath $RemoteRootPath -SourcePath $SourceGPOsPath | Out-Null

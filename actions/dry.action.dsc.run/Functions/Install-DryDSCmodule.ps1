@@ -67,6 +67,7 @@ function Install-DryDSCmodule {
                             return "AlreadyInstalled"
                         } 
                         else {
+                            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
                             Install-PackageProvider nuget -Force | 
                             Out-Null
                             # here you should add versions, install-module supports max and min versions etc
@@ -77,7 +78,7 @@ function Install-DryDSCmodule {
                                 'Confirm'=$false
                                 'Force'=$true
                             }
-                            
+                            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
                             Install-Module @InstallModuleParams
                             return "Installed"
                         }
@@ -99,6 +100,7 @@ function Install-DryDSCmodule {
                         #Install-PackageProvider -Name 'nuget' -Scope CurrentUser -force 4>>$GLOBAL:VerboseStreamFile 6>>$GLOBAL:InfoStreamFile 1>>$GLOBAL:SuccessStreamFile
                         #Output-Streams 
                         # here you should add versions, install-module supports max and min versions etc
+                        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
                         Install-Module -Name $ModuleName -RequiredVersion $Version -Scope CurrentUser -Force -Confirm:$false 
 
                         $Result = "Installed"
