@@ -194,7 +194,7 @@ function dry.action.packer.run {
             if dhcp, update the resource with IP from packer. 
 
             This is dependent on the packer config containing provisioners that 
-            a. put's the ip of the target machine in a utf8-encoded file named '62f93fde-f2c1-437f-81f5-8abcdcd48444.ip4'
+            a. put's the ip of the target machine in a utf8-encoded file named '62f93fde-f2c1-437f-81f5-8abcdcd48444.ip4'. The file must use EXACTLY this name - it is NOT variable. 
             b. downloads the file to the local machine to the $Configuration.ConfigTargetPath folder
 
             provisioner "powershell" {
