@@ -1,4 +1,7 @@
-# Create/customize OS templates for any platform
+# This is to be re-written - it is not true anymore. There used to be a separate project *DryImage* to create images for use with *DryDeploy*, but now there is only **DryDeploy**. To create images, or templates, with packer, just use a regular DryDeploy module. An example will eventually be supplied in the folder *Examples* at root of the DryDeploy project. 
+
+*The text below is just kept here for use when documenting the new way to create templates/images.*  
+
 You may use DryDeploy to create images using it's action `packer.run` that in turn uses the great Hashicorp tool *Packer*. Packer has plug-ins for (probably) any cloud or on-prem provider, and let's you put all . , andDryImage uses Packer to create images for your virtual on-prem or cloud platform. It takes a variables json and a configuration directory containing your packer config, and invokes Packer. So why not just use Packer? 
 
 Packer creates your image from a source, and runs whatever commands you want it to run on that OS. DryImage provides a set of functions for that task, so you may specify in data, not in code, the stuff you wanna do. For instance, you may specify, in data, 
