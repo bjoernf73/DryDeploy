@@ -294,17 +294,17 @@ class Plan {
                             $Dependency_Guid,
                             $CurrentAction.Action_Guid
                         )
-                        $This.Actions += $Action
+                        $This.Actions.Add($Action)
                     }
                     # Since one or more Action were added to the Plan, Chained actions
                     # in the UnresolvedActionsList may now resolve
                     $ResolveUnresolvedActions = $true
                 }
                 elseif ($Action.Chained_Guid) {
-                    $This.UnresolvedActionsList += $Action
+                    $This.UnresolvedActionsList.Add($Action)
                 }
                 else {
-                    $This.Actions += $Action
+                    $This.Actions.Add($Action)
                     # Since an Action was added to the Plan, Chained actions
                     # in the UnresolvedActionsList may now resolve
                     $ResolveUnresolvedActions = $true
@@ -333,7 +333,7 @@ class Plan {
         ConvertFrom-Json -ErrorAction Stop
         $This.OrderCount = $PlanObject.OrderCount
         $PlanObject.Actions.foreach({
-            $This.Actions += [DryAction]::New($_)
+            $This.Actions.Add([DryAction]::New($_))
         })
         $This.PlannedTime = [DateTime]($PlanObject.PlannedTime)
         if ($null -eq $PlanObject.EndTime) {
@@ -360,7 +360,7 @@ class Plan {
                 foreach ($DependentActionGuid in $DependentActionGuids) {
                     # get the action guid
                     $InstanceActionGuid = $This.ResolveActionGuid($DependentActionGuid,$ActionGuid) 
-                    $This.Actions += [DryAction]::New($_,$InstanceActionGuid)
+                    $This.Actions.Add([DryAction]::New($_,$InstanceActionGuid))
                 }
             })
             $This.UnresolvedActionsList = [ArrayList]::New()
@@ -371,8 +371,9 @@ class Plan {
     }
 
     [Void] hidden AddActionOrder() {
-
-        $This.Actions = $This.Actions | Sort-Object -Property Action_Guid
+        if (($This.Actions).count -gt 1) {
+            [ArrayList]$This.Actions = [ArrayList]$This.Actions | Sort-Object -Property Action_Guid
+        }
         $ActionCount = 0
         $This.Actions.foreach({
             $ActionCount++
