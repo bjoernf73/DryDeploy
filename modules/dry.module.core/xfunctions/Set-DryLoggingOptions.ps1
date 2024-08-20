@@ -66,16 +66,17 @@ function Set-DryLoggingOptions {
             warn_on_too_narrow_console = $true
             array_first_element_length = 45
             post_buffer                = 3
-            
-            verbose     = [PSCustomObject]@{ foreground_color = 'Yellow';   background_color = $null; display_location = $true;  text_type = '[v]'  }
-            debug       = [PSCustomObject]@{ foreground_color = 'Magenta';  background_color = $null; display_location = $true;  text_type = '[d]' }
-            warning     = [PSCustomObject]@{ foreground_color = 'Black';    background_color = $null; display_location = $true;  text_type = '[w]' }
-            information = [PSCustomObject]@{ foreground_color = 'White';    background_color = $null; display_location = $false; text_type = '   ' }
-            error       = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $true;  text_type = '[e]' }
-            input       = [PSCustomObject]@{ foreground_color = 'Yellow';   background_color = $null; display_location = $true;  text_type = '[i]' }
-            success     = [PSCustomObject]@{ foreground_color = 'Green';    background_color = $null; display_location = $false; text_type = '[s]' ;  status_text = 'Success'}
-            fail        = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $false; text_type = '[f]' ;  status_text = 'Fail'   }
+            # [system.consolecolor]::Black, DarkBlue, DarkGreen, DarkCyan, DarkRed, DarkMagenta, DarkYellow, Gray, DarkGray, Blue, Green, Cyan, Red, Magenta, Yellow, White
+            verbose     = [PSCustomObject]@{ foreground_color = 'Yellow';     background_color = $null; display_location = $true;  text_type = 'verbose:' }
+            debug       = [PSCustomObject]@{ foreground_color = 'DarkYellow'; background_color = $null; display_location = $true;  text_type = 'debug:  ' }
+            warning     = [PSCustomObject]@{ foreground_color = 'Yellow';     background_color = $null; display_location = $true;  text_type = 'warning:' }
+            information = [PSCustomObject]@{ foreground_color = 'White';      background_color = $null; display_location = $false; text_type = '  ' }
+            error       = [PSCustomObject]@{ foreground_color = 'Red';        background_color = $null; display_location = $true;  text_type = 'error:  ' }
+            input       = [PSCustomObject]@{ foreground_color = 'Blue';       background_color = $null; display_location = $true;  text_type = '> ' }
+            success     = [PSCustomObject]@{ foreground_color = 'Green';      background_color = $null; display_location = $false; text_type = 'success:' ;  status_text = 'Success'}
+            fail        = [PSCustomObject]@{ foreground_color = 'Red';        background_color = $null; display_location = $false; text_type = 'fail:   ' ;  status_text = 'Fail'   }
         }
+        
 
         $Streams  = @('verbose','debug','warning','information','error','input','success','fail')
 

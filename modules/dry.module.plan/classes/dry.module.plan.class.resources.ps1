@@ -103,17 +103,17 @@ class Resources {
                             $DryInput = $DryInput.Trim()
                             ($DryInput -is [string]) -and 
                             ($DryInput.length -ge 2) -and
-                            ($DryInput.length -le 6) -and
+                            ($DryInput.length -le 8) -and
                             ($DryInput -notmatch "\d$") -and
                             ($DryInput -notmatch "^\d")
                         }
                         
                         ol i " "
                         $GetDryInputParams = @{
-                            Prompt               = "Customize the Short (2-6 characters), or ENTER for default ('$($sSelected.Short)')"
+                            Prompt               = "Customize the Short (2-8 characters), or ENTER for default ('$($sSelected.Short)')"
                             PromptChoiceString   = ""
                             #Description          = "The list above is an example of roles and corresponding short role names for inspiration"
-                            FailedMessage        = "The short role name should be 2-6 chars, not contain special chars but plain letters, and not start or end with a number. The role short name is significant it you have an Active Directory that separates roles into OU's based on the role short name. If you don't, just accept the defult"
+                            FailedMessage        = "The short role name should be 2-8 chars, not contain special chars but plain letters, and not start or end with a number. The role short name is significant it you have an Active Directory that separates roles into OU's based on the role short name. If you don't, just accept the defult"
                             ValidateScript       = $ValidateShortRoleNameScript
                             ValidateScriptParams = @()
                             DefaultValue         = "$($sSelected.Short)"

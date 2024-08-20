@@ -188,14 +188,14 @@ function Out-DryLog {
                 console_width_threshold    = 70;
                 post_buffer                = 3;
                 array_first_element_length = 45;
-                verbose     = [PSCustomObject]@{ foreground_color = 'Cyan';     background_color = $null; display_location = $true;  text_type = '[v]' }
-                debug       = [PSCustomObject]@{ foreground_color = 'DarkCyan'; background_color = $null; display_location = $true;  text_type = '[d]' }
-                warning     = [PSCustomObject]@{ foreground_color = 'Yellow';   background_color = $null; display_location = $true;  text_type = '[w]' }
-                information = [PSCustomObject]@{ foreground_color = 'White';    background_color = $null; display_location = $false; text_type = '[>]' }
-                error       = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $true;  text_type = '[e]' }
-                input       = [PSCustomObject]@{ foreground_color = 'Yellow';   background_color = $null; display_location = $true;  text_type = '[i]' }
-                success     = [PSCustomObject]@{ foreground_color = 'Green';    background_color = $null; display_location = $false; text_type = '[s]' ;  status_text = 'Success'}
-                fail        = [PSCustomObject]@{ foreground_color = 'Red';      background_color = $null; display_location = $false; text_type = '[f]' ;  status_text = 'Fail'   }
+                verbose     = [PSCustomObject]@{ foreground_color = 'Yellow';     background_color = $null; display_location = $true;  text_type = 'verbose:' }
+                debug       = [PSCustomObject]@{ foreground_color = 'DarkYellow'; background_color = $null; display_location = $true;  text_type = 'debug:  ' }
+                warning     = [PSCustomObject]@{ foreground_color = 'Yellow';     background_color = $null; display_location = $true;  text_type = 'warning:' }
+                information = [PSCustomObject]@{ foreground_color = 'White';      background_color = $null; display_location = $false; text_type = '  ' }
+                error       = [PSCustomObject]@{ foreground_color = 'Red';        background_color = $null; display_location = $true;  text_type = 'error:  ' }
+                input       = [PSCustomObject]@{ foreground_color = 'Blue';       background_color = $null; display_location = $true;  text_type = '> ' }
+                success     = [PSCustomObject]@{ foreground_color = 'Green';      background_color = $null; display_location = $false; text_type = 'success:' ;  status_text = 'Success'}
+                fail        = [PSCustomObject]@{ foreground_color = 'Red';        background_color = $null; display_location = $false; text_type = 'fail:   ' ;  status_text = 'Fail'   }
             }
         }
         $LoggingOptions = $GLOBAL:LoggingOptions
@@ -214,7 +214,7 @@ function Out-DryLog {
 
         # Check that $LogFile is defined, turn off logging to file if not
         if (($null -eq $LogFile) -or ($LogFile -eq "")) {
-            # Only warn once, don't nag all the time
+            # Only warn once a session, don't nag repeatedly
             if ($GLOBAL:DoNotLogToFile -ne $true) {
                 Write-Warning -Message "`$LogFile is undefined -> logging to file is disabled. Define LoggingOptions.path to enable it!" -WarningAction Continue
                 [Bool]$GLOBAL:DoNotLogToFile = $true
@@ -590,6 +590,7 @@ function Out-DryLog {
                 }
                 # The 3 first characters are the the code, they are printed in black
                 if ($LogColors) {
+                    <#
                     if ($LogColors["foregroundcolor"]) {
                         $TextTypeBackGroundColor = $LogColors["foregroundcolor"]
                     }
@@ -609,6 +610,8 @@ function Out-DryLog {
                         Write-Host -BackGroundColor $TextTypeBackGroundColor -ForeGroundColor $TextTypeForeGroundColor -Object $FullMessageChunk.Substring(0,3) -NoNewLine
                         Write-Host @LogColors -Object $FullMessageChunk.Substring(3)
                     }
+                    #>
+                    Write-Host @LogColors -Object $FullMessageChunk
                 }
                 else {
                     Write-Host -Object $FullMessageChunk

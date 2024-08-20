@@ -156,30 +156,5 @@
 
             }
         }
-    },
-    "logging": {
-        "log_to_file":                true,
-        "warn_on_to_narrow_console":  true,
-        "console_width_threshold":    70,
-        "array_first_element_length": 45,
-        "post_buffer":                 3,
-        "verbose": {
-            "foreground_color": "Cyan"
-        },
-        "debug": {
-            "foreground_color": "DarkCyan"
-        },
-        "warning": {
-            "foreground_color": "Yellow"
-        },
-        "information": {
-            "foreground_color": "White"
-        },
-        "error": {
-            "foreground_color": "Red"
-        },
-        "input": {
-            "foreground_color": "Yellow"
-        } 
     }
 }
