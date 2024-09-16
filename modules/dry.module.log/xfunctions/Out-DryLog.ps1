@@ -191,7 +191,7 @@ function Out-DryLog {
                 verbose     = [PSCustomObject]@{ foreground_color = 'Yellow';     background_color = $null; display_location = $true;  text_type = 'verbose:' }
                 debug       = [PSCustomObject]@{ foreground_color = 'DarkYellow'; background_color = $null; display_location = $true;  text_type = 'debug:  ' }
                 warning     = [PSCustomObject]@{ foreground_color = 'Yellow';     background_color = $null; display_location = $true;  text_type = 'warning:' }
-                information = [PSCustomObject]@{ foreground_color = 'White';      background_color = $null; display_location = $false; text_type = '  ' }
+                information = [PSCustomObject]@{ foreground_color = 'White';      background_color = $null; display_location = $false; text_type = 'info:   ' }
                 error       = [PSCustomObject]@{ foreground_color = 'Red';        background_color = $null; display_location = $true;  text_type = 'error:  ' }
                 input       = [PSCustomObject]@{ foreground_color = 'Blue';       background_color = $null; display_location = $true;  text_type = '> ' }
                 success     = [PSCustomObject]@{ foreground_color = 'Green';      background_color = $null; display_location = $false; text_type = 'success:' ;  status_text = 'Success'}
