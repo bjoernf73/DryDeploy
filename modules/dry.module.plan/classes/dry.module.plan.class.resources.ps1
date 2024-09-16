@@ -72,7 +72,7 @@ class Resources {
                         $GetDryInputParams = @{
                             Prompt             = "Enter index of a role"
                             PromptChoiceString = "$($Configuration.build.roles.order)"
-                            #Description        = "The list above are roles that you may select from in interactive mode. You may select a different module (.\DryDeploy.ps1 -ModuleConfig ..\path\to\config) if the role you are looking for is not in the list"
+                            #Description        = "The list above are roles that you may select from in interactive mode. You may select a different module (DryDeploy -ModuleConfig ..\path\to\config) if the role you are looking for is not in the list"
                             FailedMessage      = "You need to select the index of the role, i.e. one of '$($Configuration.build.roles.order)' or 'q' to quit"
                             ValidateSet        = $Configuration.build.roles.order
                         }
@@ -161,7 +161,7 @@ class Resources {
                         $GetDryInputParams = @{
                             Prompt             = "Enter index of a subnet"
                             PromptChoiceString = "$iSubnetsIndexArray"
-                            #Description        = "The list above are subnets that you may select from. You may select a different environment (.\DryDeploy.ps1 -EnvConfig ..\path\to\config) if the subnet you are looking for is not in the list"
+                            #Description        = "The list above are subnets that you may select from. You may select a different environment (DryDeploy -EnvConfig ..\path\to\config) if the subnet you are looking for is not in the list"
                             FailedMessage      = "You need to select the index of the subnet, i.e. one of '$iSubnetsIndexArray'"
                             ValidateSet        = $iSubnetsIndexArray
                         }

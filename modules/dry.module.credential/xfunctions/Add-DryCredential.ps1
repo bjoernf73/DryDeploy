@@ -42,7 +42,7 @@ function Add-DryCredential {
             throw "The ConfigCombo.envconfig.name is null"
         }
         if ($null -eq $GLOBAL:dry_var_global_Configuration.CredentialsType) {
-            throw "Missing global variable 'CredentialsType' (defined in DryDeploy.ps1)"
+            throw "Missing global variable 'CredentialsType' (defined in DryDeploy)"
         }
         
         switch ($PsCmdlet.ParameterSetName) {

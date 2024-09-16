@@ -119,7 +119,7 @@ credentials which are resolved by your Action variables
 expressions, 'credential2', 'credential3' and so on. Those 
 credentials are specified in the Plan by Aliases, for instance
 'local-admin' or 'domain-admin' or 'db-svc-user'. Run
-.\DryDeploy.ps1 -Resolve to resolve those Aliases into actual 
+DryDeploy -Resolve to resolve those Aliases into actual 
 credentials before you -Apply. If you don't, you may be 
 prompted at the beginning av each Action for which a credential
 isn't yet resolved. Once resolved, the credential will be stored 
@@ -292,67 +292,67 @@ and in path
 Will destroy existing resources. Careful.
 
 .EXAMPLE
-.\DryDeploy.ps1 -Init
+DryDeploy -Init
 Will prepare your system for deployment. Installs Choco, Git, 
 Packer, downloads and installs modules, and dependent git repos.
 Make sure to elevate your PowerShell for this one - it will fail
 if not
 
 .EXAMPLE
-.\DryDeploy.ps1 -ModuleConfig ..\ModuleConfigs\MyModule -EnvConfig ..\EnvConfigs\MyEnvironment
+DryDeploy -ModuleConfig ..\ModuleConfigs\MyModule -EnvConfig ..\EnvConfigs\MyEnvironment
 Creates a configuration combination of a module configuration and
 an environment configuration. The combination (the "ConfigCombo") 
 is stored and used on every subsequent run until you invoke the 
 SetConfig parameterset again.
 
 .EXAMPLE
-.\DryDeploy.ps1 -Plan
+DryDeploy -Plan
 Will create a full plan for all resources in the configuration that
 is of a role that matches roles in your ModuleConfig
 
 .EXAMPLE
-.\DryDeploy.ps1
+DryDeploy
 Displays the current Plan
 
 .EXAMPLE
-.\DryDeploy.ps1 -Plan -Resources dc,ca
+DryDeploy -Plan -Resources dc,ca
 Creates a partial plan, containing only Resources whos name is 
 or matches "dc*" or "ca*"
 
 .EXAMPLE
-.\DryDeploy.ps1 -Plan -Resources dc,ca -Actions terra,ad
+DryDeploy -Plan -Resources dc,ca -Actions terra,ad
 Creates a partial plan, containing only Resources whos name is 
 or match "dc*" or "ca*", with only Actions whos name is or 
 matches "terra*" (for instance "terra.run") or "ad*" (for instance 
 "ad.import")
 
 .EXAMPLE
-.\DryDeploy.ps1 -Plan -ExcludeResources DC,DB
+DryDeploy -Plan -ExcludeResources DC,DB
 Creates a partial plan, excluding any Resource whos name is or 
 matches "DC*" or "DB*"
 
 .EXAMPLE
-.\DryDeploy.ps1 -Resolve
+DryDeploy -Resolve
 Resolves all credentials, variables and options for each Action 
 in the current plan, but does not actually invoke the Action
 
 .EXAMPLE
-.\DryDeploy.ps1 -Apply
+DryDeploy -Apply
 Applies the current Plan. 
 
 .EXAMPLE
-.\DryDeploy.ps1 -Apply -Force
+DryDeploy -Apply -Force
 Applies the current Plan, destroying any resource with the same 
 identity as the resource you are creating. 
 
 .EXAMPLE
-.\DryDeploy.ps1 -Apply -Resources ca002 -Actions ad.import
+DryDeploy -Apply -Resources ca002 -Actions ad.import
 Applies only actions of the Plan where the Resources name is or 
 matches "ca002*", and the name of the Action that is or matches 
 "ad.import"
 
 .EXAMPLE
-$Config = .\DryDeploy.ps1 -GetConfig
+$Config = DryDeploy -GetConfig
 Returns the configuration object, and assigns it to the variable 
 '$Config' so you may inspect it's content 'offline' 
 #>
@@ -901,7 +901,7 @@ function DryDeploy {
                 Installs dependencies for DD, your EnvConfig, and your ModuleConfig. DD has 
                 some dependencies spesified on SystemOptions.json at root. Your selected EnvConfig and 
                 ModuleConfig may each have theirs in their 'Config.json' at root of each repo, in a 
-                "dependencies": {} object. You must elevate Powershell and run .\DryDeploy.ps1 -Init 
+                "dependencies": {} object. You must elevate Powershell and run DryDeploy -Init 
                 at least once for a configuration combination.
 
             # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
@@ -1380,7 +1380,7 @@ function DryDeploy {
                         
                         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                         
-                            You may call ".\DryDeploy.ps1 -Apply -ActionParams @{'param1'='value1'}" to pass a hashtable
+                            You may call "DryDeploy -Apply -ActionParams @{'param1'='value1'}" to pass a hashtable
                             of names and values to the action-function if it supports some way of filtering on certain 
                             parts of the configuration, however this params are highly Action specific, so the action
                             function will automatically quit after this.
@@ -1455,7 +1455,7 @@ function DryDeploy {
                             Quit
 
                             You may call 
-                                .\DryDeploy.ps1 -Apply -Quit
+                                DryDeploy -Apply -Quit
                             to make DD quit after every action. That way, you can ensure it continues only
                             one Action at every run. Moreover, the -Quit parameter is nice for pipelines, since you 
                             may devide the pipeline into blocks. If Jenkins, or DevOpsServer, or Gitlab Automation, 
@@ -1473,7 +1473,7 @@ function DryDeploy {
                             Step
                         
                             You may call 
-                                .\DryDeploy.ps1 -Apply -Step
+                                DryDeploy -Apply -Step
                             to make DryDeploy wait for you to press ENTER before continuing to the next 
                             Action, or Q to quit, if you're unhappy about something. 
                             

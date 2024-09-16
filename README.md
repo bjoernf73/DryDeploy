@@ -1,96 +1,105 @@
 ---
-external help file: -help.xml
-Module Name:
+external help file: DryDeploy-help.xml
+Module Name: DryDeploy
 online version:
 schema: 2.0.0
 ---
 
-# DryDeploy.ps1
+# DryDeploy
 
 ## SYNOPSIS
 DryDeploy is a promiscuous deployment orchestrator - swinging among 
-available technologies. 
+available orchestration and configuration technologies. 
 
 A full autodeploy of an information system may require you to use 
-a variety of configuration technologies.
-For instance, terraform 
-is great for configuring cloud platforms and instantiate resources, 
-but it's inside-OS-capabilities are bad to say the least.
-Traditional
-dsc (Desired State Configuration) is great for configuring Windows 
-roles, but does nothing for your platform provider.
-You may want to 
-use packer to automate creation of templates for your platform, and 
-saltstack to manage packages within OS's - and so on.
+a variety of orchestration and configuration technologies.
+For 
+instance, terraform is great for configuring cloud platforms and 
+instantiate resources, but it's inside-OS-capabilities are bad to 
+say the least.
+Traditional DSC (Desired State Configuration) is great 
+for configuring Windows roles, but does nothing for your platform 
+provider.
+You may want to use packer to automate creation of templates
+for your platform, and saltstack to manage packages within OS's - and 
+so on.
  
 
-Common for dsc, terraform, packer, ansible, saltstack etc.
+Common for DSC, terraform, packer, ansible, saltstack etc.
 is that: 
- - you create one or more file containing your configuration, using
+ - you create one or more files containing your configuration, using
  variables for environment specific values and secrets
  - when you deploy, you supply the tool with the path to the config 
  and all the variables that it needs.
 
 At the core of DryDeploy lies the separation between 
- - ModuleConfig (the configuration definition of a system module)
+ - ModuleConfig (the configuration files of a system or a range
+   of systems)
  - EnvConfig (that defines the environment into which you will 
    deploy your system modules).
 
 DryDeploy combines a ModuleConfig, which defines all details of how
 to bring one or multiple roles (resource templates) into a ready to 
 use state, with an EnvConfig, which contain all environment specific
-values.
-Separate properly, and you may deploy otherwise identical 
-instances of a service, spanning multiple servers or containers, 
-into a dev (3), a test(2), a ref(1), and a production(0) environment.
+variable values.
+Separate properly, and you may deploy otherwise 
+identical instances of service and systems, spanning multiple servers 
+and containers, into a dev (3), a test(2), a ref(1), and a production(0) 
+environment with only a click of a button.
 
-This separation is key to automation, although misunderstood and 
-ignored by most IT depts.
-When you automate, you should be able to
-test your code in a separate, non-critical environment which you 
-may never be blamed for destroying by running a faulty config.
-When 
-your config finally works, it should be a no effort task to move on
-to the next environment (one closer to production).
-In DryDeploy, 
-you run a simple command to change the EnvConfig, then you -Plan, 
-then you -Apply. 
+This separation between system modules and environment is key to proper 
+automation, although misunderstood or ignored by most IT departments.
+Most companies, state- and governmental agencies, are shockingly incapable 
+of reproducing their services configurations, because of years of mismanagement,
+and the misunderstanding of IAC.
+IAC is not making a script here and there. 
+When you automate, you should be able to test your code in a separate, non-
+critical environment which you may never be blamed for destroying by running 
+a faulty config on.
+When your config finally works, it should be a no effort 
+task to move on to the next environment (one closer to production).
+In DryDeploy,
+you run a simple command to select the environment (EnvConfig) and the system 
+module (ModuleConfig) you'd like to deploy, then you -Plan, then you -Apply. 
 
-PS C:\DryDeploy\> .\DryDeploy.ps1 -Plan
+PS C:\DryDeploy\> DryDeploy -ModuleConfig .\Path\2\My\ModuleConfig -EnvConfig .\Path\2\My\Environment
 
-PS C:\DryDeploy\> .\DryDeploy.ps1 -Apply
+PS C:\DryDeploy\> DryDeploy -Plan
+
+PS C:\DryDeploy\> DryDeploy -Apply
 
 Go shopping while DryDeploy works through your build.
-Want it in a 
-pipeline?
-No problem - I'd recommend DevOps Server, but you may use 
-Jenkins or Gitlab if you so fancy.
+Want it in a pipeline?
+No 
+problem - I'd recommend DevOps Server, but you may use Gitlab if you so fancy.
 
 If something fails, edit your code, and -Apply again.
-DryDeploy 
-retries the failed Action and continues to apply the rest of the 
-plan.
+DryDeploy retries the 
+failed Action and continues to apply the rest of the plan.
+
+During development, filter the plan only selecting the parts of the configuration
+you want to test.
 
 ## SYNTAX
 
 ### ShowPlan (Default)
 ```
-DryDeploy.ps1 [-ShowDeselected] [<CommonParameters>]
+DryDeploy [-ShowDeselected] [<CommonParameters>]
 ```
 
 ### Github
 ```
-DryDeploy.ps1 [-GitHub] [<CommonParameters>]
+DryDeploy [-GitHub] [<CommonParameters>]
 ```
 
 ### Init
 ```
-DryDeploy.ps1 [-Init] [<CommonParameters>]
+DryDeploy [-Init] [<CommonParameters>]
 ```
 
 ### Plan
 ```
-DryDeploy.ps1 [-Plan] [-Actions <String[]>] [-ExcludeActions <String[]>] [-BuildSteps <Int32[]>]
+DryDeploy [-Plan] [-Actions <String[]>] [-ExcludeActions <String[]>] [-BuildSteps <Int32[]>]
  [-ExcludeBuildSteps <Int32[]>] [-Resources <String[]>] [-ExcludeResources <String[]>] [-Roles <String[]>]
  [-ExcludeRoles <String[]>] [-Phases <Int32[]>] [-ExcludePhases <Int32[]>] [-NoLog] [-ShowDeselected]
  [-CmTrace] [<CommonParameters>]
@@ -98,36 +107,41 @@ DryDeploy.ps1 [-Plan] [-Actions <String[]>] [-ExcludeActions <String[]>] [-Build
 
 ### Resolve
 ```
-DryDeploy.ps1 [-Resolve] [<CommonParameters>]
+DryDeploy [-Resolve] [<CommonParameters>]
 ```
 
 ### Apply
 ```
-DryDeploy.ps1 [-Apply] [-Actions <String[]>] [-ExcludeActions <String[]>] [-BuildSteps <Int32[]>]
+DryDeploy [-Apply] [-Actions <String[]>] [-ExcludeActions <String[]>] [-BuildSteps <Int32[]>]
  [-ExcludeBuildSteps <Int32[]>] [-Resources <String[]>] [-ExcludeResources <String[]>] [-Roles <String[]>]
  [-ExcludeRoles <String[]>] [-Phases <Int32[]>] [-ExcludePhases <Int32[]>] [-ActionParams <Hashtable>] [-NoLog]
  [-KeepConfigFiles] [-DestroyOnFailedBuild] [-ShowAllErrors] [-ShowPasswords] [-ShowStatus]
  [-SuppressInteractivePrompts] [-IgnoreDependencies] [-Step] [-Quit] [-CmTrace] [-Force] [<CommonParameters>]
 ```
 
+### Interactive
+```
+DryDeploy [-Interactive] [<CommonParameters>]
+```
+
 ### SetConfig
 ```
-DryDeploy.ps1 [-EnvConfig <String>] [-ModuleConfig <String>] [<CommonParameters>]
+DryDeploy [-EnvConfig <String>] [-ModuleConfig <String>] [<CommonParameters>]
 ```
 
 ### GetConfig
 ```
-DryDeploy.ps1 [-GetConfig] [<CommonParameters>]
+DryDeploy [-GetConfig] [<CommonParameters>]
 ```
 
 ### Rewind
 ```
-DryDeploy.ps1 [-Rewind] [<CommonParameters>]
+DryDeploy [-Rewind] [<CommonParameters>]
 ```
 
-### FastForward
+### FastFwd
 ```
-DryDeploy.ps1 [-FastForward] [<CommonParameters>]
+DryDeploy [-FastFwd] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -184,7 +198,7 @@ the order in which Actions of the Roles are deployed
 
 ### EXAMPLE 1
 ```
-.\DryDeploy.ps1 -Init
+DryDeploy -Init
 ```
 
 Will prepare your system for deployment.
@@ -195,7 +209,7 @@ if not
 
 ### EXAMPLE 2
 ```
-.\DryDeploy.ps1 -ModuleConfig ..\ModuleConfigs\MyModule -EnvConfig ..\EnvConfigs\MyEnvironment
+DryDeploy -ModuleConfig ..\ModuleConfigs\MyModule -EnvConfig ..\EnvConfigs\MyEnvironment
 ```
 
 Creates a configuration combination of a module configuration and
@@ -206,7 +220,7 @@ SetConfig parameterset again.
 
 ### EXAMPLE 3
 ```
-.\DryDeploy.ps1 -Plan
+DryDeploy -Plan
 ```
 
 Will create a full plan for all resources in the configuration that
@@ -214,14 +228,14 @@ is of a role that matches roles in your ModuleConfig
 
 ### EXAMPLE 4
 ```
-.\DryDeploy.ps1
+DryDeploy
 ```
 
 Displays the current Plan
 
 ### EXAMPLE 5
 ```
-.\DryDeploy.ps1 -Plan -Resources dc,ca
+DryDeploy -Plan -Resources dc,ca
 ```
 
 Creates a partial plan, containing only Resources whos name is 
@@ -229,7 +243,7 @@ or matches "dc*" or "ca*"
 
 ### EXAMPLE 6
 ```
-.\DryDeploy.ps1 -Plan -Resources dc,ca -Actions terra,ad
+DryDeploy -Plan -Resources dc,ca -Actions terra,ad
 ```
 
 Creates a partial plan, containing only Resources whos name is 
@@ -239,7 +253,7 @@ matches "terra*" (for instance "terra.run") or "ad*" (for instance
 
 ### EXAMPLE 7
 ```
-.\DryDeploy.ps1 -Plan -ExcludeResources DC,DB
+DryDeploy -Plan -ExcludeResources DC,DB
 ```
 
 Creates a partial plan, excluding any Resource whos name is or 
@@ -247,7 +261,7 @@ matches "DC*" or "DB*"
 
 ### EXAMPLE 8
 ```
-.\DryDeploy.ps1 -Resolve
+DryDeploy -Resolve
 ```
 
 Resolves all credentials, variables and options for each Action 
@@ -255,14 +269,14 @@ in the current plan, but does not actually invoke the Action
 
 ### EXAMPLE 9
 ```
-.\DryDeploy.ps1 -Apply
+DryDeploy -Apply
 ```
 
 Applies the current Plan.
 
 ### EXAMPLE 10
 ```
-.\DryDeploy.ps1 -Apply -Force
+DryDeploy -Apply -Force
 ```
 
 Applies the current Plan, destroying any resource with the same 
@@ -270,7 +284,7 @@ identity as the resource you are creating.
 
 ### EXAMPLE 11
 ```
-.\DryDeploy.ps1 -Apply -Resources ca002 -Actions ad.import
+DryDeploy -Apply -Resources ca002 -Actions ad.import
 ```
 
 Applies only actions of the Plan where the Resources name is or 
@@ -279,7 +293,7 @@ matches "ca002*", and the name of the Action that is or matches
 
 ### EXAMPLE 12
 ```
-$Config = .\DryDeploy.ps1 -GetConfig
+$Config = DryDeploy -GetConfig
 ```
 
 Returns the configuration object, and assigns it to the variable 
@@ -354,7 +368,7 @@ Those
 credentials are specified in the Plan by Aliases, for instance
 'local-admin' or 'domain-admin' or 'db-svc-user'.
 Run
-.\DryDeploy.ps1 -Resolve to resolve those Aliases into actual 
+DryDeploy -Resolve to resolve those Aliases into actual 
 credentials before you -Apply.
 If you don't, you may be 
 prompted at the beginning av each Action for which a credential
@@ -385,6 +399,29 @@ any filter to only Apply a limited set of planned actions (-Actions,
 ```yaml
 Type: SwitchParameter
 Parameter Sets: Apply
+Aliases:
+
+Required: True
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Interactive
+Starts DryDeploy in interactive mode, which has the effect that 
+resources specified in an environment are ignored.
+Instead, a single
+resource will be defined from interactive prompts, and a plan for 
+that resource is created.
+You still need to have a module and an 
+environment selected.
+You may only select to build a resource from
+a role in the currently selected system module.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: Interactive
 Aliases:
 
 Required: True
@@ -887,7 +924,7 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -FastForward
+### -FastFwd
 In an existing plan, fastforwards one buildstep.
 That is, 
 searches for the first occurance of a buildstep with a status 
@@ -896,7 +933,7 @@ that is not 'Success', and sets that Action's status to
 
 ```yaml
 Type: SwitchParameter
-Parameter Sets: FastForward
+Parameter Sets: FastFwd
 Aliases:
 
 Required: False

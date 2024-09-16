@@ -72,7 +72,7 @@ function dry.action.terra.run {
             ActionParams
             When working with a single Action type, for instance during development, 
             it is possible to pass a hashtable of extra commmand line paramaters to 
-            DryDeploy.ps1 that will be passed to the receiving program, in this case 
+            DryDeploy that will be passed to the receiving program, in this case 
             Terraform.  
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         if ($ActionParams) {
