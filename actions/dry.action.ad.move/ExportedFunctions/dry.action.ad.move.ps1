@@ -165,7 +165,7 @@ function dry.action.ad.move {
     }
     finally {
         $AdMoveSession | Remove-PSSession -ErrorAction Ignore 
-        Remove-Module -Name 'dry.module.ad' -Force -ErrorAction continue
+        Remove-Module -Name 'dry.module.ad' -Force -ErrorAction SilentlyContinue
         ol i "Action 'ad.move' is finished" -sh
     }
 }
