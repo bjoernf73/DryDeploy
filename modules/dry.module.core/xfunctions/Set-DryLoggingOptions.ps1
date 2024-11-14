@@ -26,8 +26,9 @@
   .DESCRIPTION
   The dry.module.log module exports the function 'Out-DryLog' that is universally
   used in the DryDeploy project. The function logs and manages text displayed on
-  the console. Set-DryLoggingOptions defines hard coded defaults for all Out-DryLog 
-  options. DryDeploy's SystemOptions.json may define one or more options that will 
+  the console. Set-DryLoggingOptions gets and sets logging options for Out-DryLog. 
+  The Out-DryLog function defines itself a set of defaults, but only if a global 
+  variable $GLOBAL:LoggingOptions does not exist.It first sets the defaults, den DryDeploy's SystemOptions.json may define one or more options that will 
   override the default options. Lastly, the user may define a UserOptions.json that 
   may define one or more options that will override both the systemoptions and the
   default options.
@@ -56,7 +57,6 @@ function Set-DryLoggingOptions {
         [String]   $ArchiveDirectory,
         [Switch]   $NoLog
     )
-
     try {
         # The function defines all it's Defaults, then apply the SystemConfig, then the UserConfig, then relevant command line options
         $LoggingOptions = [PSCustomObject]@{
@@ -70,14 +70,12 @@ function Set-DryLoggingOptions {
             verbose     = [PSCustomObject]@{ foreground_color = 'Yellow';     background_color = $null; display_location = $true;  text_type = 'verbose:' }
             debug       = [PSCustomObject]@{ foreground_color = 'DarkYellow'; background_color = $null; display_location = $true;  text_type = 'debug:  ' }
             warning     = [PSCustomObject]@{ foreground_color = 'Yellow';     background_color = $null; display_location = $true;  text_type = 'warning:' }
-            information = [PSCustomObject]@{ foreground_color = 'White';      background_color = $null; display_location = $false; text_type = ':       ' }
+            information = [PSCustomObject]@{ foreground_color = 'White';      background_color = $null; display_location = $false; text_type = 'dd>     ' }
             error       = [PSCustomObject]@{ foreground_color = 'Red';        background_color = $null; display_location = $true;  text_type = 'error:  ' }
-            input       = [PSCustomObject]@{ foreground_color = 'Blue';       background_color = $null; display_location = $true;  text_type = '> ' }
+            input       = [PSCustomObject]@{ foreground_color = 'Blue';       background_color = $null; display_location = $true;  text_type = 'dd<     ' }
             success     = [PSCustomObject]@{ foreground_color = 'Green';      background_color = $null; display_location = $false; text_type = 'success:' ;  status_text = 'Success'}
             fail        = [PSCustomObject]@{ foreground_color = 'Red';        background_color = $null; display_location = $false; text_type = 'fail:   ' ;  status_text = 'Fail'   }
         }
-        
-
         $Streams  = @('verbose','debug','warning','information','error','input','success','fail')
 
         # set properties defined by the system
@@ -136,8 +134,5 @@ function Set-DryLoggingOptions {
     }
     catch {
         $PSCmdlet.ThrowTerminatingError($_)
-    }
-    finally {
-
     }
 }

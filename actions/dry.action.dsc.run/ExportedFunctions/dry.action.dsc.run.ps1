@@ -23,6 +23,8 @@ function dry.action.dsc.run {
         $ActionParams
     )
     try {
+        $SCRIPT:GlobalProgressPreference = $GLOBAL:ProgressPreference
+        $ProgressPreference = 'SilentlyContinue'
         Push-Location
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             SourceFile is the top .psm1 file
@@ -362,6 +364,7 @@ function dry.action.dsc.run {
         }
     }
     finally {
+        $ProgressPreference = $SCRIPT:GlobalProgressPreference
         Pop-Location
         Remove-Module -Name PSDesiredStateConfiguration,dry.action.dsc.run -ErrorAction Ignore 
 
