@@ -57,11 +57,11 @@ Class GPRegistryPolicy
 
     GPRegistryPolicy()
     {
-        $this.KeyName     = $Null
-        $this.ValueName   = $Null
+        $this.KeyName     = $null
+        $this.ValueName   = $null
         $this.ValueType   = [RegType]::REG_NONE
         $this.ValueLength = 0
-        $this.ValueData   = $Null
+        $this.ValueData   = $null
     }
 
     GPRegistryPolicy(

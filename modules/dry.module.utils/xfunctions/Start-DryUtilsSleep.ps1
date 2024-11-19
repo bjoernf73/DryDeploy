@@ -22,9 +22,9 @@
 function Start-DryUtilsSleep {
     [CmdletBinding()]
     param (
-        [Int]$Seconds,
+        [int]$Seconds,
 
-        [String]$Message = "Sleeping $Seconds seconds..."
+        [string]$Message = "Sleeping $Seconds seconds..."
     )
     $TargetTime = (Get-Date).AddSeconds($Seconds)
     while($TargetTime -gt (Get-Date)) {

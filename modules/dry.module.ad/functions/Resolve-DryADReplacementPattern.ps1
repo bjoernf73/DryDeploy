@@ -23,7 +23,7 @@ function Resolve-DryADReplacementPattern {
     param (
         [Parameter(Position = 0, Mandatory)]
         [AllowEmptyString()]
-        [String]$InputText,
+        [string]$InputText,
 
         [Parameter(Position = 1, Mandatory)]
         [System.Collections.Generic.List[PSObject]]$Variables

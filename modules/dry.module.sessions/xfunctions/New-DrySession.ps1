@@ -23,14 +23,14 @@ function New-DrySession {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
-        [String]$Computername,
+        [string]$Computername,
 
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential[]]$Credential,
 
         [Parameter(Mandatory)]
         [ValidateSet('PSSession','CIMSession')]
-        [String]$SessionType,
+        [string]$SessionType,
 
         [Parameter()]
         [PSObject]$SessionConfig,
@@ -39,7 +39,7 @@ function New-DrySession {
         [Switch]$IgnoreErrors,
 
         [Parameter(HelpMessage="How many times to try - defaults to 10 times")]
-        [Int]$MaxRetries = 10
+        [int]$MaxRetries = 10
     )
 
     try {

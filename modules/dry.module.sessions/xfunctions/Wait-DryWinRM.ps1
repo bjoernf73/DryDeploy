@@ -23,28 +23,28 @@ function Wait-DryWinRM {
     [CmdletBinding()]
     param (
         [Parameter(HelpMessage="IP-address")]
-        [String]$IP,
+        [string]$IP,
 
         [Parameter(Mandatory,HelpMessage="NetBIOS Host Name")]
-        [String]$Computername,
+        [string]$Computername,
 
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential[]]$Credential,
 
         [Parameter(HelpMessage="Port - defaults to 5985")]
-        [Int]$Port = 5985,
+        [int]$Port = 5985,
 
         [Parameter(HelpMessage="How long (in seconds) do you 
         want me to try reaching the interface? Default is 1800 (30 minutes)")]
-        [Int]$SecondsToTry = 1800,
+        [int]$SecondsToTry = 1800,
 
         [Parameter(HelpMessage="How long (in seconds) do you 
         want me to wait before I start? By default, I wait 15 seconds")]
-        [Int]$SecondsToWaitBeforeStart = 15,
+        [int]$SecondsToWaitBeforeStart = 15,
 
         [Parameter(HelpMessage="How long (in seconds) do you 
         want me to wait between each retry? By default, I wait 60 seconds")]
-        [Int]$SecondsToWaitBetweenTries = 60,
+        [int]$SecondsToWaitBetweenTries = 60,
 
         [Parameter()]
         [PSObject]$SessionConfig
@@ -77,8 +77,8 @@ function Wait-DryWinRM {
     [bool]$PortUp = $false
 
     do {
-        $ProgressTotalTime = [Int]((New-TimeSpan -Start $StartTime -End $TargetTime).TotalSeconds)
-        $ProgressTimeLeft = [Int]((New-TimeSpan -Start (Get-Date) -end $TargetTime).TotalSeconds)
+        $ProgressTotalTime = [int]((New-TimeSpan -Start $StartTime -End $TargetTime).TotalSeconds)
+        $ProgressTimeLeft = [int]((New-TimeSpan -Start (Get-Date) -end $TargetTime).TotalSeconds)
         $WriteProgressParameters = @{
             Activity        = "[$Address`:$Port]: Waiting for WinRM interface"
             Status          = "Port Down"
@@ -104,12 +104,12 @@ function Wait-DryWinRM {
                 }
                 else {
                     $NowTime = Get-date 
-                    $Span = [Int]((New-TimeSpan -Start $StartTime -End $NowTime).TotalSeconds)
+                    $Span = [int]((New-TimeSpan -Start $StartTime -End $NowTime).TotalSeconds)
                     
                     if ($NowTime -lt $TargetTime) {
                 
                         ol i "Still waiting for WinRM","$Span of $ProgressTotalTime seconds"
-                        $ProgressTimeLeft = [Int]((New-TimeSpan -Start (Get-Date) -end $TargetTime).TotalSeconds)
+                        $ProgressTimeLeft = [int]((New-TimeSpan -Start (Get-Date) -end $TargetTime).TotalSeconds)
                         $WriteProgressParameters = @{
                             Activity        = "[$Address`:$Port]: Waiting for WinRM interface"
                             Status          = "WinRM Down"
@@ -127,7 +127,7 @@ function Wait-DryWinRM {
         }
         else {
             $NowTime = Get-date 
-            $Span = [Int]((New-TimeSpan -Start $StartTime -End $NowTime).TotalSeconds)
+            $Span = [int]((New-TimeSpan -Start $StartTime -End $NowTime).TotalSeconds)
             
             if ($(Get-Date) -lt $TargetTime) {
                 ol i "Still waiting for WinRM","$Span of $ProgressTotalTime seconds"

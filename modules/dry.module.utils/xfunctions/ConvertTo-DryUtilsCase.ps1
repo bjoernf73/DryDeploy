@@ -25,11 +25,11 @@ function ConvertTo-DryUtilsCase {
     param (
         [Parameter(Mandatory)]
         [AllowEmptyString()]
-        [String]$Name,
+        [string]$Name,
 
         [ValidateSet('upper','lower','ignore','capitalized','capitalize')]
         [Parameter(Mandatory)]
-        [String]$Case 
+        [string]$Case 
     )
     if ($Case -eq 'capitalize') { $Case = 'capitalized' }
    
@@ -38,7 +38,7 @@ function ConvertTo-DryUtilsCase {
         param (
             [Parameter(Mandatory)]
             [AllowEmptyString()]
-            [String]$Name
+            [string]$Name
         )
         $Name = $Name.Trim()
 
@@ -47,7 +47,7 @@ function ConvertTo-DryUtilsCase {
         } 
         elseif ($Name -match ' ') {
             $Parts = $Name.split(' ')
-            [String]$AccumulatedParts = ''
+            [string]$AccumulatedParts = ''
             foreach ($Part in $Parts) {
                 $UpperCasePart = ($Part.SubString(0,1)).ToUpper()
                 $LowerCasePart = ($Part.Substring(1,($Part.length-1))).ToLower()
@@ -76,7 +76,7 @@ function ConvertTo-DryUtilsCase {
         'capitalized' {
             # If dN, split, and capitalize each part
             if (($Name -match "OU=") -or ($Name -match "CN=") -or ($Name -match "DC=")) {
-                [String]$AccumulatedStringValue = ''
+                [string]$AccumulatedStringValue = ''
                 $NameParts = @($Name.Split(','))
                 foreach ($Part in $NameParts) {
                     $Delimter = $Part.SubString(0,3)

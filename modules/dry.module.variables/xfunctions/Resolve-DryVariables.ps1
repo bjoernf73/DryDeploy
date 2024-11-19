@@ -52,7 +52,7 @@ function Resolve-DryVariables {
 
         [Parameter(Helpmessage="Specify the output you want, either 'hashtable' or 'list'. Defaults to 'list'")]
         [ValidateSet('hashtable', 'list')]
-        [String]$OutPutType = 'list'
+        [string]$OutPutType = 'list'
     )
     try {
         switch ($OutPutType) {
@@ -95,13 +95,13 @@ function Resolve-DryVariables {
                                 [Array]$VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
                             }
                             'Int' {
-                                [Int]$VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
+                                [int]$VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
                             }
                             {$_ -in @('bool','boolean')} {
                                 [bool]$VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
                             }
                             'String' {
-                                [String]$VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
+                                [string]$VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
                             }
                             {$_ -in @('PSObject','PSCustomObject')} {
                                 [PSCustomObject]$VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
@@ -123,13 +123,13 @@ function Resolve-DryVariables {
                             [Array]$VarValue = $Var.value 
                         }
                         'Int' {
-                            [Int]$VarValue = $Var.value 
+                            [int]$VarValue = $Var.value 
                         }
                         {$_ -in @('bool','boolean')} {
                             [bool]$VarValue = $Var.value 
                         }
                         'String' {
-                            [String]$VarValue = $Var.value 
+                            [string]$VarValue = $Var.value 
                         }
                         default {
                             # Accept whatever type is returned
@@ -146,10 +146,10 @@ function Resolve-DryVariables {
                                 [Array]$VarValue = @($Var.value)
                             }
                             'Int' {
-                                [Int]$VarValue = $Var.value 
+                                [int]$VarValue = $Var.value 
                             }
                             'String' {
-                                [String]$VarValue = ($Var.value).ToString()
+                                [string]$VarValue = ($Var.value).ToString()
                             }
                             default {
                                 # Accept whatever type is returned
@@ -186,13 +186,13 @@ function Resolve-DryVariables {
                                 [Array]$VarValue = & $Var.function @FunctionParamsHash
                             }
                             'Int' {
-                                [Int]$VarValue = & $Var.function @FunctionParamsHash
+                                [int]$VarValue = & $Var.function @FunctionParamsHash
                             }
                             {$_ -in @('bool','boolean')} {
                                 [bool]$VarValue = & $Var.function @FunctionParamsHash
                             }
                             'String' {
-                                [String]$VarValue = & $Var.function @FunctionParamsHash
+                                [string]$VarValue = & $Var.function @FunctionParamsHash
                             }
                             {$_ -in @('PSObject','PSCustomObject')} {
                                 [PSCustomObject]$VarValue = & $Var.function @FunctionParamsHash

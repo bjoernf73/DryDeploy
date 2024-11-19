@@ -26,15 +26,15 @@ function Test-DryUtilsPort {
         [string[]]$ComputerName,
 
         [Parameter(Mandatory, Position = 1, ValueFromPipelineByPropertyName)]
-        [Int]$Port,
+        [int]$Port,
 
-        [Int]$Count = 1,
+        [int]$Count = 1,
 
-        [Int]$Delay = 500,
+        [int]$Delay = 500,
         
-        [Int]$TcpTimeout = 1000,
+        [int]$TcpTimeout = 1000,
 
-        [Int]$UdpTimeout = 1000,
+        [int]$UdpTimeout = 1000,
 
         [Switch]$Tcp,
 
@@ -108,7 +108,7 @@ function Test-DryUtilsPort {
                         ol v "$($Computer): Waiting for message return"
                         $ReceiveBytes = $UdpClient.Receive([ref]$RemoteEndpoint)
                         $StopWatch.Stop()
-                        [String]$ReturnedData = $a.GetString($ReceiveBytes)
+                        [string]$ReturnedData = $a.GetString($ReceiveBytes)
                         
                         ol v "$($Computer): Connection Successful"
                             

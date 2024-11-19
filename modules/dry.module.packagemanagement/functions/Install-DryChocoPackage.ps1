@@ -27,9 +27,9 @@ function Install-DryChocoPackage {
     
     param (
         [Parameter(HelpMessage="Name of the Package to install")]
-        [String]$Name,
-        [String]$MinimumVersion,
-        [String]$RequiredVersion
+        [string]$Name,
+        [string]$MinimumVersion,
+        [string]$RequiredVersion
     )
 
     try {
@@ -48,7 +48,7 @@ function Install-DryChocoPackage {
         }
 
         $Installed = Get-ChocoPackage -Name $Name -LocalOnly
-        if ($Null -eq $Installed) {
+        if ($null -eq $Installed) {
             Install-ChocoPackage @InstallParams
         }
         else {
@@ -72,7 +72,7 @@ function Install-DryChocoPackage {
         $PSCmdlet.ThrowTerminatingError($_)
     }
     finally {
-        $Installed = $Null
-        $InstallParams = $Null
+        $Installed = $null
+        $InstallParams = $null
     }
 }

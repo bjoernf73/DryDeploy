@@ -25,13 +25,13 @@ function Set-DryADRemoteRegistry {
     param (
         [Parameter()]
         [ValidateSet('HKEY_CLASSES_ROOT', 'HKEY_CURRENT_USER', 'HKEY_LOCAL_MACHINE', 'HKEY_USERS', 'HKEY_CURRENT_CONFIG', 'HKEY_DYN_DATA')]
-        [String]$BaseKey = 'HKEY_LOCAL_MACHINE',
+        [string]$BaseKey = 'HKEY_LOCAL_MACHINE',
 
         [Parameter(Mandatory)]
-        [String]$LeafKey,
+        [string]$LeafKey,
 
         [Parameter(Mandatory)]
-        [String]$ValueName,
+        [string]$ValueName,
 
         [Parameter(Mandatory)]
         $ValueData,
@@ -80,12 +80,12 @@ function Set-DryADRemoteRegistry {
                 [ScriptBlock]$DwordScriptBlock = {
                     param (
                         [Uint32] $BaseKeyInt,
-                        [String] $LeafKey,
-                        [String] $ValueName,
+                        [string] $LeafKey,
+                        [string] $ValueName,
                         [Uint32] $ValueData
                     )
 
-                    $Result = @($false, $Null)
+                    $Result = @($false, $null)
                     try {     
                         $InvokeCimMethodParams = @{
                             'Namespace'   = 'root\cimv2' 

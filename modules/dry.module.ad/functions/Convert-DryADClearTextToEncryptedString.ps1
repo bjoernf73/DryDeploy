@@ -23,11 +23,11 @@ function Convert-DryADClearTextToEncryptedString {
     param ( 
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [String]$ClearText,
+        [string]$ClearText,
         
         [Parameter(Mandatory)]
         [ValidateScript({ Test-Path $_ -PathType Leaf })]
-        [String] $CertificateFile
+        [string] $CertificateFile
     )
 
     try {

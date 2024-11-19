@@ -25,7 +25,7 @@ function Get-DryPlan {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
-        [String]
+        [string]
         $PlanFile,
 
         [Parameter()]

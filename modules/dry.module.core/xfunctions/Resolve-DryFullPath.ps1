@@ -21,7 +21,7 @@
 function Resolve-DryFullPath {
     [cmdletbinding()]
     param (
-        [String] 
+        [string] 
         $Path,
 
         [System.IO.DirectoryInfo] 

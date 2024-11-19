@@ -23,7 +23,7 @@ function Get-DryConfigCombo {
     [cmdletbinding()]
     param (
         [Parameter(Mandatory)]
-        [String]$Path,
+        [string]$Path,
 
         [Parameter(Mandatory)]
         [PSCustomObject]$SystemOptions,

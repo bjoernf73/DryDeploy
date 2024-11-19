@@ -24,10 +24,10 @@ function Wait-DryUtilsRestart {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
-        [String]$ComputerName,
+        [string]$ComputerName,
 
         [Parameter()]
-        [Int]$MinimumTimeOuts = 3
+        [int]$MinimumTimeOuts = 3
 
     )
 

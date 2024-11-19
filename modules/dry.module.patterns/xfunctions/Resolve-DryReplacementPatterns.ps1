@@ -28,7 +28,7 @@ function Resolve-DryReplacementPatterns {
 
         [Parameter(ParametersetName="InputText",Position=0,Mandatory)]
         [AllowEmptyString()]
-        [String]$InputText,
+        [string]$InputText,
 
         [Parameter(ParametersetName="InputObject",Position=1,Mandatory)]
         [Parameter(ParametersetName="InputText",Position=1,Mandatory)]
@@ -59,14 +59,14 @@ function Resolve-DryReplacementPatterns {
                         # the common_variables and resource_variables define the strings to replace, so 
                         # avoid replacing them, return the original object
                     }
-                    elseif ($PropertyValue -is [String]) {
+                    elseif ($PropertyValue -is [string]) {
                         # if name is a string, we can replace
                         $PropertyValue = Resolve-DryReplacementPattern -InputText $PropertyValue -Variables $Variables     
                     }
                     elseif ($PropertyValue -is [Array]) {
                         # nested call for each element in array
                         $PropertyValue = @($PropertyValue | Foreach-Object { 
-                            if ($_ -is [String]) {
+                            if ($_ -is [string]) {
                                 Resolve-DryReplacementPatterns -InputText $_ -Variables $Variables
                             } 
                             else {

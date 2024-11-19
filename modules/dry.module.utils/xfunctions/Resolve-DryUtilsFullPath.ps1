@@ -26,11 +26,11 @@ function Resolve-DryUtilsFullPath {
     param (
         [Parameter(Mandatory,HelpMessage="Releative or absolute path of any kind")]
         [ValidateNotNullOrEmpty()]
-        [String]$Path,
+        [string]$Path,
 
         [Parameter(HelpMessage="The type to return. Only existing objects may return")]
         [ValidateSet('String','PathInfo','FileInfo','DirectoryInfo',$null)]
-        [String]$OutputType,
+        [string]$OutputType,
 
         [Parameter(HelpMessage="Ensures the path is resolved and returned as a string even though the item doesn't exist")]
         [Switch]$Force
@@ -63,7 +63,7 @@ function Resolve-DryUtilsFullPath {
         }
         catch [System.Management.Automation.ItemNotFoundException] {
             if ($Force) {
-                [String]$FullPath = $_.TargetObject
+                [string]$FullPath = $_.TargetObject
                 if ($OutputType -ne 'String') {
                     throw "The path '$FullPath' does not exist, and cannot be converted to '$OutputType'"
                 }

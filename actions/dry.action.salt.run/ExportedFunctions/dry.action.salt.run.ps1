@@ -29,8 +29,8 @@ function dry.action.salt.run {
         $ConfigOSSourcePath  = $OptionsObject.ConfigOSSourcePath
         $ConfigTargetPath    = $OptionsObject.ConfigTargetPath
         
-        [String]$SaltMetaConfigFile   = (Get-ChildItem -Path "$ConfigSourcePath\*" -Include *.json,*.jsonc -ErrorAction Stop).FullName
-        [String]$SaltTemplateFile     = (Get-ChildItem -Path "$ConfigSourcePath\*" -Include *.psm1 -ErrorAction Stop).FullName
+        [string]$SaltMetaConfigFile   = (Get-ChildItem -Path "$ConfigSourcePath\*" -Include *.json,*.jsonc -ErrorAction Stop).FullName
+        [string]$SaltTemplateFile     = (Get-ChildItem -Path "$ConfigSourcePath\*" -Include *.psm1 -ErrorAction Stop).FullName
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   METACONFIG
@@ -52,7 +52,7 @@ function dry.action.salt.run {
         #   of them on the local, and target system. So they're in the MetaConfig
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        [String]$SaltTemplate = Get-Content -Path $DscTemplateFile -Raw -ErrorAction Stop
+        [string]$SaltTemplate = Get-Content -Path $DscTemplateFile -Raw -ErrorAction Stop
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   DSC_MODULES
@@ -252,7 +252,7 @@ function dry.action.salt.run {
         $DscTarget = $Resource.resolved_network.ip_address
 
         if ($MetaConfigObject.dsc_target) { 
-            $DscTarget = $Null
+            $DscTarget = $null
             switch ($MetaConfigObject.dsc_target.value_type) {
                 'expression' {
                     # The variable value is an expression
@@ -355,7 +355,7 @@ function dry.action.salt.run {
             Where-Object { 
                 $_.type -eq 'winrm'
             }
-            if ($Null -eq $SessionConfig) {
+            if ($null -eq $SessionConfig) {
                 ol -t 1 -m "Unable to find 'connection' of type 'winrm' in environment config"
                 throw "Unable to find 'connection' of type 'winrm' in environment config"
             }
@@ -441,7 +441,7 @@ function dry.action.salt.run {
             $_.type -eq 'winrm'
         }
 
-        if ($Null -eq $SessionConfig) {
+        if ($null -eq $SessionConfig) {
             ol v "Unable to find 'connection' of type 'winrm' in environment config"
             throw "Unable to find 'connection' of type 'winrm' in environment config"
         }
@@ -555,7 +555,7 @@ function dry.action.salt.run {
 
                 $ResourceInstancesNotInDesiredState.foreach({
                     # This is sometimes $null, so $_.trim() failes
-                    if ($Null -ne $_) {
+                    if ($null -ne $_) {
                         if (($_.Trim()) -ne '') {
                             ol -t 6 -arr 'Resource not in desired state yet',"$_"
                         }
@@ -627,15 +627,15 @@ function dry.action.salt.run {
             }
             
             $WaitDryForEventParamaters = @{}
-            if ($Null -ne $VerificationObject.seconds_to_try) {
+            if ($null -ne $VerificationObject.seconds_to_try) {
                 $WaitDryForEventParamaters['SecondsToTry'] = $VerificationObject.seconds_to_try
             }
 
-            if ($Null -ne $VerificationObject.seconds_to_wait_between_tries) {
+            if ($null -ne $VerificationObject.seconds_to_wait_between_tries) {
                 $WaitDryForEventParamaters['SecondsToWaitBetweenTries'] = $VerificationObject.seconds_to_wait_between_tries
             }
 
-            if ($Null -ne $VerificationObject.seconds_to_wait_before_start) {
+            if ($null -ne $VerificationObject.seconds_to_wait_before_start) {
                 $WaitDryForEventParamaters['SecondsToWaitBeforeStart'] = $VerificationObject.seconds_to_wait_before_start
             }
             

@@ -25,7 +25,7 @@ function Set-DryPlan {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
-        [String] $PlanFile,
+        [string] $PlanFile,
 
         [Parameter(Mandatory)]
         [Plan]   $Plan

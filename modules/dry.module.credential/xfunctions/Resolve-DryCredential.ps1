@@ -27,7 +27,7 @@ function Resolve-DryCredential {
 
         [ValidatePattern("___cred___.*___")]
         [Parameter(ParametersetName="InputString",Mandatory,HelpMessage="Expects a string matching one of the replacement strings")]
-        [String]$InputString
+        [string]$InputString
     )
     
     try {
@@ -43,7 +43,7 @@ function Resolve-DryCredential {
                 # If Key is a string, we can do the replacement. If it is an
                 # object, we must make a nested call. If array, make nested
                 # call for each element of the array
-                if (($PropertyValue -is [String]) -and ($PropertyValue -match "___cred___.*___")) {
+                if (($PropertyValue -is [string]) -and ($PropertyValue -match "___cred___.*___")) {
                     # Call Resolve-DryPassword that returns the replaced string
                     $PropertyValue = Resolve-DryCredential -InputString $PropertyValue  
                 }
@@ -54,10 +54,10 @@ function Resolve-DryCredential {
                 elseif ($PropertyValue -is [Array]) {
                     # nested call for each array element
                     $PropertyValue = @(  $PropertyValue | Foreach-Object { 
-                        if (($_ -is [String]) -and ($_ -match "___cred___.*___")) {
+                        if (($_ -is [string]) -and ($_ -match "___cred___.*___")) {
                             Resolve-DryCredential -InputText $_ 
                         } 
-                        elseif (($_ -is [String]) -and ($_ -notmatch "___cred___.*___")) {
+                        elseif (($_ -is [string]) -and ($_ -notmatch "___cred___.*___")) {
                             # just return the original object
                             $_
                         }

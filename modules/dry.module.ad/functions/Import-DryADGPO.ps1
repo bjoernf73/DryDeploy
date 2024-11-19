@@ -26,12 +26,12 @@ function Import-DryADGPO {
         $GPO,
 
         [Parameter(Mandatory)]
-        [String]
+        [string]
         $GPOsPath,
 
         [Parameter()]
         [ValidateSet('domain', 'site', 'computer')]
-        [String]
+        [string]
         $Scope = 'domain',
 
         [Parameter(Mandatory, ParameterSetName = 'Remote')]
@@ -39,7 +39,7 @@ function Import-DryADGPO {
 
         [Parameter(Mandatory, ParameterSetName = 'Local',
             HelpMessage = "For 'Local' sessions, specify the Domain Controller to use")]
-        [String]
+        [string]
         $DomainController,
 
         [Parameter()]
@@ -71,11 +71,11 @@ function Import-DryADGPO {
             ol v @('GPO Folder Path', "'$BackupGPOPath'")
 
             $GPOImportArgumentList = @(
-                [String] $GPO.Name,
-                [String] $GPO.TargetName,
-                [String] $BackupGPOPath,
+                [string] $GPO.Name,
+                [string] $GPO.TargetName,
+                [string] $BackupGPOPath,
                 [HashTable]$ReplacementHash
-                [String] $Server,
+                [string] $Server,
                 [Bool] $Force
             )
 
@@ -90,7 +90,7 @@ function Import-DryADGPO {
                     Session = $PSSession
                 }
             }
-            $GPOImportResult = $Null
+            $GPOImportResult = $null
             $GPOImportResult = Invoke-Command @InvokeCommandParams
             
             # Log all remote messages to Out-DryLog regardless of result
@@ -114,7 +114,7 @@ function Import-DryADGPO {
             # Unless the json-gpo specifies a (bool) value for defaultpermissions, it is set to true, meaning
             # meaning that permissions in the json-GPO is ignored, and the default security descriptor of the 
             # groupPolicyContainer schema class is used.      
-            if ($Null -eq $GPO.defaultpermissions) {
+            if ($null -eq $GPO.defaultpermissions) {
                 [Bool]$GPODefaultPermissions = $true
             }
             else {
@@ -122,9 +122,9 @@ function Import-DryADGPO {
             }
 
             $GPOImportArgumentList = @(
-                [String]    $GPO.TargetName,
-                [String]    $JsonGPOFilePath,
-                [String]    $Server,
+                [string]    $GPO.TargetName,
+                [string]    $JsonGPOFilePath,
+                [string]    $Server,
                 [Bool]      $Force,
                 [Bool]      $GPODefaultPermissions,
                 [HashTable] $ReplacementHash
@@ -141,7 +141,7 @@ function Import-DryADGPO {
                     Session = $PSSession
                 }
             }
-            $GPOImportResult = $Null
+            $GPOImportResult = $null
             $GPOImportResult = Invoke-Command @InvokeCommandParams
 
             switch ($GPOImportResult[0]) {

@@ -21,10 +21,10 @@ function Get-DryADRandomString {
     [CmdletBinding()]
     param (
         [Parameter()]
-        [Int]$Length = 20,
+        [int]$Length = 20,
 
         [Parameter()]
-        [Int]$NonAlphabetics = 5,
+        [int]$NonAlphabetics = 5,
 
         [Parameter(HelpMessage = "Returns Secure String instead of plain text")]
         [Switch]$Secure

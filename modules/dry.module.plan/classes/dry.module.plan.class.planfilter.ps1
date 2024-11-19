@@ -1,28 +1,28 @@
 using Namespace System.Collections.Generic
 using Namespace System.Collections
 class PlanFilter {
-    [String[]] $ResourceNames
-    [String[]] $ExcludeResourceNames
-    [String[]] $RoleNames
-    [String[]] $ExcludeRoleNames
-    [String[]] $ActionNames
-    [String[]] $ExcludeActionNames
-    [Int[]]    $Phases
-    [Int[]]    $ExcludePhases
-    [Int[]]    $BuildSteps
-    [Int[]]    $ExcludeBuildSteps
+    [String[]]$ResourceNames
+    [String[]]$ExcludeResourceNames
+    [String[]]$RoleNames
+    [String[]]$ExcludeRoleNames
+    [String[]]$ActionNames
+    [String[]]$ExcludeActionNames
+    [Int[]]$Phases
+    [Int[]]$ExcludePhases
+    [Int[]]$BuildSteps
+    [Int[]]$ExcludeBuildSteps
 
     PlanFilter (
-        [String[]] $ResourceNames,
-        [String[]] $ExcludeResourceNames,
-        [String[]] $RoleNames,
-        [String[]] $ExcludeRoleNames,
-        [String[]] $ActionNames,
-        [String[]] $ExcludeActionNames,
-        [Int[]]    $Phases,
-        [Int[]]    $ExcludePhases,
-        [Int[]]    $BuildSteps,
-        [Int[]]    $ExcludeBuildSteps) {
+        [String[]]$ResourceNames,
+        [String[]]$ExcludeResourceNames,
+        [String[]]$RoleNames,
+        [String[]]$ExcludeRoleNames,
+        [String[]]$ActionNames,
+        [String[]]$ExcludeActionNames,
+        [Int[]]$Phases,
+        [Int[]]$ExcludePhases,
+        [Int[]]$BuildSteps,
+        [Int[]]$ExcludeBuildSteps) {
             
         $This.ResourceNames        = $ResourceNames
         $This.ExcludeResourceNames = $ExcludeResourceNames
@@ -37,11 +37,11 @@ class PlanFilter {
     }
 
     [Bool] Hidden InFilter(
-        [String] $ResourceName,
-        [String] $RoleName,
-        [String] $ActionName,
-        [Int]    $Phase,
-        [Int]    $ActionOrder) {
+        [string]$ResourceName,
+        [string]$RoleName,
+        [string]$ActionName,
+        [int]$Phase,
+        [int]$ActionOrder) {
         
         $ResourceValidated = $RoleValidated = $ActionValidated = $PhaseValidated = $ActionOrderValidated = $false
         

@@ -22,16 +22,16 @@
 function Get-DryHeader {
     [CmdletBinding(DefaultParameterSetName="multilineheader")]
     [OutputType([Array],ParameterSetName="multilineheader")]
-    [OutputType([String],ParameterSetName="singlelineheader")]
+    [OutputType([string],ParameterSetName="singlelineheader")]
     param (
         [Parameter(Mandatory)]
         [PSObject]$Message,
 
         [Parameter(HelpMessage="Number of whitespaces on the right side of screen, after each message line")]
-        [Int]$PostBuffer = 3,
+        [int]$PostBuffer = 3,
 
         [Parameter(HelpMessage="A sequence of characters of a specific length")]
-        [String]$HeaderChars = '.',
+        [string]$HeaderChars = '.',
 
         [Alias("sh")]
         [Parameter(Mandatory,ParameterSetName="singlelineheader",HelpMessage="Get a smaller, one-line header")]
@@ -42,7 +42,7 @@ function Get-DryHeader {
 
         [Parameter(Mandatory,ParameterSetName="singlelineheader")]
         [Parameter(Mandatory,ParameterSetName="multilineheader")]
-        [Int]$TargetMessageLength
+        [int]$TargetMessageLength
     )
 
     # Make an array of the header chars
@@ -81,7 +81,7 @@ function Get-DryHeader {
          }
         'multilineheader' {
             # Just output the header line
-            [String]$HeaderLine = ''
+            [string]$HeaderLine = ''
             $HeaderCharIndex = 0
             while ($HeaderLine.Length -lt $TargetMessageLength) {
                 $HeaderLine = $HeaderLine + $HeaderCharsArray[$HeaderCharIndex]

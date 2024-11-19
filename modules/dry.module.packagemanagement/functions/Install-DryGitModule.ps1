@@ -31,23 +31,23 @@ function Install-DryGitModule {
 
         [Parameter(Mandatory,HelpMessage="Path to the directory the repository will be cloned (or checked out) into")]
         [ValidateScript({(Get-Item -Path $_) -is [System.IO.DirectoryInfo]})]
-        [String]$Path,
+        [string]$Path,
 
         [Parameter(HelpMessage="The branch (or tag) to checkout")]
-        [String]$Branch
+        [string]$Branch
     )
 
     try {
         Switch -Regex ($Source) {
             "[^/\\]{1,}(?=\.git$)" { 
-                [String]$ProjectName = $Matches[0].ToString()
+                [string]$ProjectName = $Matches[0].ToString()
             }
             default {
                 throw "Unable to understand the format of the source git repository source '$Source'"
             }
         }
-        [String]$ProjectPath       = Join-Path -Path $Path -ChildPath $ProjectName
-        [String]$ProjectDotGitPath = Join-Path -Path $ProjectPath -ChildPath '.git'
+        [string]$ProjectPath       = Join-Path -Path $Path -ChildPath $ProjectName
+        [string]$ProjectDotGitPath = Join-Path -Path $ProjectPath -ChildPath '.git'
 
         if ((Test-Path -Path $ProjectPath) -and 
             (-not (Test-Path -Path $ProjectDotGitPath))) {

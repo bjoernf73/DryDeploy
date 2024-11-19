@@ -22,11 +22,11 @@ function New-DryADWmiFilter {
     [CmdletBinding(DefaultParameterSetName = 'Local')]
     param (
         [Parameter(Mandatory, HelpMessage = 'The Name of the WMI Query')]
-        [String]
+        [string]
         $Name,
 
         [Parameter(HelpMessage = 'Optional Description of the WMI Query')]
-        [String]
+        [string]
         $Description,
     
         [Parameter(Mandatory, HelpMessage = 'The WMI Query itself')]
@@ -40,7 +40,7 @@ function New-DryADWmiFilter {
 
         [Parameter(Mandatory, ParameterSetName = 'Local', HelpMessage = "Specify the 
         Domain Controller to target in Local Session")]
-        [String] 
+        [string] 
         $DomainController
     )
     

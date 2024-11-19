@@ -23,7 +23,7 @@ function Get-DryConfigData {
     [cmdletbinding()]
     param (
         [Parameter(Mandatory)]
-        [String]
+        [string]
         $Path,
 
         [Parameter(HelpMessage="Object to merge changes into")]

@@ -1,7 +1,7 @@
 # ScriptBlock for calculating a dependencies hash
 [scriptblock]$dry_core_sb_configcombo_calcdephash = {
     [CmdLetBinding()]
-    [OutputType([String])]
+    [OutputType([string])]
     param (
         [Parameter(Mandatory)]
         [PSObject]$Dependencies

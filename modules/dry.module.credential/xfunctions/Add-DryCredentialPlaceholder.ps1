@@ -23,17 +23,17 @@ function Add-DryCredentialPlaceholder {
     [CmdLetBinding()]
     param (
         [Parameter(Mandatory,HelpMessage="The Alias of the credential to add")]
-        [String]$Alias,
+        [string]$Alias,
 
         [Parameter(Mandatory,HelpMessage="The Environment (EnvConfig) for which the placeholder is added")]
-        [String]$EnvConfig,
+        [string]$EnvConfig,
 
         [ValidateSet('encryptedstring', 'hashicorpvault', 'ansiblevault')]
         [Parameter(Mandatory,HelpMessage="The Environment Name (EnvConfig) for which the credential placeholder is added")]
-        [String]$Type,
+        [string]$Type,
 
         [Parameter(HelpMessage="The user name of the credential to add, if specified")]
-        [String]$UserName
+        [string]$UserName
     )
 
     try {

@@ -3,12 +3,12 @@
     [CmdLetBinding()]
     param (
         [Parameter(Mandatory)]
-        [String]$Path,
+        [string]$Path,
 
         [Parameter(Mandatory,
         HelpMessage="Specify it you're modifying the 'environment' or 'module'")]
         [ValidateSet('environment','module')]
-        [String]$Type
+        [string]$Type
     )
     try {
         $FullPath = Resolve-DryUtilsFullPath -Path $Path 

@@ -29,7 +29,7 @@ function New-DryADUser {
         $User,
 
         [Parameter(Mandatory, HelpMessage = "NetBIOS domain name")]
-        [String] 
+        [string] 
         $DomainNB,
 
         [Parameter(Mandatory, ParameterSetName = 'Remote',
@@ -39,7 +39,7 @@ function New-DryADUser {
 
         [Parameter(Mandatory, ParameterSetName = 'Local',
             HelpMessage = "For 'Local' sessions, specify the Domain Controller to use")]
-        [String] 
+        [string] 
         $DomainController,
 
         [Parameter(Mandatory, ParameterSetName = 'Remote',
@@ -103,7 +103,7 @@ function New-DryADUser {
         if ($GetResult -eq $false) {
             
             # If $User.Enabled not specified, enable the account
-            if ($Null -eq $User.Enabled) {
+            if ($null -eq $User.Enabled) {
                 $User | Add-Member -MemberType 'NoteProperty' -Name 'Enabled' -Value $true
             }
             
@@ -130,12 +130,12 @@ function New-DryADUser {
                 }
                 if ($User.password.length) {
                     $GetDryADCredentialParams += @{
-                        Length = [Int]$User.password.length
+                        Length = [int]$User.password.length
                     }
                 }
                 if ($User.password.nonalphabetics) {
                     $GetDryADCredentialParams += @{
-                        NonAlphabetics = [Int]$User.password.nonalphabetics
+                        NonAlphabetics = [int]$User.password.nonalphabetics
                     }
                 }
                 

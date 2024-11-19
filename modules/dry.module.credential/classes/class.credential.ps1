@@ -22,10 +22,10 @@ using Namespace System.Collections
 
 class Credentials {
     [ArrayList] $Credentials
-    [String]    $Path
+    [string]    $Path
     [DateTime]  $Accessed
 
-    Credentials ([String] $Path) {
+    Credentials ([string] $Path) {
         try {
             if (-not (Test-Path -Path $Path -ErrorAction Ignore)) {
                 throw "The credentials file $Path does not exist"
@@ -65,9 +65,9 @@ class Credentials {
     }
 
     [Void] AddCredential(
-        [String]$Alias,
-        [String]$EnvConfig,
-        [String]$Type,
+        [string]$Alias,
+        [string]$EnvConfig,
+        [string]$Type,
         [PSCredential] $Credential) {
         try {
             $CredObj            = [PSCustomObject]@{
@@ -94,11 +94,11 @@ class Credentials {
     }
 
     [Void] AddCredential(
-        [String]$Alias,
-        [String]$EnvConfig,
-        [String]$Type,
-        [String]$UserName, 
-        [String]$pw) {
+        [string]$Alias,
+        [string]$EnvConfig,
+        [string]$Type,
+        [string]$UserName, 
+        [string]$pw) {
         try {
             [SecureString]$SecStringPassword = ConvertTo-SecureString $pw -AsPlainText -Force
             [PSCredential]$Credential        = New-Object System.Management.Automation.PSCredential ($UserName, $SecStringPassword)
@@ -127,10 +127,10 @@ class Credentials {
     }
 
     [Void] AddCredentialPlaceholder(
-        [String]$Alias, 
-        [String]$EnvConfig, 
-        [String]$Type,
-        [String]$UserName) {
+        [string]$Alias, 
+        [string]$EnvConfig, 
+        [string]$Type,
+        [string]$UserName) {
         try {
             if (-not ($This.TestCredential($Alias,$EnvConfig))) {
                 ol v "The Alias '$Alias' in '$EnvConfig' not found, adding it."
@@ -150,9 +150,9 @@ class Credentials {
     }
 
     [Void] AddCredentialPlaceholder(
-        [String]$Alias, 
-        [String]$EnvConfig, 
-        [String]$Type) {
+        [string]$Alias, 
+        [string]$EnvConfig, 
+        [string]$Type) {
         try {
             if (-not ($This.TestCredential($Alias,$EnvConfig))) {
                 ol v "The Alias '$Alias' in '$EnvConfig' not found, adding it."
@@ -171,9 +171,9 @@ class Credentials {
     }
 
     [PSCredential] PromptForCredential(
-        [String]$Alias,
-        [String]$EnvConfig,
-        [String]$Type) {
+        [string]$Alias,
+        [string]$EnvConfig,
+        [string]$Type) {
         try {
             [PSCredential]$PromptCredential = Get-Credential -Message "Credential '$Alias' in '$EnvConfig'"
             $This.AddCredential($Alias,$EnvConfig,$Type,$PromptCredential)
@@ -185,10 +185,10 @@ class Credentials {
     }
 
     [PSCredential] PromptForCredential(
-        [String]$Alias,
-        [String]$EnvConfig,
-        [String]$Type,
-        [String]$UserName) {
+        [string]$Alias,
+        [string]$EnvConfig,
+        [string]$Type,
+        [string]$UserName) {
         try {
             [PSCredential]$PromptCredential = Get-Credential -Message "Credential '$Alias' in '$EnvConfig'" -UserName $UserName
             $This.AddCredential($Alias,$EnvConfig,$Type,$PromptCredential)
@@ -200,8 +200,8 @@ class Credentials {
     }
 
     [PSCredential] GetCredential( 
-        [String]$Alias,
-        [String]$EnvConfig) {
+        [string]$Alias,
+        [string]$EnvConfig) {
         try {
             if ($This.TestCredential($Alias,$EnvConfig)) {
                 $CredentialMatch = $This.GetCredentialMatch($Alias,$EnvConfig)
@@ -252,8 +252,8 @@ class Credentials {
     }
 
     [PSCredential] GetCredentialFromEncryptedSecureString(
-        [String] $Alias,
-        [String] $EnvConfig,
+        [string] $Alias,
+        [string] $EnvConfig,
         [PSCustomObject] $CredObject) {
         try {
             try {
@@ -315,8 +315,8 @@ class Credentials {
     }
 
     [PSCredential] GetCredentialFromHashicorpVault(
-        [String] $Alias,
-        [String] $EnvConfig,
+        [string] $Alias,
+        [string] $EnvConfig,
         [PSCustomObject] $CredObject) {
         #! just a placeholder - not implemented
         try {
@@ -359,8 +359,8 @@ class Credentials {
     }
 
     [PSCredential] GetCredentialFromAnsibleVault(
-        [String] $Alias,
-        [String] $EnvConfig,
+        [string] $Alias,
+        [string] $EnvConfig,
         [PSCustomObject] $CredObject) {
         #! just a placeholder - not implemented
         try {
@@ -403,8 +403,8 @@ class Credentials {
     }
 
     [PSCustomObject] GetCredentialMatch(
-        [String]$Alias,
-        [String]$EnvConfig) {
+        [string]$Alias,
+        [string]$EnvConfig) {
         try {
             return @($This.Credentials | Where-Object {
                 ($_.Alias -eq $Alias) -and ($_.EnvConfig -eq $EnvConfig)
@@ -416,8 +416,8 @@ class Credentials {
     }
 
     [Bool] TestCredential(
-        [String]$Alias,
-        [String]$EnvConfig) {
+        [string]$Alias,
+        [string]$EnvConfig) {
         try {
             $CredentialMatches = @($This.Credentials | Where-Object {
                 ($_.Alias -eq $Alias) -and ($_.EnvConfig -eq $EnvConfig)

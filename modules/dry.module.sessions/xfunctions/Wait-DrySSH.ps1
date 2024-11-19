@@ -23,11 +23,11 @@ function Wait-DrySSH {
     [CmdletBinding()]
     param (
         [Parameter(HelpMessage="IP Address")]
-        [String]
+        [string]
         $IP,
 
         [Parameter(Mandatory,HelpMessage="NetBIOS Host Name")]
-        [String]
+        [string]
         $Computername,
 
         [Parameter(Mandatory)]
@@ -35,19 +35,19 @@ function Wait-DrySSH {
         $Credential,
 
         [Parameter(HelpMessage="Port - defaults to 22")]
-        [Int]
+        [int]
         $Port = 22,
 
         [Parameter(HelpMessage="How long (in seconds) do you want me to try reaching the interface? Default is 1800 (30 minutes)")]
-        [Int]
+        [int]
         $SecondsToTry = 1800,
 
         [Parameter(HelpMessage="How long (in seconds) do you want me to wait before I start? By default, I wait 15 seconds")]
-        [Int]
+        [int]
         $SecondsToWaitBeforeStart = 15,
 
         [Parameter(HelpMessage="How long (in seconds) do you want me to wait between each retry? By default, I wait 60 seconds")]
-        [Int]
+        [int]
         $SecondsToWaitBetweenTries = 30
     )
     if ($IP) {
@@ -85,8 +85,8 @@ function Wait-DrySSH {
 
     # Outter do tests if the port is up
     do {
-        $ProgressTotalTime = [Int]((New-TimeSpan -Start $StartTime -End $TargetTime).TotalSeconds)
-        $ProgressTimeLeft = [Int]((New-TimeSpan -Start (Get-Date) -end $TargetTime).TotalSeconds)
+        $ProgressTotalTime = [int]((New-TimeSpan -Start $StartTime -End $TargetTime).TotalSeconds)
+        $ProgressTimeLeft = [int]((New-TimeSpan -Start (Get-Date) -end $TargetTime).TotalSeconds)
         $WriteProgressParameters = @{
             Activity        = "[$Address`:$Port]: Waiting for SSH interface"
             Status          = "Port Down"
@@ -116,13 +116,13 @@ function Wait-DrySSH {
                 else {
                     ol i "Connection is: '$($SSHSession.Connected)'"
                     $NowTime = Get-date 
-                    $Span = [Int]((New-TimeSpan -Start $StartTime -End $NowTime).TotalSeconds)
-                    $TimeLeft = [Int]((New-TimeSpan -Start $NowTime -end $TargetTime).TotalSeconds)
+                    $Span = [int]((New-TimeSpan -Start $StartTime -End $NowTime).TotalSeconds)
+                    $TimeLeft = [int]((New-TimeSpan -Start $NowTime -end $TargetTime).TotalSeconds)
                     
                     # sleep and let loop retry
                     if ($NowTime -lt $TargetTime) {
                         ol i "[$Address`:$Port]: Still waiting (SSH not ready). Been waiting for $Span of $TimeLeft seconds"
-                        $ProgressTimeLeft = [Int]((New-TimeSpan -Start (Get-Date) -end $TargetTime).TotalSeconds)
+                        $ProgressTimeLeft = [int]((New-TimeSpan -Start (Get-Date) -end $TargetTime).TotalSeconds)
                         $WriteProgressParameters = @{
                             'Activity'="[$Address`:$Port]: Waiting for SSH interface"
                             'Status'="SSH Down"
@@ -141,8 +141,8 @@ function Wait-DrySSH {
         }
         else {
             $NowTime = Get-date 
-            $Span = [Int]((New-TimeSpan -Start $StartTime -End $NowTime).TotalSeconds)
-            $TimeLeft = [Int]((New-TimeSpan -Start $NowTime -end $TargetTime).TotalSeconds)
+            $Span = [int]((New-TimeSpan -Start $StartTime -End $NowTime).TotalSeconds)
+            $TimeLeft = [int]((New-TimeSpan -Start $NowTime -end $TargetTime).TotalSeconds)
             
             # sleep and let loop retry
             if ($(Get-Date) -lt $TargetTime) {

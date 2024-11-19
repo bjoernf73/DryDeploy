@@ -23,7 +23,7 @@ function Test-DryWinRM {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory,HelpMessage="IP, FQDN or NetBIOS Host Name")]
-        [String]$Computername,
+        [string]$Computername,
 
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$Credential,

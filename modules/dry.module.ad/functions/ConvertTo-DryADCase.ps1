@@ -23,11 +23,11 @@ function ConvertTo-DryADCase {
     param (
         [Parameter(Mandatory)]
         [AllowEmptyString()]
-        [String]$Name,
+        [string]$Name,
 
         [ValidateSet('upper', 'lower', 'ignore', 'capitalized', 'capitalize')]
         [Parameter(Mandatory)]
-        [String]$Case 
+        [string]$Case 
     )
     if ($Case -eq 'capitalize') {
         $Case = 'capitalized'
@@ -39,7 +39,7 @@ function ConvertTo-DryADCase {
         param (
             [Parameter(Mandatory)]
             [AllowEmptyString()]
-            [String]$Name
+            [string]$Name
         )
         $Name = $Name.Trim()
 
@@ -48,7 +48,7 @@ function ConvertTo-DryADCase {
         } 
         elseif ($Name -match ' ') {
             $Parts = $Name.split(' ')
-            [String]$AccumulatedParts = ''
+            [string]$AccumulatedParts = ''
             foreach ($Part in $Parts) {
                 $UpperCasePart = ($Part.SubString(0, 1)).ToUpper()
                 $LowerCasePart = ($Part.Substring(1, ($Part.length - 1))).ToLower()
@@ -80,7 +80,7 @@ function ConvertTo-DryADCase {
                 ($Name -match "CN=") -or 
                 ($Name -match "DC=")
             ) {
-                [String]$AccumulatedStringValue = ''
+                [string]$AccumulatedStringValue = ''
                 $NameParts = @($Name.Split(','))
                 foreach ($Part in $NameParts) {
                     # The first three letters are part of 

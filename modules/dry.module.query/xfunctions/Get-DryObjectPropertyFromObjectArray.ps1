@@ -27,15 +27,15 @@ function Get-DryObjectPropertyFromObjectArray {
 
         [Parameter(Mandatory,HelpMessage="The object property name that  
         identifies the object from which `$Property will be returned")]
-        [String]$IDProperty,
+        [string]$IDProperty,
 
         [Parameter(Mandatory,HelpMessage="The object property value that
         identifies the object from which `$Property will be returned")]
-        [String]$IDPropertyValue,
+        [string]$IDPropertyValue,
 
         [Parameter(Mandatory,HelpMessage="The property name who's value
         will be returned")]
-        [String]$Property,
+        [string]$Property,
 
         [Parameter(HelpMessage="The ObjectArray may contain multiple matching
         objects, but you want the first found object's values")]
@@ -48,7 +48,7 @@ function Get-DryObjectPropertyFromObjectArray {
         [Parameter(HelpMessage="The ObjectArray may contain multiple matching
         objects, but you want the value from the numbered item. Items are numbered
         1,2,3 meaning that `$Number = 1 corresponds to `$MatchObjects[0]")]
-        [Int]$Number,
+        [int]$Number,
 
         [Parameter(HelpMessage="By default, we assume that the ObjectArray
         contains one, and only one, unique object to match, and an exception

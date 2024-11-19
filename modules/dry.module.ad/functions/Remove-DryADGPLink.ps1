@@ -27,11 +27,11 @@ function Remove-DryADGPLink {
         $GPOLinkObject,
 
         [Parameter(Mandatory)]
-        [String]
+        [string]
         $DomainFQDN,
 
         [Parameter(Mandatory)]
-        [String]
+        [string]
         $DomainDN,
 
         [Parameter(Mandatory, ParameterSetName = 'Remote')]
@@ -40,7 +40,7 @@ function Remove-DryADGPLink {
 
         [Parameter(Mandatory, ParameterSetName = 'Local',
             HelpMessage = "For 'Local' sessions, specify the Domain Controller to use")]
-        [String]
+        [string]
         $DomainController
     )
 

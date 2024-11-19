@@ -22,7 +22,7 @@ function Wait-DryADForADWebServices {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
-        [String]
+        [string]
         $DomainDN,
 
         [Parameter(Mandatory)]
@@ -30,12 +30,12 @@ function Wait-DryADForADWebServices {
         $PSSession,
 
         [Parameter(HelpMessage = "How long should I try this without success?")]
-        [Int]
+        [int]
         $WaitMinutes = 20
   
     )
     [Boolean]$ADWebServicesUp = $false
-    [String]$DomainControllersOUDN = "OU=Domain Controllers,$DomainDN"
+    [string]$DomainControllersOUDN = "OU=Domain Controllers,$DomainDN"
     [DateTime]$StartTime = Get-Date
     Do {
         $TestResult = Invoke-Command -Session $PSSession -ScriptBlock { 

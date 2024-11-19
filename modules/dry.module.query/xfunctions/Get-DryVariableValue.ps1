@@ -43,7 +43,7 @@ function Get-DryVariableValue {
         [System.Collections.Generic.List[PSObject]]$Variables,
 
         [Parameter(HelpMessage="The variable name to get from `$Variables")]
-        [String]$Name
+        [string]$Name
     )
     
     try {
@@ -51,7 +51,7 @@ function Get-DryVariableValue {
         $Variable = $Variables | Where-Object {
             $_.Name -eq $Name
         }
-        if ($Null -eq $Variable) {
+        if ($null -eq $Variable) {
             ol w "Variables does not contain a variable named '$Name'"
             throw "Variables does not contain a variable named '$Name'"
         }

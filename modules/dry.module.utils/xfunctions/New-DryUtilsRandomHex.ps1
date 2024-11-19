@@ -25,11 +25,11 @@ function New-DryUtilsRandomHex {
     
     param (
         [Parameter(HelpMessage="Length of the random hex")]
-        [Int]$Length = 25
+        [int]$Length = 25
     )
     try {
         $Chars = '0123456789ABCDEF'
-        [String]$Random = $null
+        [string]$Random = $null
         for ($i=1; $i -le $Length; $i++)     {
             $Random += $Chars.Substring((Get-Random -Minimum 0 -Maximum 15),1)
         }

@@ -5,7 +5,7 @@
     param (
         [Parameter(Mandatory,HelpMessage="To determine which depdencies_hash to compare with")]
         [ValidateSet('environment','module','system')]
-        [String]$Type
+        [string]$Type
     )
     try {
         ol d "Testing dependencies hash for",$Type
@@ -23,7 +23,7 @@
                 $StoredHash = $This.systemconfig.dependencies_hash
             }
         }
-        [String]$ActualHash = $This.CalcDepHash($Dependencies)
+        [string]$ActualHash = $This.CalcDepHash($Dependencies)
         ol d 'Actual hash',$ActualHash
         ol d 'Stored hash',$StoredHash
         if ($ActualHash -eq $StoredHash) {

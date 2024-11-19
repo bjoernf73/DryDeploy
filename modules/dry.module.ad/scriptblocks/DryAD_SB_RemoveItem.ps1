@@ -21,7 +21,7 @@
 [ScriptBlock]$DryAD_SB_RemoveItem = {
     param (
         [Parameter(Mandatory)]
-        [String]
+        [string]
         $Path,
 
         [Parameter()]

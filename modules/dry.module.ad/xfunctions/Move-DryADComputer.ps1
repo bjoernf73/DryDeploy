@@ -23,11 +23,11 @@ function Move-DryADComputer {
     [CmdletBinding(DefaultParameterSetName = 'Local')] 
     param (
         [Parameter(Mandatory)]
-        [String]
+        [string]
         $ComputerName,
 
         [Parameter(Mandatory)]
-        [String]
+        [string]
         $TargetOU,
 
         [Parameter(HelpMessage = "Only test, and return true or false")]
@@ -41,7 +41,7 @@ function Move-DryADComputer {
 
         [Parameter(Mandatory, ParameterSetName = 'Local',
             HelpMessage = "For 'Local' sessions, specify the Domain Controller to use")]
-        [String] 
+        [string] 
         $DomainController
     )
     ol v @("Moving: '$ComputerName' to OU", "$TargetOU")

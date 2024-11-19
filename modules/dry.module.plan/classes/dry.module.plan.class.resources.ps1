@@ -2,10 +2,10 @@ using Namespace System.Collections.Generic
 using Namespace System.Collections
 
 class Resources {
-    [ArrayList] $Resources
+    [ArrayList]$Resources
 
     # create an instance
-    Resources ([PSCustomObject] $Configuration,[PSCustomObject] $ConfigCombo, [bool]$Interactive) {
+    Resources ([PSCustomObject]$Configuration,[PSCustomObject]$ConfigCombo, [bool]$Interactive) {
         $This.Resources = [ArrayList]::New()
         switch ($Interactive) {
             $false { 
@@ -294,16 +294,16 @@ class Resources {
         })
     } 
 
-    [String] NewActionGuid([int]$ResourceOrder,[int]$ActionOrder) { 
+    [string] NewActionGuid([int]$ResourceOrder,[int]$ActionOrder) { 
         return [string]('{0:d4}' -f $ResourceOrder) + [string]('{0:d4}' -f $ActionOrder) + '0000-' + ((New-Guid).Guid)
     }
 
 
-    [String] GetPreviuosDependencyActionGuid (
-        [String]$Action_Guid 
+    [string] GetPreviuosDependencyActionGuid (
+        [string]$Action_Guid 
     ) {
-        [Int]$ResourceOrder = $Action_Guid.Substring(0,4)
-        [Int]$ActionOrder = $Action_Guid.Substring(4,4)
+        [int]$ResourceOrder = $Action_Guid.Substring(0,4)
+        [int]$ActionOrder = $Action_Guid.Substring(4,4)
         $ActionOrder--
         $Resource = $This.Resources | Where-Object { 
             $_.ResourceOrder -eq $ResourceOrder
@@ -312,7 +312,7 @@ class Resources {
             $_.Order -eq $ActionOrder
         }
 
-        if ($Null -eq $Action) {
+        if ($null -eq $Action) {
             throw "Unable to find previous Action (Resource: $ResourceOrder, Action $ActionOrder)"
         }
 
@@ -322,7 +322,7 @@ class Resources {
     }
 
     # Find first Action in plan and return true if it matches $ActionSpec
-    [Bool] IsThisFirstActionInPlan ([String] $ActionGuid) {
+    [Bool] IsThisFirstActionInPlan ([string]$ActionGuid) {
         
         # Loop though Resources using their ResourceOrder-property
         :ResourceLoop for ($ResourceOrder = 1; $ResourceOrder -le $This.Resources.Count; $ResourceOrder++) {
@@ -337,14 +337,14 @@ class Resources {
                     $_.Order -eq $ActionOrder
                 }
                 # As soon as we meet an Action without an explicit dependency, it is considered the first Action
-                if ($Null -eq $CurrentAction.depends_on) {
+                if ($null -eq $CurrentAction.depends_on) {
                     $FirstActionGuid = $CurrentAction.Action_Guid
                     Break ResourceLoop
                 }
             }
         }
 
-        if ( $Null -eq $FirstActionGuid ) {
+        if ( $null -eq $FirstActionGuid ) {
             throw "No first Action in Resolved Resurces found"
         }
         elseif ( $FirstActionGuid -eq $ActionGuid ) {
@@ -357,14 +357,14 @@ class Resources {
         }
     }
 
-    [Void] DoOrder ([PSObject] $Network,[PSObject]$Build) {
+    [Void] DoOrder ([PSObject]$Network,[PSObject]$Build) {
         
-        [Array]$Sites = @(($Network.Sites).Name)
-        [Array]$RoleOrder  = @($Build.roles)
-        [String]$OrderType = $Build.order_type
+        [array]$Sites = @(($Network.Sites).Name)
+        [array]$RoleOrder  = @($Build.roles)
+        [string]$OrderType = $Build.order_type
 
         if ($OrderType -notin @('site','role')) {
-            [String]$OrderType = 'role'
+            [string]$OrderType = 'role'
         }
 
         $ResourceCount     = 0
@@ -383,10 +383,10 @@ class Resources {
                             $_.order -eq $RoleCount
                         }
             
-                        if ($BuildRole -is [Array]) {
+                        if ($BuildRole -is [array]) {
                             throw "Multiple Roles in the Build with order $RoleCount"
                         }
-                        elseif ($Null -eq $BuildRole) {
+                        elseif ($null -eq $BuildRole) {
                             throw "No Roles in the Build with order $RoleCount"
                         }
     
@@ -423,10 +423,10 @@ class Resources {
                         $_.order -eq $RoleCount
                     }
         
-                    if ($BuildRole -is [Array]) {
+                    if ($BuildRole -is [array]) {
                         throw "Multiple Roles in the Build with order $RoleCount"
                     }
-                    elseif ($Null -eq $BuildRole) {
+                    elseif ($null -eq $BuildRole) {
                         throw "No Roles in the Build with order $RoleCount"
                     }
 

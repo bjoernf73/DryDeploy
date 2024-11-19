@@ -1,31 +1,30 @@
 using Namespace System.Collections.Generic
 using Namespace System.Collections
 class Network {
-    [String]         $Name
-    [String]         $Switch_Name
-    [String]         $Ip_Subnet 
-    [String]         $Subnet_Mask
-    [String]         $Default_Gateway
-    [String]         $Reverse_Zone
-    [Array]          $Dns
-    [Array]          $Dns_Forwarders
-    [PSCustomObject] $Dhcp
-    [String]         $Ip_Address
+    [string]$Name
+    [string]$Switch_Name
+    [string]$Ip_Subnet 
+    [string]$Subnet_Mask
+    [string]$Default_Gateway
+    [string]$Reverse_Zone
+    [array]$Dns
+    [array]$Dns_Forwarders
+    [PSCustomObject]$Dhcp
+    [string]$Ip_Address
 
     Network (
-         [PSCustomObject] $NetworkRef,
-         [Array]          $Sites
+         [PSCustomObject]$NetworkRef,
+         [array]$Sites
     ) {
-
         $Site = $Sites | 
         Where-Object { 
             $_.Name -eq $NetworkRef.site 
         }
         
-        if ($Null -eq $Site) {
+        if ($null -eq $Site) {
             Write-Error "No sites matched pattern '$($NetworkRef.site)'" -ErrorAction Stop
         }
-        elseif ($Site -is [Array]) {
+        elseif ($Site -is [array]) {
             Write-Error "Multiple sites matched pattern '$($NetworkRef.site)'" -ErrorAction Stop
         }
     
@@ -34,10 +33,10 @@ class Network {
             $_.Name -eq $NetworkRef.subnet_name 
         }
         
-        if ($Null -eq $Subnet) {
+        if ($null -eq $Subnet) {
             Write-Error "No subnets matched pattern '$($NetworkRef.subnet_name)'" -ErrorAction Stop
         }
-        elseif ($Subnet -is [Array]) {
+        elseif ($Subnet -is [array]) {
             Write-Error "Multiple subnets matched pattern '$($NetworkRef.subnet_name)'" -ErrorAction Stop
         }
 

@@ -36,7 +36,7 @@ function ConvertTo-DryUtilsDomainFQDN {
                 })
             )
         })]
-        [String]$DomainDN
+        [string]$DomainDN
     )
     
     try {

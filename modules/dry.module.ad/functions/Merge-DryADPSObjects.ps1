@@ -39,7 +39,7 @@ function Merge-DryADPSObjects {
             $Private:ResultArray += $SecondObject
             return $Private:ResultArray 
         }
-        elseif ( ($FirstObject -is [String]) -and $SecondObject -is [String] ) {
+        elseif ( ($FirstObject -is [string]) -and $SecondObject -is [string] ) {
             # This happens when properties are identical in above iterations. By default, the property from 
             # $FirstObject is returned, unless the switch $PreferSecondObjectOnConflict is passed - then 
             # the property from $SecondObject is returned. In any case, if the switch $FailOnConflict, 

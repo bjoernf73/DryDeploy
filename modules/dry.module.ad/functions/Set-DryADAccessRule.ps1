@@ -23,16 +23,16 @@ function Set-DryADAccessRule {
     param ( 
         [Parameter(HelpMessage = "Name of user to delegate rights to. 
         Never used by DryDeploy, since rights are always delegated to groups")]
-        [String]
+        [string]
         $User,
 
         [Parameter(HelpMessage = "Name of group to delegate rights to")]
-        [String]
+        [string]
         $Group,    
     
         [Parameter(Mandatory,
             HelpMessage = "DistinguisheName of container object (ou or cn) to set rights on")]
-        [String]
+        [string]
         $Path,
 
         [Parameter(Mandatory,
@@ -43,21 +43,21 @@ function Set-DryADAccessRule {
         [Parameter(Mandatory,
             HelpMessage = "Access Control Type, either 'Allow' or 'Deny'.")]
         [ValidateSet("Allow", "Deny")]
-        [String]
+        [string]
         $AccessControlType, 
         
         [Parameter(HelpMessage = "Inheritance")]
         [ValidateSet("All", "Children", "Descendents", "SelfAndChildren", "None")]
-        [String]
+        [string]
         $ActiveDirectorySecurityInheritance, 
 
         [Parameter(HelpMessage = "The AD object type that the right(s) applies to. 
         Like 'user','computer' or 'organizationalunit', or any other AD object type")]
-        [String]
+        [string]
         $ObjectType, 
         
         [Parameter(HelpMessage = "The object type by name that should inherit the right(s).")]
-        [String]
+        [string]
         $InheritedObjectType,
 
         [Parameter(Mandatory, ParameterSetName = 'Remote',
@@ -67,7 +67,7 @@ function Set-DryADAccessRule {
 
         [Parameter(Mandatory, ParameterSetName = 'Local',
             HelpMessage = "For 'Local' sessions, specify the Domain Controller to use")]
-        [String] 
+        [string] 
         $DomainController
     )
 
@@ -103,9 +103,9 @@ function Set-DryADAccessRule {
         }
 
         # Since parameters cannot be splatted, or named in -Argumentslist, make sure all exists
-        if (-not $ObjectType) { [String]$ObjectType = '' }
-        if (-not $InheritedObjectType) { [String]$InheritedObjectType = '' }
-        if (-not $ActiveDirectorySecurityInheritance) { [String]$ActiveDirectorySecurityInheritance = '' }
+        if (-not $ObjectType) { [string]$ObjectType = '' }
+        if (-not $InheritedObjectType) { [string]$InheritedObjectType = '' }
+        if (-not $ActiveDirectorySecurityInheritance) { [string]$ActiveDirectorySecurityInheritance = '' }
             
         $ArgumentList = @(
             $Path,
@@ -128,7 +128,7 @@ function Set-DryADAccessRule {
                 Session = $PSSession
             }
         }
-        $return = $Null; $return = Invoke-Command @InvokeParams
+        $return = $null; $return = Invoke-Command @InvokeParams
 
         # Send every string in $Return[0] to Debug via Out-DryLog
         foreach ($ReturnString in $Return[0]) {
@@ -144,7 +144,7 @@ function Set-DryADAccessRule {
         else {
             ol f 'AD right not set'
             ol w "Failed to configure AD right"
-            if ($Null -ne $Return[2]) {
+            if ($null -ne $Return[2]) {
                 throw ($Return[2]).ToString()
             } 
             else {

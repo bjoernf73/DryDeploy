@@ -20,18 +20,18 @@
 
 [ScriptBlock] $DryAD_SB_MoveComputer_Set = {
     param (
-        [String]
+        [string]
         $ComputerName,
 
-        [String]
+        [string]
         $TargetOU,
 
-        [String]
+        [string]
         $Server
     )
     
     try {
-        [String]$DomainDN = (Get-ADDomain -Server $Server -ErrorAction Stop | 
+        [string]$DomainDN = (Get-ADDomain -Server $Server -ErrorAction Stop | 
                 Select-Object -Property distinguishedName).distinguishedName
         if ($TargetOU -notmatch "$DomainDN$") {
             $TargetOU = $TargetOU + ",$DomainDN"

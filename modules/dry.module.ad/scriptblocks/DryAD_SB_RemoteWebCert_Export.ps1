@@ -21,9 +21,9 @@
 
 [ScriptBlock]$DryAD_SB_RemoteWebCert_Export = {
     param (
-        [String] $Path,
+        [string] $Path,
         [Array]  $SignatureAlgorithms,
-        [String] $KeyUsage
+        [string] $KeyUsage
     )
     try {
         $Cert = Get-ChildItem -Path Cert:\LocalMachine\My -ErrorAction Stop | Where-Object { 

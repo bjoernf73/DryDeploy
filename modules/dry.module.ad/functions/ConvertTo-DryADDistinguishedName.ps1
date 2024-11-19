@@ -28,11 +28,11 @@ function ConvertTo-DryADDistinguishedName {
     param (
         [Parameter(Mandatory)]
         [AllowEmptyString()]
-        [String]$Name,
+        [string]$Name,
 
         [Parameter()]
         [ValidateSet("upper", "lower", "ignore", "capitalize", "capitalized")]
-        [String]$Case = 'ignore'
+        [string]$Case = 'ignore'
     )
     
     # chop off any leading or trailing slashes and spaces. 
@@ -41,7 +41,7 @@ function ConvertTo-DryADDistinguishedName {
     ol d @('Input', $Name)   
    
     try {
-        [String]$ConvertedName = ""
+        [string]$ConvertedName = ""
         
         if (
             ($Name -match "^ou=") -or 

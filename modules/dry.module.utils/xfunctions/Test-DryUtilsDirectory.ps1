@@ -89,7 +89,7 @@ function Test-DryUtilsDirectory {
             elseif (
                 (Test-Path -Path $Path -ErrorAction Ignore) -and
                 ((Get-Item -Path $Path).PSisContainer -eq $true) -and
-                ($Null -eq (Get-ChildItem -Path $Path ))
+                ($null -eq (Get-ChildItem -Path $Path ))
             ) {
                 $Validated = $true
             }

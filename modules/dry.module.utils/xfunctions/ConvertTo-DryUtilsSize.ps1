@@ -23,12 +23,12 @@ function ConvertTo-DryUtilsSize {
     [cmdletbinding()]            
     param (   
         [Parameter(Mandatory)]            
-        [String]$Value,
+        [string]$Value,
            
         [validateset("Bytes","KB","MB","GB","TB")]            
-        [String]$To,            
+        [string]$To,            
                     
-        [Int]$Precision = 4            
+        [int]$Precision = 4            
     )
     ol v "Got '$Value' to convert to '$To'." 
 

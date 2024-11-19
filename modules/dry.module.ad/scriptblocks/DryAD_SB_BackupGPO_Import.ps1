@@ -21,19 +21,19 @@
 [ScriptBlock] $DryAD_SB_BackupGPO_Import = {
     [CmdletBinding()]
     param (
-        [String]
+        [string]
         $BackupName,
 
-        [String]
+        [string]
         $TargetName,
 
-        [String]
+        [string]
         $Path,
 
         [Hashtable]
         $Replacements,
 
-        [String]
+        [string]
         $Server,
 
         [Switch]
@@ -66,15 +66,15 @@
             [CmdletBinding()]
             param (
                 [Parameter()]
-                [String]
+                [string]
                 $FolderPath = $ENV:TEMP,
         
                 [Parameter()]
-                [String]
+                [string]
                 $Extension,
         
                 [Parameter()]
-                [Int]
+                [int]
                 $Length = 12
             )
             try {
@@ -141,7 +141,7 @@
             }
             $MigTablePath = Join-Path -Path $Path -ChildPath ($BackupName + '.migtable')
             $RemoteMessages += "If migtable exists, it's path should be '$MigTablePath'"
-            $TempMigTable = $Null
+            $TempMigTable = $null
             if (Test-Path -Path $MigTablePath) {
                 $RemoteMessages += "The migtable '$MigTablePath' exists!"
                 $TempMigTable = Get-RandomPath -extension 'migtable'
@@ -188,7 +188,7 @@
                 }
             }
         }
-        @($Status, $Null, $RemoteMessages)
+        @($Status, $null, $RemoteMessages)
     }
     catch {
         @($Status, $_, $RemoteMessages)

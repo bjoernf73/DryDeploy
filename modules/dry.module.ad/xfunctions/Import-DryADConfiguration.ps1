@@ -38,11 +38,11 @@ function Import-DryADConfiguration {
         $ConfigurationPath,
 
         [Parameter(HelpMessage = "Shortname (not IP!) of the computer for which the configuration is run")]
-        [String] 
+        [string] 
         $ComputerName,
 
         [Parameter(HelpMessage = "Active Directory site name for which the configuration is done")]
-        [String] 
+        [string] 
         $ADSite,
 
         [Parameter(HelpMessage = "Array of one or more Types to process. By default, all are processed")]
@@ -58,7 +58,7 @@ function Import-DryADConfiguration {
         $Tags,
 
         [Parameter(Mandatory, ParameterSetName = 'Local', HelpMessage = "Specify a resolvable name or IP to a Domain Controller to perform AD actions on")]
-        [String] 
+        [string] 
         $DomainController,
 
         [Parameter(Mandatory, ParameterSetName = 'Remote')]
@@ -82,7 +82,7 @@ function Import-DryADConfiguration {
             }
         }
 
-        [String]$ExecutionType = $PSCmdlet.ParameterSetName
+        [string]$ExecutionType = $PSCmdlet.ParameterSetName
         ol i 'Execution Type', "$ExecutionType"
 
         $ConfigurationPath = (Resolve-Path -Path $ConfigurationPath -ErrorAction Stop).Path
@@ -137,7 +137,7 @@ function Import-DryADConfiguration {
         
         $DefaultVariables.foreach({
                 $CurrentDefaultVariable = $_
-                if ($Null -eq ($Variables | Where-Object { $_.Name -eq $CurrentDefaultVariable })) {
+                if ($null -eq ($Variables | Where-Object { $_.Name -eq $CurrentDefaultVariable })) {
                     $Variables += New-Object -TypeName PSObject -Property @{
                         Name  = "$CurrentDefaultVariable"
                         Value = Get-Variable -Name $CurrentDefaultVariable -Value
@@ -156,16 +156,16 @@ function Import-DryADConfiguration {
         if ($ADSite) {
             ol i 'ADSite', "$ADSite"
         }
-        elseif ($Null -ne ($Variables | Where-Object { $_.Name -eq 'ADSite' })) {
-            [String]$ADSite = ($Variables | Where-Object { $_.Name -eq 'ADSite' }).Value
+        elseif ($null -ne ($Variables | Where-Object { $_.Name -eq 'ADSite' })) {
+            [string]$ADSite = ($Variables | Where-Object { $_.Name -eq 'ADSite' }).Value
             ol i 'ADSite', "$ADSite"
         }
         
         if ($ComputerName) {
             ol i 'ComputerName', "$ComputerName"
         }
-        elseif ($Null -ne ($Variables | Where-Object { $_.Name -eq 'ComputerName' })) {
-            [String]$ComputerName = ($Variables | Where-Object { $_.Name -eq 'ComputerName' }).Value
+        elseif ($null -ne ($Variables | Where-Object { $_.Name -eq 'ComputerName' })) {
+            [string]$ComputerName = ($Variables | Where-Object { $_.Name -eq 'ComputerName' }).Value
             ol i 'ComputerName', "$ComputerName"
         }
         ol i ' ' -h
@@ -205,22 +205,22 @@ function Import-DryADConfiguration {
         #   to ignore
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        [String]$OUCase    = 'ignore'
-        [String]$GPOCase   = 'ignore'
-        [String]$GroupCase = 'ignore'
-        [String]$UserCase  = 'ignore'
+        [string]$OUCase    = 'ignore'
+        [string]$GPOCase   = 'ignore'
+        [string]$GroupCase = 'ignore'
+        [string]$UserCase  = 'ignore'
 
         if ($RoleConfiguration.casing.ad_organizational_unit_case) {
-            [String]$OUCase = $RoleConfiguration.casing.ad_organizational_unit_case
+            [string]$OUCase = $RoleConfiguration.casing.ad_organizational_unit_case
         }
         if ($RoleConfiguration.casing.ad_gpo_case) {
-            [String]$GPOCase = $RoleConfiguration.casing.ad_gpo_case
+            [string]$GPOCase = $RoleConfiguration.casing.ad_gpo_case
         }
         if ($RoleConfiguration.casing.ad_group_case) { 
-            [String]$GroupCase = $RoleConfiguration.casing.ad_group_case
+            [string]$GroupCase = $RoleConfiguration.casing.ad_group_case
         }
         if ($RoleConfiguration.casing.ad_user_case) { 
-            [String]$UserCase = $RoleConfiguration.casing.ad_user_case
+            [string]$UserCase = $RoleConfiguration.casing.ad_user_case
         }
 
         ol v 'Casing - OUs',    "$OUCase"
@@ -247,7 +247,7 @@ function Import-DryADConfiguration {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         if (Test-Path -Path "$ConfigurationPath\ad_schema" -ErrorAction Ignore) {
             if (($Types -icontains 'ad_schema') -or 
-                ($Null -eq $Types)
+                ($null -eq $Types)
             ) { 
                 $ProcessADSchema = $true
                 $ADSchemaExtensions = @(Get-ChildItem -Path "$ConfigurationPath\ad_schema\*" -Include "*.ldf")
@@ -264,7 +264,7 @@ function Import-DryADConfiguration {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         if (Test-Path -Path "$ConfigurationPath\netlogon" -ErrorAction Ignore) {  
             if (($Types -icontains 'netlogon') -or 
-                ($Null -eq $Types)
+                ($null -eq $Types)
             ) { 
                 $ProcessNETLOGON = $true
                 $NumberOfElementsToProcess++
@@ -279,7 +279,7 @@ function Import-DryADConfiguration {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         if (Test-Path -Path "$ConfigurationPath\adm_templates" -ErrorAction Ignore) {  
-            if (($Types -icontains 'adm_templates') -or ($Null -eq $Types)) { 
+            if (($Types -icontains 'adm_templates') -or ($null -eq $Types)) { 
                 $ProcessAdmTemplates = $true
                 $NumberOfElementsToProcess++
             } 
@@ -309,7 +309,7 @@ function Import-DryADConfiguration {
                         $_.scope -contains 'computer'
                     } )
 
-            if (($Types -icontains 'ou_schema') -or ($Null -eq $Types)) { 
+            if (($Types -icontains 'ou_schema') -or ($null -eq $Types)) { 
                 $ProcessOUs = $true 
                 $NumberOfElementsToProcess += (
                     $DomainOUs.Count + $SiteOUs.Count + $ComputerOUs.Count
@@ -337,12 +337,12 @@ function Import-DryADConfiguration {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         # DomainOUs that are missing 'path'-property must resolve it from 'paths'
-        foreach ($OU in $DomainOUs | Where-Object { ($Null -eq $_.Path) -and ($Null -ne $_.Paths) }) {
+        foreach ($OU in $DomainOUs | Where-Object { ($null -eq $_.Path) -and ($null -ne $_.Paths) }) {
 
             Remove-Variable -Name Path -ErrorAction Ignore
             $Path = $OU.paths.domain
 
-            if ($Null -eq $Path) {
+            if ($null -eq $Path) {
                 ol e "Unable to find `$OU.paths.domain on '$($OU.alias)'"
                 throw "Unable to find `$OU.paths.domain on '$($OU.alias)'"
             }
@@ -359,12 +359,12 @@ function Import-DryADConfiguration {
         }
 
         # SiteOUs that are missing 'path'-property must resolve it from 'paths'
-        foreach ($OU in $SiteOUs | Where-Object { ($Null -eq $_.Path) -and ($Null -ne $_.Paths) }) {
+        foreach ($OU in $SiteOUs | Where-Object { ($null -eq $_.Path) -and ($null -ne $_.Paths) }) {
 
             Remove-Variable -Name Path -ErrorAction Ignore
             $Path = $OU.paths.site
 
-            if ($Null -eq $Path) {
+            if ($null -eq $Path) {
                 ol e "Unable to find `$OU.paths.Site on '$($OU.alias)'"
                 throw "Unable to find `$OU.paths.Site on '$($OU.alias)'"
             }
@@ -381,12 +381,12 @@ function Import-DryADConfiguration {
         }
 
         # ComputerOUs that are missing 'path'-property must resolve it from 'paths'
-        foreach ($OU in $ComputerOUs | Where-Object { ($Null -eq $_.Path) -and ($Null -ne $_.Paths) }) {
+        foreach ($OU in $ComputerOUs | Where-Object { ($null -eq $_.Path) -and ($null -ne $_.Paths) }) {
 
             Remove-Variable -Name Path -ErrorAction Ignore
             $Path = $OU.paths.computer
 
-            if ($Null -eq $Path) {
+            if ($null -eq $Path) {
                 ol e "Unable to find `$OU.paths.computer on '$($OU.alias)'"
                 throw "Unable to find `$OU.paths.computer on '$($OU.alias)'"
             }
@@ -676,7 +676,7 @@ function Import-DryADConfiguration {
         if (
             ($Types -icontains 'wmi_filters') -or 
             ($Types -icontains 'wmi_filters_links') -or 
-            ($Null -eq $Types)
+            ($null -eq $Types)
         ) { 
             if ($RoleConfiguration.wmi_filters) {
                 
@@ -701,7 +701,7 @@ function Import-DryADConfiguration {
                 # Count the wmi_filters, but only if we're actually importing them
                 if (
                     ($Types -icontains 'wmi_filters') -or 
-                    ($Null -eq $Types)
+                    ($null -eq $Types)
                 ) {
                     $ProcessWMIFilterImports = $true
                     $NumberOfElementsToProcess += ($DomainWMIFilters.Count + $SiteWMIFilters.Count + $ComputerWMIFilters.Count)
@@ -710,7 +710,7 @@ function Import-DryADConfiguration {
 
                 if (
                     ($Types -icontains 'wmi_filters_links') -or 
-                    ($Null -eq $Types)
+                    ($null -eq $Types)
                 ) {
                     $ProcessWMIFilterLinks = $true
                     $DomainWmiFilterLinksCount = 0
@@ -766,7 +766,7 @@ function Import-DryADConfiguration {
             # Count
             if (
                 ($Types -icontains 'rights_groups') -or 
-                ($Null -eq $Types)
+                ($null -eq $Types)
             ) { 
                 $ProcessRightsGroups = $true
                 $NumberOfElementsToProcess += ($DomainRightsGroups.Count + $SiteRightsGroups.Count + $ComputerRightsGroups.Count) 
@@ -842,7 +842,7 @@ function Import-DryADConfiguration {
             # Count
             if (
                 ($Types -icontains 'role_groups') -or 
-                ($Null -eq $Types)
+                ($null -eq $Types)
             ) { 
                 $ProcessRoleGroups = $true
                 $NumberOfElementsToProcess += ($DomainRoleGroups.Count + $SiteRoleGroups.Count + $ComputerRoleGroups.Count)
@@ -904,7 +904,7 @@ function Import-DryADConfiguration {
         $NumberOfComputerMemberAndMemberOf = 0
         if (
             ($Types -icontains 'group_members') -or 
-            ($Null -eq $Types)
+            ($null -eq $Types)
         ) { 
             $ProcessGroupMembers = $true
             
@@ -959,7 +959,7 @@ function Import-DryADConfiguration {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         if (
             ($Types -icontains 'rights') -or 
-            ($Null -eq $Types)
+            ($null -eq $Types)
         ) { 
             $ProcessRights = $true
             
@@ -976,7 +976,7 @@ function Import-DryADConfiguration {
                     $NumberOfRights++
                     $NumberOfDomainRights++
                     # Resolve Path
-                    if ($Null -eq $DomainRight.Path) {
+                    if ($null -eq $DomainRight.Path) {
 
                         # Resolve paths from OU schema. It is possible to set a domain right 
                         # at a site- or computer-scoped OU  
@@ -1008,7 +1008,7 @@ function Import-DryADConfiguration {
                     $NumberOfSiteRights++
             
                     # Resolve Path
-                    if ($Null -eq $SiteRight.Path) {
+                    if ($null -eq $SiteRight.Path) {
                         
                         # Resolve domain paths from OU schema. A right for a site group may 
                         # reference an OU in the domain scope, site scope or computer scope
@@ -1040,7 +1040,7 @@ function Import-DryADConfiguration {
                     $NumberOfComputerRights++
             
                     # Resolve Path
-                    if ($Null -eq $ComputerRight.Path) {
+                    if ($null -eq $ComputerRight.Path) {
                         
                         # Resolve domain paths from OU schema. A right for a computer group may 
                         # reference an OU in the domain scope, or in the site scope
@@ -1074,7 +1074,7 @@ function Import-DryADConfiguration {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         if (
             ($Types -icontains 'gpo_imports') -or 
-            ($Null -eq $Types)
+            ($null -eq $Types)
         ) {  
             
             if ($RoleConfiguration.gpo_imports) {   
@@ -1116,7 +1116,7 @@ function Import-DryADConfiguration {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         if (
             ($Types -icontains 'gpo_links') -or
-            ($Null -eq $Types)
+            ($null -eq $Types)
         ) {  
             if ($RoleConfiguration.gpo_links) {  
 
@@ -1176,7 +1176,7 @@ function Import-DryADConfiguration {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         if (
             ($Types -icontains 'users') -or 
-            ($Null -eq $Types)
+            ($null -eq $Types)
         ) {  
             if ($RoleConfiguration.users) {
                 
@@ -1198,7 +1198,7 @@ function Import-DryADConfiguration {
                 # Count
                 if (
                     ($Types -icontains 'users') -or 
-                    ($Null -eq $Types)
+                    ($null -eq $Types)
                 ) { 
                     $ProcessUsers = $true
                     $NumberOfElementsToProcess += ($DomainUsers.Count + $SiteUsers.Count + $ComputerUsers.Count)
@@ -1258,7 +1258,7 @@ function Import-DryADConfiguration {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         if (($Types -icontains 'users_memberof') -or 
-            ($Null -eq $types)) {  
+            ($null -eq $types)) {  
             
             $ProcessUserMemberOf = $true
             # Count User's MemberOfs
@@ -2854,9 +2854,9 @@ function Import-DryADConfiguration {
         if ($ProcessGPOImports) {
             switch ($ExecutionType) {
                 'Remote' {
-                    [String]$RemoteRootPath = "C:\DryDeploy\"
-                    [String]$RemoteModulesPath = Join-Path -Path $RemoteRootPath -ChildPath 'modules'
-                    [String]$GPOsPath = Join-Path -Path $RemoteRootPath -ChildPath 'gpo_imports'
+                    [string]$RemoteRootPath = "C:\DryDeploy\"
+                    [string]$RemoteModulesPath = Join-Path -Path $RemoteRootPath -ChildPath 'modules'
+                    [string]$GPOsPath = Join-Path -Path $RemoteRootPath -ChildPath 'gpo_imports'
 
                     # Only invoke if json-gpos in configuration
                     if ($RequiresGPOHelper) {
@@ -2876,7 +2876,7 @@ function Import-DryADConfiguration {
                     Copy-DryADFilesToRemoteTarget -PSSession $PSSession -TargetPath $RemoteRootPath -SourcePath $SourceGPOsPath | Out-Null
                 }
                 'Local' {
-                    [String]$GPOsPath = $SourceGPOsPath
+                    [string]$GPOsPath = $SourceGPOsPath
                 }
             }  
 
@@ -2890,7 +2890,7 @@ function Import-DryADConfiguration {
             ol i "GPO Imports - Domain scope ($($DomainGPOImports.count))" -sh
             foreach ($GPO in $DomainGPOImports) {
                 # Ensure TargetName exists, and is converted to the desired case
-                if ($Null -eq $GPO.TargetName) { 
+                if ($null -eq $GPO.TargetName) { 
                     $GPO | 
                         Add-Member -MemberType NoteProperty -Name 'TargetName' -Value $(ConvertTo-DryADCase -Name $GPO.Name -Case $GPOcase)
                 }
@@ -2933,7 +2933,7 @@ function Import-DryADConfiguration {
             ol i "GPO Imports - Site scope ($($SiteGPOImports.count))" -sh
             foreach ($GPO in $SiteGPOImports) {
                 # Ensure TargetName exists, and is converted to the desired case
-                if ($Null -eq $GPO.TargetName) { 
+                if ($null -eq $GPO.TargetName) { 
                     $GPO | 
                         Add-Member -MemberType NoteProperty -Name 'TargetName' -Value $(ConvertTo-DryADCase -Name $GPO.Name -Case $GPOcase)
                 }
@@ -2975,7 +2975,7 @@ function Import-DryADConfiguration {
             ol i "GPO Imports - Computer scope ($($ComputerGPOImports.count))" -sh
             foreach ($GPO in $ComputerGPOImports) {
                 # Ensure TargetName exists, and is converted to the desired case
-                if ($Null -eq $GPO.TargetName) { 
+                if ($null -eq $GPO.TargetName) { 
                     $GPO | 
                         Add-Member -MemberType NoteProperty -Name 'TargetName' -Value $(ConvertTo-DryADCase -Name $GPO.Name -Case $GPOcase)
                 }

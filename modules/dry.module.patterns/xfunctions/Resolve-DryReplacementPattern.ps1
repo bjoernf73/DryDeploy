@@ -25,7 +25,7 @@ function Resolve-DryReplacementPattern {
     param (
         [Parameter(Mandatory)]
         [AllowEmptyString()]
-        [String]$InputText,
+        [string]$InputText,
 
         [Parameter(Mandatory)]
         [System.Collections.Generic.List[PSObject]]$Variables

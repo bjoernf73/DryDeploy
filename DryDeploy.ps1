@@ -510,7 +510,7 @@ param (
     Once set, the ConfigCombo (the combination of a EnvConfig, 
     a ModuleConfig and an InstanceConfig) will be stored and reused  
     for each subsequent action")]
-    [String]
+    [string]
     $EnvConfig,
 
     [Parameter(ParameterSetName='SetConfig',
@@ -518,7 +518,7 @@ param (
     Once set, the ConfigCombo (the combination of a EnvConfig, 
     a ModuleConfig and an InstanceConfig) will be stored and reused  
     for each subsequent action")]
-    [String]
+    [string]
     $ModuleConfig,
 
     [Parameter(ParameterSetName='Apply',
@@ -785,14 +785,14 @@ try {
         Define paths
     
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-    [String]$dry_var_PlanFile           = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'dry_deploy_plan.json'
-    [String]$dry_var_ResourcesFile      = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'dry_deploy_resources.json'
-    [String]$dry_var_ConfigComboFile    = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'dry_deploy_config_combo.json'
-    [String]$dry_var_UserOptionsFile    = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'UserOptions.json' # the user may create this file to override the defaults
-    [String]$dry_var_TempConfigsDir     = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'TempConfigs'
-    [String]$dry_var_ArchiveDir         = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'Archived'
-    [String]$dry_var_SystemOptionsFile  = Join-Path -Path $dry_var_global_ScriptPath           -ChildPath 'SystemOptions.json'
-    [String]$GLOBAL:dry_var_global_CredentialsFile    = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'dry_deploy_credentials.json'
+    [string]$dry_var_PlanFile           = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'dry_deploy_plan.json'
+    [string]$dry_var_ResourcesFile      = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'dry_deploy_resources.json'
+    [string]$dry_var_ConfigComboFile    = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'dry_deploy_config_combo.json'
+    [string]$dry_var_UserOptionsFile    = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'UserOptions.json' # the user may create this file to override the defaults
+    [string]$dry_var_TempConfigsDir     = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'TempConfigs'
+    [string]$dry_var_ArchiveDir         = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'Archived'
+    [string]$dry_var_SystemOptionsFile  = Join-Path -Path $dry_var_global_ScriptPath           -ChildPath 'SystemOptions.json'
+    [string]$GLOBAL:dry_var_global_CredentialsFile    = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'dry_deploy_credentials.json'
 
     $dry_var_Paths = [PSCustomObject]@{
         RootWorkingDirectory = $dry_var_global_RootWorkingDirectory
@@ -1195,7 +1195,7 @@ try {
                 $dry_var_Action = $null
                 $dry_var_Action = $dry_var_Plan.Actions | Where-Object { $_.ApplyOrder -eq $dry_var_ActionCount }
                 
-                if ($Null -eq $dry_var_Action) { throw "Unable to find Action with Order $dry_var_ActionCount in Plan" }
+                if ($null -eq $dry_var_Action) { throw "Unable to find Action with Order $dry_var_ActionCount in Plan" }
 
                 try {
                     Show-DryActionStart -Action $dry_var_Action
@@ -1300,7 +1300,7 @@ try {
                 $dry_var_Action = $null
                 $dry_var_Action = $dry_var_Plan.Actions | Where-Object { $_.ApplyOrder -eq $dry_var_ActionCount }
                 
-                if ($Null -eq $dry_var_Action) { throw "Unable to find Action with Order $dry_var_ActionCount in Plan" }
+                if ($null -eq $dry_var_Action) { throw "Unable to find Action with Order $dry_var_ActionCount in Plan" }
 
                 try {
                     if ($dry_var_Action.Status -eq 'Todo') {

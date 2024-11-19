@@ -31,7 +31,7 @@ function Get-DryInput {
     [CmdletBinding(DefaultParameterSetName="prompt")]
     param (
         [Parameter(ParameterSetName="prompt",Mandatory)]
-        [String]$Prompt,
+        [string]$Prompt,
 
         [Parameter(ParameterSetName="prompt")]
         $DefaultValue,
@@ -39,15 +39,15 @@ function Get-DryInput {
         [Parameter(ParameterSetName="prompt",HelpMessage = "May be used for simple values like 
         a list of allowed numbers to choose from in a prompt. Will automatically be shown in 
         the prompt allowed values 'box' (in from of the prompt in [<here>])")]
-        [String]$PromptChoiceString,
+        [string]$PromptChoiceString,
 
         [Parameter(ParameterSetName="prompt",
         HelpMessage="A helpmessage that is printed before the actual prompt")]
-        [String]$Description,
+        [string]$Description,
 
         [Parameter(ParameterSetName="prompt",Mandatory)]
         [AllowEmptyString()]
-        [String]$FailedMessage,
+        [string]$FailedMessage,
 
         [Parameter(HelpMessage="When there is a choice between options, use a ValidateSet to ensure input
         values are in the set of allowed choices")]

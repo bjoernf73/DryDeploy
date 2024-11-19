@@ -22,12 +22,12 @@ function Get-DryADServiceProperty {
     [CmdletBinding(DefaultParameterSetName = 'Local')] 
     param ( 
         [Parameter(Mandatory, HelpMessage = "The property to get")]
-        [String] 
+        [string] 
         $Property,
 
         [Parameter(Mandatory, HelpMessage = "Tells which function to run; Get-ADDomain, Get-ADForest or Get-ADRootDse")]
         [ValidateSet('domain', 'forest', 'rootdse')]
-        [String] 
+        [string] 
         $Service,
 
         [Parameter(Mandatory, ParameterSetName = 'Remote',
@@ -37,7 +37,7 @@ function Get-DryADServiceProperty {
 
         [Parameter(Mandatory, ParameterSetName = 'Local',
             HelpMessage = "For 'Local' sessions, specify the Domain Controller to use")]
-        [String] 
+        [string] 
         $DomainController
     )
 
@@ -71,7 +71,7 @@ function Get-DryADServiceProperty {
                 Session = $PSSession
             }
         }
-        $return = $Null; 
+        $return = $null; 
         $return = Invoke-Command @InvokeParams
 
         if ($return -is [ErrorRecord]) {

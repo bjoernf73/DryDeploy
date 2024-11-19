@@ -24,15 +24,15 @@ function New-DryInteractivePlan {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
-        [String]
+        [string]
         $ResourcesFile,
 
         [Parameter(Mandatory)]
-        [String]
+        [string]
         $PlanFile,
 
         [Parameter(Mandatory)]
-        [String]
+        [string]
         $ArchiveFolder,
 
         [Parameter(Mandatory)]

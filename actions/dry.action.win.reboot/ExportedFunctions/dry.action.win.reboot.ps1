@@ -46,9 +46,9 @@ function dry.action.win.reboot {
         #   of reboots, and wether or not to do gpupdate. Spescify the defaults
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-        [Int]    $NumberOfReboots  = 1
+        [int]    $NumberOfReboots  = 1
         [Bool]   $GPUpdate         = $true
-        [String] $ConfigOrDefault  = 'Default'
+        [string] $ConfigOrDefault  = 'Default'
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   METACONFIG
@@ -59,9 +59,9 @@ function dry.action.win.reboot {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
         if ($Resolved.ActionMetaConfig) {
-            [Int]$NumberOfReboots = $Resolved.ActionMetaConfig.reboots
+            [int]$NumberOfReboots = $Resolved.ActionMetaConfig.reboots
             [Bool]$GPUpdate = $Resolved.ActionMetaConfig.gpupdate
-            [String]$ConfigOrDefault        = 'Config'
+            [string]$ConfigOrDefault        = 'Config'
         }
         
         switch ($GPUpdate) {

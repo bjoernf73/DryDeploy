@@ -22,7 +22,7 @@ function Get-DryADJson {
     param (
         [ValidateScript({ (Test-Path $_ -PathType 'leaf') -and (($_ -match ".json$") -or ($_ -match ".jsonc$")) })]
         [Parameter(Mandatory, ParameterSetName = 'stringpath')]
-        [String]$Path,
+        [string]$Path,
 
         [ValidateScript({ ($_.exists -and (($_.name -match ".json$") -or ($_.name -match ".jsonc$"))) })]
         [Parameter(Mandatory, ParameterSetName = 'fileinfo')]
@@ -41,7 +41,7 @@ function Get-DryADJson {
             $_.Trim() -notmatch "^//" 
         }
 
-        [String]$ContentString = $ContentArray | Out-String -ErrorAction 'Stop'
+        [string]$ContentString = $ContentArray | Out-String -ErrorAction 'Stop'
 
         # Convert to PSObject and return
         ConvertFrom-Json -InputObject $ContentString -ErrorAction 'Stop'

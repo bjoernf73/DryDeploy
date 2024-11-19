@@ -733,7 +733,7 @@ class GroupPolicy : BaseSettings {
                 $RegSettings = @{}
                 $RegSettings.Add("keyName",$setting.KeyName)
                 $RegSettings.Add("valueType",$setting.ValueType)
-                if ($Null -ne $setting.ValueName) 
+                if ($null -ne $setting.ValueName) 
                 { 
                     if ($Setting.ValueName.Length -eq 1) {
                         if (([byte][char]$setting.ValueName) -ne 0) {
@@ -746,7 +746,7 @@ class GroupPolicy : BaseSettings {
                     }
                 }
 
-                if ($Null -ne $setting.ValueData) {
+                if ($null -ne $setting.ValueData) {
                     $ValueData = $null
                     switch ($setting.ValueType.ToLower()) {
                         "reg_dword" { $ValueData = [uint32]$Setting.ValueData }
@@ -1866,7 +1866,7 @@ function Import-GroupPolicyToAD {
     }
 
     if ($DefaultPermissions) {
-        $GPO.Permissions=$Null
+        $GPO.Permissions=$null
     }
 
     try {

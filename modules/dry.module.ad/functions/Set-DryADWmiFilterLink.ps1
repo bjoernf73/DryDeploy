@@ -21,11 +21,11 @@ function Set-DryADWmiFilterLink {
     [CmdletBinding(DefaultParameterSetName = 'Local')]
     param (
         [Parameter(Mandatory)]
-        [String]
+        [string]
         $GPOName,
 
         [Parameter(Mandatory)]
-        [String]
+        [string]
         $WMIFilterName,
 
         [Parameter(Mandatory, ParameterSetName = 'Remote', HelpMessage = "PSSession 
@@ -35,7 +35,7 @@ function Set-DryADWmiFilterLink {
 
         [Parameter(Mandatory, ParameterSetName = 'Local', HelpMessage = "Specify the 
         Domain Controller to target in Local Session")]
-        [String] 
+        [string] 
         $DomainController
     )
 
@@ -64,9 +64,9 @@ function Set-DryADWmiFilterLink {
                     ErrorAction = 'Stop'
                     
                 }
-                $ADObject = $Null
+                $ADObject = $null
                 $ADObject = Get-ADObject @GetADObjectParams
-                if ($Null -eq $ADObject) {
+                if ($null -eq $ADObject) {
                     throw "Object not found"
                 }
                 $true
@@ -136,7 +136,7 @@ function Set-DryADWmiFilterLink {
                     Server      = $Server
                     ErrorAction = 'Stop'
                 }
-                if ($Null -eq $GPOADObject.gPCWQLFilter) {
+                if ($null -eq $GPOADObject.gPCWQLFilter) {
                     $SetParams += @{
                         Add = @{gPCWQLFilter = $gPCWQLFilter }
                     }

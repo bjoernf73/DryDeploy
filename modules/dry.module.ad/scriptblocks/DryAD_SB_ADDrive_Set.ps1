@@ -21,7 +21,7 @@
 [ScriptBlock]$DryAD_SB_ADDrive_Set = {
     param ($Server)
     try {
-        $ReturnError = $Null
+        $ReturnError = $null
         $ReturnValue = $false
         $VerboseReturnStrings = @("Entered Scriptblock")
 

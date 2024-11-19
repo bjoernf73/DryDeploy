@@ -26,7 +26,7 @@ function Initialize-DryPackageManagement {
     [CmdLetBinding()]
     param (
         [Parameter()]
-        [String]$RootURL
+        [string]$RootURL
     )
 
     try {
@@ -88,8 +88,8 @@ function Initialize-DryPackageManagement {
         if ($Dependencies.git) {
             ol i 'GITs' -sh
             if (-not $GitsPath) { 
-                [String]$UserProfile = [Environment]::GetEnvironmentVariable("UserProfile")
-                [String]$GitsPath = ([Environment]::GetEnvironmentVariable("PSModulePath") -split ';') | Where-Object { 
+                [string]$UserProfile = [Environment]::GetEnvironmentVariable("UserProfile")
+                [string]$GitsPath = ([Environment]::GetEnvironmentVariable("PSModulePath") -split ';') | Where-Object { 
                     $_ -match ($UserProfile -replace '\\','\\')
                 }
             }

@@ -113,12 +113,12 @@ function Out-DryLog {
     param (
         [Alias("t")]
         [Parameter(Mandatory,Position=0)]
-        [String]$Type,
+        [string]$Type,
 
         [Alias("m")]
         [Parameter(ParameterSetName="message",Mandatory,Position=1)]
         [AllowEmptyString()]
-        [String]$Message,
+        [string]$Message,
 
         [Alias("hash")]
         [Parameter(ParameterSetName="hashtable",Mandatory,Position=1)]
@@ -142,7 +142,7 @@ function Out-DryLog {
         [Alias("title")]
         [Parameter(ParameterSetName="hashtable",HelpMessage="Title of the Hashtable to display")]
         [Parameter(ParameterSetName="object",HelpMessage="Title of the PSObject to display")]
-        [String]$MsgTitle,
+        [string]$MsgTitle,
 
         [Parameter(ParameterSetName="object", HelpMessage="Don't use this param. It is only for use in nested calls. 
         Meaning that the MsgObjLevel will be increased by 1 each time Out-DryLog parameterset 'object' calls itself")]
@@ -154,7 +154,7 @@ function Out-DryLog {
 
         [Alias("hchar")]
         [Parameter(ParameterSetName="message",HelpMessage="The char(s) to fill the line")]
-        [String]$HeaderChars = '.',
+        [string]$HeaderChars = '.',
 
         [Alias("sh")]
         [Parameter(ParameterSetName="message",HelpMessage="Creates a nice, small header of the message text")]
@@ -167,7 +167,7 @@ function Out-DryLog {
         [Alias("cs")]
         [Parameter(HelpMessage="Normally 1, the direct caller. However, if Out-DryLog is called by a proxy function, you may use
         2 to point the 'location' (where in your code Out-DryLog was called) to the call before the direct call.")]
-        [Int]$Callstacklevel = 1,
+        [int]$Callstacklevel = 1,
 
         [Alias("fore")]
         [AllowNull()]
@@ -229,8 +229,8 @@ function Out-DryLog {
 
         # Get the calling cmdlet/script and line number
         $Caller = (Get-PSCallStack)[$callstacklevel]
-        [String] $Location = ($Caller.location).Replace(' line ','')
-        [String] $LocationString = "[$Location $(get-date -Format HH:mm:ss)]"
+        [string] $Location = ($Caller.location).Replace(' line ','')
+        [string] $LocationString = "[$Location $(get-date -Format HH:mm:ss)]"
 
         $DisplayLogMessage = $false
         <#
@@ -434,10 +434,10 @@ function Out-DryLog {
                     
                     switch ($ArrayMessages.count) {
                         {$_ -eq 1 } {
-                            [System.Collections.Generic.List[String]]$Messages = @("$($ArrayMessages[0])")
+                            [System.Collections.Generic.List[string]]$Messages = @("$($ArrayMessages[0])")
                         }
                         {$_ -gt 1 } {
-                            [System.Collections.Generic.List[String]]$Messages = @("$($FirstElement): $($ArrayMessages[0])")
+                            [System.Collections.Generic.List[string]]$Messages = @("$($FirstElement): $($ArrayMessages[0])")
                             for ($m = 1; $m -le $ArrayMessages.count; $m++) {
                                 $Messages.Add("$($BlankFirstElement)  $($ArrayMessages[$m])")
                             }
@@ -445,7 +445,7 @@ function Out-DryLog {
                     }
                 }
                 else {
-                    [System.Collections.Generic.List[String]]$Messages = @("$ArrayMessage")
+                    [System.Collections.Generic.List[string]]$Messages = @("$ArrayMessage")
                 }                
             }
             elseif ($PSCmdlet.ParameterSetName -eq 'object') {

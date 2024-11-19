@@ -28,7 +28,7 @@ function Show-DryPlan {
 
         [Parameter(Mandatory)]
         [ValidateSet('Plan','Apply')]
-        [String] $Mode,
+        [string] $Mode,
 
         [Parameter(HelpMessage='Shows deselected Actions (not in Plan) as well as planned Actions')]
         [Switch]$ShowDeselected,
@@ -45,11 +45,11 @@ function Show-DryPlan {
         param (
             [Parameter(Mandatory)]
             [AllowEmptyString()]  
-            [String]$String, 
+            [string]$String, 
 
-            [Int]$Offset,
+            [int]$Offset,
 
-            [Int]$Postbuffer = 3
+            [int]$Postbuffer = 3
         )
         try {
             $TargetMessageLength = $Host.UI.RawUI.WindowSize.Width - ($OffSet + $Postbuffer)
@@ -87,20 +87,20 @@ function Show-DryPlan {
         [CmdletBinding()]
         param (
             [Parameter(Mandatory)]
-            [String]$RepoType,
+            [string]$RepoType,
 
             [Parameter(Mandatory)]
-            [String]$Path,
+            [string]$Path,
 
-            [Int]$LongestResourceString
+            [int]$LongestResourceString
         )
-        [String]$RepoString = ''
-        [Int]$RepoTypeStringLength = $LongestResourceString + 11
-        [String]$RepoString = $RepoType
+        [string]$RepoString = ''
+        [int]$RepoTypeStringLength = $LongestResourceString + 11
+        [string]$RepoString = $RepoType
         do {
             $RepoString = "$RepoString "
         } while ($RepoString.length -le $RepoTypeStringLength)
-        [String]$RepoString = $RepoString + $Path
+        [string]$RepoString = $RepoString + $Path
         $RepoString
     }
 
@@ -110,11 +110,11 @@ function Show-DryPlan {
             [Parameter(Mandatory)]
             [psobject]$Action,
 
-            [Int]$LongestActionString,
+            [int]$LongestActionString,
 
-            [Int]$LongestResourceString,
+            [int]$LongestResourceString,
 
-            [Int]$LongestRoleString,
+            [int]$LongestRoleString,
 
             [Switch]$ShowDeslected
         )
@@ -123,9 +123,9 @@ function Show-DryPlan {
             $Action.Phase = " "
         }
         # PlanO is exactly 5 chars. If it is 0, make empty
-        [String]$OrderStr = $Action.PlanO  
+        [string]$OrderStr = $Action.PlanO  
         if ($OrderStr -eq '0') {
-            [String]$OrderStr = ' '
+            [string]$OrderStr = ' '
         }
         While ($OrderStr.length -lt 5) {
             $OrderStr = "$OrderStr "
@@ -133,7 +133,7 @@ function Show-DryPlan {
         $PlanString += $OrderStr
 
         # resource is 3 chars more than $LongestResourceString
-        [String]$ResourceStr = $Action.Resource  
+        [string]$ResourceStr = $Action.Resource  
         $ResourceStr = "   $ResourceStr"
         Do {
             $ResourceStr = "$ResourceStr "
@@ -142,7 +142,7 @@ function Show-DryPlan {
         $PlanString = $PlanString + $ResourceStr
 
         # action is 3 chars more than $LongestActionString
-        [String]$ActionStr = $Action.Action
+        [string]$ActionStr = $Action.Action
         Do {
             $ActionStr = "$ActionStr "
         } 
@@ -150,7 +150,7 @@ function Show-DryPlan {
         $PlanString = $PlanString + $ActionStr
 
         # Phase is 7 chars exactly
-        [String]$PhaseStr = $action.Phase
+        [string]$PhaseStr = $action.Phase
         Do {
             $PhaseStr = "$PhaseStr "
         } 
@@ -158,14 +158,14 @@ function Show-DryPlan {
         $PlanString = $PlanString + $PhaseStr
 
          # Role is 3 chars more than $LongestRoleString
-         [String]$RoleStr = $Action.Role
+         [string]$RoleStr = $Action.Role
          Do {
              $RoleStr = "$RoleStr "
          } 
          While ($RoleStr.length -le ($LongestRoleString+3))
          $PlanString = $PlanString + $RoleStr
 
-        [String]$StatusStr = $action.Status
+        [string]$StatusStr = $action.Status
         Do {
             $StatusStr = "$StatusStr "
         } 
@@ -174,9 +174,9 @@ function Show-DryPlan {
 
         $PlanString = "$PlanString   "
 
-        [String]$OrderStr = $Action.ActionO
+        [string]$OrderStr = $Action.ActionO
         if ($OrderStr -eq '0') {
-            [String]$OrderStr = ' '
+            [string]$OrderStr = ' '
         }
         While ($OrderStr.length -lt 8){
             $OrderStr = "$OrderStr "
@@ -184,7 +184,7 @@ function Show-DryPlan {
         $PlanString += $OrderStr
         
         # Description must be calculated
-        [String]$DescStr = Format-DryDescriptionString -String $Action.Description -Offset ($PlanString.length)
+        [string]$DescStr = Format-DryDescriptionString -String $Action.Description -Offset ($PlanString.length)
         $PlanString = $PlanString + $DescStr
         
         # return the string

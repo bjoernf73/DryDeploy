@@ -21,13 +21,13 @@
 [ScriptBlock]$DryAD_SB_JsonGPO_Import = {
     [CmdLetBinding()] 
     param (
-        [String]
+        [string]
         $Name,
 
-        [String]
+        [string]
         $FileName,
 
-        [String]
+        [string]
         $DomainController,
 
         [Bool]
@@ -39,7 +39,7 @@
         [HashTable]
         $Replacements
     )
-    $Result = @($false, $Null, '')
+    $Result = @($false, $null, '')
     
     try {
         Import-Module -Name 'dry.ad.gpohelper' -Force -ErrorAction 'Stop' | Out-Null

@@ -25,13 +25,13 @@ function Get-DryUtilsRandomPath {
     
     param (
         [Parameter(HelpMessage="Length of the file or folder name, minus extension")]
-        [Int]$Length,
+        [int]$Length,
 
         [Parameter(HelpMessage="Folder path, defaults to `$env:TEMP")]
-        [String]$Path,
+        [string]$Path,
 
         [Parameter(HelpMessage="Extension of the file")]
-        [String]$Extension
+        [string]$Extension
     )
 
     try {
@@ -51,7 +51,7 @@ function Get-DryUtilsRandomPath {
         if ($Extension) {
             $RandomString = $RandomString + '.' + $Extension
         }
-        return [String](Join-Path -Path $Path -ChildPath $RandomString)
+        return [string](Join-Path -Path $Path -ChildPath $RandomString)
     }
     catch {
         $PSCmdlet.ThrowTerminatingError($_)

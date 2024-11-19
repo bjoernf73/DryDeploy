@@ -23,16 +23,16 @@ function Add-DryCredential {
     [CmdLetBinding(DefaultParameterSetName='Credential')]
     param (
         [Parameter(Mandatory,HelpMessage="The Alias the credential to add")]
-        [String]$Alias,
+        [string]$Alias,
 
         [Parameter(Mandatory,ParameterSetName="Credential",HelpMessage="The name, or 'alias', of the credential to add")]
         [PSCredential]$Credential,
 
         [Parameter(Mandatory,ParameterSetName="UserNameAndPassword",HelpMessage="The user name of the credential to add")]
-        [String]$UserName,
+        [string]$UserName,
 
         [Parameter(Mandatory,ParameterSetName="UserNameAndPassword",HelpMessage="The password of the credential to add")]
-        [String]$Password
+        [string]$Password
     )
 
     try {

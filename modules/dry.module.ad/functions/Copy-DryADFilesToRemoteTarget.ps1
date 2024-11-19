@@ -23,11 +23,11 @@ function Copy-DryADFilesToRemoteTarget {
     [CmdletBinding(DefaultParameterSetName = 'Local')]
     param (
         [Parameter(Mandatory)]
-        [String]
+        [string]
         $TargetPath,
 
         [Parameter(Mandatory)]
-        [String]
+        [string]
         $SourcePath,
 
         [Parameter(Mandatory, ParameterSetName = 'Remote')]

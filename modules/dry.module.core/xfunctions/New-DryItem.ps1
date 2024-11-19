@@ -27,7 +27,7 @@ function New-DryItem {
 
         [Parameter(Mandatory)]
         [ValidateSet('Directory','File')]
-        [String]$ItemType
+        [string]$ItemType
     )
 
     try {

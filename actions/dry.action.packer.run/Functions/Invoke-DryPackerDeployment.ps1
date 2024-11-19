@@ -133,7 +133,7 @@ function Invoke-DryPackerDeployment {
             $CredName = $SecondaryCredential.Name
             $CredIndex = $SecondaryCredential.Credentials_Index
 
-            if ($Null -eq $Credentials."credential$CredIndex") {
+            if ($null -eq $Credentials."credential$CredIndex") {
                 ol -t 1 -m "Action is missing it's .credential$CredIndex"
                 throw "Action is missing it's .credential$CredIndex"
             }

@@ -23,15 +23,15 @@
     param (
        
         [Parameter(Position = 0)]
-        [String]
+        [string]
         $Path,
      
         [Parameter(Position = 1)]
-        [String]
+        [string]
         $TargetName,
 
         [Parameter(Position = 2)]
-        [String]
+        [string]
         $TargetType,
 
         [Parameter(Position = 3)]
@@ -43,27 +43,27 @@
         $AccessControlType,
 
         [Parameter(Position = 5)]
-        [String]
+        [string]
         $ObjectType,
 
         [Parameter(Position = 6)]
-        [String]
+        [string]
         $InheritedObjectType,
 
         [Parameter(Position = 7)]
-        [String]
+        [string]
         $ActiveDirectorySecurityInheritance,
 
         [Parameter(Position = 8)]
-        [String]
+        [string]
         $ExecutionType,
 
         [Parameter(Position = 9)]
-        [String]
+        [string]
         $Server
     )
     try {
-        $ReturnError = $Null
+        $ReturnError = $null
         $ReturnValue = $false
         $DebugReturnStrings = @("Entered Scriptblock")
         $DebugReturnStrings += @("'Path'                               = '$Path'")
@@ -182,14 +182,14 @@
         }
         $DebugReturnStrings += "SID of the Target: $Target"
 
-        $ObjectTypeGUID = $Null
+        $ObjectTypeGUID = $null
         if ($ObjectType) {
             $DebugReturnStrings += "Finding GUID of ObjectType: '$ObjectType'"
             $ObjectTypeGUID = [GUID]($ObjectTypeGUIDs.$($ObjectType))
             $DebugReturnStrings += "ObjectTypeGUID: $($ObjectTypeGUID.ToString())"
         }
         
-        $InheritedObjectTypeGUID = $Null
+        $InheritedObjectTypeGUID = $null
         if ($InheritedObjectType) {
             $DebugReturnStrings += "Finding GUID of InheritedObjectType: '$InheritedObjectType'"
             $InheritedObjectTypeGUID = [GUID]($ObjectTypeGUIDs.$($InheritedObjectType)) 
@@ -220,56 +220,56 @@
             }
 
             # Convert to proper types
-            if ($Null -ne $ActiveDirectorySecurityInheritance) {
+            if ($null -ne $ActiveDirectorySecurityInheritance) {
                 [System.DirectoryServices.ActiveDirectorySecurityInheritance]$ActiveDirectorySecurityInheritance = $ActiveDirectorySecurityInheritance
             }
 
             # Now we're able to find the constructor
             if (
-                ($Null -eq $ActiveDirectorySecurityInheritance) -and 
-                ($Null -eq $ObjectTypeGUID) -and 
-                ($Null -eq $InheritedObjectTypeGUID)
+                ($null -eq $ActiveDirectorySecurityInheritance) -and 
+                ($null -eq $ObjectTypeGUID) -and 
+                ($null -eq $InheritedObjectTypeGUID)
             ) { 
                 
                 $DebugReturnStrings += "Constructor: 1 (Target, ActiveDirectoryRight, AccessControlType)"
                 $AccessRule = New-Object System.DirectoryServices.ActiveDirectoryAccessRule($Target, $ActiveDirectoryRight, $AccessControlType) -ErrorAction Stop
             }
             elseif (
-                ($Null -ne $ActiveDirectorySecurityInheritance) -and 
-                ($Null -eq $ObjectTypeGUID) -and 
-                ($Null -eq $InheritedObjectTypeGUID)
+                ($null -ne $ActiveDirectorySecurityInheritance) -and 
+                ($null -eq $ObjectTypeGUID) -and 
+                ($null -eq $InheritedObjectTypeGUID)
             ) { 
                 $DebugReturnStrings += "Constructor: 2 (Target, ActiveDirectoryRight, AccessControlType, ActiveDirectorySecurityInheritance)"
                 $AccessRule = New-Object System.DirectoryServices.ActiveDirectoryAccessRule($Target, $ActiveDirectoryRight, $AccessControlType, $ActiveDirectorySecurityInheritance) -ErrorAction Stop
             }
             elseif (
-                ($Null -ne $ActiveDirectorySecurityInheritance) -and 
-                ($Null -eq $ObjectTypeGUID) -and 
-                ($Null -ne $InheritedObjectTypeGUID)
+                ($null -ne $ActiveDirectorySecurityInheritance) -and 
+                ($null -eq $ObjectTypeGUID) -and 
+                ($null -ne $InheritedObjectTypeGUID)
             ) { 
                 $DebugReturnStrings += "Constructor: 3 (Target, ActiveDirectoryRight, AccessControlType, ActiveDirectorySecurityInheritance, InheritedObjectTypeGUID)"
                 $AccessRule = New-Object System.DirectoryServices.ActiveDirectoryAccessRule($Target, $ActiveDirectoryRight, $AccessControlType, $ActiveDirectorySecurityInheritance, $InheritedObjectTypeGUID) -ErrorAction Stop
             }
             elseif (
-                ($Null -eq $ActiveDirectorySecurityInheritance) -and 
-                ($Null -ne $ObjectTypeGUID) -and 
-                ($Null -eq $InheritedObjectTypeGUID)
+                ($null -eq $ActiveDirectorySecurityInheritance) -and 
+                ($null -ne $ObjectTypeGUID) -and 
+                ($null -eq $InheritedObjectTypeGUID)
             ) { 
                 $DebugReturnStrings += "Constructor: 4 (Target, ActiveDirectoryRight, AccessControlType, ObjectTypeGuid)"
                 $AccessRule = New-Object System.DirectoryServices.ActiveDirectoryAccessRule($Target, $ActiveDirectoryRight, $AccessControlType, $ObjectTypeGuid) -ErrorAction Stop
             }
             elseif (
-                ($Null -ne $ActiveDirectorySecurityInheritance) -and 
-                ($Null -ne $ObjectTypeGUID) -and 
-                ($Null -eq $InheritedObjectTypeGUID)
+                ($null -ne $ActiveDirectorySecurityInheritance) -and 
+                ($null -ne $ObjectTypeGUID) -and 
+                ($null -eq $InheritedObjectTypeGUID)
             ) { 
                 $DebugReturnStrings += "Constructor: 5 (Target, ActiveDirectoryRight, AccessControlType, ObjectTypeGuid, ActiveDirectorySecurityInheritance)"
                 $AccessRule = New-Object System.DirectoryServices.ActiveDirectoryAccessRule($Target, $ActiveDirectoryRight, $AccessControlType, $ObjectTypeGuid, $ActiveDirectorySecurityInheritance) -ErrorAction Stop
             }
             elseif (
-                ($Null -ne $ActiveDirectorySecurityInheritance) -and 
-                ($Null -ne $ObjectTypeGUID) -and 
-                ($Null -ne $InheritedObjectTypeGUID)) { 
+                ($null -ne $ActiveDirectorySecurityInheritance) -and 
+                ($null -ne $ObjectTypeGUID) -and 
+                ($null -ne $InheritedObjectTypeGUID)) { 
                 #Type = 6
                 $DebugReturnStrings += "Constructor: 6 (Target, ActiveDirectoryRight, AccessControlType, ObjectTypeGuid, ActiveDirectorySecurityInheritance, InheritedObjectTypeGUID)"
                 $AccessRule = New-Object System.DirectoryServices.ActiveDirectoryAccessRule($Target, $ActiveDirectoryRight, $AccessControlType, $ObjectTypeGuid, $ActiveDirectorySecurityInheritance, $InheritedObjectTypeGUID) -ErrorAction Stop

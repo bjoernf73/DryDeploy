@@ -24,11 +24,11 @@ function Add-DryADGroupMember {
     [CmdletBinding(DefaultParameterSetName = 'Local')]
     param (
         [Parameter(Mandatory, HelpMessage = "The Group to add the Member to")]
-        [String] 
+        [string] 
         $Group,
 
         [Parameter(Mandatory, HelpMessage = "The Member to add the Group")]
-        [String] 
+        [string] 
         $Member,
 
         [Parameter(Mandatory, ParameterSetName = 'Remote')]
@@ -37,7 +37,7 @@ function Add-DryADGroupMember {
 
         [Parameter(Mandatory, ParameterSetName = 'Local',
             HelpMessage = "For 'Local' sessions, specify the Domain Controller to use")]
-        [String] 
+        [string] 
         $DomainController
     )
     ol d @("Adding: $Member to", $Group)

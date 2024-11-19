@@ -30,12 +30,12 @@ function Save-DryArchiveFile {
         [Parameter(HelpMessage="Number of archived files to keep. I will count existing 
         archived files, and delete all but the `$ToKeep newest (based on the sortable 
         date in filename). If 0, I won't delete any old archive files")]
-        [Int]
+        [int]
         $ToKeep = 50,
 
         [Parameter(HelpMessage="The folder to move the archived file into. If not given, I'll
         default to the same folder as the original file. Don't worry, I'll fix a unique name")]
-        [String]
+        [string]
         $ArchiveFolder
     )
     try {

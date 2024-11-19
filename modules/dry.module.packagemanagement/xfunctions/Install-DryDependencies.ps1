@@ -30,9 +30,9 @@ function Install-DryDependencies {
 
         [Parameter(Mandatory,HelpMessage="To determine which depdencies_hash to write to")]
         [ValidateSet('environment','module','system')]
-        [String]$Type,
+        [string]$Type,
 
-        [String]$GitsPath
+        [string]$GitsPath
     )
 
     try {
@@ -101,8 +101,8 @@ function Install-DryDependencies {
         if ($Dependencies.git) {
             ol i 'GITs' -sh
             if (-not $GitsPath) { 
-                [String]$UserProfile = [Environment]::GetEnvironmentVariable("UserProfile")
-                [String]$GitsPath = ([Environment]::GetEnvironmentVariable("PSModulePath") -split ';') | Where-Object { 
+                [string]$UserProfile = [Environment]::GetEnvironmentVariable("UserProfile")
+                [string]$GitsPath = ([Environment]::GetEnvironmentVariable("PSModulePath") -split ';') | Where-Object { 
                     $_ -match ($UserProfile -replace '\\','\\')
                 }
             }

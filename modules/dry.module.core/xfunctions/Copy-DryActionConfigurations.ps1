@@ -23,13 +23,13 @@ function Copy-DryActionConfigurations {
     [CmdletBinding()]
     param (
         [Parameter()]
-        [String]$ConfigSourcePath,
+        [string]$ConfigSourcePath,
 
         [Parameter(Mandatory)]
-        [String]$ConfigTargetPath,
+        [string]$ConfigTargetPath,
 
         [Parameter()]
-        [String]$ConfigOSSourcePath
+        [string]$ConfigOSSourcePath
     )
     
     try {

@@ -23,10 +23,10 @@ function Get-DryCredential {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory,HelpMessage="The Alias of the credential to get")]
-        [String]$Alias,
+        [string]$Alias,
 
         [Parameter(HelpMessage="The Environment (EnvConfig) that the Alias to get belongs to")]
-        [String]$EnvConfig
+        [string]$EnvConfig
     )
 
     try {

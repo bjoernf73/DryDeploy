@@ -26,7 +26,7 @@ function Get-DryADRemotePublicCertificate {
         $PSSession,
         
         [Parameter(Mandatory)]
-        [String]
+        [string]
         $CertificateFile
     )
 

@@ -24,27 +24,27 @@ function New-DryADSecurityGroup {
         [Parameter(Mandatory,
             HelpMessage = "Enter name of the group")]
         [ValidateNotNullOrEmpty()]
-        [String] 
+        [string] 
         $Name, 
 
         [Parameter(Mandatory,
             HelpMessage = "Enter distinguishedName of the path of the group")]
         [ValidateScript({ $_ -match "^OU=" })]
-        [String] 
+        [string] 
         $Path, 
         
         [Parameter(Mandatory, HelpMessage = "Enter a description for the group")]
         [ValidateNotNullOrEmpty()]
-        [String] 
+        [string] 
         $Description, 
 
         [Parameter(HelpMessage = "Active Directory group type. Must be 'DomainLocal', 'Global' or 'Universal'")]
         [ValidateSet("DomainLocal", "Global", "Universal")]
-        [String] 
+        [string] 
         $Type = "DomainLocal", 
 
         [Parameter(HelpMessage = "Group category. Must be 'Security' or 'Distribution'. Defaults to security.")]
-        [String] 
+        [string] 
         $GroupCategory = "Security",
 
         [Parameter(ParameterSetName = 'Remote',
@@ -54,7 +54,7 @@ function New-DryADSecurityGroup {
 
         [Parameter(Mandatory, ParameterSetName = 'Local',
             HelpMessage = "For 'Local' sessions, specify the Domain Controller to use")]
-        [String] 
+        [string] 
         $DomainController
     )
     # Details to the debug stream

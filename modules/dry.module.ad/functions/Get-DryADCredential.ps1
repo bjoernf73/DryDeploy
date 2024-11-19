@@ -22,13 +22,13 @@ function Get-DryADCredential {
     param (
         [Parameter(Mandatory)]
         [ValidateScript({ ("$_" -split '\\').count -eq 2 })]
-        [String]$UserName,
+        [string]$UserName,
         
         [Parameter()]
-        [Int]$Length = 20,
+        [int]$Length = 20,
 
         [Parameter()]
-        [Int]$NonAlphabetics = 5,
+        [int]$NonAlphabetics = 5,
 
         [Switch]$Random
     )
@@ -46,6 +46,6 @@ function Get-DryADCredential {
         $PSCmdlet.ThrowTerminatingError($_)
     }
     finally {
-        $SecStringPassword = $Null
+        $SecStringPassword = $null
     }
 }

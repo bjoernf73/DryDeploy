@@ -23,16 +23,16 @@ function Set-DryADSchemaExtension {
     [CmdletBinding(DefaultParameterSetName = 'Local')] 
     param (
         [Parameter(Mandatory, HelpMessage = 'The Schema Extension type')]
-        [String]
+        [string]
         $Type,
 
         [Parameter(Mandatory, HelpMessage = 'The number of times the success strings
         must be matched')]
-        [Int]
+        [int]
         $SuccessCount,
 
         [Parameter(Mandatory, HelpMessage = 'The LDF Content')]
-        [String]
+        [string]
         $Content,
 
         [Parameter(HelpMessage = 'Variables used for replacements in LDFs. Each 
@@ -47,7 +47,7 @@ function Set-DryADSchemaExtension {
         $PSSession,
 
         [Parameter(Mandatory, HelpMessage = "The Schema Master")]
-        [String] 
+        [string] 
         $SchemaMaster
     )
     try {

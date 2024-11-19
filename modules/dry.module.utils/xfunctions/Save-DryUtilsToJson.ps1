@@ -23,17 +23,17 @@ function Save-DryUtilsToJson {
     [cmdletbinding()]
     param (
         [Parameter(Mandatory)]
-        [String]$Path,
+        [string]$Path,
 
         [Parameter(Mandatory)]
         [PSObject]$InputObject,
 
         [Parameter()]
-        [Int]$Depth = 50,
+        [int]$Depth = 50,
 
         [Parameter()]
         [ValidateSet('ASCII','BigEndianUnicode','Default','OEM','String','Unicode','Unknown','UTF7','UTF8','UTF32')]
-        [String]$Encoding = 'Default',
+        [string]$Encoding = 'Default',
 
         [Parameter()]
         [Switch]$Force

@@ -21,16 +21,16 @@ function Get-DryADOUPathFromAlias {
     [cmdletbinding()]
     param (
         [Parameter(Mandatory)]
-        [String]$Alias,
+        [string]$Alias,
 
         [Parameter(Mandatory)]
         [Array]$OUs,
 
         [Parameter(Mandatory)]
-        [String]$Scope,
+        [string]$Scope,
 
         [Parameter()]
-        [String]$Child
+        [string]$Child
     )
 
     $ReferencedOU = $OUs | Where-Object {  
@@ -41,7 +41,7 @@ function Get-DryADOUPathFromAlias {
     ol d 'Scope', "$Scope"
     ol d 'Child', "$Child"
 
-    if ($Null -eq $ReferencedOU) {
+    if ($null -eq $ReferencedOU) {
         ol e @('Unable to resolve OU from Alias', 'No OUs found')
         throw "Unable to find OU for Alias '$Alias': No references found"
     } 
@@ -52,7 +52,7 @@ function Get-DryADOUPathFromAlias {
     }
     
     $Path = $ReferencedOU.Path
-    if ($Null -eq $Path) {
+    if ($null -eq $Path) {
         ol e "Found OU '$($OU.Alias)', but it contains no path"
         throw "Found OU '$($OU.Alias)', but it contains no path"
     }

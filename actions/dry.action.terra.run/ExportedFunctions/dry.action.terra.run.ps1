@@ -29,10 +29,10 @@ function dry.action.terra.run {
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             SourceFile is the top .tf file
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        [String]    $SourceFilePath   = Join-Path -Path $Resolved.ConfigSourcePath -ChildPath '*'
+        [string]    $SourceFilePath   = Join-Path -Path $Resolved.ConfigSourcePath -ChildPath '*'
         [FileInfo]  $SourceFile       = Get-Item -Path $SourceFilePath -Include "*.tf" -ErrorAction Stop
-        [String]    $TargetVarsFile   = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name).auto.tfvars.json"
-        [String]    $TargetStateFile  = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name).tfstate"
+        [string]    $TargetVarsFile   = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name).auto.tfvars.json"
+        [string]    $TargetStateFile  = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name).tfstate"
         [HashTable] $VariablesHash    = ConvertTo-DryHashtable -Variables $Resolved.vars -NotSecrets
         
         # Output the tfvars file. Using json, we don't have to create a shady text-parsing-function for this.

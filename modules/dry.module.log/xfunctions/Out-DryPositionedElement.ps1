@@ -17,7 +17,7 @@ function Out-DryPositionedElement {
         with the corresponding `$Name will be created in `$dry_var_global_PositionedElements, or overwritten if it exists. If not `$Position, and an 
         entry with the corresponding `$Name in `$dry_var_global_PositionedElements does not exist, the current cursor position will be used and an entry
         created")]
-        [String]$Name,
+        [string]$Name,
 
         [Parameter(ParameterSetName="updatescreen",
         HelpMessage="Output as a List (Format-List) instead of a table (Format-Table) which is the default")]

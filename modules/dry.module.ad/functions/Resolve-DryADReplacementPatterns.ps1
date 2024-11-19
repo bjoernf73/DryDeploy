@@ -27,7 +27,7 @@ function Resolve-DryADReplacementPatterns {
 
         [Parameter(ParametersetName = "InputText", Position = 0, Mandatory)]
         [AllowEmptyString()]
-        [String]$InputText,
+        [string]$InputText,
 
         [Parameter(ParametersetName = "InputObject", Position = 1, Mandatory)]
         [Parameter(ParametersetName = "InputText", Position = 1, Mandatory)]
@@ -65,7 +65,7 @@ function Resolve-DryADReplacementPatterns {
                     }
                     # If Key is a string, we can do the replacement. If it is an object, we must make a nested 
                     # call. If array, make nested call for each element of the array
-                    elseif ($PropertyValue -is [String]) {
+                    elseif ($PropertyValue -is [string]) {
                         # call Resolve-DryADReplacementPattern that returns the replaced string
                         $PropertyValue = Resolve-DryADReplacementPattern -InputText $PropertyValue -Variables $Variables     
                     }
@@ -76,7 +76,7 @@ function Resolve-DryADReplacementPatterns {
                     elseif ($PropertyValue -is [Array]) {
                         # nested call for each array element
                         $PropertyValue = @(  $PropertyValue | foreach-Object { 
-                                if ($_ -is [String]) {
+                                if ($_ -is [string]) {
                                     Resolve-DryADReplacementPatterns -InputText $_ -Variables $Variables
                                 } 
                                 else {

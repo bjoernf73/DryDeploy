@@ -35,7 +35,7 @@ function Get-DryUtilsPSObjectCopy {
     # Will only work on properties at root though
     if ($Properties) {
         foreach ($Key in $Properties.Keys) {
-            if ($Null -eq $Object."$Key") {
+            if ($null -eq $Object."$Key") {
                 Write-Host "The Property '$Key' does not exist!"
                 $Object | Add-Member -MemberType NoteProperty -Name $Key -Value $Properties["$Key"]
             }

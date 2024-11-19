@@ -54,49 +54,49 @@ function Resolve-DryActionOptions {
         <#
             The Action has a path in the ModuleConfig or in the BaseConfig.
         #>
-        [String]$ConfigTargetPath = Join-Path -Path $Configuration.Paths.TempConfigsDir -ChildPath $ConfigCombo.envconfig.name
-        [String]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.ResourceName
-        [String]$RoleTargetRootPath = $ConfigTargetPath
-        [String]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.Action
-        [String]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.Source
+        [string]$ConfigTargetPath = Join-Path -Path $Configuration.Paths.TempConfigsDir -ChildPath $ConfigCombo.envconfig.name
+        [string]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.ResourceName
+        [string]$RoleTargetRootPath = $ConfigTargetPath
+        [string]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.Action
+        [string]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.Source
 
         switch ($Action.source) {
             'role' {
-                [String]$RolesConfigSourcePath = Join-Path -Path $Configuration.Paths.ModuleConfigDirectory -ChildPath 'Roles'
-                [String]$RoleConfigSourcePath  = Join-Path -Path $RolesConfigSourcePath -ChildPath $Action.Role
-                [String]$ConfigSourcePath      = Join-Path -Path $RoleConfigSourcePath -ChildPath $Action.Action
+                [string]$RolesConfigSourcePath = Join-Path -Path $Configuration.Paths.ModuleConfigDirectory -ChildPath 'Roles'
+                [string]$RoleConfigSourcePath  = Join-Path -Path $RolesConfigSourcePath -ChildPath $Action.Role
+                [string]$ConfigSourcePath      = Join-Path -Path $RoleConfigSourcePath -ChildPath $Action.Action
 
-                [String]$ModuleFilesSourcePath = Join-Path -Path $Configuration.Paths.ModuleConfigDirectory -ChildPath 'Files'
-                [String]$RoleFilesSourcePath   = Join-Path -Path $RoleConfigSourcePath -ChildPath 'Files'
-                [String]$ActionFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
+                [string]$ModuleFilesSourcePath = Join-Path -Path $Configuration.Paths.ModuleConfigDirectory -ChildPath 'Files'
+                [string]$RoleFilesSourcePath   = Join-Path -Path $RoleConfigSourcePath -ChildPath 'Files'
+                [string]$ActionFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
                 if ($Action.Phase -gt 0) {
-                    [String]$ConfigSourcePath       = Join-Path -Path $ConfigSourcePath -ChildPath $Action.Phase
-                    [String]$PhaseFilesSourcePath   = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
-                    [String]$ActionTypePropertyName = "$($Action.Action)_type$($Action.Phase)"
-                    [String]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.Phase
+                    [string]$ConfigSourcePath       = Join-Path -Path $ConfigSourcePath -ChildPath $Action.Phase
+                    [string]$PhaseFilesSourcePath   = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
+                    [string]$ActionTypePropertyName = "$($Action.Action)_type$($Action.Phase)"
+                    [string]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.Phase
                 }
                 else {
-                    [String]$ActionTypePropertyName = "$($Action.Action)_type"
+                    [string]$ActionTypePropertyName = "$($Action.Action)_type"
                 }
-                [String]$ActionMetaConfigFile = Join-Path -Path $ConfigSourcePath -ChildPath 'Config.json'
+                [string]$ActionMetaConfigFile = Join-Path -Path $ConfigSourcePath -ChildPath 'Config.json'
 
             }
             'base' {
-                [String]$BaseConfigSourcePath = Join-Path -Path $Configuration.Paths.BaseConfigDirectory -ChildPath $Action.Resource.BaseConfig
-                [String]$ConfigSourcePath     = Join-Path -Path $BaseConfigSourcePath -ChildPath $Action.Action
+                [string]$BaseConfigSourcePath = Join-Path -Path $Configuration.Paths.BaseConfigDirectory -ChildPath $Action.Resource.BaseConfig
+                [string]$ConfigSourcePath     = Join-Path -Path $BaseConfigSourcePath -ChildPath $Action.Action
                 
-                [String]$RoleFilesSourcePath   = Join-Path -Path $BaseConfigSourcePath -ChildPath 'Files'
-                [String]$ActionFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
+                [string]$RoleFilesSourcePath   = Join-Path -Path $BaseConfigSourcePath -ChildPath 'Files'
+                [string]$ActionFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
                 if ($Action.Phase -gt 0) {
-                    [String]$ConfigSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath $Action.Phase
-                    [String]$PhaseFilesSourcePath   = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
-                    [String]$ActionTypePropertyName = "$($Action.Action)_type$($Action.Phase)"
-                    [String]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.Phase
+                    [string]$ConfigSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath $Action.Phase
+                    [string]$PhaseFilesSourcePath   = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
+                    [string]$ActionTypePropertyName = "$($Action.Action)_type$($Action.Phase)"
+                    [string]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.Phase
                 }
                 else {
-                    [String]$ActionTypePropertyName = "$($Action.Action)_type"
+                    [string]$ActionTypePropertyName = "$($Action.Action)_type"
                 }
-                [String]$ActionMetaConfigFile = Join-Path -Path $ConfigSourcePath -ChildPath 'Config.json'
+                [string]$ActionMetaConfigFile = Join-Path -Path $ConfigSourcePath -ChildPath 'Config.json'
             }
         }
 
@@ -125,7 +125,7 @@ function Resolve-DryActionOptions {
         if (Test-Path -Path $ActionMetaConfigFile -ErrorAction ignore) {
             $ActionMetaConfig = Get-DryFromJson -File $ActionMetaConfigFile
             if ($ActionMetaConfig.default -and $ActionMetaConfig.supported_types) {
-                [String]$ActionType = $ActionMetaConfig.default
+                [string]$ActionType = $ActionMetaConfig.default
                 [Array]$SupportedTypes = @($ActionMetaConfig.supported_types)
 
                 # Test if the Resource specifies a type for this Action, and modify  
@@ -137,9 +137,9 @@ function Resolve-DryActionOptions {
                 }
 
                 
-                [String]$ConfigSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath $ActionType
-                [String]$TypeFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
-                [String]$TypeMetaConfigFile = Join-Path -Path $ConfigSourcePath -ChildPath 'Config.json'
+                [string]$ConfigSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath $ActionType
+                [string]$TypeFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
+                [string]$TypeMetaConfigFile = Join-Path -Path $ConfigSourcePath -ChildPath 'Config.json'
                 [PSCustomObject]$TypeMetaConfig = Get-DryFromJson -Path $TypeMetaConfigFile
                 
             }
@@ -173,11 +173,11 @@ function Resolve-DryActionOptions {
         # fjernet herfra, lagt nederst 
 
         if ($TypeMetaConfig.target_expression) {
-            [String]$Target = Invoke-Expression -Command $TypeMetaConfig.target_expression 
+            [string]$Target = Invoke-Expression -Command $TypeMetaConfig.target_expression 
         }
         else {
             # dhcp da? hvordan gjør vi det? 
-            [String]$Target = $Action.Resource.Resolved_Network.ip_address
+            [string]$Target = $Action.Resource.Resolved_Network.ip_address
         }
 
         # Create the target folder

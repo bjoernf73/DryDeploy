@@ -28,13 +28,13 @@ function Wait-DryUtilsForEvent {
         [hashtable[]]$Filters,
 
         [Parameter(HelpMessage="How many seconds to try before I fail")]
-        [Int]$SecondsToTry = 300,
+        [int]$SecondsToTry = 300,
 
         [Parameter(HelpMessage="How many seconds to wait between tries")]
-        [Int]$SecondsToWaitBetweenTries = 30,
+        [int]$SecondsToWaitBetweenTries = 30,
 
         [Parameter(HelpMessage="How many seconds to wait before I start trying? By default, I wait 15 seconds")]
-        [Int]$SecondsToWaitBeforeStart = 15,
+        [int]$SecondsToWaitBeforeStart = 15,
 
         [Parameter(Mandatory,HelpMessage="Parameters to splat to New-DrySession")]
         [Hashtable]$SessionParameters
@@ -140,16 +140,16 @@ function Wait-DryUtilsForEvent {
     ol i "Searching until:  $TargetTime"
 
     [Bool] $Found       = $false
-    [Int]  $FoundCount  = 0
-    [Int]  $TargetCount = $Filters.count
-    [Int]  $Tried       = 0
+    [int]  $FoundCount  = 0
+    [int]  $TargetCount = $Filters.count
+    [int]  $Tried       = 0
 
     try {
         do {
             $Tried++
             ol i "Try nr. $Tried"
-            $ProgressTotalTime = [Int]((New-TimeSpan -Start $StartTime -End $TargetTime).TotalSeconds)
-            $ProgressTimeLeft = [Int]((New-TimeSpan -Start (Get-Date) -end $TargetTime).TotalSeconds)
+            $ProgressTotalTime = [int]((New-TimeSpan -Start $StartTime -End $TargetTime).TotalSeconds)
+            $ProgressTimeLeft = [int]((New-TimeSpan -Start (Get-Date) -end $TargetTime).TotalSeconds)
             $WriteProgressParameters = @{
                 'Activity'="Searching"
                 'Status'="Searching Event Log"
@@ -181,7 +181,7 @@ function Wait-DryUtilsForEvent {
                     
                     try {
                         Remove-Variable -Name Events -ErrorAction Ignore
-                        if ($Null -eq $EventID) {
+                        if ($null -eq $EventID) {
                             $Events = Get-EventLog @GetEventLogParameters -ErrorAction Ignore
                         }
                         else {

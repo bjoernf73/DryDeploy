@@ -26,7 +26,7 @@ function Install-DryOscdImg {
     [CmdletBinding()]
     param(
         [Parameter(HelpMessage="To avoid applocker restriction, specify an applocker-allowed path to execute the installer in")]
-        [String]$TempPath
+        [string]$TempPath
     )
 
     try {

@@ -24,10 +24,10 @@ function Invoke-DryInPSSession {
     param (
         [Parameter(ParameterSetName="Command",Mandatory)]
         [Parameter(ParameterSetName="Exe",Mandatory)]
-        [String]$Command,
+        [string]$Command,
 
         [Parameter(ParameterSetName="Exe")]
-        [String]$ArgumentString,
+        [string]$ArgumentString,
 
         [Parameter(ParameterSetName="Command")]
         [Parameter(ParameterSetName="scriptblock")]
@@ -37,7 +37,7 @@ function Invoke-DryInPSSession {
         [scriptblock]$Scriptblock,
 
         [Parameter(Mandatory)]
-        [String]$Computername,
+        [string]$Computername,
 
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential[]]$Credential,

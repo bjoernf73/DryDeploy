@@ -33,13 +33,13 @@ function Get-DryDscReverseZones {
         # Get resource's site
         $Site = $Configuration.CoreConfig.network.sites | 
         Where-Object { $_.Name -eq $Resource.network.site }
-        if (($Site -is [array]) -or ($Null -eq $Site)){
+        if (($Site -is [array]) -or ($null -eq $Site)){
             Write-Error "Multiple or no sites matched pattern '$($Resource.network.site)'" -ErrorAction Stop
         }
 
         # Get the resource's subnet. That must exist, and there should be only one
         $Subnets = @($Site.Subnets)
-        if ($Null -eq $Subnets) {
+        if ($null -eq $Subnets) {
             Write-Error "No subnets matched pattern '$($Resource.network.subnet_name)'" -ErrorAction Stop
         }
 

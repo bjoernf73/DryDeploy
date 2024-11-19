@@ -63,7 +63,7 @@ function Get-DryADConnectionPoint {
 
         [Parameter(Mandatory)]
         [ValidateSet('Local','Remote')]
-        [String] $ExecutionType,
+        [string] $ExecutionType,
 
         [Parameter(HelpMessage="Don't validate the connection - just give it to me")]
         [Switch]$NoValidate

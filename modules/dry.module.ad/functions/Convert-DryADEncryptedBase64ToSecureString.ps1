@@ -23,7 +23,7 @@ function Convert-DryADEncryptedBase64ToSecureString {
     param (
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [String] $EncryptedBase64String
+        [string] $EncryptedBase64String
     )
     try {
         # Try to find a certificate in the LocalMachine\My (Personal) Store with

@@ -29,12 +29,12 @@ function dry.action.dsc.run {
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             SourceFile is the top .psm1 file
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        [String]$SourceFilePath = Join-Path -Path $Resolved.ConfigSourcePath -ChildPath '*'
+        [string]$SourceFilePath = Join-Path -Path $Resolved.ConfigSourcePath -ChildPath '*'
         [FileInfo]$SourceFile   = Get-Item -Path $SourceFilePath -Include "*.psm1" -ErrorAction Stop
-        [String]$DSCTargetDir   = $Resolved.ConfigTargetPath
-        [String]$TargetFilePath = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($SourceFile.Name)"
-        [String]$MofTarget      = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Resolved.target).mof"
-        [String]$MetaMofTarget  = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Resolved.target).meta.mof"       
+        [string]$DSCTargetDir   = $Resolved.ConfigTargetPath
+        [string]$TargetFilePath = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($SourceFile.Name)"
+        [string]$MofTarget      = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Resolved.target).mof"
+        [string]$MetaMofTarget  = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Resolved.target).meta.mof"       
         ol i @("The DSC Target is","$($Resolved.target)")
 
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -49,8 +49,8 @@ function dry.action.dsc.run {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         $DSCTemplate = Get-Content -Path $SourceFile -ErrorAction Stop
         if ($Resolved.TypeMetaConfig.dsc_modules) {
-            [String]$DscImportModulesString = "# Importing Desired State Modules `n"
-            [String]$DscImportResourcesString = "# Importing Desired State Resources `n"
+            [string]$DscImportModulesString = "# Importing Desired State Modules `n"
+            [string]$DscImportResourcesString = "# Importing Desired State Resources `n"
             
             foreach ($DscModule in $Resolved.TypeMetaConfig.dsc_modules) {
                 if (-not ($DscModule.requiredVersion)) {
@@ -129,7 +129,7 @@ function dry.action.dsc.run {
         Set-Location -Path $DSCTargetDir -ErrorAction Stop
 
         # Get the name of the configuration & create *.meta.mof and *.mof
-        [String]$DSCConfig = (Get-Command -module $TargetFile.BaseName | Where-Object { $_.CommandType -eq 'Configuration' }).Name
+        [string]$DSCConfig = (Get-Command -module $TargetFile.BaseName | Where-Object { $_.CommandType -eq 'Configuration' }).Name
         & $DSCConfig -ConfigurationData $ConfigurationData @ParamsHash -OutputPath $DSCTargetDir
 
         ol i @('Establish CIMSession to',"$($Resolved.target)")

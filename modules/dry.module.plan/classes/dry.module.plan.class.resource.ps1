@@ -1,33 +1,33 @@
 using Namespace System.Collections.Generic
 using Namespace System.Collections
 class Resource {
-    [String]          $Name
-    [String]          $Role 
-    [String]          $Role_Short_Name
-    [String]          $BaseConfig
-    [String]          $Description
-    [Int]             $ResourceOrder
-    [String]          $BaseConfigPath
-    [String]          $RolePath
-    [String]          $ConfigurationTargetPath
-    [Guid]            $Resource_Guid
-    [PSCustomObject]  $Network
-    [Network]         $Resolved_Network
-    [PSCustomObject]  $ActionOrder
-    [PSCustomObject]  $Options
+    [string]$Name
+    [string]$Role 
+    [string]$Role_Short_Name
+    [string]$BaseConfig
+    [string]$Description
+    [int]$ResourceOrder
+    [string]$BaseConfigPath
+    [string]$RolePath
+    [string]$ConfigurationTargetPath
+    [Guid]$Resource_Guid
+    [PSCustomObject]$Network
+    [Network]$Resolved_Network
+    [PSCustomObject]$ActionOrder
+    [PSCustomObject]$Options
 
     # Initial creation of the resource
     Resource (
-        [String]          $Name,
-        [String]          $role_short_name,
-        [String]          $Role,
-        [String]          $BaseConfig,
-        [String]          $BaseConfigPath,
-        [String]          $Description,
-        [PSCustomObject]  $Network,
-        [PSCustomObject]  $ConfigCombo,
-        [PSCustomObject]  $Configuration,
-        [PSCustomObject]  $Options
+        [string]$Name,
+        [string]$role_short_name,
+        [string]$Role,
+        [string]$BaseConfig,
+        [string]$BaseConfigPath,
+        [string]$Description,
+        [PSCustomObject]$Network,
+        [PSCustomObject]$ConfigCombo,
+        [PSCustomObject]$Configuration,
+        [PSCustomObject]$Options
     ) {
         $This.Name                     = $Name
         $This.role_short_name          = $role_short_name
@@ -47,10 +47,10 @@ class Resource {
         $BuildTemplate = $Configuration.build.roles | Where-Object {
             $_.role -eq $Role
         }
-        if ($Null -eq $BuildTemplate) {
+        if ($null -eq $BuildTemplate) {
             throw "The Build does not contain a Role '$($This.Role)'"
         }
-        elseif ($BuildTemplate -is [Array]) {
+        elseif ($BuildTemplate -is [array]) {
             throw "The Build contains multiple Roles matching '$($This.Role)'"
         }
         # Get a copy of the Build Object. The Build is now instantiated by a Resource, 

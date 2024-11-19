@@ -28,7 +28,7 @@ function Set-DryADDrive {
 
         [Parameter(Mandatory, ParameterSetName = 'Local',
             HelpMessage = "For 'Local' sessions, specify the Domain Controller to use")]
-        [String] 
+        [string] 
         $DomainController
     )
 
@@ -56,7 +56,7 @@ function Set-DryADDrive {
                 Session = $PSSession
             }
         }
-        $return = $Null; $return = Invoke-Command @InvokeParams
+        $return = $null; $return = Invoke-Command @InvokeParams
 
         # Send every string in $Return[0] to Degug via Out-DryLog
         foreach ($ReturnString in $Return[0]) {
@@ -71,7 +71,7 @@ function Set-DryADDrive {
         else {
             ol f 'AD Drive Not Configured'
             ol w "Failed to set AD Drive to target Domain Controller"
-            if ($Null -ne $Return[2]) {
+            if ($null -ne $Return[2]) {
                 throw ($Return[2]).ToString()
             } 
             else {

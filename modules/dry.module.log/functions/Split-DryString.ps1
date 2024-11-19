@@ -23,21 +23,21 @@ function Split-DryString {
     param (
         [Parameter(Mandatory,HelpMessage="The string to split into chunks of a certain maximum length")]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [string]
         $String,
 
         [Parameter(Mandatory,HelpMessage="The function will split `$String into an array of strings, or
         chunks, of maximum length `$Length. They may be shorter - see description of paramameter
         `$WhiteSpaceAtEndChars below")]
         [ValidateScript({"$_ -gt 1"})]
-        [Int]
+        [int]
         $Length,
 
         [Parameter(HelpMessage="In order not to split a sentence in the middle of a word, the function
         will search the last 10 (or, the number of `$WhiteSpaceAtEndChars) chars, of each chunk, for a
         whitespace. If a whitespace is found within those chars, it will split at the whitespace instead
         of exactly at `$Length")]
-        [Int]
+        [int]
         $WhiteSpaceAtEndChars = 10
     )
 
