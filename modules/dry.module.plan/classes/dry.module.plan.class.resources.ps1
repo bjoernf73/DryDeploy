@@ -223,8 +223,9 @@ class Resources {
                         $GetDryInputParams = @{
                             Prompt        = "Enter name of the resource"
                             #Description   = "If you see a list above, they are names and corresponding roles of resources specified in your current environment config. If the list is empty, you probably clickops eveything, don't you? If you do see some names there, they are only listed here to inspire you to make the slightest effort to approximate the current naming convention used in your environment. If no such convention is obvious, well...that's on you."
-                            FailedMessage = "You need to enter a name for your resource"
-                            ValidateScript = {param($DryInput); (($DryInput -ne '') -and ($null -ne $DryInput))}
+                            #! the input should be an array of validatescripts and error messages, so that each can be validated, and the appropriate error message displayed
+                            FailedMessage = "The name should not be an FQDN ('.' in name is not allowed)"
+                            ValidateScript = {param($DryInput); (($DryInput -ne '') -and ($null -ne $DryInput) -and ($DryInput -notmatch "\."))}
                         }
                         [string]$sResourceName = Get-DryInput @GetDryInputParams
                         if (!($sResourceName)) {

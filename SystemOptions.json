@@ -37,6 +37,10 @@
                         {
                             "Name": "GPRegistryPolicyParser",
                             "MinimumVersion": "1.0.0"
+                        },
+                        {
+                            "Name": "powershell-yaml",
+                            "MinimumVersion": "0.4.7"
                         }
                     ]
                 },
