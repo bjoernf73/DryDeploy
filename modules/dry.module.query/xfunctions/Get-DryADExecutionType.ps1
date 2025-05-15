@@ -46,13 +46,25 @@ function Get-DryAdExecutionType {
     }
     
     try {
+        if($PSVersionTable.PSEdition -eq 'Core'){
+            if($PSVersionTable.Platform -ne 'Win32NT'){
+                ol v "Running on non-Windows - returning 'Remote'"
+                return 'Remote'
+            }
+        }
+                
+        $LocalPrereqs['DomainComputer'] = $false
+        $LocalPrereqs['DomainComputerInTargetDomain'] = $false
+        $LocalPrereqs['ADModuleInstalled'] = $false
+        $LocalPrereqs['GPOModuleInstalled'] = $false
+       
         # Test: If executing system is in a domain and that domain is our target
-        if ((Get-WmiObject -Class Win32_ComputerSystem -ErrorAction SilentlyContinue).PartOfDomain) {
+        if ((Get-CimInstance -Class Win32_ComputerSystem -ErrorAction SilentlyContinue).PartOfDomain) {
             $LocalPrereqs['DomainComputer'] = $true
         }
 
         # Test: If executing system is in target domain
-        if ((Get-WmiObject -Class Win32_ComputerSystem -ErrorAction SilentlyContinue).Domain -eq $Configuration.CoreConfig.network.domain.domain_fqdn) {
+        if ((Get-CimInstance -Class Win32_ComputerSystem -ErrorAction SilentlyContinue).Domain -eq $Configuration.CoreConfig.network.domain.domain_fqdn) {
             $LocalPrereqs['DomainComputerInTargetDomain'] = $true
         }
 
@@ -69,14 +81,12 @@ function Get-DryAdExecutionType {
         ol v -hash $LocalPrereqs
 
         # Loop through all
-        $ExecutionType = 'Local'
         $LocalPrereqs.Keys | foreach-Object {
             if ($LocalPrereqs["$_"] -eq $false) {
-                $ExecutionType = 'Remote'
+                return 'Remote'
             }
         }
-        
-        $ExecutionType
+        return "Local"
     }
     catch {
         $PSCmdlet.ThrowTerminatingError($_)
