@@ -27,10 +27,13 @@
         Get-ADUser -Identity $Name -Server $Server | Out-Null
         $true
     }
-    Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-        $false
-    }
     catch {
-        $_
+        if($_.CategoryInfo.Reason -eq 'ADIdentityNotFoundException') {
+            # The Object does not exist
+            $false
+        }
+        else {
+            $_
+        }
     }
 }

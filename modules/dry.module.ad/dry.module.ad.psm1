@@ -1,4 +1,3 @@
-Using Module ActiveDirectory
 Using Namespace System.Management.Automation.Runspaces
 <#  
     This is an AD Config module for use with DryDeploy, or by itself.

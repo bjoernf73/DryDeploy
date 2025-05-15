@@ -32,10 +32,13 @@
         Get-ADGroup @GetADGroupParams | Out-Null
         $true
     }
-    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-        $false
-    }
     catch {
-        $_
+        if($_.CategoryInfo.Reason -eq 'ADIdentityNotFoundException') {
+            # The Object does not exist
+            $false
+        }
+        else {
+            $_
+        }
     }
 }

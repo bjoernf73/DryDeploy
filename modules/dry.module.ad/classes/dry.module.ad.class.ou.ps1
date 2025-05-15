@@ -1,5 +1,6 @@
-Using Module ActiveDirectory
 Using Namespace System.Management.Automation.Runspaces
+# removed: 
+# Using Module ActiveDirectory
 # dry.module.ad is an AD config module for use with DryDeploy, or by itself.
 #
 # Copyright (C) 2021  Bjørn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -165,12 +166,25 @@ Class OU {
                             # The Object exists already
                             $true
                         }
-                        Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-                            # The Object does not exist
-                            $false
-                        }
                         catch {
-                            $PSCmdlet.ThrowTerminatingError($_)
+                            if($_.CategoryInfo.Reason -eq 'ADIdentityNotFoundException') {
+                                # The Object does not exist
+                                $false
+                            }
+                            else {
+                                # The Object does not exist
+                                ol e "Error trying to get OU '$CurrentName' in parent '$CurrentParent'"
+                                ol e $_.Exception.Message
+                                ol e $_.InvocationInfo
+                                ol e $_.ScriptStackTrace
+                                ol e $_.ScriptName
+                                ol e $_.TargetObject
+                                ol e $_.FullyQualifiedErrorId
+                                ol e $_.ErrorRecord
+                                
+                                # Throw the error to the caller
+                                $PSCmdlet.ThrowTerminatingError($_)
+                            }
                         }
                     } 
 
