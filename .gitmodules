@@ -1,0 +1,3 @@
+[submodule "modules/dry.module.ad"]
+	path = modules/dry.module.ad
+	url = https://github.com/bjoernf73/dry.module.ad.git
