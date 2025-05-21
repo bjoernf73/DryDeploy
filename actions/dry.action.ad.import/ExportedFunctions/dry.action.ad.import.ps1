@@ -100,8 +100,6 @@ function dry.action.ad.import {
         $SetDryADConfigurationParams = @{
             Variables         = $Resolved.vars
             ConfigurationPath = $Resolved.ConfigSourcePath
-            ComputerName      = $Action.Resource.name
-            ADSite            = $Action.Resource.resolved_network.site
             DryDeploy         = $true
         }
         if ($ExecutionType -eq 'Remote') {
