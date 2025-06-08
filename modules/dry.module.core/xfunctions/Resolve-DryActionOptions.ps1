@@ -159,18 +159,10 @@ function Resolve-DryActionOptions {
             }
         }
 
-        <#
-        $Paths = New-Object -TypeName PSCustomObject
-        $Paths | Add-Member -MemberType NoteProperty -Name 'ConfigTargetPath' -Value $ConfigTargetPath
-        $Paths | Add-Member -MemberType NoteProperty -Name 'ConfigSourcePath' -Value $ConfigSourcePath
-        $Paths | Add-Member -MemberType NoteProperty -Name 'ModuleFilesSourcePath' -Value $ModuleFilesSourcePath
-        $Paths | Add-Member -MemberType NoteProperty -Name 'RoleFilesSourcePath' -Value $RoleFilesSourcePath
-        $Paths | Add-Member -MemberType NoteProperty -Name 'ActionFilesSourcePath' -Value $ActionFilesSourcePath
-        $Paths | Add-Member -MemberType NoteProperty -Name 'PhaseFilesSourcePath' -Value $PhaseFilesSourcePath
-        $Paths | Add-Member -MemberType NoteProperty -Name 'TypeFilesSourcePath' -Value $TypeFilesSourcePath
-        #>
+        # for actions run in wsl, convert the path to it's wsl equivalent
+        $WslConfigSourcePath = ('/mnt/' + $ConfigSourcePath.substring(0,1).tolower() +  $($ConfigSourcePath.substring(2) -replace '\\','/')) -replace '//','/'
+        $WslConfigTargetPath = ('/mnt/' + $ConfigTargetPath.substring(0,1).tolower() +  $($ConfigTargetPath.substring(2) -replace '\\','/')) -replace '//','/'
 
-        # fjernet herfra, lagt nederst 
 
         if ($TypeMetaConfig.target_expression) {
             [string]$Target = Invoke-Expression -Command $TypeMetaConfig.target_expression 
@@ -188,7 +180,9 @@ function Resolve-DryActionOptions {
         $OptionsObject = New-Object -TypeName PSCustomObject
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ActionType' -Value $ActionType
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ConfigTargetPath' -Value $ConfigTargetPath
+        $OptionsObject | Add-Member -MemberType NoteProperty -Name 'WslConfigTargetPath' -Value $WslConfigTargetPath
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ConfigSourcePath' -Value $ConfigSourcePath
+        $OptionsObject | Add-Member -MemberType NoteProperty -Name 'WslConfigSourcePath' -Value $WslConfigSourcePath
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'Credentials' -Value $Credentials
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'Target' -Value $Target
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'RoleTargetRootPath' -Value $RoleTargetRootPath

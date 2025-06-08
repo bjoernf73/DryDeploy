@@ -185,7 +185,12 @@ function dry.action.packer.run {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         ol i @('Packer Build',"& $PackerExe build $DisplayArguments")
         # ol i @('Packer Build',"& $PackerExe build $Arguments")
-        & $PackerExe build $Arguments
+        #& $PackerExe build $Arguments
+
+        # use one of these
+        wsl -d Ubuntu -- watch -n 1 ls
+        Start-Process wsl -ArgumentList "-d Ubuntu -- ansible-playbook " -NoNewWindow -Wait
+        
         if ($LastExitCode -ne 0) {
             throw "Packer Build failed: $LastExitCode" 
         }

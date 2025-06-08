@@ -1594,7 +1594,7 @@ finally {
     Get-Module | Where-Object { 
         ($_.Name -match "^dry\.action\.*") -or 
         ($_.Name -match "^dry\.module\.*")} | 
-    Remove-Module -Force
+    Remove-Module -Force -Verbose:$false
 
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
