@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function ConvertTo-DryHashtable {
+function ConvertTo-DryHashtable{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory,HelpMessage="The variables to convert. Only the 'name' and 'value' properties will be preserved
         in the returned hashtable")]
         [PSObject[]]$Variables,
@@ -34,29 +34,29 @@ function ConvertTo-DryHashtable {
         'secret' equals true will be included in the returned hashtable")]
         [Switch]$OnlySecrets
     )
-    try {
+    try{
         $PRIVATE:PrivateVariablesHash = $null
-        $PRIVATE:PrivateVariablesHash = [HashTable]::New()
-        foreach ($Var in $Variables) {
-            if ($NotSecrets) {
-                if ($Var.Secret -ne $true) {
+        $PRIVATE:PrivateVariablesHash = [hashtable]::New()
+        foreach($Var in $Variables){
+            if($NotSecrets){
+                if($Var.Secret -ne $true){
                     $PRIVATE:PrivateVariablesHash += @{$Var.Name = $Var.Value}
                 }
             }
-            elseif ($OnlySecrets) {
-                if ($Var.Secret -eq $true) {
+            elseif($OnlySecrets){
+                if($Var.Secret -eq $true){
                     $PRIVATE:PrivateVariablesHash += @{$Var.Name = $Var.Value}
                 }
             }
-            else {
+            else{
                 $PRIVATE:PrivateVariablesHash += @{$Var.Name = $Var.Value}
             }
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
     }
     $PrivateVariablesHash
 }

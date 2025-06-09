@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Wait-DryWinRM {
+function Wait-DryWinRM{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(HelpMessage="IP-address")]
         [string]$IP,
 
@@ -49,17 +49,17 @@ function Wait-DryWinRM {
         [Parameter()]
         [PSObject]$SessionConfig
     )
-    if ($IP) {
+    if($IP){
         $Address = $IP
     } 
-    else {
+    else{
         $Address = $ComputerName
     }
     $StartTime = Get-Date
     
     # if, for instance, a restart is required in the midst of all of this, the function may
     # return true too early, so we sleep a specified number of seconds before checking 
-    for ($Timer = 1; $Timer -lt $SecondsToWaitBeforeStart; $Timer++) {
+    for ($Timer = 1; $Timer -lt $SecondsToWaitBeforeStart; $Timer++){
         $WriteProgressParameters = @{
             Activity        = "[$Address`:$Port]: Waiting for WinRM interface"
             Status          = "Waiting $($SecondsToWaitBeforeStart-$Timer) seconds before starting"
@@ -76,7 +76,7 @@ function Wait-DryWinRM {
     [bool]$WinRMUp = $false
     [bool]$PortUp = $false
 
-    do {
+    do{
         $ProgressTotalTime = [int]((New-TimeSpan -Start $StartTime -End $TargetTime).TotalSeconds)
         $ProgressTimeLeft = [int]((New-TimeSpan -Start (Get-Date) -end $TargetTime).TotalSeconds)
         $WriteProgressParameters = @{
@@ -86,9 +86,9 @@ function Wait-DryWinRM {
         }   
         Write-Progress @WriteProgressParameters    
         
-        if ((Test-DryUtilsPort -Port $Port -ComputerName $Address -ErrorAction SilentlyContinue).Open -eq $true) {
+        if((Test-DryUtilsPort -Port $Port -ComputerName $Address -ErrorAction SilentlyContinue).Open -eq $true){
             $PortUp = $true
-            do {
+            do{
                 $StartInPSSessionParams = @{
                     Command       = 'Write-Output'
                     Arguments     = @{'InputObject'='hei'}
@@ -98,15 +98,15 @@ function Wait-DryWinRM {
                     IgnoreErrors  = $true
                 } 
                 $ReturnValue = Invoke-DryInPSSession @StartInPSSessionParams 
-                if ($ReturnValue -eq 'hei') {
+                if($ReturnValue -eq 'hei'){
                     $WinRMUp = $true
                     Write-Progress -Completed -Activity "[$Address`:$Port]: Waiting for WinRM interface"
                 }
-                else {
+                else{
                     $NowTime = Get-date 
                     $Span = [int]((New-TimeSpan -Start $StartTime -End $NowTime).TotalSeconds)
                     
-                    if ($NowTime -lt $TargetTime) {
+                    if($NowTime -lt $TargetTime){
                 
                         ol i "Still waiting for WinRM","$Span of $ProgressTotalTime seconds"
                         $ProgressTimeLeft = [int]((New-TimeSpan -Start (Get-Date) -end $TargetTime).TotalSeconds)
@@ -125,24 +125,24 @@ function Wait-DryWinRM {
                 ((Get-Date) -lt $TargetTime)
             )
         }
-        else {
+        else{
             $NowTime = Get-date 
             $Span = [int]((New-TimeSpan -Start $StartTime -End $NowTime).TotalSeconds)
             
-            if ($(Get-Date) -lt $TargetTime) {
+            if($(Get-Date) -lt $TargetTime){
                 ol i "Still waiting for WinRM","$Span of $ProgressTotalTime seconds"
                 Start-Sleep -Seconds $SecondsToWaitBetweenTries
             }
-            else {
+            else{
                 Write-Progress -Completed -Activity "[$Address`:$Port]: Waiting for WinRM interface"
             }
         } 
     }
     while (  ($portUp -eq $false)  -and ((Get-Date) -lt $TargetTime) )
     
-    switch ($WinRMUp) {
-        $true { ol i "WinRM status","UP" }
-        $false { ol i "WinRM status","DOWN"}
+    switch($WinRMUp){
+        $true{ ol i "WinRM status","UP" }
+        $false{ ol i "WinRM status","DOWN"}
     }
     return $WinRMUp
 }

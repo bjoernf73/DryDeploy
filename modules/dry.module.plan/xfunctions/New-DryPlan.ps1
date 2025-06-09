@@ -20,9 +20,9 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function New-DryPlan {
+function New-DryPlan{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [string]
         $ResourcesFile,
@@ -44,27 +44,27 @@ function New-DryPlan {
         $ConfigCombo,
 
         [Parameter()]
-        [Array]
+        [array]
         $ResourceNames,
 
         [Parameter()]
-        [Array]
+        [array]
         $ExcludeResourceNames,
 
         [Parameter()]
-        [Array]
+        [array]
         $RoleNames,
 
         [Parameter()]
-        [Array]
+        [array]
         $ExcludeRoleNames,
 
         [Parameter()]
-        [Array] 
+        [array] 
         $ActionNames,
 
         [Parameter()]
-        [Array]
+        [array]
         $ExcludeActionNames,
 
         [Parameter()]
@@ -90,10 +90,10 @@ function New-DryPlan {
     $Plan = [Plan]::New($Resources)
     $PlanFilter = [PlanFilter]::New($ResourceNames,$ExcludeResourceNames,$RoleNames,$ExcludeRoleNames,$ActionNames,$ExcludeActionNames,$Phases,$ExcludePhases,$BuildSteps,$ExcludeBuildSteps)
     $Plan.Actions.foreach({
-        if ($PlanFilter.InFilter($_.ResourceName,$_.Role,$_.Action,$_.Phase,$_.ActionOrder)) {
+        if($PlanFilter.InFilter($_.ResourceName,$_.Role,$_.Action,$_.Phase,$_.ActionOrder)){
             $_.PlanSelected = $true
         }
-        else {
+        else{
             $_.PlanSelected = $false
         }
         # However, always set applyselected to false

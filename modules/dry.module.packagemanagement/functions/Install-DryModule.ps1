@@ -22,17 +22,17 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Install-DryModule { 
+function Install-DryModule{ 
     [CmdLetBinding()]
     
-    param (
+    param(
         [Parameter(Mandatory,ValueFromPipeline,HelpMessage="The module to install")]
         [PSObject]$Module
     )
 
-    try {
+    try{
         $NugetScope = 'CurrentUser'
-        if ($Module.scope) {
+        if($Module.scope){
             $NugetScope = $Module.scope
         }
         $InstallModuleParams = @{
@@ -42,40 +42,40 @@ function Install-DryModule {
             ErrorAction = 'Stop'
         }
 
-        if ($Module.allowclobber) {
+        if($Module.allowclobber){
             $InstallModuleParams += @{
                 AllowClobber = $Module.AllowClobber
             }
         }
 
-        if ($Module.repository) {
+        if($Module.repository){
             $InstallModuleParams += @{
                 Repository = $Module.repository
             }
         }
         
-        if ($Module.minimumversion) {
+        if($Module.minimumversion){
             $InstallModuleParams += @{
                 MinimumVersion = $Module.minimumversion
             }
         }
-        elseif ($Module.requiredversion) {
+        elseif($Module.requiredversion){
             $InstallModuleParams += @{
                 RequiredVersion = $Module.requiredversion
             }
         }
-        elseif ($Module.maximumversion) {
+        elseif($Module.maximumversion){
             $InstallModuleParams += @{
                 MaximumVersion = $Module.maximumversion
             }
         }
 
         $ExistingModule = Get-Module -Name $Module.name -ListAvailable -ErrorAction Ignore
-        if ($ExistingModule) {
-            if ($Module.minimumversion) {
-                if ($ExistingModule.Version -lt $Module.minimumversion) {
-                    if ($Module.scope -eq 'AllUsers') {
-                        if (-not (Test-DryElevated)) {
+        if($ExistingModule){
+            if($Module.minimumversion){
+                if($ExistingModule.Version -lt $Module.minimumversion){
+                    if($Module.scope -eq 'AllUsers'){
+                        if(-not (Test-DryElevated)){
                             throw "Some Nuget Modules must be installed in the 'AllUsers' scope - run elevated (Run as Administrator)"
                         }
                     }
@@ -87,31 +87,31 @@ function Install-DryModule {
                     Update-Module @UpdateModuleParams
                 }
             }
-            elseif ($Module.maximumversion) {
-                if ($ExistingModule.Version -gt $Module.maximumversion) {
+            elseif($Module.maximumversion){
+                if($ExistingModule.Version -gt $Module.maximumversion){
                     # don't bother with this
                     ol w "The installed module '$($module.name) (version: $($ExistingModule.version))' must be manually uninstalled. You need the lower version $($module.version) instead"
                     throw "The installed module '$($module.name) (version: $($ExistingModule.version))' must be manually uninstalled. You need the lower version $($module.version) instead"
                 }
             }
-            elseif ($module.requiredversion) {
-                if ($ExistingModule.Version -ne $Module.requiredversion) {
+            elseif($module.requiredversion){
+                if($ExistingModule.Version -ne $Module.requiredversion){
                     # don't bother with this
                     ol w "The installed module '$($module.name) (version: $($ExistingModule.version))' must be manually uninstalled. You need required version $($module.version) instead"
                     throw "The installed module '$($module.name) (version: $($ExistingModule.version))' must be manually uninstalled. You need required version $($module.version) instead"
                 }
             }
         }
-        else {
-            if ($Module.scope -eq 'AllUsers') {
-                if (-not (Test-DryElevated)) {
+        else{
+            if($Module.scope -eq 'AllUsers'){
+                if(-not (Test-DryElevated)){
                     throw "Some Nuget Modules must be installed in the 'AllUsers' scope - run elevated (Run as Administrator)"
                 }
             }
             Install-Module @InstallModuleParams 
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

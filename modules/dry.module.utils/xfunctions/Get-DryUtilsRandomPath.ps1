@@ -19,11 +19,11 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Get-DryUtilsRandomPath {
+function Get-DryUtilsRandomPath{
     [CmdLetBinding()]
     [OutputType([System.String])]
     
-    param (
+    param(
         [Parameter(HelpMessage="Length of the file or folder name, minus extension")]
         [int]$Length,
 
@@ -34,29 +34,29 @@ function Get-DryUtilsRandomPath {
         [string]$Extension
     )
 
-    try {
-        if (-not $Length) {
+    try{
+        if(-not $Length){
             [int]$Length = 25
         }
-        if ($Extension) {
+        if($Extension){
             $Extension = $Extension.TrimStart('.')
         }
-        if ($Path) {
+        if($Path){
             $Path = Resolve-DryUtilsFullPath -Path $Path -OutputType 'String' -Force
         }
-        else {
+        else{
             $Path = Resolve-DryUtilsFullPath -Path $env:TEMP -OutputType 'String'
         }
         $RandomString = New-DryUtilsRandomHex -Length $Length
-        if ($Extension) {
+        if($Extension){
             $RandomString = $RandomString + '.' + $Extension
         }
         return [string](Join-Path -Path $Path -ChildPath $RandomString)
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
       $Path = $null
       $RandomString = $null
       $Extension = $null

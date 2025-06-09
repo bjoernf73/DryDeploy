@@ -17,9 +17,9 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-function Get-DryDomainDN {
+function Get-DryDomainDN{
     [CmdletBinding()]  
-    param (
+    param(
         [Parameter(Mandatory)]
         [psobject]$Configuration,
 
@@ -29,18 +29,18 @@ function Get-DryDomainDN {
         [Parameter()]
         [switch]$ConfigurationDN
     )
-    try {
+    try{
         $DomainFQDN = $Configuration.CoreConfig.network.domain.domain_fqdn
         $DomainDN = ConvertTo-DryUtilsDomainDN -DomainFQDN $DomainFQDN
-        if ($ConfigurationDN -or $SchemaDN) {
+        if($ConfigurationDN -or $SchemaDN){
             $DomainDN = "CN=Configuration,$DomainDN"
         }
-        if ($SchemaDN) {
+        if($SchemaDN){
             $DomainDN = "CN=Schema,$DomainDN"
         }
         $DomainDN
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

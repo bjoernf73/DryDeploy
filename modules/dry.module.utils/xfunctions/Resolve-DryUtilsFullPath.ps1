@@ -19,11 +19,11 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Resolve-DryUtilsFullPath {
+function Resolve-DryUtilsFullPath{
     [CmdLetBinding()]
     [OutputType([System.String],[System.Management.Automation.PathInfo],[System.IO.FileInfo],[System.IO.DirectoryInfo])]
     
-    param (
+    param(
         [Parameter(Mandatory,HelpMessage="Releative or absolute path of any kind")]
         [ValidateNotNullOrEmpty()]
         [string]$Path,
@@ -35,52 +35,52 @@ function Resolve-DryUtilsFullPath {
         [Parameter(HelpMessage="Ensures the path is resolved and returned as a string even though the item doesn't exist")]
         [Switch]$Force
     )
-    try {
-        if (-not $OutputType) {
+    try{
+        if(-not $OutputType){
             $OutputType = 'String'
         }
-        try {
+        try{
             [System.Management.Automation.PathInfo]$PathInfo = Resolve-Path -Path $Path -ErrorAction Stop
-            try {
-                switch ($OutputType) {
-                    'PathInfo' {
+            try{
+                switch($OutputType){
+                    'PathInfo'{
                         [System.Management.Automation.PathInfo]$FullPath = $PathInfo
                     }
-                    'FileInfo' {
+                    'FileInfo'{
                         [System.IO.FileInfo]$FullPath = Get-Item -Path $PathInfo -ErrorAction Stop
                     }
-                    'DirectoryInfo' {
+                    'DirectoryInfo'{
                         [System.IO.DirectoryInfo]$FullPath = Get-Item -Path $PathInfo -ErrorAction  Stop
                     }
-                    default {
+                    default{
                         [System.String]$FullPath = $PathInfo.Path
                     }
                 }
             }
-            catch {
+            catch{
                 $PSCmdlet.ThrowTerminatingError($_)
             }
         }
-        catch [System.Management.Automation.ItemNotFoundException] {
-            if ($Force) {
+        catch [System.Management.Automation.ItemNotFoundException]{
+            if($Force){
                 [string]$FullPath = $_.TargetObject
-                if ($OutputType -ne 'String') {
+                if($OutputType -ne 'String'){
                     throw "The path '$FullPath' does not exist, and cannot be converted to '$OutputType'"
                 }
             }
-            else {
+            else{
                 $PSCmdlet.ThrowTerminatingError($_)
             }
         }
-        catch {
+        catch{
             $PSCmdlet.ThrowTerminatingError($_)
         }
         return $FullPath
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
         $PathInfo = $null
         $FullPath = $null
     }

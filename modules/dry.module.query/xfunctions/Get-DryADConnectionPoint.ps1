@@ -49,9 +49,9 @@ Get-DryDC @params -DomainFQDN -NoPing
 Return's DomainFQDN of the DC at the $Resource's site, if there 
 is one, even though it's down (unpingable)
 #>
-function Get-DryADConnectionPoint {
+function Get-DryADConnectionPoint{
     [CmdLetBinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [PSObject]$Configuration,
 
@@ -69,62 +69,62 @@ function Get-DryADConnectionPoint {
         [Switch]$NoValidate
     )
     
-    try {
-        if ($null -ne $Resource.network.site) {
-            $Site = $Configuration.CoreConfig.network.sites | Where-Object {
+    try{
+        if($null -ne $Resource.network.site){
+            $Site = $Configuration.CoreConfig.network.sites | Where-Object{
                 $_.name -eq "$($Resource.network.site)"
             }
-            if ($null -eq $Site) {
+            if($null -eq $Site){
                 throw "Unable to find site object matching name $($Resource.network.site)"
             }
-            elseif ($Site -is [array]) {
+            elseif($Site -is [array]){
                 throw "Multiple references to site $($Resource.network.site) in `$Configuration.CoreConfig.network"
             }
 
             $ADConnectionPoints = $Site.active_directory_connection_points
 
-            if ($null -eq $ADConnectionPoints) {
+            if($null -eq $ADConnectionPoints){
                 ol w "The site $($Site.name) does not contain any entries in it's active_directory_connection_points property.`
                 Make sure one or multiple IP's is defined as connection point for each site"
                 throw "The site $($Site.name) does not contain any entries in it's active_directory_connection_points property"
             }
-            elseif ($ADConnectionPoints -isnot [array]) {
+            elseif($ADConnectionPoints -isnot [array]){
                 ol w "The site $($Site.name) does not contain an array of entries in it's active_directory_connection_points property.`
                 Make sure an array of one or multiple IP's is defined as connection point for each site"
                 throw "The site $($Site.name) does not contain an array of entries in it's active_directory_connection_points property"
             }
 
-            $SessionConfig = $Configuration.CoreConfig.connections | Where-Object { $_.type -eq 'winrm'}
+            $SessionConfig = $Configuration.CoreConfig.connections | Where-Object{ $_.type -eq 'winrm'}
 
             [Bool]$ConnectionPointVerified = $false
             $PRIVATE:count = 0
-            do {
-                try {
-                    if ($NoValidate) {
+            do{
+                try{
+                    if($NoValidate){
                         $ConnectionPointVerified = $true
                         $ADConnectionPoint = $ADConnectionPoints[$PRIVATE:count]
                     }
-                    else {
-                        if ($ExecutionType -eq 'Remote') {
+                    else{
+                        if($ExecutionType -eq 'Remote'){
                             # test remoting
-                            if (Test-DryWinrm -ComputerName $ADConnectionPoints[$PRIVATE:count] -Credential $Credential -SessionConfig $SessionConfig) {
+                            if(Test-DryWinrm -ComputerName $ADConnectionPoints[$PRIVATE:count] -Credential $Credential -SessionConfig $SessionConfig){
                                 $ConnectionPointVerified = $true
                                 $ADConnectionPoint = $ADConnectionPoints[$PRIVATE:count]
                             }
                         }
-                        else {
+                        else{
                             # don't test remoting
-                            if (Test-Connection -ComputerName $ADConnectionPoints[$PRIVATE:count] -Count 2 -ErrorAction Ignore ) {
+                            if(Test-Connection -ComputerName $ADConnectionPoints[$PRIVATE:count] -Count 2 -ErrorAction Ignore ){
                                 $ConnectionPointVerified = $true
                                 $ADConnectionPoint = $ADConnectionPoints[$PRIVATE:count]
                             }
                         }
                     } 
                 }
-                catch {
+                catch{
                     $PSCmdlet.ThrowTerminatingError($_)
                 }
-                finally {
+                finally{
                     $PRIVATE:count++
                 }
             }
@@ -133,14 +133,14 @@ function Get-DryADConnectionPoint {
                 ($PRIVATE:count -lt $ADConnectionPoints.count)
             )
         }
-        else {
+        else{
             ol v "The Resource $($Resource.name) does specify a site-property - PDC Emulator will be returned"
             $ADConnectionPoint = $Configuration.CoreConfig.network.pdc_emulator
         }
         ol i "Resolved AD Connection Point","$ADConnectionPoint"
         return $ADConnectionPoint
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

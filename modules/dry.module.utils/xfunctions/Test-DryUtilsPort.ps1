@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Test-DryUtilsPort {
+function Test-DryUtilsPort{
     [Cmdletbinding()]
-    param (  
+    param(  
         [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [string[]]$ComputerName,
 
@@ -41,9 +41,9 @@ function Test-DryUtilsPort {
         [Switch]$Udp
     )
 
-    Begin {  
-        if ((-not $Tcp) -and 
-            (-not $Udp)) {
+    Begin{  
+        if((-not $Tcp) -and 
+            (-not $Udp)){
             $Tcp = $true
         }
         #Typically you never do this, but in this case I felt it was for the benefit of the function  
@@ -53,21 +53,21 @@ function Test-DryUtilsPort {
         $StopWatch               = New-Object System.Diagnostics.Stopwatch
     }
 
-    Process {
-        foreach ($Computer in $ComputerName) {
-            for ($i = 0; $i -lt $Count; $i++) {
+    Process{
+        foreach($Computer in $ComputerName){
+            for ($i = 0; $i -lt $Count; $i++){
                 $Result          = New-Object PSObject | Select-Object Server, Port, TypePort, Open, Notes, ResponseTime
                 $Result.Server   = $Computer
                 $Result.Port     = $Port
                 $Result.TypePort = 'TCP'
 
-                if ($Tcp) {
+                if($Tcp){
                     $TcpClient   = New-Object System.Net.Sockets.TcpClient
                     $StopWatch.Start()
                     $Connect     = $TcpClient.BeginConnect($Computer, $Port, $null, $null)
                     $Wait        = $Connect.AsyncWaitHandle.WaitOne($TcpTimeout, $false)
                     
-                    if (-not $Wait) {
+                    if(-not $Wait){
                         $TcpClient.Close()
                         $StopWatch.Stop()
                         ol v "$($Computer): Connection Timeout"
@@ -76,7 +76,7 @@ function Test-DryUtilsPort {
                         $Result.Notes = 'Connection to Port Timed Out'
                         $Result.ResponseTime = $StopWatch.ElapsedMilliseconds
                     }
-                    else {
+                    else{
                         [void]$TcpClient.EndConnect($Connect)
                         $TcpClient.Close()
                         $StopWatch.Stop()
@@ -85,7 +85,7 @@ function Test-DryUtilsPort {
                     }
                     $Result.ResponseTime = $StopWatch.ElapsedMilliseconds
                 }
-                if ($Udp) {
+                if($Udp){
                     $UdpClient = New-Object System.Net.Sockets.UdpClient
                     $UdpClient.Client.ReceiveTimeout = $UdpTimeout
 
@@ -104,7 +104,7 @@ function Test-DryUtilsPort {
                     ol v "$($Computer): Creating remote endpoint"
                     $RemoteEndpoint = New-Object System.Net.IPEndPoint([System.Net.IPAddress]::Any, 0)
 
-                    try {
+                    try{
                         ol v "$($Computer): Waiting for message return"
                         $ReceiveBytes = $UdpClient.Receive([ref]$RemoteEndpoint)
                         $StopWatch.Stop()
@@ -115,12 +115,12 @@ function Test-DryUtilsPort {
                         $Result.Open  = $true
                         $Result.Notes = $ReturnedData
                     }
-                    catch {
+                    catch{
                         ol v "$($Computer): Host maybe unavailable"
                         $Result.Open  = $false
                         $Result.Notes = 'Unable to verify if port is open or if host is unavailable.'
                     }
-                    finally {
+                    finally{
                         $UdpClient.Close()
                         $Result.ResponseTime = $StopWatch.ElapsedMilliseconds
                     }
@@ -131,7 +131,7 @@ function Test-DryUtilsPort {
             }
         }
     }
-    End {
+    End{
         $Report 
     }
 }

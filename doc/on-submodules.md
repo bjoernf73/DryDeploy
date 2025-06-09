@@ -27,7 +27,7 @@ git submodule update --init --remote --merge
 ```powershell
 $ToRemoves = @('windows-2019-core','windows-2019-desktop','windows-2022-core','windows-2022-desktop')
 # The submodules are located in the BaseConfig folder at root
-foreach ($ToRemove in $ToRemoves) {
+foreach($ToRemove in $ToRemoves){
     git submodule deinit -f BaseConfig/$ToRemove
     rmdir .git/modules/BaseConfig/$ToRemove -Recurse -Force
     git rm -f BaseConfig/$ToRemove

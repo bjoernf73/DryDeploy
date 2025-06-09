@@ -20,9 +20,9 @@
 #>
 
 
-function ConvertTo-DryUtilsCase {
+function ConvertTo-DryUtilsCase{
     [CmdLetBinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [AllowEmptyString()]
         [string]$Name,
@@ -31,31 +31,31 @@ function ConvertTo-DryUtilsCase {
         [Parameter(Mandatory)]
         [string]$Case 
     )
-    if ($Case -eq 'capitalize') { $Case = 'capitalized' }
+    if($Case -eq 'capitalize'){ $Case = 'capitalized' }
    
-    function PRIVATE:Capitalize-String {
+    function PRIVATE:Capitalize-String{
         [CmdLetBinding()]
-        param (
+        param(
             [Parameter(Mandatory)]
             [AllowEmptyString()]
             [string]$Name
         )
         $Name = $Name.Trim()
 
-        if ($Name.length -le 1) {
+        if($Name.length -le 1){
             return $Name.ToUppper()
         } 
-        elseif ($Name -match ' ') {
+        elseif($Name -match ' '){
             $Parts = $Name.split(' ')
             [string]$AccumulatedParts = ''
-            foreach ($Part in $Parts) {
+            foreach($Part in $Parts){
                 $UpperCasePart = ($Part.SubString(0,1)).ToUpper()
                 $LowerCasePart = ($Part.Substring(1,($Part.length-1))).ToLower()
                 $AccumulatedParts += $UpperCasePart + $LowerCasePart + ' '
             }
             return $AccumulatedParts.Trim()
         } 
-        else {
+        else{
             $UpperCasePart = ($Name.SubString(0,1)).ToUpper()
             $LowerCasePart = ($Name.Substring(1,($Name.length-1))).ToLower()
             $ReturnString = $UpperCasePart + $LowerCasePart
@@ -63,22 +63,22 @@ function ConvertTo-DryUtilsCase {
         }        
     }
     
-    switch ($Case) {
-        'ignore' {
+    switch($Case){
+        'ignore'{
             $ReturnValue = $Name
         }
-        'upper' {
+        'upper'{
             $ReturnValue = $Name.ToUpper()
         }
-        'lower' {
+        'lower'{
             $ReturnValue = $Name.ToLower()
         }
-        'capitalized' {
+        'capitalized'{
             # If dN, split, and capitalize each part
-            if (($Name -match "OU=") -or ($Name -match "CN=") -or ($Name -match "DC=")) {
+            if(($Name -match "OU=") -or ($Name -match "CN=") -or ($Name -match "DC=")){
                 [string]$AccumulatedStringValue = ''
                 $NameParts = @($Name.Split(','))
-                foreach ($Part in $NameParts) {
+                foreach($Part in $NameParts){
                     $Delimter = $Part.SubString(0,3)
                     $Namepart = $Part.SubString(3,($Part.length-3))
                     $Namepart = Capitalize-String -Name $NamePart
@@ -86,7 +86,7 @@ function ConvertTo-DryUtilsCase {
                 }
                 $ReturnValue = $AccumulatedStringValue.TrimEnd(',')
             } 
-            else {
+            else{
                 $ReturnValue = Capitalize-String -Name $Name
             }
         }

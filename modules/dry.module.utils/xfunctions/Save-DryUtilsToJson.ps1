@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Save-DryUtilsToJson {
+function Save-DryUtilsToJson{
     [cmdletbinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [string]$Path,
 
@@ -39,12 +39,12 @@ function Save-DryUtilsToJson {
         [Switch]$Force
     )
 
-    try {
+    try{
         $InputObject | 
         ConvertTo-Json -Depth $Depth -ErrorAction Stop |
         Out-File -FilePath $Path -Encoding $Encoding -ErrorAction Stop -Force:$Force
     }
-    catch {
+    catch{
         ol w @('Unable to save to',"$Path")
         $PSCmdlet.ThrowTerminatingError($_)
     }

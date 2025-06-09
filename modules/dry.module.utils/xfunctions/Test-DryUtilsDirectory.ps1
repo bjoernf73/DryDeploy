@@ -58,8 +58,8 @@ Test-DryUtilsDirectory -Path 'c:\test' -Exist
 If the directory exists, the test passes. If it does not,
 the test failes
 #>
-function Test-DryUtilsDirectory {
-    param (
+function Test-DryUtilsDirectory{
+    param(
         [Parameter(Mandatory)]
         [System.IO.DirectoryInfo]$Path,
 
@@ -78,61 +78,61 @@ function Test-DryUtilsDirectory {
         [Switch]$Create
     )
     
-    try {
+    try{
         $Validated = $false
         
-        if ($EmptyOrNotExist) {
+        if($EmptyOrNotExist){
             # Will pass if the directory does not exist, or if it exists and is empty
-            if (-not (Test-Path -Path $Path -ErrorAction Ignore)) {
+            if(-not (Test-Path -Path $Path -ErrorAction Ignore)){
                 $Validated = $true
             }
-            elseif (
+            elseif(
                 (Test-Path -Path $Path -ErrorAction Ignore) -and
                 ((Get-Item -Path $Path).PSisContainer -eq $true) -and
                 ($null -eq (Get-ChildItem -Path $Path ))
-            ) {
+            ){
                 $Validated = $true
             }
 
-            if ($Validated -eq $false) {
+            if($Validated -eq $false){
                 throw "Could not validate test on '$Path'"
             }
         }
 
-        if ($NotExist) {
+        if($NotExist){
             # Will pass if the directory does not exist
-            if (-not (Test-Path -Path $Path -ErrorAction Ignore)) {
+            if(-not (Test-Path -Path $Path -ErrorAction Ignore)){
                 $Validated = $true
             }
 
-            if ($Validated -eq $false) {
+            if($Validated -eq $false){
                 throw "Could not validate test on '$Path'"
             }
         }
 
-        if ($Exist) {
+        if($Exist){
             # Will pass if the directory exists
-            if (
+            if(
                 (Test-Path -Path $Path -ErrorAction Ignore) -and 
                 ((Get-Item -Path $Path).PSisContainer -eq $true)
-            ) {
+            ){
                 $Validated = $true
             }
 
-            if ($Validated -eq $false) {
+            if($Validated -eq $false){
                 throw "Could not validate test on '$Path'"
             }
         }
 
         # Post actions
-        if ($Create) {
-            if (-not (Test-Path -Path $Path -ErrorAction Ignore)) {
+        if($Create){
+            if(-not (Test-Path -Path $Path -ErrorAction Ignore)){
                 New-Item -Path $Path -ItemType Directory -ErrorAction Stop |
                 Out-Null
             }
         }
     }
-    catch {
+    catch{
         ol w "The test(s) on directory '$Path' failed"
         $PSCmdlet.ThrowTerminatingError($_)
     }

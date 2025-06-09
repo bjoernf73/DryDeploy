@@ -20,9 +20,9 @@
 #>
 
 
-function Get-DryUtilsDomainObject {
+function Get-DryUtilsDomainObject{
     [cmdletbinding()]
-    param ()
+    param()
 
     # Create the Object and the function to add to the object in the function scope. 
     $Object = New-Object -TypeName PSObject
@@ -47,11 +47,11 @@ function Get-DryUtilsDomainObject {
     # found in local site, set the 'LocalDC' to $false
     $Context = New-Object DirectoryContext("domain",$DNSDomain)
     $DCObject = [DomainController]::findone($Context,$SiteObject.Name) 
-    if ($NULL -eq $DCObject) {
+    if($NULL -eq $DCObject){
         $DCObject = [DomainController]::findone($Context)
         $Object | Add-Member -MemberType NoteProperty -Name "LocalDC" -Value $false
     } 
-    else {
+    else{
         $Object | Add-Member -MemberType NoteProperty -Name "LocalDC" -Value $true
     }
     $Object | Add-Member -MemberType NoteProperty -Name  "DomainControllerFQDN" -Value $DCObject.Name

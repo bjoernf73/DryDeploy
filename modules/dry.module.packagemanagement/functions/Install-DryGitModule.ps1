@@ -22,10 +22,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Install-DryGitModule { 
+function Install-DryGitModule{ 
     [CmdLetBinding()]
     
-    param (
+    param(
         [Parameter(HelpMessage="The Source URI of the git repository to clone (or checkout)")]
         $Source,
 
@@ -37,45 +37,45 @@ function Install-DryGitModule {
         [string]$Branch
     )
 
-    try {
-        Switch -Regex ($Source) {
-            "[^/\\]{1,}(?=\.git$)" { 
+    try{
+        Switch -Regex ($Source){
+            "[^/\\]{1,}(?=\.git$)"{ 
                 [string]$ProjectName = $Matches[0].ToString()
             }
-            default {
+            default{
                 throw "Unable to understand the format of the source git repository source '$Source'"
             }
         }
         [string]$ProjectPath       = Join-Path -Path $Path -ChildPath $ProjectName
         [string]$ProjectDotGitPath = Join-Path -Path $ProjectPath -ChildPath '.git'
 
-        if ((Test-Path -Path $ProjectPath) -and 
-            (-not (Test-Path -Path $ProjectDotGitPath))) {
+        if((Test-Path -Path $ProjectPath) -and 
+            (-not (Test-Path -Path $ProjectDotGitPath))){
             throw "The target folder '$ProjectPath' exists, but is not a git project"
         }
-        elseif (Test-Path -Path $ProjectPath) {
+        elseif(Test-Path -Path $ProjectPath){
             Sync-GitBranch -RepoRoot $ProjectPath -ErrorAction Stop | Out-Null
         } 
-        else {
+        else{
             Copy-GitRepository -Source $Source -DestinationPath $ProjectPath -ErrorAction Stop
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
     
-    try {
-        if ($Branch) {
+    try{
+        if($Branch){
             [Git.Automation.BranchInfo]$CurrentBranch = Get-GitBranch -RepoRoot $ProjectPath -Current -ErrorAction Stop
-            if ($Branch -eq $CurrentBranch.Name) {
+            if($Branch -eq $CurrentBranch.Name){
                 Sync-GitBranch -RepoRoot $ProjectPath -ErrorAction Stop | Out-Null
             }
-            else {
+            else{
                 Update-GitRepository -RepoRoot $ProjectPath -Revision $Branch -ErrorAction Stop | Out-Null
             }
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

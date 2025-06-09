@@ -31,9 +31,9 @@ returns 'Local' if they are, else returns 'Remote'
 The full $Configuration 
 
 #>
-function Get-DryAdExecutionType {
+function Get-DryAdExecutionType{
     [CmdLetBinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [PSObject]$Configuration
     )
@@ -45,7 +45,7 @@ function Get-DryAdExecutionType {
         GPOModuleInstalled           = $false
     }
     
-    try {
+    try{
         if($PSVersionTable.PSEdition -eq 'Core'){
             if($PSVersionTable.Platform -ne 'Win32NT'){
                 ol v "Running on non-Windows - returning 'Remote'"
@@ -59,21 +59,21 @@ function Get-DryAdExecutionType {
         $LocalPrereqs['GPOModuleInstalled'] = $false
        
         # Test: If executing system is in a domain and that domain is our target
-        if ((Get-CimInstance -Class Win32_ComputerSystem -ErrorAction SilentlyContinue).PartOfDomain) {
+        if((Get-CimInstance -Class Win32_ComputerSystem -ErrorAction SilentlyContinue).PartOfDomain){
             $LocalPrereqs['DomainComputer'] = $true
         }
 
         # Test: If executing system is in target domain
-        if ((Get-CimInstance -Class Win32_ComputerSystem -ErrorAction SilentlyContinue).Domain -eq $Configuration.CoreConfig.network.domain.domain_fqdn) {
+        if((Get-CimInstance -Class Win32_ComputerSystem -ErrorAction SilentlyContinue).Domain -eq $Configuration.CoreConfig.network.domain.domain_fqdn){
             $LocalPrereqs['DomainComputerInTargetDomain'] = $true
         }
 
         # Test: If the ActiveDirectory module is installed
-        if (Get-Module -ListAvailable -Name 'ActiveDirectory') {
+        if(Get-Module -ListAvailable -Name 'ActiveDirectory'){
             $LocalPrereqs['ADModuleInstalled'] = $true
         }
         # Test: If the GroupPolicy module is installed
-        if (Get-Module -ListAvailable -Name 'GroupPolicy') {
+        if(Get-Module -ListAvailable -Name 'GroupPolicy'){
             $LocalPrereqs['GPOModuleInstalled'] = $true
         }
 
@@ -81,14 +81,14 @@ function Get-DryAdExecutionType {
         ol v -hash $LocalPrereqs
 
         # Loop through all
-        $LocalPrereqs.Keys | foreach-Object {
-            if ($LocalPrereqs["$_"] -eq $false) {
+        $LocalPrereqs.Keys | foreach-Object{
+            if($LocalPrereqs["$_"] -eq $false){
                 return 'Remote'
             }
         }
         return "Local"
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

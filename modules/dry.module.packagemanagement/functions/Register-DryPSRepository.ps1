@@ -22,34 +22,34 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Register-DryPSRepository { 
+function Register-DryPSRepository{ 
     [CmdLetBinding()]
-    param (
+    param(
         [PSObject]$Repository
     )
 
-    try {
-        try {
+    try{
+        try{
             $RegisteredRepository = Get-PSrepository -name $Repository.Name 
-            if ($RegisteredRepository.InstallationPolicy -ne $Repository.InstallationPolicy) {
+            if($RegisteredRepository.InstallationPolicy -ne $Repository.InstallationPolicy){
                 Set-PSRepository -Name $Repository.Name -InstallationPolicy $Repository.InstallationPolicy -ErrorAction Stop
             }
         }
-        catch {
-            if ($_.CategoryInfo.Category -eq 'ObjectNotFound') {
+        catch{
+            if($_.CategoryInfo.Category -eq 'ObjectNotFound'){
                 $RepositoryPropertiesHash = @{}
-                $Repository.PSObject.Properties | foreach-Object {
+                $Repository.PSObject.Properties | foreach-Object{
                     $RepositoryPropertiesHash.Add($_.Name,$Repository.($_.Name))   
                 }
                 $RepositoryPropertiesHash.Add('ErrorAction','Stop')
                 Register-PSRepository @RepositoryPropertiesHash 
             }
-            else {
+            else{
                 $PSCmdlet.ThrowTerminatingError($_)
             }
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

@@ -1,9 +1,9 @@
 using Namespace System.Collections.Generic
 using Namespace System.Management.Automation
 using Namespace System.IO
-function dry.action.dsc.run {
+function dry.action.dsc.run{
     [CmdletBinding()]  
-    param (
+    param(
         [Parameter(Mandatory,HelpMessage="The resolved action object")]
         [PSObject]
         $Action,
@@ -19,10 +19,10 @@ function dry.action.dsc.run {
 
         [Parameter(HelpMessage="Hash directly from the command line to be 
         added as parameters to the function that iniates the action")]
-        [HashTable]
+        [hashtable]
         $ActionParams
     )
-    try {
+    try{
         $SCRIPT:GlobalProgressPreference = $GLOBAL:ProgressPreference
         $ProgressPreference = 'SilentlyContinue'
         Push-Location
@@ -40,7 +40,7 @@ function dry.action.dsc.run {
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
            vars are converted to a hashtable so they can be splatted to the DSC Config
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        [HashTable]$ParamsHash = ConvertTo-DryHashtable -Variables $Resolved.vars
+        [hashtable]$ParamsHash = ConvertTo-DryHashtable -Variables $Resolved.vars
 
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
            The Import-DSCResource keyword does not support values from parameters, so
@@ -48,12 +48,12 @@ function dry.action.dsc.run {
            DSC config at execution time to handle modules and versioning of them dynamic
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         $DSCTemplate = Get-Content -Path $SourceFile -ErrorAction Stop
-        if ($Resolved.TypeMetaConfig.dsc_modules) {
+        if($Resolved.TypeMetaConfig.dsc_modules){
             [string]$DscImportModulesString = "# Importing Desired State Modules `n"
             [string]$DscImportResourcesString = "# Importing Desired State Resources `n"
             
-            foreach ($DscModule in $Resolved.TypeMetaConfig.dsc_modules) {
-                if (-not ($DscModule.requiredVersion)) {
+            foreach($DscModule in $Resolved.TypeMetaConfig.dsc_modules){
+                if(-not ($DscModule.requiredVersion)){
                     throw "Desired State Modules must specify a 'requiredversion' property"
                 } 
                 # Import-Module string ex: Import-Module -Name 'xDnsServer' -RequiredVersion '1.16.0.0'
@@ -71,17 +71,17 @@ function dry.action.dsc.run {
            dsc_modules specifies modules to be installed locally on the execution
            host and on the target system
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        if ($Resolved.TypeMetaConfig.dsc_modules) {
+        if($Resolved.TypeMetaConfig.dsc_modules){
             ol i @('trying to install DSC modules on','Local System')
             $Resolved.TypeMetaConfig.dsc_modules | Install-DryDSCModule 
             $SessionConfig = $Configuration.CoreConfig.connections | 
-            Where-Object { 
+            Where-Object{ 
                 $_.type -eq 'winrm'
             }
-            if ($null -eq $SessionConfig) {
+            if($null -eq $SessionConfig){
                 throw "Unable to find 'connection' of type 'winrm' in environment config"
             }
-            else {
+            else{
                 $GetDryPSSessionParams += @{ SessionConfig = $SessionConfig}
             }
             
@@ -95,14 +95,14 @@ function dry.action.dsc.run {
             ol i 'DSC modules sucessfully installed' -sh
         }
 
-        if ($Resolved.TypeMetaConfig.dsc_sleep_before_seconds) {
+        if($Resolved.TypeMetaConfig.dsc_sleep_before_seconds){
             ol i @('Sleep before applying',"$($Resolved.TypeMetaConfig.dsc_sleep_before_seconds) seconds")
             Start-DryUtilsSleep -seconds $Resolved.TypeMetaConfig.dsc_sleep_before_seconds
         }
         
         # Delete any *.mof and *.meta.mof from previous runs
-        if (Test-Path -Path $MofTarget -ErrorAction Ignore) {Remove-Item -Path $MofTarget -Force -Confirm:$false | Out-Null}
-        if (Test-Path -Path $MetaMofTarget -ErrorAction Ignore) {Remove-Item -Path $MetaMofTarget -Force -Confirm:$false | Out-Null}
+        if(Test-Path -Path $MofTarget -ErrorAction Ignore){Remove-Item -Path $MofTarget -Force -Confirm:$false | Out-Null}
+        if(Test-Path -Path $MetaMofTarget -ErrorAction Ignore){Remove-Item -Path $MetaMofTarget -Force -Confirm:$false | Out-Null}
 
         Import-Module -Name PSDesiredStateConfiguration -Verbose:$false -Force
         
@@ -129,7 +129,7 @@ function dry.action.dsc.run {
         Set-Location -Path $DSCTargetDir -ErrorAction Stop
 
         # Get the name of the configuration & create *.meta.mof and *.mof
-        [string]$DSCConfig = (Get-Command -module $TargetFile.BaseName | Where-Object { $_.CommandType -eq 'Configuration' }).Name
+        [string]$DSCConfig = (Get-Command -module $TargetFile.BaseName | Where-Object{ $_.CommandType -eq 'Configuration' }).Name
         & $DSCConfig -ConfigurationData $ConfigurationData @ParamsHash -OutputPath $DSCTargetDir
 
         ol i @('Establish CIMSession to',"$($Resolved.target)")
@@ -141,7 +141,7 @@ function dry.action.dsc.run {
         }
         $CimSession = New-DrySession @GetDryCIMSessionParams
         
-        if (Test-Path -Path $MetaMofTarget) {
+        if(Test-Path -Path $MetaMofTarget){
             Set-DSCLocalConfigurationManager -Path $DSCTargetDir -CimSession $CimSession -Verbose -Force
         }
         
@@ -161,21 +161,21 @@ function dry.action.dsc.run {
             that for very large or very small configs. 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         [int]$DscTestBeforeSeconds = 15
-        if ($Resolved.TypeMetaConfig.dsc_test_before_seconds) {
+        if($Resolved.TypeMetaConfig.dsc_test_before_seconds){
             [int]$DscTestBeforeSeconds = $Resolved.TypeMetaConfig.dsc_test_before_seconds
         }
         Start-DryUtilsSleep -Seconds $DscTestBeforeSeconds -Message "Sleeping before testing configuration"
 
 
-        if (($Action.credentials.credential1 -ne $Action.credentials.credential2) -and ($null -ne $Action.credentials.credential2)) {
+        if(($Action.credentials.credential1 -ne $Action.credentials.credential2) -and ($null -ne $Action.credentials.credential2)){
             # alternating credentials
             $DscTargetSystemPOSTCredentialsArray = @($Resolved.Credentials.credential1,$Resolved.Credentials.credential2)
         }
-        else {
+        else{
             $DscTargetSystemPOSTCredentialsArray = @($Resolved.Credentials.credential1)
         }
         
-        $SessionConfig = $Configuration.CoreConfig.connections | Where-Object { 
+        $SessionConfig = $Configuration.CoreConfig.connections | Where-Object{ 
             $_.type -eq 'winrm'
         }
 
@@ -189,11 +189,11 @@ function dry.action.dsc.run {
         }
         $WinRMStatus = Wait-DryWinRM @WaitWinRMInterfaceParams
         
-        switch ($WinRMStatus) {
-            $false {
+        switch($WinRMStatus){
+            $false{
                 throw "Failed to Connect to DSC Target: $($Resolved.target))"
             }
-            default {
+            default{
                 # Do nothing
             }  
         }
@@ -209,19 +209,19 @@ function dry.action.dsc.run {
 
         
         [int]$DscTestIntervalSeconds = 60
-        if ($Resolved.TypeMetaConfig.dsc_test_interval_seconds) {
+        if($Resolved.TypeMetaConfig.dsc_test_interval_seconds){
             [int]$DscTestIntervalSeconds = $Resolved.TypeMetaConfig.dsc_test_interval_seconds
         }
 
-        do {
+        do{
             $CimSession | Remove-CimSession -ErrorAction Ignore
             $CimSession = New-DrySession @GetDryCIMSessionParams
             $LcmObject = Test-DSCConfiguration -Detailed -CimSession $CimSession -ErrorAction SilentlyContinue
-            if ($LcmObject.InDesiredState) {
+            if($LcmObject.InDesiredState){
                 $LcmInDesiredState = $true
                 ol i @('LCM status','in desired state')
             } 
-            else {
+            else{
                 ol i @('LCM status','not in desired state (yet)')
                 # test for instances that are allowed not to be in desired state
                 $ResourceInstancesNotInDesiredState = $null
@@ -229,25 +229,25 @@ function dry.action.dsc.run {
 
                 $ResourceInstancesNotInDesiredState.foreach({
                     # This is sometimes $null, so $_.trim() failes
-                    if ($null -ne $_) {
-                        if (($_.Trim()) -ne '') {
+                    if($null -ne $_){
+                        if(($_.Trim()) -ne ''){
                             ol i @('DSC Resource not in desired state yet',"$_")
                         }
                     }
                 })
                 
-                if (($Resolved.TypeMetaConfig.dsc_allowed_not_in_desired_state).count -gt 0) {
+                if(($Resolved.TypeMetaConfig.dsc_allowed_not_in_desired_state).count -gt 0){
                     [array]$AllowedNotInDesiredState = $Resolved.TypeMetaConfig.dsc_allowed_not_in_desired_state
                     
                     $NotInDesiredStateCount = 0
                     $ResourceInstancesNotInDesiredState.foreach({
-                        if ($AllowedNotInDesiredState -contains $_) {
+                        if($AllowedNotInDesiredState -contains $_){
                             ol d @("Instances allowed to not be in it's desired state","$_")
                             $NotInDesiredStateCount++
                         }
                     })
                     
-                    if ($NotInDesiredStateCount -ge $ResourceInstancesNotInDesiredState.Count) {
+                    if($NotInDesiredStateCount -ge $ResourceInstancesNotInDesiredState.Count){
                         ol w "Some Resources are not in the Desired State, but are allowed not to be according to the configuration. Assuming all is OK and ready to move on "
                         ol i "Assuming LCM is in it's Desired State - moving on" -sh
                         $LcmInDesiredState = $true
@@ -255,7 +255,7 @@ function dry.action.dsc.run {
                 }
             }
 
-            if (-not ($LcmInDesiredState)) {
+            if(-not ($LcmInDesiredState)){
                 Start-DryUtilsSleep -Seconds $DscTestIntervalSeconds -Message "Sleeping $DscTestIntervalSeconds seconds before retesting..."
             }
 
@@ -263,23 +263,23 @@ function dry.action.dsc.run {
         while (-not $LcmInDesiredState)
         $CimSession | Remove-CimSession -ErrorAction Ignore
 
-        if (($Action.credentials.credential1 -ne $Action.credentials.credential2) -and ($null -ne $Action.credentials.credential2)) {
+        if(($Action.credentials.credential1 -ne $Action.credentials.credential2) -and ($null -ne $Action.credentials.credential2)){
             # alternating credentials
             $DscTargetSystemPOSTCredentialsArray = @($Resolved.Credentials.credential1,$Resolved.Credentials.credential2)
         }
-        else {
+        else{
             $DscTargetSystemPOSTCredentialsArray = @($Resolved.Credentials.credential1)
         }
         
-        $SessionConfig = $Configuration.CoreConfig.connections | Where-Object { 
+        $SessionConfig = $Configuration.CoreConfig.connections | Where-Object{ 
             $_.type -eq 'winrm'
         }
-        if ($Resolved.TypeMetaConfig.dsc_restart_after_lcm_finish) {
+        if($Resolved.TypeMetaConfig.dsc_restart_after_lcm_finish){
             # Restart the target system
             Restart-Computer -ComputerName $Resolved.target -Credential $DscTargetSystemPOSTCredentialsArray -Force
  
             [int]$DscWaitForRebootSeconds = 30
-            if ($Resolved.TypeMetaConfig.dsc_wait_for_reboot_seconds) {
+            if($Resolved.TypeMetaConfig.dsc_wait_for_reboot_seconds){
                 [int]$DscWaitForRebootSeconds = $Resolved.TypeMetaConfig.dsc_wait_for_reboot_seconds
             }
 
@@ -298,7 +298,7 @@ function dry.action.dsc.run {
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         $VerificationObject = $Resolved.TypeMetaConfig.dsc_verification_log_events
 
-        if ($Resolved.TypeMetaConfig.dsc_verification_log_events) {
+        if($Resolved.TypeMetaConfig.dsc_verification_log_events){
             ol i @('DSC verification log events defined','Yes')
             $GetDrySessionParams = @{
                 Computername  = $($Resolved.target)
@@ -308,27 +308,27 @@ function dry.action.dsc.run {
             }
             
             $WaitDryForEventParamaters = @{}
-            if ($null -ne $VerificationObject.seconds_to_try) {
+            if($null -ne $VerificationObject.seconds_to_try){
                 $WaitDryForEventParamaters['SecondsTotry'] = $VerificationObject.seconds_to_try
             }
 
-            if ($null -ne $VerificationObject.seconds_to_wait_between_tries) {
+            if($null -ne $VerificationObject.seconds_to_wait_between_tries){
                 $WaitDryForEventParamaters['SecondsToWaitBetweenTries'] = $VerificationObject.seconds_to_wait_between_tries
             }
 
-            if ($null -ne $VerificationObject.seconds_to_wait_before_start) {
+            if($null -ne $VerificationObject.seconds_to_wait_before_start){
                 $WaitDryForEventParamaters['SecondsToWaitBeforeStart'] = $VerificationObject.seconds_to_wait_before_start
             }
             
-            if (($VerificationObject.filters).Count -eq 0) {
+            if(($VerificationObject.filters).Count -eq 0){
                 throw "Missing filters in verification_log_events"
             }
-            else {
+            else{
                 $Filters = @()
                 $VerificationObject.filters.foreach({
                     $Filter = @{}
                     $_.psobject.properties | 
-                    foreach-Object { 
+                    foreach-Object{ 
                         $Filter.Add($_.Name,$_.Value) 
                     }
                     $Filters += $Filter
@@ -336,42 +336,42 @@ function dry.action.dsc.run {
                 $WaitDryForEventParamaters['Filters'] = $Filters
             }
 
-            try {
+            try{
                 # Add SessionParameters to ParamsHash
                 # $TestSession = New-DrySession @GetDrySessionParams
                 $WaitDryForEventParamaters.Add('SessionParameters',$GetDrySessionParams)
                 Wait-DryUtilsForEvent @WaitDryForEventParamaters
             }
-            catch {
+            catch{
                 $PSCmdlet.throwTerminatingError($_)
             }
-            finally {
+            finally{
                 # $TestSession | Remove-PSSession -ErrorAction Ignore
             }
         }
-        else {
+        else{
             ol i @('DSC verification log events','No')
         }
     }
-    catch {
+    catch{
         # Testing for non-error-catches
         # This should of course go into config instead
-        if ($_.Exception -match "The Active Directory Certificate Services installation is incomplete. To complete the installation, use the request file") {
+        if($_.Exception -match "The Active Directory Certificate Services installation is incomplete. To complete the installation, use the request file"){
             ol w "Ignoring DSC Exception"
         }
-        else {
+        else{
             $PSCmdlet.ThrowTerminatingError($_)
         }
     }
-    finally {
+    finally{
         $ProgressPreference = $SCRIPT:GlobalProgressPreference
         Pop-Location
         Remove-Module -Name PSDesiredStateConfiguration,dry.action.dsc.run -ErrorAction Ignore 
 
-        if ($GLOBAL:dry_var_global_KeepConfigFiles) {
+        if($GLOBAL:dry_var_global_KeepConfigFiles){
             ol i @('Keeping ConfigFiles in',"$DSCTargetDir")
         }
-        else {
+        else{
             ol i @('Removing ConfigFiles from',"$DSCTargetDir")
             Remove-Item -Path $DSCTargetDir -Recurse -Force -Confirm:$false
         }

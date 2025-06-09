@@ -1,6 +1,6 @@
 using Namespace System.Collections.Generic
 using Namespace System.Collections
-class Network {
+class Network{
     [string]$Name
     [string]$Switch_Name
     [string]$Ip_Subnet 
@@ -15,28 +15,28 @@ class Network {
     Network (
          [PSCustomObject]$NetworkRef,
          [array]$Sites
-    ) {
+    ){
         $Site = $Sites | 
-        Where-Object { 
+        Where-Object{ 
             $_.Name -eq $NetworkRef.site 
         }
         
-        if ($null -eq $Site) {
+        if($null -eq $Site){
             Write-Error "No sites matched pattern '$($NetworkRef.site)'" -ErrorAction Stop
         }
-        elseif ($Site -is [array]) {
+        elseif($Site -is [array]){
             Write-Error "Multiple sites matched pattern '$($NetworkRef.site)'" -ErrorAction Stop
         }
     
         $Subnet = $Site.Subnets | 
-        Where-Object { 
+        Where-Object{ 
             $_.Name -eq $NetworkRef.subnet_name 
         }
         
-        if ($null -eq $Subnet) {
+        if($null -eq $Subnet){
             Write-Error "No subnets matched pattern '$($NetworkRef.subnet_name)'" -ErrorAction Stop
         }
-        elseif ($Subnet -is [array]) {
+        elseif($Subnet -is [array]){
             Write-Error "Multiple subnets matched pattern '$($NetworkRef.subnet_name)'" -ErrorAction Stop
         }
 
@@ -49,18 +49,18 @@ class Network {
         $This.Dns             = $Subnet.Dns
         $This.Dhcp            = $Subnet.Dhcp
 
-        if ($NetworkRef.ip_index) {
+        if($NetworkRef.ip_index){
             $Snet = $Subnet.ip_subnet + '/' + $Subnet.subnet_mask
             $This.ip_address = ((Invoke-PSipcalc -NetworkAddress $Snet -Enumerate).IPenumerated)[($($NetworkRef.ip_index)-1)]
         } 
-        elseif ($NetworkRef.ip_address) {
+        elseif($NetworkRef.ip_address){
             $This.ip_address = $NetworkRef.ip_address
         }
-        else {
+        else{
             ol w "The Resource $($This.Name) does not have an IP address"
         }
 
-        if ($Subnet.dns_forwarders) {
+        if($Subnet.dns_forwarders){
             $This.Dns_Forwarders = $Subnet.dns_forwarders
         }
     }

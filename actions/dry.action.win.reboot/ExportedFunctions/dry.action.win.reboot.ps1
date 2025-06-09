@@ -17,9 +17,9 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-function dry.action.win.reboot {
+function dry.action.win.reboot{
     [CmdletBinding()]  
-    param (
+    param(
         [Parameter(Mandatory,HelpMessage="The resolved action object")]
         [PSObject]
         $Action,
@@ -35,10 +35,10 @@ function dry.action.win.reboot {
 
         [Parameter(HelpMessage="Hash directly from the command line to be 
         added as parameters to the function that iniates the action")]
-        [HashTable]
+        [hashtable]
         $ActionParams
     )
-    try {
+    try{
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   DEFAULT
         #
@@ -58,17 +58,17 @@ function dry.action.win.reboot {
         #   defined previously
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-        if ($Resolved.ActionMetaConfig) {
+        if($Resolved.ActionMetaConfig){
             [int]$NumberOfReboots = $Resolved.ActionMetaConfig.reboots
             [Bool]$GPUpdate = $Resolved.ActionMetaConfig.gpupdate
             [string]$ConfigOrDefault        = 'Config'
         }
         
-        switch ($GPUpdate) {
-            $true {
+        switch($GPUpdate){
+            $true{
                 $WithOrWithout = 'with'
             }
-            default {
+            default{
                 $WithOrWithout = 'without'
             }
         }
@@ -83,7 +83,7 @@ function dry.action.win.reboot {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         $CredCount = 1
-        while ($Resolved.credentials."credential$CredCount") {
+        while ($Resolved.credentials."credential$CredCount"){
             $Credentials += @($Resolved.credentials."credential$CredCount")
             $CredCount++
         }
@@ -99,11 +99,11 @@ function dry.action.win.reboot {
         
         # get the winrm session options
         $SessionConfig = $Configuration.CoreConfig.connections | 
-        Where-Object { 
+        Where-Object{ 
             $_.type -eq 'winrm'
         }
         
-        if ($null -eq $SessionConfig) {
+        if($null -eq $SessionConfig){
             throw "Unable to find 'connection' of type 'winrm' in environment config"
         }
 
@@ -114,10 +114,10 @@ function dry.action.win.reboot {
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #       
         
-        for ($RebootCount = 1; $RebootCount -le $NumberOfReboots; $RebootCount++) {
+        for ($RebootCount = 1; $RebootCount -le $NumberOfReboots; $RebootCount++){
             ol i @("Reboot $WithOrWithout GPUpdate","$RebootCount of $NumberOfReboots")
             
-            if ($GPUpdate) {
+            if($GPUpdate){
                 $InvokeInPSSessionParams = @{
                     Credential     = $Credentials
                     Command        = 'gpupdate' 
@@ -149,11 +149,11 @@ function dry.action.win.reboot {
             }
     
             $WinRMStatus = Wait-DryWinRM @WaitWinRMInterfaceParams
-            switch ($WinRMStatus) {
-                $false {
+            switch($WinRMStatus){
+                $false{
                     throw "Failed to Connect to $($Action.Resource.name) (IP: $($Action.Resource.resolved_network.ip_address))"
                 }
-                $true {
+                $true{
                     ol i @('Successfully connected',"$($Action.Resource.name) (IP: $($Action.Resource.resolved_network.ip_address))")
                 }  
             }
@@ -166,15 +166,15 @@ function dry.action.win.reboot {
         #   on the restartet resource come up
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #   
-        if ($null -ne $Resolved.ActionMetaConfig.sleep_after_seconds) {
+        if($null -ne $Resolved.ActionMetaConfig.sleep_after_seconds){
             Start-DryUtilsSleep -Seconds $Resolved.ActionMetaConfig.sleep_after_seconds -Message "Sleeping $($Resolved.ActionMetaConfig.sleep_after_seconds) seconds before continuing..."
         }
         ol i "All reboots were successful" -sh    
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
         @(Get-Variable -Scope Script).foreach({
             Remove-Variable -Name $_ -ErrorAction Ignore
         })

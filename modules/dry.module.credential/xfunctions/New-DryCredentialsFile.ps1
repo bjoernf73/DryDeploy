@@ -19,18 +19,18 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function New-DryCredentialsFile {
+function New-DryCredentialsFile{
     [CmdLetBinding()]
-    param (
+    param(
         $Path
     )
 
-    try {
+    try{
         
-        if (Test-Path -Path $Path -ErrorAction SilentlyContinue) {
+        if(Test-Path -Path $Path -ErrorAction SilentlyContinue){
             ol d "The Credentials file exists already"
         }
-        else {
+        else{
             $Credentials = [PSCustomObject]@{
                 credentials = @()
                 path        = "$Path"
@@ -39,7 +39,7 @@ function New-DryCredentialsFile {
             Save-DryUtilsToJson -Path $Path -InputObject $Credentials 
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }    
 }

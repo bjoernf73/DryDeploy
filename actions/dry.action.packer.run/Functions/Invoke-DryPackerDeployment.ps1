@@ -1,6 +1,6 @@
-function Invoke-DryPackerDeployment {
+function Invoke-DryPackerDeployment{
     [CmdLetBinding()]
-    param (
+    param(
 
         [Parameter(Mandatory=$true,HelpMessage="Packer file to process")]
         [System.IO.FileInfo]$PackerFile,
@@ -26,25 +26,25 @@ function Invoke-DryPackerDeployment {
         [PSObject]$Credentials
     )
 
-    try {
+    try{
         # Make sure the tested Packer version or newer is installed and in path
         $TestedPackerVersion = [Version]"1.7.2"
         
-        if (Get-Command -CommandType Application -Name Packer) { 
+        if(Get-Command -CommandType Application -Name Packer){ 
             $PackerExe = Get-Command -CommandType Application -Name packer
             $VersionString = & packer version
             [Version]$Version = ("{0}" -f ($VersionString -replace "^Packer v"))
-            if ($Version -lt $TestedPackerVersion) {
+            if($Version -lt $TestedPackerVersion){
                 throw "You need Packer $($TestedPackerVersion.ToString()) or newer installed and in path"
             }
-            else {
+            else{
                 ol -t 6 -arr "Packer version installed","v$($Version.ToString())"
             }
 
             $PackerExe = (get-command -CommandType Application -Name Packer | 
                 Select-Object -Property Source).Source
         } 
-        else { 
+        else{ 
             throw "You need to have Packer v$TestedPackerVersion (minimum) installed and in path" 
         }
 
@@ -58,7 +58,7 @@ function Invoke-DryPackerDeployment {
         $TargetVarsFile = "$WorkingDirectory\variables.json"
         
         $VariablesHash = @{}
-        foreach ($Var in $Variables) {
+        foreach($Var in $Variables){
             $VariablesHash.Add($Var.Name,$Var.Value)
         }
 
@@ -71,13 +71,13 @@ function Invoke-DryPackerDeployment {
         ConvertFrom-Json -ErrorAction Stop
 
         # Loop through files in the layout
-        foreach ($File in $Config.files) {
+        foreach($File in $Config.files){
             # define full source and destination
             $SourceFile = $SourceLocation + '\' + $File.Name
             $TargetFile = $workingDirectory.FullName + '\' + $File.Name
             
-            switch ($File.replace) {
-                $true {
+            switch($File.replace){
+                $true{
                     # Get the contents from file
                     $RawFileContents = Get-Content -Path $SourceFile -Raw -ErrorAction Stop
 
@@ -89,7 +89,7 @@ function Invoke-DryPackerDeployment {
                     Out-File -FilePath $TargetFile -Encoding Default -Force
                     Remove-Variable -Name RawFileContents,ReplacedFileContents -ErrorAction Ignore
                 }
-                default {
+                default{
                     # just copy
                     Copy-Item -Path $SourceFile -Destination $TargetFile -Confirm:$false
                 }
@@ -103,8 +103,8 @@ function Invoke-DryPackerDeployment {
 
         # Accumulate the parameters for packer. $Config.connection is either
         # winrm or ssh
-        switch ($Config.connection) {
-            'winrm' {
+        switch($Config.connection){
+            'winrm'{
                 $ArgumentArray = @(
                     "-var",
                     "`"winrm_username=$($ConnectionCredential.username)`"",
@@ -114,7 +114,7 @@ function Invoke-DryPackerDeployment {
                     "`"winrm_host=$($resource.resolved_network.ip_address)`""
                 )
             }
-            'ssh' {
+            'ssh'{
                 $ArgumentArray = @(
                     "-var",
                     "`"ssh_username=$($ConnectionCredential.username)`"",
@@ -124,16 +124,16 @@ function Invoke-DryPackerDeployment {
                     "`"ssh_host=$($resource.resolved_network.ip_address)`""
                 )
             }
-            default {
+            default{
                 throw "Unknown connection: '$($Config.Connection)'. Expected 'winrm' or 'ssh'"
             }
         }
                 
-        foreach ($SecondaryCredential in $Config.Secondary_Credentials) {
+        foreach($SecondaryCredential in $Config.Secondary_Credentials){
             $CredName = $SecondaryCredential.Name
             $CredIndex = $SecondaryCredential.Credentials_Index
 
-            if ($null -eq $Credentials."credential$CredIndex") {
+            if($null -eq $Credentials."credential$CredIndex"){
                 ol -t 1 -m "Action is missing it's .credential$CredIndex"
                 throw "Action is missing it's .credential$CredIndex"
             }
@@ -141,7 +141,7 @@ function Invoke-DryPackerDeployment {
             $SecPasswd = $SecCredential.GetNetworkCredential().Password
             $SecUsername = $SecCredential.Username
         
-            if ($SecUsername -match "\\") {
+            if($SecUsername -match "\\"){
                 $SecUsername = $SecUsername.split('\')[1]
             }
             $ArgumentArray += @(
@@ -160,42 +160,42 @@ function Invoke-DryPackerDeployment {
         # VALIDATE 
         
         Remove-Variable -Name PackerOutput -Scope Local -ErrorAction Ignore
-        try {
+        try{
             ol -t 6 -m "Running Packer validate..."
             & packer validate $ArgumentArray | Tee-Object -Variable PackerOutput 
             
             # Validate gives no output on success on 1.7.6. Somewhere between 1.7.6 and 1.7.8 it says 'The configuration is valid.'
             $PackerValidated = $false
-            if ($LOCAL:PackerOutput) {
+            if($LOCAL:PackerOutput){
                 $LOCAL:PackerOutput.foreach({
                     ol i 'Packer validate output',"$_"
-                    if ($_ -match 'The configuration is valid') {
+                    if($_ -match 'The configuration is valid'){
                         $PackerValidated = $true
                     }
                 })
             }
-            else {
+            else{
                 # No output
                 $PackerValidated = $true
             } 
-            if (-not ($PackerValidated)) {
+            if(-not ($PackerValidated)){
                 throw "Packer validate: Failed"
             }
-            else {
+            else{
                 ol i 'Packer validate', 'Success'
             }
         }
-        catch {
+        catch{
             $PSCmdlet.ThrowTerminatingError($_)    
         }
         
         # BUILD
-        try {
-            switch ($GLOBAL:dry_var_global_DestroyOnFailedBuild) {
-                $true {
+        try{
+            switch($GLOBAL:dry_var_global_DestroyOnFailedBuild){
+                $true{
                     $OnError = 'cleanup'
                 }
-                default {
+                default{
                     $OnError = 'abort'
                 }
             }
@@ -211,36 +211,36 @@ function Invoke-DryPackerDeployment {
             $SuccessTargetCount = $PackerSuccessStrings.Count
             
             $LOCAL:PackerOutput.foreach({
-                foreach ($PackerSuccessString in $PackerSuccessStrings) {
-                    if ($_ -match $PackerSuccessString) {
+                foreach($PackerSuccessString in $PackerSuccessStrings){
+                    if($_ -match $PackerSuccessString){
                         $SuccessCount++
                         ol -t 0 -m "Match for success string '$PackerSuccessString'"
                     }
                 }   
             })
 
-            if ($SuccessCount -eq $SuccessTargetCount) {
+            if($SuccessCount -eq $SuccessTargetCount){
                 ol -t 6 -arr "Packager Build status","Success"
             }
-            elseif ($SuccessCount -gt $SuccessTargetCount) {
+            elseif($SuccessCount -gt $SuccessTargetCount){
                 ol -t 6 -arr "Packager Build status","Success"
                 ol -t 1 -m "Expected to find only $SuccessTargetCount matches in Packer output, but found $SuccessCount"
             }
-            else {
+            else{
                 ol -t 6 -arr "Packager Build status","Failed"
                 throw "Packer Build failed"
             }
         }
-        catch {
+        catch{
             $PSCmdlet.ThrowTerminatingError($_)
         }
         # Remove the password
         Remove-Variable -Name ConnectionPasswd -ErrorAction Ignore
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
         # Pop back to the root
         Pop-Location
         # make sure the directory is removed

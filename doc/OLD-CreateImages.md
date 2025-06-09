@@ -53,22 +53,22 @@ The values in *vars.json*'s `variables` node are used in 2 ways:
 
   1. Each image has a `Config.json` at root describing the files that will be copied to a temporary working directory, like the code below. If a file's `replace: true`, any pattern `###some_name###` in the file will replaced by `some_value`. 
 
-    {
+   {
       "display_name": "Ubuntu Server 20.04.3",
       "type": "linux",
       "files": [ 
-          {
+         {
               "name": "ci-ubuntu.20.04.3.srv-packerconfig.json",
               "type": "json",
               "tag": "packerconfig",
               "replace": false
           },
-          {
+         {
               "name": "user-data",
               "tag": "http-file",
               "replace": true
           },
-          {
+         {
               "name": "meta-data",
               "tag": "http-file",
               "replace": false

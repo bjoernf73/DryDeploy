@@ -19,25 +19,25 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function ConvertTo-DryUtilsDomainDN {
+function ConvertTo-DryUtilsDomainDN{
     [CmdLetBinding()]
-    param (
+    param(
         [ValidateScript({$_ -match "^[a-zA-Z0-9][a-zA-Z0-9-_]{0,61}[a-zA-Z0-9]{0,1}\.([a-zA-Z]{1,6}|[a-zA-Z0-9-]{1,30}\.[a-zA-Z]{2,3})$"})]
         [string]$DomainFQDN
     )
-    try {
+    try{
         $DomainDN = ""
         $FQDNParts = $DomainFQDN.Split(".")
-        for ($i = 0; $i -le ($FQDNParts.Count - 1); $i++) {
+        for ($i = 0; $i -le ($FQDNParts.Count - 1); $i++){
             $DomainDN += "DC=$(${FQDNParts}[$i]),"
         }
         $DomainDN = $DomainDN.Remove($DomainDN.Length - 1, 1)
         return $DomainDN
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
         Remove-Variable -name DomainFQDN,FQDNParts -ErrorAction Ignore
     }
 }

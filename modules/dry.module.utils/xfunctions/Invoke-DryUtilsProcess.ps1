@@ -19,15 +19,14 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Invoke-DryUtilsProcess {
+function Invoke-DryUtilsProcess{
     [CmdletBinding()]            
-    param (
-        $Exe, 
+    param(
+        [string]$Exe, 
         $Arguments
     )
     
-    Try 
-    {
+    try{
         $process = New-Object System.Diagnostics.ProcessStartInfo
         $process.FileName = $exe
         $process.RedirectStandardError = $true
@@ -44,11 +43,11 @@ function Invoke-DryUtilsProcess {
         $StdOutStr = ""
         $StdErrStr = ""
     
-        while(!($p.StandardOutput.EndOfStream)) {
+        while(!($p.StandardOutput.EndOfStream)){
             $StdOutStr = $StdOutStr + "`n" + $p.StandardOutput.ReadLine() 
         }
 
-        while(!($p.StandardError.EndOfStream)) {
+        while(!($p.StandardError.EndOfStream)){
             $StdErrStr = $StdErrStr  + "`n" + $p.StandardError.ReadLine()
         }
 
@@ -64,7 +63,7 @@ function Invoke-DryUtilsProcess {
         
         return $RetObj
     }
-    catch {
+    catch{
         $p.Dispose()
         throw $_
     }

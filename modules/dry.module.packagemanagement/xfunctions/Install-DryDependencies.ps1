@@ -22,9 +22,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Install-DryDependencies {
+function Install-DryDependencies{
     [CmdLetBinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [PSCustomObject]$ConfigCombo,
 
@@ -35,26 +35,26 @@ function Install-DryDependencies {
         [string]$GitsPath
     )
 
-    try {
+    try{
         ol i " "
         ol i "Dependencies" -sh
 
-        switch ($Type) {
-            'environment' {
+        switch($Type){
+            'environment'{
                 $Dependencies = $ConfigCombo.envconfig.dependencies
             }
-            'module' {
+            'module'{
                 $Dependencies = $ConfigCombo.moduleconfig.dependencies
             }
-            'system' {
+            'system'{
                 $Dependencies = $ConfigCombo.systemconfig.dependencies
             }
         }
 
         # Chocolatey packages must be installed elevated
         #! should check if they are installed before throwing error
-        if ($Dependencies.choco.packages.count -gt 0) {
-            if (-Not (Test-DryElevated)) {
+        if($Dependencies.choco.packages.count -gt 0){
+            if(-Not (Test-DryElevated)){
                 ol w " "
                 ol w "When modules depend on chocolatey packages, you should run"
                 ol w "-init or -moduleinit elevated (i.e. 'Run as Administrator')"
@@ -64,30 +64,30 @@ function Install-DryDependencies {
         }
 
         # Install nuget modules
-        if ($Dependencies.nuget) {
+        if($Dependencies.nuget){
             ol i 'Nugets' -sh
-            foreach ($Module in $Dependencies.nuget.modules) {
+            foreach($Module in $Dependencies.nuget.modules){
                 ol i @('Nuget',$Module.name)
                 Install-DryModule -Module $Module
             }
         }
 
         # Install Chocolatey packages
-        if ($Dependencies.choco) {
-            if ($Dependencies.choco.packages.count -gt 0) {
+        if($Dependencies.choco){
+            if($Dependencies.choco.packages.count -gt 0){
                 ol i 'Chocos' -sh
                 Install-DryChocolatey
-                foreach ($Package in $Dependencies.choco.packages) {
+                foreach($Package in $Dependencies.choco.packages){
                     ol i @('Choco',$Package.name)
                     $InstallChocoParams = @{
                         Name = $Package.name
                     }
-                    if ($Module.minimumversion) {
+                    if($Module.minimumversion){
                         $InstallChocoParams += @{
                             MinimumVersion = $Module.minimumversion
                         }
                     }
-                    if ($Module.requiredversion) {
+                    if($Module.requiredversion){
                         $InstallChocoParams += @{
                             RequiredVersion = $Module.requiredversion
                         }
@@ -98,27 +98,27 @@ function Install-DryDependencies {
         }
 
         # Download git projects to a PSModule path
-        if ($Dependencies.git) {
+        if($Dependencies.git){
             ol i 'GITs' -sh
-            if (-not $GitsPath) { 
+            if(-not $GitsPath){ 
                 [string]$UserProfile = [Environment]::GetEnvironmentVariable("UserProfile")
-                [string]$GitsPath = ([Environment]::GetEnvironmentVariable("PSModulePath") -split ';') | Where-Object { 
+                [string]$GitsPath = ([Environment]::GetEnvironmentVariable("PSModulePath") -split ';') | Where-Object{ 
                     $_ -match ($UserProfile -replace '\\','\\')
                 }
             }
             # Ensure $GitsPath exists
-            if (-not (Test-Path -Path $GitsPath)) {
+            if(-not (Test-Path -Path $GitsPath)){
                 New-Item -Path $GitsPath -Force -ItemType Directory -ErrorAction Stop | Out-Null
             }
             
-            foreach ($Project in $Dependencies.git.projects) {
+            foreach($Project in $Dependencies.git.projects){
                 ol i @('Git',$Project.url)
                 $InstallDryGitModuleParams = @{
                     Source = $Project.url
                     Path = $GitsPath
                 }
                 
-                if ($Project.branch) {
+                if($Project.branch){
                     $InstallDryGitModuleParams += @{
                         Branch = $Project.branch
                     }
@@ -128,21 +128,21 @@ function Install-DryDependencies {
         }
 
         # no catch - assume all dependencies are ensured, so write the dependencies_hash to the ConfigObject
-        switch ($Type) {
-            'system' {
+        switch($Type){
+            'system'{
                 $ConfigCombo.systemconfig.dependencies_hash = $ConfigCombo.CalcDepHash($Dependencies)
             }
-            'module' {
+            'module'{
                 $ConfigCombo.moduleconfig.dependencies_hash = $ConfigCombo.CalcDepHash($Dependencies)
             }
-            'environment' {
+            'environment'{
                 $ConfigCombo.envconfig.dependencies_hash = $ConfigCombo.CalcDepHash($Dependencies)
             }
         }
         $ConfigCombo.Save()
         ol i "Dependencies installed" -sh 
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

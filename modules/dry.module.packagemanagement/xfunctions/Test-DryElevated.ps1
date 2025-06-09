@@ -22,30 +22,30 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Test-DryElevated { 
+function Test-DryElevated{ 
     [CmdLetBinding()]
     [OutputType([Boolean])]
-    param ()
+    param()
 
-    try {
-        if ($PSVersionTable.Platform -eq 'Unix') {
-            if ((id -u) -eq 0) {
+    try{
+        if($PSVersionTable.Platform -eq 'Unix'){
+            if((id -u) -eq 0){
                 $true
             }
-            else {
+            else{
                 $false
             }
         }
-        else {
-            if (([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {
+        else{
+            if(([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')){
                 $true
             }
-            else {
+            else{
                 $false
             }
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

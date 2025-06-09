@@ -20,9 +20,9 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Show-DryActionEnd {
+function Show-DryActionEnd{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [DryAction] $Action,
 
@@ -33,20 +33,20 @@ function Show-DryActionEnd {
         [DateTime] $EndTime
 
     )
-    try {
-        switch ($Action.Status) {
-            'SUCCESS' { $OutPutColor = 'Green' }
-            'FAILED'  { $OutPutColor = 'Red' }
-            Default   { $OutPutColor = 'Yellow' }
+    try{
+        switch($Action.Status){
+            'SUCCESS'{ $OutPutColor = 'Green' }
+            'FAILED' { $OutPutColor = 'Red' }
+            Default  { $OutPutColor = 'Yellow' }
         }
 
         [timespan]$ActionSpan = ($EndTime-$StartTime)
             ol i " " -h
             ol i " "
-        if ($Action.Phase) {
+        if($Action.Phase){
             ol i "Action [$($Action.action)] - Phase [$($Action.Phase)] took $($ActionSpan.ToString("dd\:hh\:mm\:ss")) to complete" -ForegroundColor $OutPutColor
         }
-        else {
+        else{
             ol i "Action [$($Action.action)] took $($ActionSpan.ToString("dd\:hh\:mm\:ss")) to complete" -ForegroundColor $OutPutColor
         }
         
@@ -54,7 +54,7 @@ function Show-DryActionEnd {
             ol i "Status: $($Action.Status.ToUpper())" -ForegroundColor $OutPutColor
             ol i " "
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

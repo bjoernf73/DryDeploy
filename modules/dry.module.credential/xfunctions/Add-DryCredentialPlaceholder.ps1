@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Add-DryCredentialPlaceholder {
+function Add-DryCredentialPlaceholder{
     [CmdLetBinding()]
-    param (
+    param(
         [Parameter(Mandatory,HelpMessage="The Alias of the credential to add")]
         [string]$Alias,
 
@@ -36,16 +36,16 @@ function Add-DryCredentialPlaceholder {
         [string]$UserName
     )
 
-    try {
+    try{
         $DryCredentials = [Credentials]::New($GLOBAL:dry_var_global_CredentialsFile)
-        if (($UserName) -and ($UserName.Trim() -ne '')) {
+        if(($UserName) -and ($UserName.Trim() -ne '')){
             $DryCredentials.AddCredentialPlaceholder($Alias,$EnvConfig,$Type,$UserName)
         }
-        else {
+        else{
             $DryCredentials.AddCredentialPlaceholder($Alias,$EnvConfig,$Type)
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }    
 }

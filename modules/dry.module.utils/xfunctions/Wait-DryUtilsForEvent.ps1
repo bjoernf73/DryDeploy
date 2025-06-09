@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Wait-DryUtilsForEvent {
+function Wait-DryUtilsForEvent{
     [cmdletbinding()]            
-    param (
+    param(
         [Parameter(HelpMessage="Array of Hashtables containing identifying values for the Event. Should contain any `
         combinations (one or more) of the following: LogName, EventID, Source, Message, EntryType `
         LogName is mandatory")]
@@ -45,24 +45,24 @@ function Wait-DryUtilsForEvent {
     ol i "..............................."
    
     # Preprocess Filter properties
-    foreach ($Filter in $Filters) {
+    foreach($Filter in $Filters){
 
         # If 'AfterBoot' is $true, I will create a datetime object of the last boot time, and use
         # that as the After-parameter. If in addition 'SecondsAfter' is specified, I will subtract
         # that number of seconds from the boot time. 
-        if (($Filter.ContainsKey('AfterBoot')) -and ($Filter['AfterBoot'] -eq $true)) {
+        if(($Filter.ContainsKey('AfterBoot')) -and ($Filter['AfterBoot'] -eq $true)){
             
             $LastBootTime = Get-DryUtilsLastBootTime -Session $Session
             
-            if ($Filter.ContainsKey('SecondsAfter')) {
+            if($Filter.ContainsKey('SecondsAfter')){
                 $Filter['After'] = $LastBootTime.AddSeconds(-$($Filter['SecondsAfter']))
                 $Filter.Remove('SecondsAfter')
             }
-            else {
+            else{
                 $Filter['After'] = $LastBootTime
             }
 
-            if ($Filter.ContainsKey('SecondsBefore')) {
+            if($Filter.ContainsKey('SecondsBefore')){
                 ol w "You cannot specify both AfterBoot and SecondsBefore - use BeforeBoot and optionally SecondsBefore instead"
                 $Filter.Remove('SecondsBefore')
             }
@@ -70,44 +70,44 @@ function Wait-DryUtilsForEvent {
         # If 'BeforeBoot' is $true, I will create a datetime object of the last boot time, and use
         # that as the Before-parameter. If in addition 'SecondsBefore' is specified, I will subtract
         # that number of seconds from the boot time. 
-        elseif (($Filter.ContainsKey('BeforeBoot')) -and ($Filter['BeforeBoot'] -eq $true)) {
+        elseif(($Filter.ContainsKey('BeforeBoot')) -and ($Filter['BeforeBoot'] -eq $true)){
             # Get time of last boot
             $LastBootTime = Get-DryUtilsLastBootTime -Session $Session
             
-            if ($Filter.ContainsKey('SecondsBefore')) {
+            if($Filter.ContainsKey('SecondsBefore')){
                 $Filter['Before'] = $LastBootTime.AddSeconds(-$($Filter['SecondsBefore']))
                 $Filter.Remove('SecondsBefore')
             }
-            else {
+            else{
                 $Filter['Before'] = $LastBootTime
             }
 
-            if ($Filter.ContainsKey('SecondsAfter')) {
+            if($Filter.ContainsKey('SecondsAfter')){
                 ol w "You cannot specify both BeforeBoot and SecondsAfter - use AfterBoot and optionally SecondsAfter instead"
                 $Filter.Remove('SecondsAfter')
             }
         }
 
-        elseif ($Filter.ContainsKey('SecondsBefore')) {
+        elseif($Filter.ContainsKey('SecondsBefore')){
             $Filter['Before'] = (Get-Date).AddSeconds(-$($Filter['SecondsBefore']))
             $Filter.Remove('SecondsBefore')
             
-            if ($Filter.ContainsKey('SecondsAfter')) {
+            if($Filter.ContainsKey('SecondsAfter')){
                 ol w "You cannot specify both SecondsBefore and SecondsAfter"
                 $Filter.Remove('SecondsAfter')
             }
         }
 
-        elseif ($Filter.ContainsKey('SecondsAfter')) {
+        elseif($Filter.ContainsKey('SecondsAfter')){
             $Filter['After'] = (Get-Date).AddSeconds(-$($Filter['SecondsAfter']))
             $Filter.Remove('SecondsAfter')
         } 
         
         @('LogName','EventID','Source','EntryType','Message','Before','After') | 
-        foreach-Object {
-            if ($Filter.ContainsKey("$_")) {
+        foreach-Object{
+            if($Filter.ContainsKey("$_")){
                 $str = "$_`:"
-                do {
+                do{
                     $str = "$str "
                 } while ($str.Length -lt 14)
             }
@@ -124,7 +124,7 @@ function Wait-DryUtilsForEvent {
     # If, for instance, a restart is required in the midst of all of this, the function may
     # return true too early, so we sleep a specified number of seconds before checking 
     # increment the element counter and update progress
-    for ($Timer = 1; $Timer -lt $SecondsToWaitBeforeStart; $Timer++) {
+    for ($Timer = 1; $Timer -lt $SecondsToWaitBeforeStart; $Timer++){
         $WriteProgressParameters = @{
             'Activity'="Waiting"
             'Status'="Waiting $($SecondsToWaitBeforeStart-$Timer) seconds before starting"
@@ -144,8 +144,8 @@ function Wait-DryUtilsForEvent {
     [int]  $TargetCount = $Filters.count
     [int]  $Tried       = 0
 
-    try {
-        do {
+    try{
+        do{
             $Tried++
             ol i "Try nr. $Tried"
             $ProgressTotalTime = [int]((New-TimeSpan -Start $StartTime -End $TargetTime).TotalSeconds)
@@ -157,14 +157,14 @@ function Wait-DryUtilsForEvent {
             }   
             Write-Progress @WriteProgressParameters    
             
-            foreach ($Filter in ($Filters | Where-Object {$_['Found'] -eq $false})) {
+            foreach($Filter in ($Filters | Where-Object{$_['Found'] -eq $false})){
                 $Session | Remove-PSSession -ErrorAction Ignore
                 $Session = New-DrySession @SessionParameters
-                $Found = Invoke-Command -Session $Session -ScriptBlock {
-                    param ($Filter)
+                $Found = Invoke-Command -Session $Session -ScriptBlock{
+                    param($Filter)
                     
                     # If EventID is used, put in $EventID
-                    if ($Filter.ContainsKey('EventID')) {
+                    if($Filter.ContainsKey('EventID')){
                         $EventID = $Filter['EventID']
                     }
     
@@ -172,69 +172,69 @@ function Wait-DryUtilsForEvent {
                     $GetEventLogParameters = @{}
                     # $GetEventLogParameters += @{'Before'=$Before}
                     @('LogName','Source','EntryType','Message','After','Before') | 
-                    foreach-Object {
-                        if ($Filter.ContainsKey("$_")) {
+                    foreach-Object{
+                        if($Filter.ContainsKey("$_")){
                             $GetEventLogParameters += @{"$_"=$Filter["$_"]}
                         
                         }
                     }
                     
-                    try {
+                    try{
                         Remove-Variable -Name Events -ErrorAction Ignore
-                        if ($null -eq $EventID) {
+                        if($null -eq $EventID){
                             $Events = Get-EventLog @GetEventLogParameters -ErrorAction Ignore
                         }
-                        else {
+                        else{
                             $Events = Get-EventLog @GetEventLogParameters -ErrorAction Ignore | 
-                            Where-Object {
+                            Where-Object{
                                 $_.EventID -eq $EventID
                             }
                         }
                         
-                        if ($Events.count -ge 1) {
+                        if($Events.count -ge 1){
                             $true
                         } 
-                        else {
+                        else{
                             $false
                         }
                     }
-                    catch {
+                    catch{
                         $false
                     }
                 } -ArgumentList $Filter
     
-                if ($Found) {
+                if($Found){
                     $FoundCount++
                     $Filter['Found'] = $true
                     ol i "Found verification Event with the following properties:"
                     @('LogName','EventID','Source','EntryType','Message','After','Before') | 
-                    foreach-Object {
-                        if ($Filter.ContainsKey("$_")) {
+                    foreach-Object{
+                        if($Filter.ContainsKey("$_")){
                             ol i "$_ = $($Filter[""$_""])"
                         }
                     }
                 }
             }
             
-            if ($FoundCount -lt $TargetCount) {
+            if($FoundCount -lt $TargetCount){
                 ol i "Verification Events found: $FoundCount of $TargetCount. Sleeping $SecondsToWaitBetweenTries seconds before retrying..."
                 Start-Sleep -Seconds $SecondsToWaitBetweenTries
             }
         }
         while (($FoundCount -lt $TargetCount) -and ((Get-Date) -lt $TargetTime))
         
-        if ($FoundCount -lt $TargetCount) {
+        if($FoundCount -lt $TargetCount){
             ol i "Not all events found within the timeframe of $SecondsToTry seconds"
             throw "Not all events found within the timeframe of $SecondsToTry seconds"
         } 
-        else {
+        else{
             ol i "All Events found!"
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
         $Session | Remove-PSSession -ErrorAction Ignore
         Write-Progress -Completed -Activity "Searching"
     }

@@ -22,56 +22,56 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Install-DryPacker { 
+function Install-DryPacker{ 
     [CmdletBinding()]
-    param (
+    param(
         [string]$PackerTestedVersion
     )
     
-    try {
-        if (-not (Test-DryExeAvailability -Exe 'packer.exe')) {
-            if (Test-DryElevated) {
+    try{
+        if(-not (Test-DryExeAvailability -Exe 'packer.exe')){
+            if(Test-DryElevated){
                 & choco install packer -y
-                if (Test-DryExeAvailability -Exe 'packer.exe') {
+                if(Test-DryExeAvailability -Exe 'packer.exe'){
                     $PackerVersion = & packer.exe -version
-                    if ($PackerVersion -ge $PackerTestedVersion) {
+                    if($PackerVersion -ge $PackerTestedVersion){
                         ol i @('Packer',"v$PackerVersion")
                     }
-                    else {
+                    else{
                         ol w 'Restart shell to verify install of packer'
                     }
                 }
-                else {
+                else{
                     ol w 'Restart shell to verify install of packer'
                 }
             }
-            else {
+            else{
                 throw "Install at least Packer v$PackerTestedVersion or newer to produce images with DryImage"
             }
         }
-        else {
+        else{
             $PackerVersion = & packer.exe -version
-            if (-not ($PackerVersion -ge $PackerTestedVersion)) {
-                if (Test-DryElevated) {
+            if(-not ($PackerVersion -ge $PackerTestedVersion)){
+                if(Test-DryElevated){
                     & choco upgrade packer -y
                     $PackerVersion = & packer.exe -version
-                    if ($PackerVersion -ge $PackerTestedVersion) {
+                    if($PackerVersion -ge $PackerTestedVersion){
                         ol i @('Packer',"v$PackerVersion")
                     }
-                    else {
+                    else{
                         ol w 'Restart shell to verify install of packer'
                     }
                 }
-                else {
+                else{
                     throw "Install at least Packer v$PackerTestedVersion or newer to produce images with DryImage"
                 }
             }
-            else {
+            else{
                 ol i @('Packer',"v$PackerVersion")
             }
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

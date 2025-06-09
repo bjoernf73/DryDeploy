@@ -22,27 +22,27 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Install-DryChocolatey { 
+function Install-DryChocolatey{ 
     [CmdLetBinding()]
-    param ()
+    param()
 
-    try {
+    try{
         $ChocoInstallUri = 'https://chocolatey.org/install.ps1'
-        if (-not (Test-DryExeAvailability -Exe 'choco.exe')) {
-            if (Test-DryElevated) {
+        if(-not (Test-DryExeAvailability -Exe 'choco.exe')){
+            if(Test-DryElevated){
                 Set-ExecutionPolicy Bypass -Scope Process -Force
                 Invoke-WebRequest -Uri "$ChocoInstallUri" -UseBasicParsing -ErrorAction Stop | 
                 Invoke-Expression -ErrorAction Stop
             }
-            else {
+            else{
                 throw "To install chocolatey, you must elevate (i.e. 'Run as Administrator')"
             }
         }
-        else {
+        else{
             ol v "Chocolatey is installed"
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

@@ -19,8 +19,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Split-DryString {
-    param (
+function Split-DryString{
+    param(
         [Parameter(Mandatory,HelpMessage="The string to split into chunks of a certain maximum length")]
         [ValidateNotNullOrEmpty()]
         [string]
@@ -56,32 +56,32 @@ function Split-DryString {
         #  - the charachter following the chunk is not a whitespace
         #  - the last character of the chunk is not a whitespace
         # If such a whitespace is found, we split at that instead
-        if ($String.Length -gt ($i+$Chunk.Length+1) ) {
-            if ( ($Chunk.Length -eq $Length) -and ( $String.Substring($i+$Chunk.Length,1) -ne ' ') -and ( $Chunk.Substring($Chunk.Length-1) -ne ' ') ) {
+        if($String.Length -gt ($i+$Chunk.Length+1) ){
+            if( ($Chunk.Length -eq $Length) -and ( $String.Substring($i+$Chunk.Length,1) -ne ' ') -and ( $Chunk.Substring($Chunk.Length-1) -ne ' ') ){
                 $LastWhiteSpace = ($Chunk.Substring($Chunk.Length-$WhiteSpaceAtEndChars)).LastIndexOf(' ')
-                if ($LastWhiteSpace -ge 0) {
+                if($LastWhiteSpace -ge 0){
                     $cutindex = $WhiteSpaceAtEndChars - ($LastWhiteSpace+1)
                     $Chunks += ($String.Substring($i,$Length-$cutindex)).Trim()
                     $i += $Length-$cutindex
                 }
-                else {
+                else{
                     # No Whitespace found
                     $Chunks += ($String.Substring($i,$Length)).Trim()
                     $i += $Length
                 }
             }
-            else {
+            else{
                 # Just add to chunks and add $Length to $i
                 $Chunks += ($String.Substring($i,$Length)).Trim()
                 $i += $Length
             }
         }
-        else {
+        else{
             $Chunks += ($String.Substring($i,$Length)).Trim()
             $i += $Length
         }
     }
-    if (($String.Substring($i)).Trim() -ne '') {
+    if(($String.Substring($i)).Trim() -ne ''){
         $Chunks += $String.Substring($i)
     }
     $Chunks

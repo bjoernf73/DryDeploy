@@ -19,27 +19,27 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Get-DryUtilsPSObjectCopy {
+function Get-DryUtilsPSObjectCopy{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory,HelpMessage="The Object to make an unreferenced copy from")]
         [PSObject]$Object,
 
         [Parameter(HelpMessage="Properties to add or change")]
-        [HashTable]$Properties
+        [hashtable]$Properties
     )
   
     [PSObject]$Copy = $Object | ConvertTo-Json -Depth 100 -Compress -ErrorAction Stop | 
     ConvertFrom-Json -ErrorAction Stop
     
     # Will only work on properties at root though
-    if ($Properties) {
-        foreach ($Key in $Properties.Keys) {
-            if ($null -eq $Object."$Key") {
+    if($Properties){
+        foreach($Key in $Properties.Keys){
+            if($null -eq $Object."$Key"){
                 Write-Host "The Property '$Key' does not exist!"
                 $Object | Add-Member -MemberType NoteProperty -Name $Key -Value $Properties["$Key"]
             }
-            else {
+            else{
                 Write-Warning "The Property '$Key' existed on the object already" -WarningAction Continue
                 $Object."$Key" = $Properties["$Key"]
             }

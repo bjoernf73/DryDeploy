@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Get-DryFromJson {
+function Get-DryFromJson{
     [CmdletBinding()]
-    param (
+    param(
         [ValidateScript({(Test-Path $_ -PathType 'leaf') -and (($_ -match ".jsonc$") -or ($_ -match ".json$"))})]
         [Parameter(Mandatory,Position=0,ParameterSetName='StringPath')]
         [System.String]
@@ -40,16 +40,16 @@ function Get-DryFromJson {
         [System.String]
         $MaybePath
     )
-    try {
-        switch ($PSCmdlet.ParameterSetName) {
-            'StringPath' {
+    try{
+        switch($PSCmdlet.ParameterSetName){
+            'StringPath'{
                 ol d 'Trying to get file from [string]',$Path
                 [string]$StrPath = $Path  
                 [System.IO.FileInfo]$File = Get-ChildItem -Path $Path -ErrorAction Stop
                 [PSCustomObject]((($File | Get-Content -Raw -ErrorAction Stop) -replace '("(\\.|[^\\"])*")|/\*[\S\s]*?\*/|//.*', '$1') | 
                 ConvertFrom-Json -ErrorAction Stop)
             }
-            'FileInfoPath' {
+            'FileInfoPath'{
                 ol d 'Trying to get file from [fileinfo]',$File.FullName
                 [string]$StrPath = $File.FullName
                 # this seems counter intuitive, but the system.io.fileinfo object may just be a string cast to [system.io.fileinfo]
@@ -57,32 +57,32 @@ function Get-DryFromJson {
                 [PSCustomObject]((($File | Get-Content -Raw -ErrorAction Stop) -replace '("(\\.|[^\\"])*")|/\*[\S\s]*?\*/|//.*', '$1') | 
                 ConvertFrom-Json -ErrorAction Stop)
             }
-            'MaybeStringPath' {
-                try {
+            'MaybeStringPath'{
+                try{
                     ol d 'Trying to get file from [string]',$MaybePath
                     [System.IO.FileInfo]$File = Get-ChildItem -Path $MaybePath -ErrorAction Stop
                     [PSCustomObject]((($File | Get-Content -Raw -ErrorAction Stop) -replace '("(\\.|[^\\"])*")|/\*[\S\s]*?\*/|//.*', '$1') | 
                     ConvertFrom-Json -ErrorAction Stop)
                 }
-                catch [System.Management.Automation.ItemNotFoundException] {
+                catch [System.Management.Automation.ItemNotFoundException]{
                     # The file doesn't exist - return $null
                     return $null
                 }
-                catch {
+                catch{
                     $PSCmdlet.ThrowTerminatingError($_)
                 } 
             }
         }        
     }
-    catch {
-        switch ($PSCmdlet.ParameterSetName) {
-            'StringPath' {
+    catch{
+        switch($PSCmdlet.ParameterSetName){
+            'StringPath'{
                 ol d 'Failed getting',$Path
             }
-            'FileInfoPath' {
+            'FileInfoPath'{
                 ol d 'Failed getting',$File
             }
-            'MaybeStringPath' {
+            'MaybeStringPath'{
                 ol d 'Failed getting',$MaybePath
             }
         }

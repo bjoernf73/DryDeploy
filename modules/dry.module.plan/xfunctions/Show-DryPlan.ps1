@@ -20,9 +20,9 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Show-DryPlan {
+function Show-DryPlan{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [Plan] $Plan,
 
@@ -40,9 +40,9 @@ function Show-DryPlan {
         [PSObject] $ConfigCombo
     )
 
-    function Format-DryDescriptionString {
+    function Format-DryDescriptionString{
         [CmdletBinding()]
-        param (
+        param(
             [Parameter(Mandatory)]
             [AllowEmptyString()]  
             [string]$String, 
@@ -51,41 +51,41 @@ function Show-DryPlan {
 
             [int]$Postbuffer = 3
         )
-        try {
+        try{
             $TargetMessageLength = $Host.UI.RawUI.WindowSize.Width - ($OffSet + $Postbuffer)
-            if ($TargetMessageLength -lt 10) {
-                if (($GLOBAL:dry_var_global_WarnOnTooNarrowConsole -eq $true) -or ($null -eq $GLOBAL:dry_var_global_WarnOnTooNarrowConsole)) {
+            if($TargetMessageLength -lt 10){
+                if(($GLOBAL:dry_var_global_WarnOnTooNarrowConsole -eq $true) -or ($null -eq $GLOBAL:dry_var_global_WarnOnTooNarrowConsole)){
                     ol w "Increase console width for messages to display properly"
                     $GLOBAL:dry_var_global_WarnOnTooNarrowConsole = $false
                 }
                 $TargetMessageLength = 10
             } 
         }
-        catch {
-            if (($GLOBAL:dry_var_global_WarnOnTooNarrowConsole -eq $true) -or ($null -eq $GLOBAL:dry_var_global_WarnOnTooNarrowConsole)) {
+        catch{
+            if(($GLOBAL:dry_var_global_WarnOnTooNarrowConsole -eq $true) -or ($null -eq $GLOBAL:dry_var_global_WarnOnTooNarrowConsole)){
                 ol w "Increase console width for messages to display properly"
                 $GLOBAL:dry_var_global_WarnOnTooNarrowConsole = $false
             }
             $TargetMessageLength = 10
         }
         
-        try {
-            if ($String.Length -le $TargetMessageLength) {
+        try{
+            if($String.Length -le $TargetMessageLength){
                 $String
             }
-            else {
+            else{
                 $String.Substring(0,($TargetMessageLength-3)) + '...'
             }
         }
-        catch {
+        catch{
             $PSCmdlet.ThrowTerminatingError($_)
         }
     }
 
 
-    function Get-DryConfigComboString {
+    function Get-DryConfigComboString{
         [CmdletBinding()]
-        param (
+        param(
             [Parameter(Mandatory)]
             [string]$RepoType,
 
@@ -97,16 +97,16 @@ function Show-DryPlan {
         [string]$RepoString = ''
         [int]$RepoTypeStringLength = $LongestResourceString + 11
         [string]$RepoString = $RepoType
-        do {
+        do{
             $RepoString = "$RepoString "
         } while ($RepoString.length -le $RepoTypeStringLength)
         [string]$RepoString = $RepoString + $Path
         $RepoString
     }
 
-    function Get-DryPlanString {
+    function Get-DryPlanString{
         [CmdletBinding()]
-        param (
+        param(
             [Parameter(Mandatory)]
             [psobject]$Action,
 
@@ -119,15 +119,15 @@ function Show-DryPlan {
             [Switch]$ShowDeslected
         )
  
-        if ($Action.Phase -eq 0) {
+        if($Action.Phase -eq 0){
             $Action.Phase = " "
         }
         # PlanO is exactly 5 chars. If it is 0, make empty
         [string]$OrderStr = $Action.PlanO  
-        if ($OrderStr -eq '0') {
+        if($OrderStr -eq '0'){
             [string]$OrderStr = ' '
         }
-        While ($OrderStr.length -lt 5) {
+        While ($OrderStr.length -lt 5){
             $OrderStr = "$OrderStr "
         }
         $PlanString += $OrderStr
@@ -135,7 +135,7 @@ function Show-DryPlan {
         # resource is 3 chars more than $LongestResourceString
         [string]$ResourceStr = $Action.Resource  
         $ResourceStr = "   $ResourceStr"
-        Do {
+        Do{
             $ResourceStr = "$ResourceStr "
         } 
         While ($ResourceStr.length -le ($LongestResourceString+6))
@@ -143,7 +143,7 @@ function Show-DryPlan {
 
         # action is 3 chars more than $LongestActionString
         [string]$ActionStr = $Action.Action
-        Do {
+        Do{
             $ActionStr = "$ActionStr "
         } 
         While ($ActionStr.length -le ($LongestActionString+3))
@@ -151,7 +151,7 @@ function Show-DryPlan {
 
         # Phase is 7 chars exactly
         [string]$PhaseStr = $action.Phase
-        Do {
+        Do{
             $PhaseStr = "$PhaseStr "
         } 
         While ($PhaseStr.length -le 7)
@@ -159,14 +159,14 @@ function Show-DryPlan {
 
          # Role is 3 chars more than $LongestRoleString
          [string]$RoleStr = $Action.Role
-         Do {
+         Do{
              $RoleStr = "$RoleStr "
          } 
          While ($RoleStr.length -le ($LongestRoleString+3))
          $PlanString = $PlanString + $RoleStr
 
         [string]$StatusStr = $action.Status
-        Do {
+        Do{
             $StatusStr = "$StatusStr "
         } 
         While ($StatusStr.length -le 9)
@@ -175,7 +175,7 @@ function Show-DryPlan {
         $PlanString = "$PlanString   "
 
         [string]$OrderStr = $Action.ActionO
-        if ($OrderStr -eq '0') {
+        if($OrderStr -eq '0'){
             [string]$OrderStr = ' '
         }
         While ($OrderStr.length -lt 8){
@@ -199,18 +199,18 @@ function Show-DryPlan {
     $NumberOfActions       = 0
 
     $Plan.Actions | 
-    foreach-Object {
+    foreach-Object{
         $NumberOfActions++
         
-        if ($LongestResourceString -lt ($_.ResourceName).length) {
+        if($LongestResourceString -lt ($_.ResourceName).length){
             $LongestResourceString = ($_.ResourceName).length
         }
         
-        if ($LongestActionString -lt ($_.Action).length) {
+        if($LongestActionString -lt ($_.Action).length){
             $LongestActionString = ($_.Action).length
         }
 
-        if ($LongestRoleString -lt ($_.Role).length) {
+        if($LongestRoleString -lt ($_.Role).length){
             $LongestRoleString = ($_.Role).length
         }
     }
@@ -218,21 +218,21 @@ function Show-DryPlan {
     $PlanArray = @()   # Actions that are in Plan, but not selected during -Apply, or -Apply is noty run yet
     $NoPlanArray = @() # Actions that are in not in Plan
 
-    for ($ActionOrderIndex = 1; $ActionOrderIndex -le $NumberOfActions; $ActionOrderIndex++) {
+    for ($ActionOrderIndex = 1; $ActionOrderIndex -le $NumberOfActions; $ActionOrderIndex++){
 
         $CurrentAction = $Plan.Actions | 
-        Where-Object { 
+        Where-Object{ 
             $_.ActionOrder -eq $ActionOrderIndex 
         }
 
-        if ($null -eq $CurrentAction){
+        if($null -eq $CurrentAction){
             throw "Found no action with index $ActionOrderIndex"
         }
-        else {
+        else{
             ol d "Found action with index $ActionOrderIndex ($($CurrentAction.ResourceName) - $($CurrentAction.Action))"
         }
 
-        if ($CurrentAction.ApplySelected) {
+        if($CurrentAction.ApplySelected){
             $PlanArray+= [PSCustomObject]@{
                 Order       = $CurrentAction.ApplyOrder
                 PlanO       = $CurrentAction.PlanOrder
@@ -245,7 +245,7 @@ function Show-DryPlan {
                 Description = $CurrentAction.Description
             }
         }
-        elseif ($CurrentAction.PlanSelected) {
+        elseif($CurrentAction.PlanSelected){
             $PlanArray+= [PSCustomObject]@{
                 Order       = 0
                 PlanO       = $CurrentAction.PlanOrder
@@ -258,7 +258,7 @@ function Show-DryPlan {
                 Description = $CurrentAction.Description
             }
         }
-        else {
+        else{
             $NoPlanArray+= [PSCustomObject]@{
                 Order       = 0
                 PlanO       = 0
@@ -316,7 +316,7 @@ function Show-DryPlan {
         Description = ' ' * $Header.Description.length
     }
 
-    if ($ShowConfigCombo) {
+    if($ShowConfigCombo){
         ol i " "
         ol i $(Get-DryConfigComboString -LongestResourceString $LongestResourceString -RepoType $ConfigComboHeader.RepoType -Path $ConfigComboHeader.Path) -Fore DarkGray
         ol i $(Get-DryConfigComboString -LongestResourceString $LongestResourceString -RepoType $ConfigComboLine.RepoType -Path $ConfigComboLine.Path) -Fore DarkGray
@@ -326,19 +326,19 @@ function Show-DryPlan {
         ol i " "
     }
     
-    if ($PlanArray.count -gt 0) {
+    if($PlanArray.count -gt 0){
         
         ol i " "
-        switch ($Mode) {
-            'Plan' {
+        switch($Mode){
+            'Plan'{
                 ol i "Plan" -sh -air
                 ol i " " 
             }
-            'Apply' {
+            'Apply'{
                 ol i "Apply" -sh -air
                 ol i " "
             }
-            default {
+            default{
                 ol i "." -sh
                 ol i " "
             }
@@ -358,11 +358,11 @@ function Show-DryPlan {
         }
         ol i $(Get-DryPlanString @GetDryPlanStringParams)
         $ResourceString = ''
-        foreach ($Action in $PlanArray) {
-            if (
+        foreach($Action in $PlanArray){
+            if(
                 ($Action.Resource -ne $ResourceString) -And 
                 ($ResourceString -ne '')
-            ) {
+            ){
                 $GetDryPlanStringParams = @{
                     Action = $Separatorline
                     LongestActionString = $LongestActionString
@@ -373,29 +373,29 @@ function Show-DryPlan {
             }
             $ResourceString = $Action.Resource
             
-            if ($Action.Status -eq 'Failed') {
+            if($Action.Status -eq 'Failed'){
                 $Fore = [System.ConsoleColor]'Red'
             }
-            elseif ($Action.Status -eq 'Success') {
+            elseif($Action.Status -eq 'Success'){
                 $Fore = [System.ConsoleColor]'Green'
             }
-            elseif ($Action.Status -eq 'Retrying') {
+            elseif($Action.Status -eq 'Retrying'){
                 $Fore = [System.ConsoleColor]'DarkYellow'
             }
-            elseif ($Action.Status -eq 'Starting') {
+            elseif($Action.Status -eq 'Starting'){
                 $Fore = [System.ConsoleColor]'Yellow'
             }
-            elseif ($Action.Order -eq 0) {
-                switch ($Mode) {
-                    'Plan' {
+            elseif($Action.Order -eq 0){
+                switch($Mode){
+                    'Plan'{
                         $Fore = [System.ConsoleColor]'White'
                     }
-                    default {
+                    default{
                         $Fore = [System.ConsoleColor]'DarkGray'
                     }
                 }
             }
-            else {
+            else{
                 $Fore = [System.ConsoleColor]'White'
             }
             $GetDryPlanStringParams = @{
@@ -409,8 +409,8 @@ function Show-DryPlan {
     }
 
     # Show Actions not in plan only if $ShowDeselected
-    if ($ShowDeselected) {
-        if ($NoPlanArray.count -gt 0) {
+    if($ShowDeselected){
+        if($NoPlanArray.count -gt 0){
             ol i " "
             ol i " "
             ol i "Deselected" -sh -air -Fore 'DarkGray'
@@ -429,7 +429,7 @@ function Show-DryPlan {
                 LongestRoleString     = $LongestRoleString
             }
             ol i $(Get-DryPlanString @GetDryPlanStringParams) -Fore 'DarkGray'
-            foreach ($Action in $NoPlanArray) {
+            foreach($Action in $NoPlanArray){
                 $GetDryPlanStringParams = @{
                     Action                = $Action
                     LongestActionString   = $LongestActionString

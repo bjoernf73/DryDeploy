@@ -19,15 +19,15 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Start-DryUtilsSleep {
+function Start-DryUtilsSleep{
     [CmdletBinding()]
-    param (
+    param(
         [int]$Seconds,
 
         [string]$Message = "Sleeping $Seconds seconds..."
     )
     $TargetTime = (Get-Date).AddSeconds($Seconds)
-    while($TargetTime -gt (Get-Date)) {
+    while($TargetTime -gt (Get-Date)){
         $SecondsLeft = $TargetTime.Subtract((Get-Date)).TotalSeconds
         $Percent = ($Seconds - $SecondsLeft) / $Seconds * 100
         Write-Progress -Activity "Sleeping" -Status "$Message" -SecondsRemaining $SecondsLeft -PercentComplete $Percent

@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Get-DryCredential {
+function Get-DryCredential{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory,HelpMessage="The Alias of the credential to get")]
         [string]$Alias,
 
@@ -29,16 +29,16 @@ function Get-DryCredential {
         [string]$EnvConfig
     )
 
-    try {
+    try{
         $DryCredentials = [Credentials]::New($GLOBAL:dry_var_global_CredentialsFile)
-        if ($EnvConfig) {
+        if($EnvConfig){
             return [PSCredential] $DryCredentials.GetCredential($Alias,$EnvConfig)
         }
-        else {
+        else{
             return [PSCredential] $DryCredentials.GetCredential($Alias,$GLOBAL:dry_var_global_ConfigCombo.envconfig.name)
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }    
 }

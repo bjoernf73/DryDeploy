@@ -1,6 +1,6 @@
 using Namespace System.Collections.Generic
 using Namespace System.Collections
-class Resource {
+class Resource{
     [string]$Name
     [string]$Role 
     [string]$Role_Short_Name
@@ -28,7 +28,7 @@ class Resource {
         [PSCustomObject]$ConfigCombo,
         [PSCustomObject]$Configuration,
         [PSCustomObject]$Options
-    ) {
+    ){
         $This.Name                     = $Name
         $This.role_short_name          = $role_short_name
         $This.Role                     = $Role
@@ -44,13 +44,13 @@ class Resource {
         $This.Options                  = $Options
 
         Remove-Variable -Name BuildTemplate -ErrorAction Ignore
-        $BuildTemplate = $Configuration.build.roles | Where-Object {
+        $BuildTemplate = $Configuration.build.roles | Where-Object{
             $_.role -eq $Role
         }
-        if ($null -eq $BuildTemplate) {
+        if($null -eq $BuildTemplate){
             throw "The Build does not contain a Role '$($This.Role)'"
         }
-        elseif ($BuildTemplate -is [array]) {
+        elseif($BuildTemplate -is [array]){
             throw "The Build contains multiple Roles matching '$($This.Role)'"
         }
         # Get a copy of the Build Object. The Build is now instantiated by a Resource, 

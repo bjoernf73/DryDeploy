@@ -48,9 +48,9 @@ Get-DryDC @params -DomainFQDN -NoPing
 Return's DomainFQDN of the DC at the $Resource's site, if there 
 is one, even though it's down (unpingable)
 #>
-function Get-DryDC {
+function Get-DryDC{
     [CmdLetBinding(DefaultParameterSetName='IP')]
-    param (
+    param(
         [Parameter(Mandatory,ParameterSetName='DomainFQDN',
         HelpMessage='Returnes FQDN of the DC')]
         [Switch]$DomainFQDN,
@@ -70,18 +70,18 @@ function Get-DryDC {
         [PSObject]$Resource
     )
     
-    try {
-        $Role = $Configuration.RoleMetaConfigs | Where-Object {
+    try{
+        $Role = $Configuration.RoleMetaConfigs | Where-Object{
             $_.Role -eq "$Role"
         }
-        if ($Role."$Property") {
+        if($Role."$Property"){
             return $Role."$Property"
         }
-        else {
+        else{
             throw "The property $Property does not exist on Role $Role"
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

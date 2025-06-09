@@ -21,6 +21,6 @@
 
 $FunctionsPath = "$PSScriptRoot\xfunctions\*.ps1"
 $Functions     = Resolve-Path -Path $FunctionsPath -ErrorAction Stop
-foreach ($function in $Functions) {
+foreach($function in $Functions){
     . $Function.Path
 }

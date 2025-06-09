@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Test-DryWinRM {
+function Test-DryWinRM{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory,HelpMessage="IP, FQDN or NetBIOS Host Name")]
         [string]$Computername,
 
@@ -32,7 +32,7 @@ function Test-DryWinRM {
         [PSObject]$SessionConfig
     )
     [Bool]$AvailableSession = $false
-    try {
+    try{
         $NewDrySessionParams = @{
             ComputerName  = $ComputerName
             Credential    = $Credential
@@ -42,13 +42,13 @@ function Test-DryWinRM {
             MaxRetries    = 3
         }
         $Session = New-DrySession @NewDrySessionParams
-        if ($Session.Availability -eq "Available") {
+        if($Session.Availability -eq "Available"){
             $AvailableSession = $true
             $Session | Remove-PSSession -ErrorAction Ignore 
         }
         $AvailableSession
     }
-    catch {
+    catch{
         $AvailableSession
     }
 }

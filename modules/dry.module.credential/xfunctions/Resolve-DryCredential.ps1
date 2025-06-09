@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Resolve-DryCredential {
+function Resolve-DryCredential{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(ParametersetName="InputObject",Mandatory,HelpMessage="Expects an object of in which one or more property values matches the the replacement string '___cred___*___'")]
         [PSCustomObject]$InputObject,
 
@@ -30,38 +30,38 @@ function Resolve-DryCredential {
         [string]$InputString
     )
     
-    try {
-        if ($InputObject) {
+    try{
+        if($InputObject){
             # make a copy of the object, or else the changes 
             # may be written back to the original object
             $CopyObject = $InputObject.PSObject.Copy()
             # loop through all properties of $InputObject
             $CopyObject.PSObject.Properties | 
-                Foreach-Object {
+                Foreach-Object{
                 $PropertyName = $_.Name
                 $PropertyValue = $_.Value
                 # If Key is a string, we can do the replacement. If it is an
                 # object, we must make a nested call. If array, make nested
                 # call for each element of the array
-                if (($PropertyValue -is [string]) -and ($PropertyValue -match "___cred___.*___")) {
+                if(($PropertyValue -is [string]) -and ($PropertyValue -match "___cred___.*___")){
                     # Call Resolve-DryPassword that returns the replaced string
                     $PropertyValue = Resolve-DryCredential -InputString $PropertyValue  
                 }
-                elseif ($PropertyValue -is [PSObject]) {
+                elseif($PropertyValue -is [PSObject]){
                     # make a nested call to this function
                     $PropertyValue = Resolve-DryCredential -InputObject $PropertyValue 
                 } 
-                elseif ($PropertyValue -is [Array]) {
+                elseif($PropertyValue -is [array]){
                     # nested call for each array element
-                    $PropertyValue = @(  $PropertyValue | Foreach-Object { 
-                        if (($_ -is [string]) -and ($_ -match "___cred___.*___")) {
+                    $PropertyValue = @(  $PropertyValue | Foreach-Object{ 
+                        if(($_ -is [string]) -and ($_ -match "___cred___.*___")){
                             Resolve-DryCredential -InputText $_ 
                         } 
-                        elseif (($_ -is [string]) -and ($_ -notmatch "___cred___.*___")) {
+                        elseif(($_ -is [string]) -and ($_ -notmatch "___cred___.*___")){
                             # just return the original object
                             $_
                         }
-                        else {
+                        else{
                             Resolve-DryCredential -InputObject $_ 
                         }
                     })
@@ -70,14 +70,14 @@ function Resolve-DryCredential {
             }
             return $CopyObject
         } 
-        else {
+        else{
             # Get the credential alias which is <name> in '___pwd___<name>___'
             $CredentialName = $InputString.Substring(10,($InputString.length-13))
             $CredObject = Get-DryCredential -Alias $CredentialName -EnvConfig $GLOBAL:dry_var_global_ConfigCombo.envconfig.name
             $CredObject
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

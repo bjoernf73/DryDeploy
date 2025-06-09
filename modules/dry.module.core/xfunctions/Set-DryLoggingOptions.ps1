@@ -48,16 +48,16 @@
   None. Set-DryLoggingOptions does not generate any output.
 
 #>
-function Set-DryLoggingOptions {
+function Set-DryLoggingOptions{
     [cmdletbinding()]
-    param (
+    param(
         [PSObject] $SystemConfig,
         [PSObject] $UserConfig,
         [string]   $WorkingDirectory,
         [string]   $ArchiveDirectory,
         [Switch]   $NoLog
     )
-    try {
+    try{
         # The function defines all it's Defaults, then apply the SystemConfig, then the UserConfig, then relevant command line options
         $LoggingOptions = [PSCustomObject]@{
             log_to_file                = $true
@@ -79,60 +79,60 @@ function Set-DryLoggingOptions {
         $Streams  = @('verbose','debug','warning','information','error','input','success','fail')
 
         # set properties defined by the system
-        if ($null -ne $SystemConfig.log_to_file)                {$LoggingOptions.log_to_file =                $SystemConfig.log_to_file}
-        if ($null -ne $SystemConfig.path)                       {$LoggingOptions.path =                       $SystemConfig.path}
-        if ($null -ne $SystemConfig.console_width_threshold)    {$LoggingOptions.console_width_threshold =    $SystemConfig.console_width_threshold}
-        if ($null -ne $SystemConfig.warn_on_too_narrow_console) {$LoggingOptions.warn_on_too_narrow_console = $SystemConfig.warn_on_too_narrow_console}
-        if ($null -ne $SystemConfig.array_first_element_length) {$LoggingOptions.array_first_element_length = $SystemConfig.array_first_element_length}
-        if ($null -ne $SystemConfig.post_buffer)                {$LoggingOptions.post_buffer =                $SystemConfig.post_buffer}
+        if($null -ne $SystemConfig.log_to_file)               {$LoggingOptions.log_to_file =                $SystemConfig.log_to_file}
+        if($null -ne $SystemConfig.path)                      {$LoggingOptions.path =                       $SystemConfig.path}
+        if($null -ne $SystemConfig.console_width_threshold)   {$LoggingOptions.console_width_threshold =    $SystemConfig.console_width_threshold}
+        if($null -ne $SystemConfig.warn_on_too_narrow_console){$LoggingOptions.warn_on_too_narrow_console = $SystemConfig.warn_on_too_narrow_console}
+        if($null -ne $SystemConfig.array_first_element_length){$LoggingOptions.array_first_element_length = $SystemConfig.array_first_element_length}
+        if($null -ne $SystemConfig.post_buffer)               {$LoggingOptions.post_buffer =                $SystemConfig.post_buffer}
 
         $Streams.foreach({
-            if ($null -ne $SystemConfig."$_".foreground_color) {$LoggingOptions."$_".foreground_color = $SystemConfig."$_".foreground_color}
-            if ($null -ne $SystemConfig."$_".background_color) {$LoggingOptions."$_".background_color = $SystemConfig."$_".background_color}
-            if ($null -ne $SystemConfig."$_".display_location) {$LoggingOptions."$_".display_location = $SystemConfig."$_".display_location}
-            if ($null -ne $SystemConfig."$_".text_type)        {$LoggingOptions."$_".text_type =        $SystemConfig."$_".text_type}
+            if($null -ne $SystemConfig."$_".foreground_color){$LoggingOptions."$_".foreground_color = $SystemConfig."$_".foreground_color}
+            if($null -ne $SystemConfig."$_".background_color){$LoggingOptions."$_".background_color = $SystemConfig."$_".background_color}
+            if($null -ne $SystemConfig."$_".display_location){$LoggingOptions."$_".display_location = $SystemConfig."$_".display_location}
+            if($null -ne $SystemConfig."$_".text_type)       {$LoggingOptions."$_".text_type =        $SystemConfig."$_".text_type}
             
             # success and fail also have a status_text property
-            if ($_ -in @('success','fail')) {
-                if ($null -ne $SystemConfig."$_".status_text)  {$LoggingOptions."$_".status_text =      $SystemConfig."$_".status_text}
+            if($_ -in @('success','fail')){
+                if($null -ne $SystemConfig."$_".status_text) {$LoggingOptions."$_".status_text =      $SystemConfig."$_".status_text}
             }
         })
 
         # set properties defined by the user
-        if ($null -ne $UserConfig.log_to_file)                {$LoggingOptions.log_to_file =                $UserConfig.log_to_file}
-        if ($null -ne $UserConfig.path)                       {$LoggingOptions.path =                       $UserConfig.path}
-        if ($null -ne $UserConfig.console_width_threshold)    {$LoggingOptions.console_width_threshold =    $UserConfig.console_width_threshold}
-        if ($null -ne $UserConfig.warn_on_too_narrow_console) {$LoggingOptions.warn_on_too_narrow_console = $UserConfig.warn_on_too_narrow_console}
-        if ($null -ne $UserConfig.array_first_element_length) {$LoggingOptions.array_first_element_length = $UserConfig.array_first_element_length}
-        if ($null -ne $UserConfig.post_buffer)                {$LoggingOptions.post_buffer =                $UserConfig.post_buffer}
+        if($null -ne $UserConfig.log_to_file)               {$LoggingOptions.log_to_file =                $UserConfig.log_to_file}
+        if($null -ne $UserConfig.path)                      {$LoggingOptions.path =                       $UserConfig.path}
+        if($null -ne $UserConfig.console_width_threshold)   {$LoggingOptions.console_width_threshold =    $UserConfig.console_width_threshold}
+        if($null -ne $UserConfig.warn_on_too_narrow_console){$LoggingOptions.warn_on_too_narrow_console = $UserConfig.warn_on_too_narrow_console}
+        if($null -ne $UserConfig.array_first_element_length){$LoggingOptions.array_first_element_length = $UserConfig.array_first_element_length}
+        if($null -ne $UserConfig.post_buffer)               {$LoggingOptions.post_buffer =                $UserConfig.post_buffer}
         
         $Streams.foreach({
-            if ($null -ne $UserConfig."$_".foreground_color) {$LoggingOptions."$_".foreground_color = $UserConfig."$_".foreground_color}
-            if ($null -ne $UserConfig."$_".background_color) {$LoggingOptions."$_".background_color = $UserConfig."$_".background_color}
-            if ($null -ne $UserConfig."$_".display_location) {$LoggingOptions."$_".display_location = $UserConfig."$_".display_location}
-            if ($null -ne $UserConfig."$_".text_type)        {$LoggingOptions."$_".text_type =        $UserConfig."$_".text_type}
+            if($null -ne $UserConfig."$_".foreground_color){$LoggingOptions."$_".foreground_color = $UserConfig."$_".foreground_color}
+            if($null -ne $UserConfig."$_".background_color){$LoggingOptions."$_".background_color = $UserConfig."$_".background_color}
+            if($null -ne $UserConfig."$_".display_location){$LoggingOptions."$_".display_location = $UserConfig."$_".display_location}
+            if($null -ne $UserConfig."$_".text_type)       {$LoggingOptions."$_".text_type =        $UserConfig."$_".text_type}
             
             # success and fail also have a status_text property
-            if ($_ -in @('success','fail')) {
-                if ($null -ne $UserConfig."$_".status_text)  {$LoggingOptions."$_".status_text =      $UserConfig."$_".status_text}
+            if($_ -in @('success','fail')){
+                if($null -ne $UserConfig."$_".status_text) {$LoggingOptions."$_".status_text =      $UserConfig."$_".status_text}
             }
         })
     
         # nolog may be specified on the command line and overrides any property log_to_file specified other places
-        if ($nolog) {
+        if($nolog){
             $LoggingOptions.log_to_file = $false
         }
         Set-Variable -Name LoggingOptions -Value $LoggingOptions -Scope GLOBAL
 
         # Make path to logfile global, archive existing log and create new log file
-        if (($LoggingOptions.path) -and ($LoggingOptions.log_to_file -eq $true)) {
-            if (Test-Path -Path $LoggingOptions.path -ErrorAction SilentlyContinue) {
+        if(($LoggingOptions.path) -and ($LoggingOptions.log_to_file -eq $true)){
+            if(Test-Path -Path $LoggingOptions.path -ErrorAction SilentlyContinue){
                 Save-DryArchiveFile -ArchiveFile $LoggingOptions.path -ArchiveFolder $ArchiveDirectory     
             }
             New-Item -Path $LoggingOptions.path -ItemType File -Force | Out-Null
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

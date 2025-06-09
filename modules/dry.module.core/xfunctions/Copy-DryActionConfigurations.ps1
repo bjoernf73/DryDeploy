@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Copy-DryActionConfigurations {
+function Copy-DryActionConfigurations{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter()]
         [string]$ConfigSourcePath,
 
@@ -32,16 +32,16 @@ function Copy-DryActionConfigurations {
         [string]$ConfigOSSourcePath
     )
     
-    try {
+    try{
         # Make sure TargetFolderPath is empty
-        if (Test-Path -Path $ConfigTargetPath -ErrorAction Ignore) {
+        if(Test-Path -Path $ConfigTargetPath -ErrorAction Ignore){
             ol w "The Target temporary directory exists - removing contents"
             Remove-Item -Path "$ConfigTargetPath\*" -Recurse -Force -Confirm:$false
             Start-Sleep -Seconds 1
         }
         ol i "Copy target","$ConfigTargetPath"
 
-        if ($ConfigSourcePath -ne '') {
+        if($ConfigSourcePath -ne ''){
             ol i "Role source","$ConfigSourcePath"
             # Copy all Role configuration files to $ConfigTargetPath
             ol v "& robocopy.exe `"$ConfigSourcePath`" `"$ConfigTargetPath`" /E"
@@ -49,49 +49,49 @@ function Copy-DryActionConfigurations {
             Tee-Object -Variable RoboOutput | 
             Out-Null
 
-            if ($LASTEXITCODE -gt 7) {
+            if($LASTEXITCODE -gt 7){
                 ol w "Error occurred copying files - robocopy exit code","$LASTEXITCODE"
-                foreach ($Line in $RoboOutput) {
+                foreach($Line in $RoboOutput){
                     ol w "$Line"
                 }
                 throw "Error occurred copying files. Exit code: $LASTEXITCODE"
             }
-            else {
+            else{
                 $LASTEXITCODE = 0
                 $GLOBAL:LASTEXITCODE = 0
-                foreach ($Line in $RoboOutput) {
+                foreach($Line in $RoboOutput){
                     ol v "$Line"
                 }
             }
             Remove-Variable -Name RoboOutput -ErrorAction Ignore
         }
-        else {
+        else{
             ol i "Role source","(none)"
         }
 
-        if ($ConfigOSSourcePath) {
+        if($ConfigOSSourcePath){
             ol i "Copy including OS configs from source","$ConfigOSSourcePath"
             ol v "& robocopy.exe `"$ConfigOSSourcePath`" `"$ConfigTargetPath`" /E"
             & robocopy.exe "$ConfigOSSourcePath" "$ConfigTargetPath" /E  *>&1 | 
             Tee-Object -Variable RoboOutput | 
             Out-Null
 
-            if ($LASTEXITCODE -gt 7) {
+            if($LASTEXITCODE -gt 7){
                 ol w "Error occurred copying files. Exit code","$LASTEXITCODE"
-                foreach ($Line in $RoboOutput) {
+                foreach($Line in $RoboOutput){
                     ol w "$Line"
                 }
                 throw "Error occurred copying files. Exit code: $LASTEXITCODE"
             }
-            else {
-                foreach ($Line in $RoboOutput) {
+            else{
+                foreach($Line in $RoboOutput){
                     ol v "$Line"
                 }
             }
             Remove-Variable -Name RoboOutput -ErrorAction Ignore
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

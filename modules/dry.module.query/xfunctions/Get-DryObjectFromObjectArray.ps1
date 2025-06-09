@@ -19,11 +19,11 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Get-DryObjectFromObjectArray {
+function Get-DryObjectFromObjectArray{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
-        [Array]$ObjectArray,
+        [array]$ObjectArray,
 
         [Parameter(Mandatory,HelpMessage="The object property name that  
         identifies the object")]
@@ -60,56 +60,56 @@ function Get-DryObjectFromObjectArray {
         [Switch]$AllowNoMatch
     )
     
-    try {
-        if ($First -or $Last -or $Number) {
+    try{
+        if($First -or $Last -or $Number){
             $AllowMultipleMatches = $true
         }
 
-        [Array]$MatchObjects = @($ObjectArray | Where-Object {
+        [array]$MatchObjects = @($ObjectArray | Where-Object{
             $_."$IDProperty" -eq "$IDPropertyValue"
         })
 
-        if (($MatchObjects.count -gt 1) -and (-not $AllowMultipleMatches)) {
+        if(($MatchObjects.count -gt 1) -and (-not $AllowMultipleMatches)){
             throw "The ObjectArray contained more than one match. Use '-AllowMultipleMatches' if that should be allowed"
         }
-        if (($MatchObjects.count -eq 0) -and (-not $AllowNoMatch)) {
+        if(($MatchObjects.count -eq 0) -and (-not $AllowNoMatch)){
             throw "The ObjectArray contained no match. Use '-AllowNoMatch' if that should be allowed"
         }
-        if ($null -eq $MatchObjects) {
+        if($null -eq $MatchObjects){
             return $null
         }
-        else {
-            if ($First) {
+        else{
+            if($First){
                 $MatchObject = $MatchObjects[0]
             }
-            elseif ($Last) {
+            elseif($Last){
                 $MatchObject = $MatchObjects[-1]
             }
-            elseif ($Number) {
+            elseif($Number){
                 $n = $Number+1
                 $MatchObject = $MatchObjects[$n]
             }
-            else {
-                if ($MatchObjects.count -eq 1) {
+            else{
+                if($MatchObjects.count -eq 1){
                     $MatchObject = $MatchObjects[0]
                 }
-                else {
+                else{
                     $ReturnMultiple = $true
                 }
             }
 
-            if ($ReturnMultiple) {
+            if($ReturnMultiple){
                 return $MatchObjects
             }
-            else {
+            else{
                 return $MatchObject
             }
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
         $MatchObjects = $null
     }
 }

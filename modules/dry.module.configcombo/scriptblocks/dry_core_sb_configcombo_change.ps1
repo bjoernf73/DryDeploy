@@ -1,7 +1,7 @@
 # Scriptblock for ScriptMethod to read the ConfigCombo
-[scriptblock]$dry_core_sb_configcombo_change = {
+[scriptblock]$dry_core_sb_configcombo_change ={
     [CmdLetBinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [string]$Path,
 
@@ -10,19 +10,19 @@
         [ValidateSet('environment','module')]
         [string]$Type
     )
-    try {
+    try{
         $FullPath = Resolve-DryUtilsFullPath -Path $Path 
         $RootConfigFile = Join-Path -Path $FullPath -ChildPath 'Config.json'
         [PSCustomObject]$RootConfig = Get-DryFromJson -Path $RootConfigFile
-        if ($RootConfig.type -ne "$Type") {
+        if($RootConfig.type -ne "$Type"){
             throw "The root config file '$RootConfigFile' is not of type '$Type'"
         }
-        else {
-            switch ($Type) {
-                'environment' {
+        else{
+            switch($Type){
+                'environment'{
                     $PropTypeName = 'envconfig'
                 }
-                'module' {
+                'module'{
                     $PropTypeName = 'moduleconfig'
                 }
             }
@@ -33,13 +33,13 @@
             $this."$PropTypeName".description  = $RootConfig.description
             $this."$PropTypeName".dependencies = $RootConfig.dependencies."$($this.platform)"."$($this.edition)"
             
-            switch ($Type) {
-                'environment' {
+            switch($Type){
+                'environment'{
                     $this.envconfig.coreconfigpath  = (Join-Path -Path $FullPath -ChildPath 'CoreConfig')
                     $this.envconfig.userconfigpath  = (Join-Path -Path $FullPath -ChildPath 'UserConfig')
                     $this.envconfig.BaseConfigPath    = (Join-Path -Path $FullPath -ChildPath 'BaseConfig')
                 }
-                'module' {
+                'module'{
                     $this.moduleconfig.buildpath       = (Join-Path -Path $FullPath -ChildPath 'Build')
                     $this.moduleconfig.rolespath       = (Join-Path -Path $FullPath -ChildPath 'Roles')
                     $this.moduleconfig.credentialspath = (Join-Path -Path $FullPath -ChildPath 'Credentials')
@@ -50,7 +50,7 @@
             $this.Save()
         }
     }
-    catch {
+    catch{
         throw $_
     }
 }

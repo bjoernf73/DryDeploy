@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Show-DryUtilsError {
+function Show-DryUtilsError{
     [cmdletbinding()]
-    param (
+    param(
         [Management.Automation.ErrorRecord]$Err
     )
     $StackTraceLine = @($Err.ScriptStackTrace -Split "`n")[0]
@@ -43,7 +43,7 @@ function Show-DryUtilsError {
     })
 
     $Err.CategoryInfo.PsObject.Properties.foreach({
-        if ($null -ne $_.value) {
+        if($null -ne $_.value){
             ol i @("$($_.Name)","$($_.Value)") -Fore Red
         }
     })

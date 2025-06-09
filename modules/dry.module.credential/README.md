@@ -12,13 +12,13 @@ A credential-alias is specified in any *action*, of a *role*, in the *build* of 
 Example: 
 ```json
     ...
-    {
+   {
         "action": "dsc.run",
         "description": "Deploys Active Directory root forest, and first domain controller",
         "phase": 1,
         "order": 2,
         "credentials": 
-        {
+       {
             "credential1": "ws2019-local-admin",
             "credential2": "domain-admin",
             "credential3": "ws2019-safemode-admin"

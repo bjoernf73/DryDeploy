@@ -348,7 +348,7 @@ Returns the configuration object, and assigns it to the variable
 '$Config' so you may inspect it's content 'offline' 
 #>
 [CmdLetBinding(DefaultParameterSetName='ShowPlan')]
-param ( 
+param( 
     [Parameter(ParameterSetName='Github',
     HelpMessage='Launches the DryDeploy Github page in your 
     favouritemost browser.')]
@@ -397,7 +397,7 @@ param (
     are excluded. If not specified, all actions are included')]
     [ArgumentCompleter({(Get-ChildItem -Path ".\actions\*" | 
         Select-Object -ExpandProperty Name) | 
-        foreach-Object { $_ -Replace "^dry\.action\.",''}})]
+        foreach-Object{ $_ -Replace "^dry\.action\.",''}})]
     [String[]]
     $Actions,
 
@@ -409,7 +409,7 @@ param (
     are included. If not specified, no actions are excluded')]
     [ArgumentCompleter({(Get-ChildItem -Path ".\actions\*" | 
         Select-Object -ExpandProperty Name) | 
-        foreach-Object { $_ -Replace "^dry\.action\.",''}})]
+        foreach-Object{ $_ -Replace "^dry\.action\.",''}})]
     [String[]]
     $ExcludeActions, 
 
@@ -652,101 +652,101 @@ param (
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
 
 #region PreModulesFunctions
-function Get-DryScriptPath {
+function Get-DryScriptPath{
     [CmdletBinding()]
-    param (
+    param(
     )
-    try {
-        if (($null -ne $PSScriptRoot) -And (Test-Path -Path $PSScriptRoot -ErrorAction 'Ignore')) {
+    try{
+        if(($null -ne $PSScriptRoot) -And (Test-Path -Path $PSScriptRoot -ErrorAction 'Ignore')){
             $PSScriptRoot
         }
-        elseif (((Split-Path -Path $MyInvocation.MyCommand.Path) -match "^[a-zA-Z]\:\\") -or
-                ((Split-Path -Path $MyInvocation.MyCommand.Path) -match "^/")) {
+        elseif(((Split-Path -Path $MyInvocation.MyCommand.Path) -match "^[a-zA-Z]\:\\") -or
+                ((Split-Path -Path $MyInvocation.MyCommand.Path) -match "^/")){
             Split-Path -Path $MyInvocation.MyCommand.Path
         }
-        else {
+        else{
             throw 'Unable to determine script path'
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
     }
 }
 
-function Get-DryPlatform {
+function Get-DryPlatform{
     [CmdletBinding()]
-    param (
+    param(
         $ScriptPath
     )
-    try {
-        $PSPlatform = & { switch ($PSVersionTable.Platform) { $null {return 'Win32NT'} default {return $PSVersionTable.Platform }}}
+    try{
+        $PSPlatform = &{ switch($PSVersionTable.Platform){ $null{return 'Win32NT'} default{return $PSVersionTable.Platform }}}
         $Platform = [PSObject]@{
             Edition                 = $PSversionTable.PSEdition
             Version                 = $PSversionTable.PSVersion.ToString()
             Platform                = $PSPlatform
-            Home                    = & {switch ($PSPlatform) {'Win32NT' {return "$($env:UserProfile)" } 'Unix' {return "$($env:HOME)" }}}
-            Slash                   = & {switch ($PSPlatform) {'Win32NT' {return '\'} 'Unix' {return '/'}}}
-            Separator               = & {switch ($PSPlatform) {'Win32NT' {return ';'} 'Unix' {return ':'}}}
+            Home                    = &{switch($PSPlatform){'Win32NT'{return "$($env:UserProfile)" } 'Unix'{return "$($env:HOME)" }}}
+            Slash                   = &{switch($PSPlatform){'Win32NT'{return '\'} 'Unix'{return '/'}}}
+            Separator               = &{switch($PSPlatform){'Win32NT'{return ';'} 'Unix'{return ':'}}}
             LocalModulesDirectories = @(
                 ([IO.Path]::GetFullPath("$(Join-Path -Path $ScriptPath -ChildPath 'modules')")),
                 ([IO.Path]::GetFullPath("$(Join-Path -Path $ScriptPath -ChildPath 'actions')"))
             )
-            RootWorkingDirectory    =  & {switch ($PSPlatform) {
-                'Win32NT' {return (Join-Path -Path "$($env:UserProfile)" -ChildPath 'DryDeploy')} 
-                'Unix' {return (Join-Path -Path "$($env:HOME)" -ChildPath 'DryDeploy')}}
+            RootWorkingDirectory    =  &{switch($PSPlatform){
+                'Win32NT'{return (Join-Path -Path "$($env:UserProfile)" -ChildPath 'DryDeploy')} 
+                'Unix'{return (Join-Path -Path "$($env:HOME)" -ChildPath 'DryDeploy')}}
             }   
         }
         return $Platform
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
     }
 }
 
-function Set-DryPSModulePath {
+function Set-DryPSModulePath{
     [CmdletBinding()]
-    param (
+    param(
         [PSObject]$Platform
     )
-    try {
-        foreach ($LocalModulesDirectory in $Platform.LocalModulesDirectories) {
-            switch ($Platform.Platform) {
-                'Win32NT' {
-                    if ($env:PSModulePath -notmatch ($LocalModulesDirectory -replace'\\','\\')) {
+    try{
+        foreach($LocalModulesDirectory in $Platform.LocalModulesDirectories){
+            switch($Platform.Platform){
+                'Win32NT'{
+                    if($env:PSModulePath -notmatch ($LocalModulesDirectory -replace'\\','\\')){
                         $env:PSModulePath = "$($env:PSModulePath);$LocalModulesDirectory" 
                     }
                 }
-                'Unix' {
-                    if ($env:PSModulePath -notmatch $LocalModulesDirectory) {
+                'Unix'{
+                    if($env:PSModulePath -notmatch $LocalModulesDirectory){
                         $env:PSModulePath = "$($env:PSModulePath):$LocalModulesDirectory" 
                     }
                 }
-                default {
+                default{
                     throw "Platform unknown: $($Platform.Platform). DD runs on Windows and Linux only"
                 }
             }
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
     }
 }
 #endregion PreModulesFunctions
 
-try {
-    if ($ShowAllErrors) {$Error.clear()}
+try{
+    if($ShowAllErrors){$Error.clear()}
     $dry_var_OriginalPSModulePath                     = $env:PSModulePath #to be set back in finally
     $GLOBAL:dry_var_global_ScriptPath                 = Get-DryScriptPath
     $GLOBAL:dry_var_global_Platform                   = Get-DryPlatform -ScriptPath $GLOBAL:dry_var_global_ScriptPath
     Set-DryPSModulePath -Platform $GLOBAL:dry_var_global_Platform
     # Remove DD modules that may have escaped the removal in finally{}
-    Get-Module | Where-Object {(
+    Get-Module | Where-Object{(
         ($_.Name -match "^dry\.module\.") -or 
         ($_.Name -match "^dry\.action\.")
     )} | Remove-Module -Force -ErrorAction Stop
@@ -775,7 +775,7 @@ try {
     $GLOBAL:VerbosePreference                   = $PSCmdlet.GetVariableValue('VerbosePreference')
     $GLOBAL:DebugPreference                     = $PSCmdlet.GetVariableValue('DebugPreference')
     $GLOBAL:ErrorActionPreference               = 'Stop'
-    if ($GLOBAL:DebugPreference -eq 'Inquire') { 
+    if($GLOBAL:DebugPreference -eq 'Inquire'){ 
         $GLOBAL:DebugPreference = 'Continue'
         $SCRIPT:DebugPreference = 'Continue'
     }
@@ -854,12 +854,12 @@ try {
         Platform      = $GLOBAL:dry_var_global_Platform
         SystemOptions = $dry_var_SystemOptions
     }
-    if ($EnvConfig) {
+    if($EnvConfig){
         $GetDryConfigComboParams += @{
             NewEnvConfig = $true
         }
     }
-    if ($ModuleConfig) {
+    if($ModuleConfig){
         $GetDryConfigComboParams += @{
             NewModuleConfig = $true
         }
@@ -867,20 +867,20 @@ try {
     $GLOBAL:dry_var_global_ConfigCombo = Get-DryConfigCombo @GetDryConfigComboParams
     $GetDryConfigComboParams = $null
 
-    switch ($PSCmdLet.ParameterSetName) {
-        'Interactive' {
+    switch($PSCmdLet.ParameterSetName){
+        'Interactive'{
             # -Interactive sets the interactive property to true, and will stay true until you -Plan
             $GLOBAL:dry_var_global_ConfigCombo.systemconfig.interactive = $true
         }
-        'Plan' {
+        'Plan'{
             # -Plan resets the interactive property back to false
             $GLOBAL:dry_var_global_ConfigCombo.systemconfig.interactive = $false
         }
     }
     $GLOBAL:dry_var_global_ConfigCombo.Save()
     
-    switch ($PSCmdLet.ParameterSetName) {
-        'GitHub' {
+    switch($PSCmdLet.ParameterSetName){
+        'GitHub'{
             Start-Process 'https://github.com/bjoernf73/DryDeploy' -Wait:$false
         }
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -890,57 +890,57 @@ try {
             Installs dependencies for DD, your EnvConfig, and your ModuleConfig. DD has 
             some dependencies spesified on SystemOptions.json at root. Your selected EnvConfig and 
             ModuleConfig may each have theirs in their 'Config.json' at root of each repo, in a 
-            "dependencies": {} object. You must elevate Powershell and run .\DryDeploy.ps1 -Init 
+            "dependencies":{} object. You must elevate Powershell and run .\DryDeploy.ps1 -Init 
             at least once for a configuration combination.
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         #! INIT must be changed when dry.module.pkgmgmt is released
         #! The test-dryelevated should only be run if there are changes to be made
-        'Init' {
+        'Init'{
             
-            if (Test-DryElevated){
+            if(Test-DryElevated){
                 # System Dependencies
-                if ($dry_var_global_ConfigCombo.TestDepHash('system')) {
+                if($dry_var_global_ConfigCombo.TestDepHash('system')){
                     ol i "System dependencies already met"
                 } 
-                else {
+                else{
                     ol i "System dependencies must be installed" -sh
                     Install-DryDependencies -ConfigCombo $dry_var_global_ConfigCombo -Type 'system'
                 }
                     
                 # Module Dependencies
-                if ($null -ne $dry_var_global_ConfigCombo.moduleconfig.path) {
-                    if ($null -ne $dry_var_global_ConfigCombo.moduleconfig.dependencies) {
-                        if ($dry_var_global_ConfigCombo.TestDepHash('module')) {
+                if($null -ne $dry_var_global_ConfigCombo.moduleconfig.path){
+                    if($null -ne $dry_var_global_ConfigCombo.moduleconfig.dependencies){
+                        if($dry_var_global_ConfigCombo.TestDepHash('module')){
                             ol i "ModuleConfig dependencies already met"
                         } 
-                        else {
+                        else{
                             ol i "ModuleConfig dependencies must be installed" -sh
                             Install-DryDependencies -ConfigCombo $dry_var_global_ConfigCombo -Type 'module'
                         }
                     }                
                 }
-                else {
+                else{
                     ol w "Run -Init also after you have selected a ModuleConfig"
                 }
 
                 # Environment dependencies
-                if ($null -ne $dry_var_global_ConfigCombo.envconfig.path){
-                    if ($null -ne $dry_var_global_ConfigCombo.envconfig.dependencies) {
-                        if ($dry_var_global_ConfigCombo.TestDepHash('environment')) {
+                if($null -ne $dry_var_global_ConfigCombo.envconfig.path){
+                    if($null -ne $dry_var_global_ConfigCombo.envconfig.dependencies){
+                        if($dry_var_global_ConfigCombo.TestDepHash('environment')){
                             ol i "EnvConfig dependencies already met"
                         } 
-                        else {
+                        else{
                             ol i "EnvConfig dependencies must be installed" -sh
                             Install-DryDependencies -ConfigCombo $dry_var_global_ConfigCombo -Type 'environment'
                         } 
                     }               
                 }
-                else {
+                else{
                     ol w "Run -Init also after you have selected an EnvConfig"
                 }
             }
-            else {
+            else{
                 throw "Init requires PowerShell to run elevated ('Run as Administrator')"
             }
         }
@@ -957,15 +957,15 @@ try {
             environment to deploy to, and what module to depoloy, every time you DD. 
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        'SetConfig' {
+        'SetConfig'{
             # ensure plan is removed when config changes
-            if (Test-Path -Path $dry_var_PlanFile -ErrorAction Ignore) {
+            if(Test-Path -Path $dry_var_PlanFile -ErrorAction Ignore){
                 Remove-Item -Path $dry_var_PlanFile -Force | Out-Null
             }
-            if ($EnvConfig) {
+            if($EnvConfig){
                 $dry_var_global_ConfigCombo.change($EnvConfig,'environment')    
             }
-            if ($ModuleConfig) {
+            if($ModuleConfig){
                 $dry_var_global_ConfigCombo.change($ModuleConfig,'module')
             }
             $dry_var_global_ConfigCombo.show()      
@@ -982,7 +982,7 @@ try {
             me... Prints out the status of the current Plan.   
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        {$_ -in 'ShowPlan','Rewind', 'FastFwd'} {
+       {$_ -in 'ShowPlan','Rewind', 'FastFwd'}{
             
             $dry_var_global_ConfigCombo.show()
             
@@ -1003,11 +1003,11 @@ try {
             $dry_var_Plan = Get-DryPlan @GetDryPlanParams -ErrorAction Stop
             $GetDryPlanParams = $null
 
-            if ($PSCmdlet.ParameterSetName -eq 'Rewind') {
+            if($PSCmdlet.ParameterSetName -eq 'Rewind'){
                 ol i "Rewinding one buildstep..."
                 $dry_var_Plan.RewindPlanOrder($dry_var_PlanFile)
             }
-            elseif ($PSCmdlet.ParameterSetName -eq 'FastFwd') {
+            elseif($PSCmdlet.ParameterSetName -eq 'FastFwd'){
                 ol i "Fast-Forward one buildstep..."
                 $dry_var_plan.FastForwardPlanOrder($dry_var_PlanFile)
             }
@@ -1030,7 +1030,7 @@ try {
             gets and invokes common variables, prepares for credentials.
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        {$_ -in 'Plan','Apply','GetConfig','Resolve','Interactive'} {
+       {$_ -in 'Plan','Apply','GetConfig','Resolve','Interactive'}{
             $dry_var_Paths | Add-Member -MemberType NoteProperty -Name 'BaseConfigDirectory' -Value (Join-Path -Path $dry_var_global_ConfigCombo.envconfig.path -ChildPath 'BaseConfig')
             $dry_var_Paths | Add-Member -MemberType NoteProperty -Name 'ModuleConfigDirectory' -Value $dry_var_global_ConfigCombo.moduleconfig.path
             $GLOBAL:dry_var_global_Configuration = Get-DryEnvConfig -ConfigCombo $dry_var_global_ConfigCombo -Paths $dry_var_Paths
@@ -1051,18 +1051,18 @@ try {
             New-DryCredentialsFile -Path $dry_var_global_CredentialsFile
 
             #! currently only support for 'encryptedstring', should support 'HashicorpVault', 1Password...
-            if (-not $GLOBAL:dry_var_global_Configuration.CredentialsType) {
+            if(-not $GLOBAL:dry_var_global_Configuration.CredentialsType){
                 $GLOBAL:dry_var_global_Configuration | Add-Member -MemberType NoteProperty -Name 'CredentialsType' -Value 'encryptedstring'
             }
             
-            if ($GLOBAL:dry_var_global_Configuration.Credentials) {
-                foreach ($dry_var_Credential in $GLOBAL:dry_var_global_Configuration.Credentials) {
+            if($GLOBAL:dry_var_global_Configuration.Credentials){
+                foreach($dry_var_Credential in $GLOBAL:dry_var_global_Configuration.Credentials){
                     $dry_var_AddCredentialPlaceholderParams = @{
                         Alias        = $dry_var_Credential.Alias
                         EnvConfig    = $GLOBAL:dry_var_global_ConfigCombo.envconfig.name
                         Type         = $GLOBAL:dry_var_global_Configuration.CredentialsType
                     }
-                    if ($dry_var_Credential.UserName) {
+                    if($dry_var_Credential.UserName){
                         $dry_var_AddCredentialPlaceholderParams += @{
                             UserName = $dry_var_Credential.UserName
                         }
@@ -1072,7 +1072,7 @@ try {
                 $dry_var_AddCredentialPlaceholderParams = $null
             }
             
-            if ($GetConfig) {
+            if($GetConfig){
                 return $GLOBAL:dry_var_global_Configuration
             }
         }
@@ -1085,7 +1085,7 @@ try {
             about to build, before you actually -Apply.  
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        'Plan' {
+        'Plan'{
             $dry_var_NewDryPlanParams = @{
                 ResourcesFile        = $dry_var_ResourcesFile
                 PlanFile             = $dry_var_PlanFile
@@ -1129,7 +1129,7 @@ try {
             selected system module.  
               
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        'Interactive' {       
+        'Interactive'{       
             $dry_var_NewDryPlanParams = @{
                 ResourcesFile        = $dry_var_ResourcesFile
                 PlanFile             = $dry_var_PlanFile
@@ -1169,7 +1169,7 @@ try {
             that cannot be found, 
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        'Resolve' {
+        'Resolve'{
             $dry_var_GetDryPlanParams = @{
                 PlanFile             = $dry_var_PlanFile
                 ResourceNames        = $Resources
@@ -1191,22 +1191,22 @@ try {
                 The iteration on every object in the Plan.  
                 
             # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-            for ($dry_var_ActionCount = 1; $dry_var_ActionCount -le $dry_var_Plan.ActiveActions; $dry_var_ActionCount++ ) {
+            for ($dry_var_ActionCount = 1; $dry_var_ActionCount -le $dry_var_Plan.ActiveActions; $dry_var_ActionCount++ ){
                 $dry_var_Action = $null
-                $dry_var_Action = $dry_var_Plan.Actions | Where-Object { $_.ApplyOrder -eq $dry_var_ActionCount }
+                $dry_var_Action = $dry_var_Plan.Actions | Where-Object{ $_.ApplyOrder -eq $dry_var_ActionCount }
                 
-                if ($null -eq $dry_var_Action) { throw "Unable to find Action with Order $dry_var_ActionCount in Plan" }
+                if($null -eq $dry_var_Action){ throw "Unable to find Action with Order $dry_var_ActionCount in Plan" }
 
-                try {
+                try{
                     Show-DryActionStart -Action $dry_var_Action
 
                     # Used by Out-DryLog ('ol')
                     $GLOBAL:GlobalResourceName = $dry_var_Action.ResourceName
                     $GLOBAL:GlobalActionName   = $dry_var_Action.Action
-                    if ($dry_var_Action.Phase -ge 1) {
+                    if($dry_var_Action.Phase -ge 1){
                         $GLOBAL:GlobalPhase    = $dry_var_Action.Phase
                     }
-                    else {
+                    else{
                         $GLOBAL:GlobalPhase    = $null
                     }
 
@@ -1225,17 +1225,17 @@ try {
                     #! Should display the options object
                     
                 }
-                catch {
+                catch{
                     ol i "The terminating exception: " -sh
                     Show-DryUtilsError -Err $_
                     $dry_var_WarningString = "Failed action: [$($dry_var_Action.action)]"
-                    if ($dry_var_Action.Phase) {
+                    if($dry_var_Action.Phase){
                         $dry_var_WarningString += " - Phase [$($dry_var_Action.Phase)]"
                     }
                     ol w $dry_var_WarningString
                     $PSCmdLet.ThrowTerminatingError($_)
                 }
-                finally {
+                finally{
                     $GLOBAL:GlobalResourceName = $null 
                     $GLOBAL:GlobalActionName = $null
                     $GLOBAL:GlobalPhase = $null
@@ -1252,7 +1252,7 @@ try {
             this time, it succeeds
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        'Apply' {
+        'Apply'{
             $dry_var_GetDryPlanParams = @{
                 PlanFile             = $dry_var_PlanFile
                 ResourceNames        = $Resources
@@ -1279,13 +1279,13 @@ try {
                 
             # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
             #! implement  $dry_var_global_ConfigCombo.NeedsInit()
-            if (($dry_var_global_ConfigCombo.TestDepHash('system')) -and
+            if(($dry_var_global_ConfigCombo.TestDepHash('system')) -and
                 ($dry_var_global_ConfigCombo.TestDepHash('environment')) -and
-                ($dry_var_global_ConfigCombo.TestDepHash('module'))) {
-                if ($IgnoreDependencies) {
+                ($dry_var_global_ConfigCombo.TestDepHash('module'))){
+                if($IgnoreDependencies){
                     ol w "The ConfigCombo seems to require -Init, but continuing due to -IgnoreDependencies"
                 }
-                else {
+                else{
                     ol w "The ConfigCombo requires -Init. Elevate Powershell, and run '.\DryDeploy.ps -Init' once. If you disagree, you may -IgnoreDependencies"
                     throw 'The ConfigCombo requires -Init'
                 }
@@ -1296,18 +1296,18 @@ try {
                 The iteration on every object in the Plan.  
                 
             # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-            for ($dry_var_ActionCount = 1; $dry_var_ActionCount -le $dry_var_Plan.ActiveActions; $dry_var_ActionCount++ ) {
+            for ($dry_var_ActionCount = 1; $dry_var_ActionCount -le $dry_var_Plan.ActiveActions; $dry_var_ActionCount++ ){
                 $dry_var_Action = $null
-                $dry_var_Action = $dry_var_Plan.Actions | Where-Object { $_.ApplyOrder -eq $dry_var_ActionCount }
+                $dry_var_Action = $dry_var_Plan.Actions | Where-Object{ $_.ApplyOrder -eq $dry_var_ActionCount }
                 
-                if ($null -eq $dry_var_Action) { throw "Unable to find Action with Order $dry_var_ActionCount in Plan" }
+                if($null -eq $dry_var_Action){ throw "Unable to find Action with Order $dry_var_ActionCount in Plan" }
 
-                try {
-                    if ($dry_var_Action.Status -eq 'Todo') {
+                try{
+                    if($dry_var_Action.Status -eq 'Todo'){
                         $dry_var_Action.Status = 'Starting'
                         $dry_var_Plan.Save($dry_var_PlanFile,$false,$null)
                     }
-                    elseif ($dry_var_Action.Status -eq 'Failed') {
+                    elseif($dry_var_Action.Status -eq 'Failed'){
                         $dry_var_Action.Status = 'Retrying'
                         $dry_var_Plan.Save($dry_var_PlanFile,$false,$null)
                     }
@@ -1318,10 +1318,10 @@ try {
                     # Used by Out-DryLog ('ol')
                     $GLOBAL:GlobalResourceName = $dry_var_Action.ResourceName
                     $GLOBAL:GlobalActionName   = $dry_var_Action.Action
-                    if ($dry_var_Action.Phase -ge 1) {
+                    if($dry_var_Action.Phase -ge 1){
                         $GLOBAL:GlobalPhase    = $dry_var_Action.Phase
                     }
-                    else {
+                    else{
                         $GLOBAL:GlobalPhase    = $null
                     }
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -1375,7 +1375,7 @@ try {
                         function will automatically quit after this.
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-                    if ($ActionParams) {
+                    if($ActionParams){
                         $dry_var_ActionParams+=@{'ActionParams'=$ActionParams}
                         $Quit = $true
                     }
@@ -1402,11 +1402,11 @@ try {
                         $GLOBAL:dry_var_global_ResolvedIPv4 or $GLOBAL:dry_var_global_ResolvedIPv6
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-                    if ($dry_var_Action.resource.resolved_network.ip_address -eq 'dhcp') {
+                    if($dry_var_Action.resource.resolved_network.ip_address -eq 'dhcp'){
                         $dry_var_AnIpWasResolved = $false
-                        if ($null -ne $GLOBAL:dry_var_global_ResolvedIPv4) {
+                        if($null -ne $GLOBAL:dry_var_global_ResolvedIPv4){
                             ol i @("Detected a resolved IP", "$($GLOBAL:dry_var_global_ResolvedIPv4)")
-                            foreach ($dry_var_SetIPAction in ($dry_var_Plan.Actions | Where-Object { $_.resource.resource_guid -eq $dry_var_Action.resource.resource_guid})) {
+                            foreach($dry_var_SetIPAction in ($dry_var_Plan.Actions | Where-Object{ $_.resource.resource_guid -eq $dry_var_Action.resource.resource_guid})){
                                 $dry_var_SetIPAction.resource.resolved_network.ip_address = "$($GLOBAL:dry_var_global_ResolvedIPv4)"
                             }
                             
@@ -1414,27 +1414,27 @@ try {
                             $GLOBAL:dry_var_global_ResolvedIPv4 = $null
                             $dry_var_AnIpWasResolved = $true
                         }
-                        if ($null -ne $GLOBAL:dry_var_global_ResolvedIPv6) {
-                            foreach ($dry_var_SetIPAction in ($dry_var_Plan.Actions | Where-Object { $_.resource.resource_guid -eq $dry_var_Action.resource.resource_guid})) {
+                        if($null -ne $GLOBAL:dry_var_global_ResolvedIPv6){
+                            foreach($dry_var_SetIPAction in ($dry_var_Plan.Actions | Where-Object{ $_.resource.resource_guid -eq $dry_var_Action.resource.resource_guid})){
                                 $dry_var_SetIPAction.resource.resolved_network.ip_address6 = "$($GLOBAL:dry_var_global_ResolvedIPv6)"
                             }
                             $dry_var_Plan.Save($dry_var_PlanFile,$false,$null)
                             $GLOBAL:dry_var_global_ResolvedIPv6 = $null
                             $dry_var_AnIpWasResolved = $true
                         }
-                        if ($dry_var_AnIpWasResolved) {
-                            if ($dry_var_Action.resource.resolved_network.ip_address -ne 'dhcp') {
+                        if($dry_var_AnIpWasResolved){
+                            if($dry_var_Action.resource.resolved_network.ip_address -ne 'dhcp'){
                                 ol i "The resource uses DHCP, and it's IP was resolved to $($dry_var_Action.resource.resolved_network.ip_address)"
                             }
-                            elseif ($dry_var_Action.resource.resolved_network.ip_address6 -ne 'dhcp') {
+                            elseif($dry_var_Action.resource.resolved_network.ip_address6 -ne 'dhcp'){
                                 ol i "The resource uses DHCP, and it's IPv6 was resolved to $($dry_var_Action.resource.resolved_network.ip_address6)"
                             }
-                            else {
+                            else{
                                 ol w "The resource's IP should have been resolved, but wasn't?"
                                 throw "The resource's IP should have been resolved, but wasn't?"
                             }
                         }
-                        else {
+                        else{
                             ol w "The resource uses DHCP, but IP not resolved yet. It may be scheduled to be resolved later in plan"
                         }
                     }
@@ -1451,7 +1451,7 @@ try {
                         don't pick up the fail, DD will ensure all subsequent runs fail as well. 
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-                    if ($Quit) {
+                    if($Quit){
                         $Error.Clear()
                         $LASTEXITCODE = 0
                         break
@@ -1467,14 +1467,14 @@ try {
                         Action, or Q to quit, if you're unhappy about something. 
                          
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-                    if ($Step) {
+                    if($Step){
                         $dry_var_StepResponse = Read-Host -Prompt "Press ENTER to continue or Q(uit) to quit"
-                        if (($dry_var_StepResponse -eq 'q') -or ($dry_var_StepResponse -eq 'quit')) { 
+                        if(($dry_var_StepResponse -eq 'q') -or ($dry_var_StepResponse -eq 'quit')){ 
                             break
                         }
                     }
                 }
-                catch {
+                catch{
                     $dry_var_Action.Status = 'Failed'
                     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -1488,18 +1488,18 @@ try {
                         Ukrainain refugees anywhere. 
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-                    if ($ShowAllErrors) {
-                        for ($ec = ($Error.count-1); $ec -ge 0; $ec--) {
-                            if ($ec -eq 0) {
+                    if($ShowAllErrors){
+                        for ($ec = ($Error.count-1); $ec -ge 0; $ec--){
+                            if($ec -eq 0){
                                 ol i "The terminating exception: " -sh
                             }
-                            else {
+                            else{
                                 ol i "Previous exception $ec`:" -sh
                             }
-                            if ($Error[$ec].GetType().Name -eq 'ErrorRecord') {
+                            if($Error[$ec].GetType().Name -eq 'ErrorRecord'){
                                 Show-DryUtilsError -Err $Error[$ec]
                             }
-                            else {
+                            else{
                                 ol i "Not Error, type is: $($Error[$ec].GetType().Name)"
                             }
                         }
@@ -1509,7 +1509,7 @@ try {
                         Just show the terminating exception
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-                    else {
+                    else{
                         ol i "The terminating exception: " -sh
                         Show-DryUtilsError -Err $_
                     }
@@ -1520,13 +1520,13 @@ try {
 
                     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
                     $dry_var_WarningString = "Failed action: [$($dry_var_Action.action)]"
-                    if ($dry_var_Action.Phase) {
+                    if($dry_var_Action.Phase){
                         $dry_var_WarningString += " - Phase [$($dry_var_Action.Phase)]"
                     }
                     ol w $dry_var_WarningString
                     $PSCmdLet.ThrowTerminatingError($_)
                 }
-                finally {
+                finally{
                     $dry_var_Plan.Save($dry_var_PlanFile,$false,$null)
                     $dry_var_ActionEndTime = Get-Date
                     $GLOBAL:GlobalResourceName = $null 
@@ -1539,16 +1539,16 @@ try {
         }
     }
 }
-catch {
+catch{
     $PSCmdlet.ThrowTerminatingError($_)
 }
-finally {
+finally{
     <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         Show the final plan and it's status if apply mode
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-    if ($PSCmdlet.ParameterSetName -eq 'Apply') {
+    if($PSCmdlet.ParameterSetName -eq 'Apply'){
         $ShowDryPlanParams       = @{
             Plan                 = $dry_var_Plan
             Mode                 = 'Apply' 
@@ -1591,7 +1591,7 @@ finally {
         Remove all DryDeploy modules
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-    Get-Module | Where-Object { 
+    Get-Module | Where-Object{ 
         ($_.Name -match "^dry\.action\.*") -or 
         ($_.Name -match "^dry\.module\.*")} | 
     Remove-Module -Force -Verbose:$false
@@ -1601,6 +1601,6 @@ finally {
         Remove all DryDeploy variables
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-    Get-Variable -Scope Local | Where-Object {$_.Name -match '^dry_var_*'} | Remove-Variable -Scope Local -Force
-    Get-Variable -Scope Global | Where-Object {$_.Name -match '^dry_var_*'} | Remove-Variable -Scope Global -Force
+    Get-Variable -Scope Local | Where-Object{$_.Name -match '^dry_var_*'} | Remove-Variable -Scope Local -Force
+    Get-Variable -Scope Global | Where-Object{$_.Name -match '^dry_var_*'} | Remove-Variable -Scope Global -Force
 }

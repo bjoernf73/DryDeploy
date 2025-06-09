@@ -1,9 +1,9 @@
 # Må testes med: 
 # - lists;  of objects, list of strings, 
 # - objects; simple one-level-psobject and complex psobjects containing strings, arrays of psobjetcs, array of strings, and so on
-[scriptblock]$OutDryPlanStatus =  {
+[scriptblock]$OutDryPlanStatus = {
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory,HelpMessage="Path to the file containing the Plan")]
         [string]$Path,
 
@@ -16,13 +16,13 @@
 
     $Loop = $true
     $Mode = 'Apply'
-    try {
-        if (-not (Test-Path -Path $Path -ErrorAction SilentlyContinue)) {
+    try{
+        if(-not (Test-Path -Path $Path -ErrorAction SilentlyContinue)){
             throw "The PlanFile '$Path' does not exist"
         }
          
         # create a loop that runs as long as there are unfinished business
-        do {
+        do{
             $Plan = Get-Content -Path $Path -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
 
             # sleep before the loop reruns
@@ -30,9 +30,9 @@
         }
         while ($Loop -eq $true)
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
     }
 }

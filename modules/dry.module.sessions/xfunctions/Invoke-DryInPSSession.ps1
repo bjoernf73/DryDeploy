@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Invoke-DryInPSSession {
+function Invoke-DryInPSSession{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(ParameterSetName="Command",Mandatory)]
         [Parameter(ParameterSetName="Exe",Mandatory)]
         [string]$Command,
@@ -50,7 +50,7 @@ function Invoke-DryInPSSession {
 
     )
     
-    try {
+    try{
         $GetDrySessionParameters = @{
             ComputerName  = $ComputerName
             Credential    = $Credential
@@ -60,44 +60,44 @@ function Invoke-DryInPSSession {
         }
         $Session = New-DrySession @GetDrySessionParameters
         
-        if ($Session.Availability -eq "Available") {
-            switch ($pscmdlet.parametersetname) {
-                'Command' {
-                    if ($Arguments) {
-                        $Result = Invoke-Command -session $Session -ScriptBlock {
-                            param ($RemoteCommand,$RemoteArgumenstSplat)
+        if($Session.Availability -eq "Available"){
+            switch($pscmdlet.parametersetname){
+                'Command'{
+                    if($Arguments){
+                        $Result = Invoke-Command -session $Session -ScriptBlock{
+                            param($RemoteCommand,$RemoteArgumenstSplat)
                             return & ($RemoteCommand) @RemoteArgumenstSplat
                             
                         } -ArgumentList $Command, $Arguments
                     }
-                    else {
-                        $Result = Invoke-Command -session $Session -ScriptBlock {
-                            param ($RemoteCommand)
+                    else{
+                        $Result = Invoke-Command -session $Session -ScriptBlock{
+                            param($RemoteCommand)
                             return & ($RemoteCommand)
                             
                         } -ArgumentList $Command
                     }
                 }
-                'scriptblock' {
-                    if ($Arguments) {
+                'scriptblock'{
+                    if($Arguments){
                         $Result = Invoke-Command -session $Session -ScriptBlock $scriptblock -ArgumentList $Arguments
                     }
-                    else {
+                    else{
                         $Result = Invoke-Command -session $Session -ScriptBlock $scriptblock
                     }
                 }
-                'Exe' {
-                    if ($Arguments) {
-                        $Result = Invoke-Command -session $Session -ScriptBlock {
-                            param ($RemoteCommand,$RemoteArgumenstString)
+                'Exe'{
+                    if($Arguments){
+                        $Result = Invoke-Command -session $Session -ScriptBlock{
+                            param($RemoteCommand,$RemoteArgumenstString)
                             & ($RemoteCommand) $RemoteArgumenstString
                             return $LASTEXITCODE
                             
                         } -ArgumentList $Command, $ArgumentString
                     }
-                    else {
-                        $Result = Invoke-Command -session $Session -ScriptBlock {
-                            param ($RemoteCommand)
+                    else{
+                        $Result = Invoke-Command -session $Session -ScriptBlock{
+                            param($RemoteCommand)
                             & ($RemoteCommand)
                             return $LASTEXITCODE
                             
@@ -106,21 +106,21 @@ function Invoke-DryInPSSession {
                 }
             }
         } 
-        else {
-            if ($IgnoreErrors) {
+        else{
+            if($IgnoreErrors){
                 return $false
             }
-            else {
+            else{
                 throw "Unable to start PSSession to $ComputerName"
             }
         }  
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_) 
     }
-    finally {
+    finally{
         $Session | Remove-PSSession -ErrorAction Ignore
-        if ($Result) {
+        if($Result){
             $Result
         }
     }

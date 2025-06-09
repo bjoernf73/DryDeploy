@@ -1,18 +1,18 @@
 # Scriptblock for ScriptMethod to read the ConfigCombo
-[scriptblock]$dry_core_sb_configcombo_read = {
+[scriptblock]$dry_core_sb_configcombo_read ={
     param(
         $NewEnvConfig,
         $NewModuleConfig
     )
-    try {
+    try{
         [PSCustomObject]$ConfigCombo = Get-DryFromJson -Path $This.Path
         $this.name = $ConfigCombo.name
         $this.path = $ConfigCombo.path
 
         # EnvConfig 
-        if (-not ($NewEnvConfig)) {
+        if(-not ($NewEnvConfig)){
             $this.envconfig.path = $ConfigCombo.envconfig.path
-            if($null -ne $ConfigCombo.envconfig.path) {
+            if($null -ne $ConfigCombo.envconfig.path){
                 $EnvConfig = Get-DryFromJson -Path (Join-Path -Path $this.envconfig.path -ChildPath 'Config.json')
                 $this.envconfig.name              = $EnvConfig.name
                 $this.envconfig.type              = $EnvConfig.type
@@ -28,9 +28,9 @@
         }
         
         # ModuleConfig
-        if (-not ($NewModuleConfig)) {
+        if(-not ($NewModuleConfig)){
             $this.moduleconfig.path = $ConfigCombo.moduleconfig.path
-            if ($null -ne $ConfigCombo.moduleconfig.path) {
+            if($null -ne $ConfigCombo.moduleconfig.path){
                 $Moduleconfig = Get-DryFromJson -Path (Join-Path -Path $this.moduleconfig.path -ChildPath 'Config.json')
                 $this.moduleconfig.name              = $Moduleconfig.name
                 $this.moduleconfig.type              = $Moduleconfig.type
@@ -50,7 +50,7 @@
         $this.systemconfig.dependencies_hash = $ConfigCombo.systemconfig.dependencies_hash
         $this.Save()
     }
-    catch {
+    catch{
         throw $_
     }
 }

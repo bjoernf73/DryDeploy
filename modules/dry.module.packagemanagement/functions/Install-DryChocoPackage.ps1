@@ -22,45 +22,45 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Install-DryChocoPackage {
+function Install-DryChocoPackage{
     [CmdLetBinding()]
     
-    param (
+    param(
         [Parameter(HelpMessage="Name of the Package to install")]
         [string]$Name,
         [string]$MinimumVersion,
         [string]$RequiredVersion
     )
 
-    try {
+    try{
         $InstallParams = @{
             Name = "$Name"
         }
-        if ($MinimumVersion) {
+        if($MinimumVersion){
             $InstallParams = @{
                 Version = "$MinimumVersion"
             }
         }
-        if ($RequiredVersion) {
+        if($RequiredVersion){
             $InstallParams = @{
                 Version = "$RequiredVersion"
             }
         }
 
         $Installed = Get-ChocoPackage -Name $Name -LocalOnly
-        if ($null -eq $Installed) {
+        if($null -eq $Installed){
             Install-ChocoPackage @InstallParams
         }
-        else {
-            if ($MinimumVersion) {
-                if ($MinimumVersion -gt $Installed.Version) {
+        else{
+            if($MinimumVersion){
+                if($MinimumVersion -gt $Installed.Version){
                     # & "$($env:Programdata)\Chocolatey\bin\choco.exe" upgrade "$($_.Name)" -y
                     Install-ChocoPackage @InstallParams
                 }
             }
-            elseif ($RequiredVersion) {
-                if ($RequiredVersion -ne $Installed.Version) {
-                    $InstallParams += {
+            elseif($RequiredVersion){
+                if($RequiredVersion -ne $Installed.Version){
+                    $InstallParams +={
                         Force = $true
                     }
                     Install-ChocoPackage @InstallParams
@@ -68,10 +68,10 @@ function Install-DryChocoPackage {
             }
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
         $Installed = $null
         $InstallParams = $null
     }

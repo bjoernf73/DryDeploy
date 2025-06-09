@@ -27,9 +27,9 @@ A logging and output-to-display module for DryDeploy
 A logging and output-to-display module for DryDeploy
 
 #>
-function Get-DryInput {
+function Get-DryInput{
     [CmdletBinding(DefaultParameterSetName="prompt")]
-    param (
+    param(
         [Parameter(ParameterSetName="prompt",Mandatory)]
         [string]$Prompt,
 
@@ -52,7 +52,7 @@ function Get-DryInput {
         [Parameter(HelpMessage="When there is a choice between options, use a ValidateSet to ensure input
         values are in the set of allowed choices")]
         [AllowEmptyString()]
-        [Array]$ValidateSet,
+        [array]$ValidateSet,
 
         [Parameter(HelpMessage="A scriptblock to validate the user input. The scriptblock will be passed
         the `$ValidateScriptParams and the `$iInput as the last argument")]
@@ -62,8 +62,8 @@ function Get-DryInput {
 
     )
 
-    try {
-        function Get-DryInputValidation {
+    try{
+        function Get-DryInputValidation{
             [cmdletbinding(DefaultParameterSetName = 'set')]
             param(
                 [Parameter(Mandatory)]
@@ -81,39 +81,39 @@ function Get-DryInput {
                 [Parameter(ParameterSetName="script")]
                 $ValidateScriptParams
             )
-            try {
-                if ($null -eq $iInput) {
+            try{
+                if($null -eq $iInput){
                     throw "goto catch"
                 }
-                else {
-                    switch ($PSCmdlet.ParameterSetName) {
-                        'set' {
-                            if ($null -ne $ValidateSet) {
-                                if ($iInput -in $ValidateSet) {
+                else{
+                    switch($PSCmdlet.ParameterSetName){
+                        'set'{
+                            if($null -ne $ValidateSet){
+                                if($iInput -in $ValidateSet){
                                     return $true
                                 }
-                                else {
+                                else{
                                     throw "goto catch"
                                 }
                             }
-                            else {
+                            else{
                                 # nothing to validate
                                 return $true
                             }
                         }
-                        'script' {
+                        'script'{
                             $ValidateScriptParams += $iInput
-                            if (Invoke-Command -ScriptBlock $ValidateScript -ArgumentList $ValidateScriptParams) {
+                            if(Invoke-Command -ScriptBlock $ValidateScript -ArgumentList $ValidateScriptParams){
                                 return $true
                             }
-                            else {
+                            else{
                                 throw "goto catch"
                             }
                         }
                     } 
                 }
             }
-            catch {
+            catch{
                 ol w $FailedMessage
                 return $false
             }
@@ -121,23 +121,23 @@ function Get-DryInput {
 
         $LoggingOptions = $GLOBAL:LoggingOptions
         $FormattedMessage = $LoggingOptions.input.text_type
-        if ($PromptChoiceString) {
+        if($PromptChoiceString){
             $PromptChoiceString = $PromptChoiceString.Trim()
         }
-        else {
+        else{
             $PromptChoiceString = "<value>"
         }
         
         # make sure left_column is a certain length
         <#
-        while ($FormattedMessage.length -lt $LoggingOptions.left_column_width) {
+        while ($FormattedMessage.length -lt $LoggingOptions.left_column_width){
             $FormattedMessage = $FormattedMessage + ' '
         }
         #>
         $FormattedMessage = $FormattedMessage + $Prompt + " [$PromptChoiceString] or 'q' to quit"
 
         # Print the description
-        if ($Description) {
+        if($Description){
             ol i $Description
             ol i ""
         }
@@ -145,49 +145,49 @@ function Get-DryInput {
         $WriteHostParams = @{
             NoNewLine = $true 
         }
-        if ($LoggingOptions.input.foreground_color) {
+        if($LoggingOptions.input.foreground_color){
             $WriteHostParams += @{
                 ForegroundColor = $LoggingOptions.input.foreground_color
             }
         }
-        if ($ValidateSet) {
-            do {
+        if($ValidateSet){
+            do{
                 $FormattedMessage | Write-Host @WriteHostParams
                 $DryInput = Read-Host -Prompt " "
-                if (($null -ne $DefaultValue) -and ($DryInput.Trim() -eq '')) {
+                if(($null -ne $DefaultValue) -and ($DryInput.Trim() -eq '')){
                     $DryInput = $DefaultValue
                 }
-                elseif ($DryInput -eq 'q') {
+                elseif($DryInput -eq 'q'){
                     break
                 }
             }
             while (-not (Get-DryInputValidation -iInput $DryInput -ValidateSet $ValidateSet -FailedMessage $FailedMessage))
         }
-        elseif ($ValidateScript) {
-            do {
+        elseif($ValidateScript){
+            do{
                 $FormattedMessage | Write-Host @WriteHostParams 
                 $DryInput = Read-Host -Prompt " "
-                if (($null -ne $DefaultValue) -and ($DryInput.Trim() -eq '')) {
+                if(($null -ne $DefaultValue) -and ($DryInput.Trim() -eq '')){
                     $DryInput = $DefaultValue
                 }
-                elseif ($DryInput -eq 'q') {
+                elseif($DryInput -eq 'q'){
                     break
                 }
             }
             while (-not (Get-DryInputValidation -iInput $DryInput -ValidateScript $ValidateScript -ValidateScriptParams $ValidateScriptParams -FailedMessage $FailedMessage))
         }
-        else {
+        else{
             # no validation
-            do {
+            do{
                 $FormattedMessage | Write-Host @WriteHostParams 
                 $DryInput = Read-Host -Prompt " "
-                if (($null -ne $DefaultValue) -and ($DryInput.Trim() -eq '')) {
+                if(($null -ne $DefaultValue) -and ($DryInput.Trim() -eq '')){
                     $DryInput = $DefaultValue
                 }
-                elseif ($DryInput -eq 'q') {
+                elseif($DryInput -eq 'q'){
                     break
                 }
-                elseif ($null -eq $DryInput) {
+                elseif($null -eq $DryInput){
                     # To make sure .trim() works
                     $DryInput = " "
                 }
@@ -195,14 +195,14 @@ function Get-DryInput {
             while (($DryInput.trim() -eq ''))
         }
         
-        if ($DryInput -eq 'q') {
+        if($DryInput -eq 'q'){
             break
         }
-        else {
+        else{
             return $DryInput
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

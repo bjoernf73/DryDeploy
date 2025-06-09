@@ -19,11 +19,11 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Get-DryObjectPropertyFromObjectArray {
+function Get-DryObjectPropertyFromObjectArray{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
-        [Array]$ObjectArray,
+        [array]$ObjectArray,
 
         [Parameter(Mandatory,HelpMessage="The object property name that  
         identifies the object from which `$Property will be returned")]
@@ -70,7 +70,7 @@ function Get-DryObjectPropertyFromObjectArray {
         [Switch]$AllowNoProperty
     )
     
-    try {
+    try{
         ol 5 @('IDProperty',$IDProperty)
         ol 5 @('IDPropertyValue',$IDPropertyValue)
         ol 5 @('Property',$Property)
@@ -82,73 +82,73 @@ function Get-DryObjectPropertyFromObjectArray {
         ol 5 @('AllowNoProperty',$AllowNoProperty)
 
 
-        if ($First -or $Last -or $Number) {
+        if($First -or $Last -or $Number){
             $AllowMultipleMatches = $true
         }
 
-        [Array]$MatchObjects = @($ObjectArray | Where-Object {
+        [array]$MatchObjects = @($ObjectArray | Where-Object{
             $_."$IDProperty" -eq "$IDPropertyValue"
         })
 
-        if (($MatchObjects.count -gt 1) -and (-not $AllowMultipleMatches)) {
+        if(($MatchObjects.count -gt 1) -and (-not $AllowMultipleMatches)){
             throw "The ObjectArray contained more than one match. Use '-AllowMultipleMatches' if that should be allowed"
         }
-        if (($MatchObjects.count -eq 0) -and (-not $AllowNoMatch)) {
+        if(($MatchObjects.count -eq 0) -and (-not $AllowNoMatch)){
             throw "The ObjectArray contained no match. Use '-AllowNoMatch' if that should be allowed"
         }
-        if ($null -eq $MatchObjects) {
+        if($null -eq $MatchObjects){
             return $null
         }
-        else {
-            if ($First)  {
+        else{
+            if($First) {
                 $MatchObject = $MatchObjects[0]
             }
-            elseif ($Last) {
+            elseif($Last){
                 $MatchObject = $MatchObjects[-1]
             }
-            elseif ($Number) {
+            elseif($Number){
                 $n = $Number+1
                 $MatchObject = $MatchObjects[$n]
             }
-            else {
-                if ($MatchObjects.count -eq 1) {
+            else{
+                if($MatchObjects.count -eq 1){
                     $MatchObject = $MatchObjects[0]
                 }
-                else {
+                else{
                     $ReturnMultiple = $true
                 }
             }
 
-            if ($ReturnMultiple) {
+            if($ReturnMultiple){
                 $ValuesToreturn = @()
                 $MatchObjects.foreach({
-                    if ($_.PSObject.Properties.Name -contains "$Property") {
+                    if($_.PSObject.Properties.Name -contains "$Property"){
                         $ValuesToreturn += $_."$Property"
                     }
-                    else {
-                        if (-not $AllowNoProperty) {
+                    else{
+                        if(-not $AllowNoProperty){
                             throw "One or more matching object does not contain the property $Property"
                         }
                     }
                 })
                 return $ValuesToReturn
             }
-            else {
-                if ($MatchObject.PSObject.Properties.Name -contains "$Property") {
+            else{
+                if($MatchObject.PSObject.Properties.Name -contains "$Property"){
                     return $MatchObject."$Property"
                 }
-                else {
-                    if ($AllowNoProperty) {
+                else{
+                    if($AllowNoProperty){
                         return $null
                     }
-                    else {
+                    else{
                         throw "The matching object does not contain the property $Property"
                     }
                 }
             }
         }
     }
-    catch {
+    catch{
         ol 3 "The input object array is returned below:"
         $ObjectArray
         
@@ -164,7 +164,7 @@ function Get-DryObjectPropertyFromObjectArray {
         ol 3 @('AllowNoProperty',$AllowNoProperty)
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
         $MatchObjects = $null
     }
 }

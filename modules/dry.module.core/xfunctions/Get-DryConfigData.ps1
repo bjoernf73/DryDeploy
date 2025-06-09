@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Get-DryConfigData {
+function Get-DryConfigData{
     [cmdletbinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [string]
         $Path,
@@ -31,19 +31,19 @@ function Get-DryConfigData {
         $Configuration
 
     )
-    try {
-        if (-not $Configuration) {
+    try{
+        if(-not $Configuration){
             $Configuration = New-Object PSCustomObject
         }
         $FullPath = Join-Path -Path (Resolve-DryUtilsFullPath -Path $Path) -ChildPath '*'
         $Files    = @(Get-ChildItem -Path $FullPath -Include '*.jsonc','*.json','*.yml','*.yaml' -ErrorAction Stop)
         
-        foreach ($File in $Files) {
-            switch ($File.extension) {
-                {$_ -in '.json','.jsonc'} {
+        foreach($File in $Files){
+            switch($File.extension){
+               {$_ -in '.json','.jsonc'}{
                     $ConfObject = Get-DryFromJson -Path $File.FullName -ErrorAction Stop  
                 }
-                {$_ -in '.yml','.yaml'} {
+               {$_ -in '.yml','.yaml'}{
                     $ConfObject = Get-DryFromYaml -Path $File.FullName -ErrorAction Stop 
                 }
             }
@@ -51,7 +51,7 @@ function Get-DryConfigData {
         }
         return $Configuration
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

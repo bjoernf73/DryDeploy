@@ -18,7 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 $ExportedFunctionsPath = "$PSScriptRoot\ExportedFunctions\*.ps1"
-$ExportedFunctions     = Resolve-Path -Path $ExportedFunctionsPath -ErrorAction Stop
-foreach ($function in $ExportedFunctions) {
+$ExportedFunctions = Resolve-Path -Path $ExportedFunctionsPath -ErrorAction Stop
+foreach($function in $ExportedFunctions){
     . $Function.Path
 }

@@ -20,36 +20,36 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Get-DryPlan {
+function Get-DryPlan{
 
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [string]
         $PlanFile,
 
         [Parameter()]
-        [Array]
+        [array]
         $ResourceNames,
 
         [Parameter()]
-        [Array]
+        [array]
         $ExcludeResourceNames,
 
         [Parameter()]
-        [Array]
+        [array]
         $RoleNames,
 
         [Parameter()]
-        [Array]
+        [array]
         $ExcludeRoleNames,
 
         [Parameter()]
-        [Array]
+        [array]
         $ActionNames,
 
         [Parameter()]
-        [Array] 
+        [array] 
         $ExcludeActionNames,
 
         [Parameter()]
@@ -81,30 +81,30 @@ function Get-DryPlan {
         current Plan (i.e. when you -Plan). At each -Apply, the ApplySelected is reevaluated. 
     #>
     $Plan.Actions.foreach({
-        if ($_.PlanSelected -eq $true) {
-            if ($PlanFilter.InFilter($_.ResourceName,$_.Role,$_.Action,$_.Phase,$_.ActionOrder)) {
+        if($_.PlanSelected -eq $true){
+            if($PlanFilter.InFilter($_.ResourceName,$_.Role,$_.Action,$_.Phase,$_.ActionOrder)){
                 $_.ApplySelected = $true
-                if ($ShowStatus) {  # If the Action was previously 'Retrying', change to 'Failed' if $ShowStatus
-                    if ($_.Status -eq 'Retrying') {
+                if($ShowStatus){  # If the Action was previously 'Retrying', change to 'Failed' if $ShowStatus
+                    if($_.Status -eq 'Retrying'){
                         $_.Status = 'Failed'
                     }
                 }
             }
-            else {
+            else{
                 $_.ApplySelected = $false
             }
-            if ($_.Status -eq 'Success') {  # However, if the Action has a status of 'Success', deselect
+            if($_.Status -eq 'Success'){  # However, if the Action has a status of 'Success', deselect
                 $_.ApplySelected = $false
             }
         }
-        else {
+        else{
             $_.ApplySelected = $false
         }
     })
     $Plan.ResolveApplyOrder($PlanFile) # Set the ApplyOrder based on PlanSelected
     $Plan.ActiveActions = 0            # Set ApplyOrder and number of active actions
     $Plan.Actions.foreach({
-        if ($_.ApplySelected -eq $true) {
+        if($_.ApplySelected -eq $true){
             $Plan.ActiveActions++
         }
     })

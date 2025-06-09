@@ -3,11 +3,11 @@ $StatusScriptBlock = [ScriptBlock]{
         $Path,
         [int]$IntervalSeconds = 15)
     
-    try {
+    try{
         Clear-Host
         $Always = $true
         $Position = [System.Management.Automation.Host.Coordinates]::new(0,0)
-        do {
+        do{
             # Get the contents
             $Object = Get-Content -Path $Path -ErrorAction Stop | 
             ConvertTo-Json -ErrorAction Stop -Depth 50
@@ -19,7 +19,7 @@ $StatusScriptBlock = [ScriptBlock]{
         }
         while ($Always -eq $true)  
     }
-    catch {
+    catch{
         throw $_
     }
 }

@@ -19,22 +19,22 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Get-DryModuleConfig {
+function Get-DryModuleConfig{
     [cmdletbinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [PSCustomObject]$ConfigCombo,
 
         [Parameter(Mandatory,HelpMessage="Object to merge changes into")]
         [PSCustomObject]$Configuration
     )
-    try {
+    try{
         # Mandatory Module Configuration directories
         @($ConfigCombo.moduleconfig.rolespath,$ConfigCombo.moduleconfig.buildpath).Foreach({
-            try {
+            try{
                 Test-Path -Path $_ -ErrorAction Stop | Out-Null
             }
-            catch {
+            catch{
                 throw "Module is missing mandatory directory '$_'"
             }
         })
@@ -56,12 +56,12 @@ function Get-DryModuleConfig {
         $Configuration | Add-Member -MemberType NoteProperty -Name RoleMetaConfigs -Value $COObjects
 
         # Credentials 
-        if (Test-Path -Path $ConfigCombo.moduleconfig.credentialspath) {
+        if(Test-Path -Path $ConfigCombo.moduleconfig.credentialspath){
             $Configuration = Get-DryConfigData -Path $ConfigCombo.moduleconfig.credentialspath -Configuration $Configuration
         }
         return $Configuration
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

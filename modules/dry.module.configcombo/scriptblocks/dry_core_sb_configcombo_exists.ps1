@@ -1,14 +1,14 @@
 # Scriptblock for ScriptMethod to test if the ConfigCombo json exists
-[scriptblock]$dry_core_sb_configcombo_exists = {
-    try {
-        if (Test-Path -Path $this.Path -ErrorAction SilentlyContinue) {
+[scriptblock]$dry_core_sb_configcombo_exists ={
+    try{
+        if(Test-Path -Path $this.Path -ErrorAction SilentlyContinue){
             return $true
         }
-        else {
+        else{
             return $false
         }
     }
-    catch {
+    catch{
         throw $_
     }
 }

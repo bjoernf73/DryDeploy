@@ -1,162 +1,162 @@
 {
     "name": "DryDeploy",
-    "dependencies": {
-        "win32nt": {
-            "desktop": {
-                "git": {
+    "dependencies":{
+        "win32nt":{
+            "desktop":{
+                "git":{
                 },
-                "nuget": {
+                "nuget":{
                     "sources": [
-                        {
+                       {
                             "Name": "PSGallery",
                             "InstallationPolicy": "Trusted",
                             "SourceLocation": "https://www.powershellgallery.com/api/v2"
                         }
                     ],
                     "modules": [
-                        {
+                       {
                             "Name": "PSnmap",
                             "MinimumVersion": "1.3.1"
                         },
-                        {
+                       {
                             "Name": "Posh-SSH",
                             "MinimumVersion": "2.2"
                         },
-                        {
+                       {
                             "Name": "Posh-Git", 
                             "MinimumVersion": "1.0.0"
                         },
-                        {
+                       {
                             "Name": "Foil",
                             "MinimumVersion": "0.1.0"
                         },
-                        {
+                       {
                             "Name": "PowershellGet",
                             "MinimumVersion": "2.2.5"
                         },
-                        {
+                       {
                             "Name": "GPRegistryPolicyParser",
                             "MinimumVersion": "1.0.0"
                         },
-                        {
+                       {
                             "Name": "powershell-yaml",
                             "MinimumVersion": "0.4.7"
                         }
                     ]
                 },
-                "choco": {
+                "choco":{
                     "sources": [
-                        {
+                       {
                             "Name": "Chocolatey",
                             "InstallationPolicy": "Trusted",
                             "SourceLocation": "https://chocolatey.org/api/v2/"
                         }
                     ],
                     "packages": [
-                        {
+                       {
                             "Name": "Git",
                             "Description": "Git client"
                         },
-                        {
+                       {
                             "Name": "Packer",
                             "Description": "Hashicorp Packer"
                         },
-                        {
+                       {
                             "Name": "Terraform",
                             "Description": "Hashicorp Terraform"
                         },
-                        {
+                       {
                             "Name": "windows-adk-oscdimg",
                             "Description": "Windows ADK with oscdimg in path, may be required for packer"
                         }
                     ]
                 },
                 "windows_capabilities" : [
-                    {
+                   {
                         "Name": "OpenSSH.Client*"
                     }
                 ]
             },
-            "core": {
-                "git": {
+            "core":{
+                "git":{
                 },
-                "nuget": {
+                "nuget":{
                     "sources": [
-                        {
+                       {
                             "Name": "PSGallery",
                             "InstallationPolicy": "Trusted",
                             "SourceLocation": "https://www.powershellgallery.com/api/v2"
                         }
                     ],
                     "modules": [
-                        {
+                       {
                             "Name": "PSnmap",
                             "MinimumVersion": "1.3.1"
                         },
-                        {
+                       {
                             "Name": "Posh-SSH",
                             "MinimumVersion": "2.2"
                         },
-                        {
+                       {
                             "Name": "Posh-Git", 
                             "MinimumVersion": "1.0.0"
                         },
-                        {
+                       {
                             "Name": "Foil",
                             "MinimumVersion": "0.1.0"
                         },
-                        {
+                       {
                             "Name": "PowershellGet",
                             "MinimumVersion": "2.2.5"
                         },
-                        {
+                       {
                             "Name": "GPRegistryPolicyParser",
                             "MinimumVersion": "1.0.0"
                         }
                     ]
                 },
-                "choco": {
+                "choco":{
                     "sources": [
-                        {
+                       {
                             "Name": "Chocolatey",
                             "InstallationPolicy": "Trusted",
                             "SourceLocation": "https://chocolatey.org/api/v2/"
                         }
                     ],
                     "packages": [
-                        {
+                       {
                             "Name": "Git",
                             "Description": "Git client"
                         },
-                        {
+                       {
                             "Name": "Packer",
                             "Description": "Hashicorp Packer"
                         },
-                        {
+                       {
                             "Name": "Terraform",
                             "Description": "Hashicorp Terraform"
                         },
-                        {
+                       {
                             "Name": "windows-adk-oscdimg",
                             "Description": "Windows ADK with oscdimg in path, may be required for packer"
                         }
                     ]
                 },
                 "windows_capabilities" : [
-                    {
+                   {
                         "Name": "OpenSSH.Client*"
                     }
                 ]
             }
 
         },
-        "unix": {
-            "git": {
+        "unix":{
+            "git":{
             },
-            "nuget": {
+            "nuget":{
 
             },
-            "apt": {
+            "apt":{
 
             }
         }

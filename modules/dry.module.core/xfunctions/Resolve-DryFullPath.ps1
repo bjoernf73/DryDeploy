@@ -18,9 +18,9 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
-function Resolve-DryFullPath {
+function Resolve-DryFullPath{
     [cmdletbinding()]
-    param (
+    param(
         [string] 
         $Path,
 
@@ -28,30 +28,30 @@ function Resolve-DryFullPath {
         $RootPath
     )
 
-    try {
+    try{
         # if no RootPath is specified, use the current working directory
-        if (-not ($RootPath)) {
+        if(-not ($RootPath)){
             [System.IO.DirectoryInfo]$RootPath = ($PWD).Path
         }
 
         # determine the slash - backslash on windows, slash on Linux
         $slash = '\'
-        if ($PSVersionTable.Platform -eq 'Unix') {
+        if($PSVersionTable.Platform -eq 'Unix'){
             $slash = '/'
         }
         
         # Path cannot be a system.io-object, because it does not necessarily exist
-        if ($Path -match "^\.") {
+        if($Path -match "^\."){
             # Path relative to the current directory
             $FullPath = [IO.Path]::GetFullPath("$RootPath$($slash)$Path")
         }
-        else {
+        else{
             # Full path
             $FullPath = [IO.Path]::GetFullPath("$Path")
         }
         return $FullPath
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

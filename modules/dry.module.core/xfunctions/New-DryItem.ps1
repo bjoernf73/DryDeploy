@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function New-DryItem {
+function New-DryItem{
     [cmdletbinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [String[]]$Items,
 
@@ -30,32 +30,32 @@ function New-DryItem {
         [string]$ItemType
     )
 
-    try {
-        foreach ($Item in $Items) {
-            if (Test-Path -Path "$Item" -ErrorAction Ignore) {
+    try{
+        foreach($Item in $Items){
+            if(Test-Path -Path "$Item" -ErrorAction Ignore){
                 $ExistingItem = Get-Item -Path "$Item" -ErrorAction Stop
-                switch ($ItemType) {
-                    'Directory' {
-                        if ($false -eq $ExistingItem.PSIsContainer) {
+                switch($ItemType){
+                    'Directory'{
+                        if($false -eq $ExistingItem.PSIsContainer){
                             throw "Item '$($ExistingItem.FullName)' is of wrong type"
                         }
                     }
-                    'File' {
-                        if ($true -eq $ExistingItem.PSIsContainer) {
+                    'File'{
+                        if($true -eq $ExistingItem.PSIsContainer){
                             throw "Item '$($ExistingItem.FullName)' is of wrong type"
                         }
                     }
                 }
             }
-            else {
+            else{
                 New-Item -ItemType $ItemType -Path "$Item" -Force | Out-Null
             }
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
         $ExistingItem = $null
     }
 }

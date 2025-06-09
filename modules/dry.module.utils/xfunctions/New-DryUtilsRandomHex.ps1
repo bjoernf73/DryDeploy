@@ -19,26 +19,26 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function New-DryUtilsRandomHex {
+function New-DryUtilsRandomHex{
     [CmdLetBinding()]
     [OutputType([System.String])]
     
-    param (
+    param(
         [Parameter(HelpMessage="Length of the random hex")]
         [int]$Length = 25
     )
-    try {
+    try{
         $Chars = '0123456789ABCDEF'
         [string]$Random = $null
-        for ($i=1; $i -le $Length; $i++)     {
+        for ($i=1; $i -le $Length; $i++)    {
             $Random += $Chars.Substring((Get-Random -Minimum 0 -Maximum 15),1)
         }
         return $Random
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
         $i = $null
         $Random = $null
     }

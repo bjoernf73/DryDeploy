@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Resolve-DryActionOptions {
+function Resolve-DryActionOptions{
     [CmdletBinding()]
-    param ( 
+    param( 
         [Parameter(Mandatory)]
         [PSObject]$Action,
 
@@ -35,7 +35,7 @@ function Resolve-DryActionOptions {
         [Switch]$NoFiles
     )
     
-    try {
+    try{
         <#
             Example Paths in Configuration: 
             
@@ -60,8 +60,8 @@ function Resolve-DryActionOptions {
         [string]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.Action
         [string]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.Source
 
-        switch ($Action.source) {
-            'role' {
+        switch($Action.source){
+            'role'{
                 [string]$RolesConfigSourcePath = Join-Path -Path $Configuration.Paths.ModuleConfigDirectory -ChildPath 'Roles'
                 [string]$RoleConfigSourcePath  = Join-Path -Path $RolesConfigSourcePath -ChildPath $Action.Role
                 [string]$ConfigSourcePath      = Join-Path -Path $RoleConfigSourcePath -ChildPath $Action.Action
@@ -69,31 +69,31 @@ function Resolve-DryActionOptions {
                 [string]$ModuleFilesSourcePath = Join-Path -Path $Configuration.Paths.ModuleConfigDirectory -ChildPath 'Files'
                 [string]$RoleFilesSourcePath   = Join-Path -Path $RoleConfigSourcePath -ChildPath 'Files'
                 [string]$ActionFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
-                if ($Action.Phase -gt 0) {
+                if($Action.Phase -gt 0){
                     [string]$ConfigSourcePath       = Join-Path -Path $ConfigSourcePath -ChildPath $Action.Phase
                     [string]$PhaseFilesSourcePath   = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
                     [string]$ActionTypePropertyName = "$($Action.Action)_type$($Action.Phase)"
                     [string]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.Phase
                 }
-                else {
+                else{
                     [string]$ActionTypePropertyName = "$($Action.Action)_type"
                 }
                 [string]$ActionMetaConfigFile = Join-Path -Path $ConfigSourcePath -ChildPath 'Config.json'
 
             }
-            'base' {
+            'base'{
                 [string]$BaseConfigSourcePath = Join-Path -Path $Configuration.Paths.BaseConfigDirectory -ChildPath $Action.Resource.BaseConfig
                 [string]$ConfigSourcePath     = Join-Path -Path $BaseConfigSourcePath -ChildPath $Action.Action
                 
                 [string]$RoleFilesSourcePath   = Join-Path -Path $BaseConfigSourcePath -ChildPath 'Files'
                 [string]$ActionFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
-                if ($Action.Phase -gt 0) {
+                if($Action.Phase -gt 0){
                     [string]$ConfigSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath $Action.Phase
                     [string]$PhaseFilesSourcePath   = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
                     [string]$ActionTypePropertyName = "$($Action.Action)_type$($Action.Phase)"
                     [string]$ConfigTargetPath = Join-Path -Path $ConfigTargetPath -ChildPath $Action.Phase
                 }
-                else {
+                else{
                     [string]$ActionTypePropertyName = "$($Action.Action)_type"
                 }
                 [string]$ActionMetaConfigFile = Join-Path -Path $ConfigSourcePath -ChildPath 'Config.json'
@@ -108,7 +108,7 @@ function Resolve-DryActionOptions {
         $Credentials = New-Object -TypeName PSCustomObject
         $c = 0
         $Action.Credentials.PSObject.Properties.foreach({$c++})
-        for ($CredCount = 1; $CredCount -le $c; $CredCount++) {
+        for ($CredCount = 1; $CredCount -le $c; $CredCount++){
             $GetCredentialsParams = @{
                 Alias     = $Action.credentials."Credential$CredCount" 
                 EnvConfig = $ConfigCombo.envconfig.name
@@ -122,16 +122,16 @@ function Resolve-DryActionOptions {
         }
 
         # Any action must specify a default type
-        if (Test-Path -Path $ActionMetaConfigFile -ErrorAction ignore) {
+        if(Test-Path -Path $ActionMetaConfigFile -ErrorAction ignore){
             $ActionMetaConfig = Get-DryFromJson -File $ActionMetaConfigFile
-            if ($ActionMetaConfig.default -and $ActionMetaConfig.supported_types) {
+            if($ActionMetaConfig.default -and $ActionMetaConfig.supported_types){
                 [string]$ActionType = $ActionMetaConfig.default
-                [Array]$SupportedTypes = @($ActionMetaConfig.supported_types)
+                [array]$SupportedTypes = @($ActionMetaConfig.supported_types)
 
                 # Test if the Resource specifies a type for this Action, and modify  
                 # ActionType only if specified type is supported - else keep the default 
-                if ($Action.Resource.options."$ActionTypePropertyName") {
-                    if ($Action.Resource.options."$ActionTypePropertyName" -in $SupportedTypes) {
+                if($Action.Resource.options."$ActionTypePropertyName"){
+                    if($Action.Resource.options."$ActionTypePropertyName" -in $SupportedTypes){
                         $ActionType = $Action.Resource.options."$ActionTypePropertyName"
                     }
                 }
@@ -150,10 +150,10 @@ function Resolve-DryActionOptions {
                 then MoveToOU must modify accordingly. The ActionMetaConfig's 'follow_type' property 
                 specifies which Action's type to follow 
             #>
-            if ($ActionMetaConfig.follow_type) {
+            if($ActionMetaConfig.follow_type){
                 $ActionType = $ActionMetaConfig.default
                 $FollowType = $ActionMetaConfig.follow_type
-                if ($Action.Resource.Options."$FollowType") {
+                if($Action.Resource.Options."$FollowType"){
                     $ActionType = $Action.Resource.Options."$FollowType"
                 }
             }
@@ -164,16 +164,16 @@ function Resolve-DryActionOptions {
         $WslConfigTargetPath = ('/mnt/' + $ConfigTargetPath.substring(0,1).tolower() +  $($ConfigTargetPath.substring(2) -replace '\\','/')) -replace '//','/'
 
 
-        if ($TypeMetaConfig.target_expression) {
+        if($TypeMetaConfig.target_expression){
             [string]$Target = Invoke-Expression -Command $TypeMetaConfig.target_expression 
         }
-        else {
+        else{
             # dhcp da? hvordan gjør vi det? 
             [string]$Target = $Action.Resource.Resolved_Network.ip_address
         }
 
         # Create the target folder
-        if (-not (Test-Path -Path $ConfigTargetPath -ErrorAction Ignore)) {
+        if(-not (Test-Path -Path $ConfigTargetPath -ErrorAction Ignore)){
             New-Item -Path $ConfigTargetPath -ItemType Directory -Confirm:$false -Force | Out-Null
         }
 
@@ -187,45 +187,45 @@ function Resolve-DryActionOptions {
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'Target' -Value $Target
         $OptionsObject | Add-Member -MemberType NoteProperty -Name 'RoleTargetRootPath' -Value $RoleTargetRootPath
 
-        if ($ActionMetaConfig) {
+        if($ActionMetaConfig){
             $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ActionMetaConfig' -Value $ActionMetaConfig
         }
 
-        if ($TypeMetaConfig) {
+        if($TypeMetaConfig){
             $OptionsObject | Add-Member -MemberType NoteProperty -Name 'TypeMetaConfig' -Value $TypeMetaConfig
         }
 
-        if ($ModuleFilesSourcePath) {
-            if (Test-Path -Path $ModuleFilesSourcePath -ErrorAction Ignore) {
+        if($ModuleFilesSourcePath){
+            if(Test-Path -Path $ModuleFilesSourcePath -ErrorAction Ignore){
                 $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ModuleFilesSourcePath' -Value $ModuleFilesSourcePath
             }
         }
-        if ($RoleFilesSourcePath) {
-            if (Test-Path -Path $RoleFilesSourcePath -ErrorAction Ignore) {
+        if($RoleFilesSourcePath){
+            if(Test-Path -Path $RoleFilesSourcePath -ErrorAction Ignore){
                 $OptionsObject | Add-Member -MemberType NoteProperty -Name 'RoleFilesSourcePath' -Value $RoleFilesSourcePath
             }
         }
-        if ($ActionFilesSourcePath) {
-            if (Test-Path -Path $ActionFilesSourcePath -ErrorAction Ignore) {
+        if($ActionFilesSourcePath){
+            if(Test-Path -Path $ActionFilesSourcePath -ErrorAction Ignore){
                 $OptionsObject | Add-Member -MemberType NoteProperty -Name 'ActionFilesSourcePath' -Value $ActionFilesSourcePath
             }
         }
-        if ($PhaseFilesSourcePath) {
-            if (Test-Path -Path $PhaseFilesSourcePath -ErrorAction Ignore) {
+        if($PhaseFilesSourcePath){
+            if(Test-Path -Path $PhaseFilesSourcePath -ErrorAction Ignore){
                 $OptionsObject | Add-Member -MemberType NoteProperty -Name 'PhaseFilesSourcePath' -Value $PhaseFilesSourcePath
             }
         }
-        if ($TypeFilesSourcePath) {
-            if (Test-Path -Path $TypeFilesSourcePath -ErrorAction Ignore) {
+        if($TypeFilesSourcePath){
+            if(Test-Path -Path $TypeFilesSourcePath -ErrorAction Ignore){
                 $OptionsObject | Add-Member -MemberType NoteProperty -Name 'TypeFilesSourcePath' -Value $TypeFilesSourcePath
             }
         }
-        if ($TypeMetaConfigFile) {
+        if($TypeMetaConfigFile){
             $OptionsObject | Add-Member -MemberType NoteProperty -Name 'TypeMetaConfigFile' -Value $TypeMetaConfigFile
         }
         
         
-        if ($ActionMetaConfig.vars) {
+        if($ActionMetaConfig.vars){
             # There are variables to be resolved for the Action
             $ResolveDryVarParams = @{
                 Variables     = $ActionMetaConfig.vars
@@ -238,7 +238,7 @@ function Resolve-DryActionOptions {
             $MetaConfigVars = Resolve-DryVariables @ResolveDryVarParams
             $ResolveDryVarParams = $null
         }
-        elseif ($TypeMetaConfig.vars) {
+        elseif($TypeMetaConfig.vars){
             # There are variables to be resolved for the Action Type
             $ResolveDryVarParams = @{
                 Variables     = $TypeMetaConfig.vars
@@ -252,12 +252,12 @@ function Resolve-DryActionOptions {
             $ResolveDryVarParams = $null
         }
 
-        if ($MetaConfigVars) {
+        if($MetaConfigVars){
             $OptionsObject | Add-Member -MemberType NoteProperty -Name 'Vars' -Value $MetaConfigVars
         }
         return $OptionsObject
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

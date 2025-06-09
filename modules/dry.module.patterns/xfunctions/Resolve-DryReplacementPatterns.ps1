@@ -20,9 +20,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Resolve-DryReplacementPatterns {
+function Resolve-DryReplacementPatterns{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(ParametersetName="InputObject",Position=0,Mandatory)]
         [PSCustomObject]$InputObject,
 
@@ -35,46 +35,46 @@ function Resolve-DryReplacementPatterns {
         [System.Collections.Generic.List[PSObject]]$Variables
     )
 
-    try {
-        if (($InputObject -is [Array]) -and $InputObject.count -eq 0) {
+    try{
+        if(($InputObject -is [array]) -and $InputObject.count -eq 0){
             return
         } 
-        elseif ($InputObject) {
-            if ($InputObject -is [Array]) {
+        elseif($InputObject){
+            if($InputObject -is [array]){
                 # make a copy of the object, so changes don't infect the original
-                [Array]$CopyObject = $InputObject.PSObject.Copy()
+                [array]$CopyObject = $InputObject.PSObject.Copy()
                 $ResultArray = @()
-                foreach ($arrItem in $CopyObject) {
+                foreach($arrItem in $CopyObject){
                     $ResultArray+= Resolve-DryReplacementPatterns -InputObject $arrItem -Variables $Variables
                 }
                 $ResultArray
             }
-            else {
+            else{
                 # make a copy of the object, so changes don't infect the original
                 $CopyObject = $InputObject.PSObject.Copy()
-                $CopyObject.PSObject.Properties | Foreach-Object {
+                $CopyObject.PSObject.Properties | Foreach-Object{
                     $PropertyName  = $_.Name
                     $PropertyValue = $_.Value
-                    if (($PropertyName -match "common_variables$") -or ($PropertyName -match "resource_variables$")) {
+                    if(($PropertyName -match "common_variables$") -or ($PropertyName -match "resource_variables$")){
                         # the common_variables and resource_variables define the strings to replace, so 
                         # avoid replacing them, return the original object
                     }
-                    elseif ($PropertyValue -is [string]) {
+                    elseif($PropertyValue -is [string]){
                         # if name is a string, we can replace
                         $PropertyValue = Resolve-DryReplacementPattern -InputText $PropertyValue -Variables $Variables     
                     }
-                    elseif ($PropertyValue -is [Array]) {
+                    elseif($PropertyValue -is [array]){
                         # nested call for each element in array
-                        $PropertyValue = @($PropertyValue | Foreach-Object { 
-                            if ($_ -is [string]) {
+                        $PropertyValue = @($PropertyValue | Foreach-Object{ 
+                            if($_ -is [string]){
                                 Resolve-DryReplacementPatterns -InputText $_ -Variables $Variables
                             } 
-                            else {
+                            else{
                                 Resolve-DryReplacementPatterns -InputObject $_ -Variables $Variables
                             }
                         })
                     }
-                    elseif ($PropertyValue -is [PSObject]) {
+                    elseif($PropertyValue -is [PSObject]){
                         # nested call
                         $PropertyValue = Resolve-DryReplacementPatterns -InputObject $PropertyValue -Variables $Variables
                     } 
@@ -83,11 +83,11 @@ function Resolve-DryReplacementPatterns {
                 return $CopyObject
             }
         } 
-        else { 
+        else{ 
             Resolve-DryReplacementPattern -InputText $InputText -Variables $Variables
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

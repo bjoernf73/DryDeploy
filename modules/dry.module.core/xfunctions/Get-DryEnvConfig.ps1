@@ -19,16 +19,16 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Get-DryEnvConfig {
+function Get-DryEnvConfig{
     [cmdletbinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [PSCustomObject]$ConfigCombo,
 
         [Parameter(Mandatory)]
         [PSCustomObject]$Paths
     )
-    try {
+    try{
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         
             EnvConfig
@@ -54,12 +54,12 @@ function Get-DryEnvConfig {
             Paths = $Paths
         }
         $Configuration.CoreConfig = Get-DryConfigData -Path (Join-Path -Path $ConfigCombo.envconfig.path -ChildPath 'CoreConfig') -ErrorAction Stop
-        if (Test-Path -Path (Join-Path -Path $ConfigCombo.envconfig.path -ChildPath 'UserConfig')) {
+        if(Test-Path -Path (Join-Path -Path $ConfigCombo.envconfig.path -ChildPath 'UserConfig')){
             $Configuration.UserConfig = Get-DryConfigData -Path (Join-Path -Path $ConfigCombo.envconfig.path -ChildPath 'UserConfig') -Configuration $Configuration -ErrorAction Stop
         }
         return $Configuration
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

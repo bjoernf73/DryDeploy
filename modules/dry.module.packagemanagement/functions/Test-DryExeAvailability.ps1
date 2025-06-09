@@ -22,22 +22,22 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Test-DryExeAvailability {
+function Test-DryExeAvailability{
     [CmdletBinding()]
     [OutputType([Bool])]
     param(
         [string]$exe
     )
 
-    try {
-        if (Get-Command -Name "$exe") {
+    try{
+        if(Get-Command -Name "$exe"){
             $true
         }
-        else {
+        else{
             $false
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

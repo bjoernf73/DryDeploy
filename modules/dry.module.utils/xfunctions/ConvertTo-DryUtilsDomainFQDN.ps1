@@ -24,9 +24,9 @@
 	.Synopsis 
 	Converts a domain distinguishedName to domain FQDN 
 #> 
-function ConvertTo-DryUtilsDomainFQDN {
+function ConvertTo-DryUtilsDomainFQDN{
     [CmdLetBinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [ValidateScript({
             [RegEx]$rx = "^(dc|DC|Dc|dC)=.*,(dc|DC|Dc|dC)=.*"; 
@@ -39,21 +39,21 @@ function ConvertTo-DryUtilsDomainFQDN {
         [string]$DomainDN
     )
     
-    try {
+    try{
         $DomainDN2 = $DomainDN.Remove(0,3)
         $DNParts = $domainDN2 -Split "dc="
         $DomainFQDN = ""
-        for ($i = 0; $i -le ($DNParts.Count - 1); $i++) {
+        for ($i = 0; $i -le ($DNParts.Count - 1); $i++){
             $DNPart = ($DNParts[$i]).Trim(',') + '.'
             $DomainFQDN += $DNPart
         }
         $DomainFQDN = $DomainFQDN.Remove($DomainFQDN.Length - 1, 1)
         return $DomainFQDN
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
         @('DomainDN','DomainDN2','DNParts').foreach({
             Remove-Variable -Name $_ -ErrorAction Ignore
         })

@@ -20,6 +20,6 @@
 # Dot source all functionscripts - the manifest limits exported functions
 $ExportedFunctionsPath = "$PSScriptRoot\ExportedFunctions\*.ps1"
 $ExportedFunctions     = Resolve-Path -Path $ExportedFunctionsPath -ErrorAction Stop
-foreach ($function in $ExportedFunctions) {
+foreach($function in $ExportedFunctions){
     . $Function.Path
 }

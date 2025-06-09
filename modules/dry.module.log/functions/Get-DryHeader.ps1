@@ -19,11 +19,11 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Get-DryHeader {
+function Get-DryHeader{
     [CmdletBinding(DefaultParameterSetName="multilineheader")]
-    [OutputType([Array],ParameterSetName="multilineheader")]
+    [OutputType([array],ParameterSetName="multilineheader")]
     [OutputType([string],ParameterSetName="singlelineheader")]
-    param (
+    param(
         [Parameter(Mandatory)]
         [PSObject]$Message,
 
@@ -46,47 +46,47 @@ function Get-DryHeader {
     )
 
     # Make an array of the header chars
-    for ($hca = 0; $hca -lt $HeaderChars.length; $hca++) {
-        [Array]$HeaderCharsArray += $HeaderChars[$hca]
+    for ($hca = 0; $hca -lt $HeaderChars.length; $hca++){
+        [array]$HeaderCharsArray += $HeaderChars[$hca]
     }
 
     # Converts 'Message' to 'M e s s a g e'
-    if ($Air) {
+    if($Air){
         $AiredMessage = ''
-        for ($LetterCount = 0; $LetterCount -lt $Message.Length; $LetterCount++) {
+        for ($LetterCount = 0; $LetterCount -lt $Message.Length; $LetterCount++){
             $AiredMessage += $Message.SubString($LetterCount,1)
             $AiredMessage = "$AiredMessage "
         }
         $Message = $AiredMessage
     }
 
-    switch ($PSCmdlet.ParameterSetName) {
-        'singlelineheader' {
+    switch($PSCmdlet.ParameterSetName){
+        'singlelineheader'{
             # add $PostBuffer
-            for ($b = 0; $b -lt $PostBuffer; $b++) {
+            for ($b = 0; $b -lt $PostBuffer; $b++){
                 $Message = "$Message "
             }
 
             # Determine which of the elements in the array to start on - this is to make HeaderChars aligned
             $HeaderCharIndex = ($Message.length)%($HeaderCharsArray.length)
 
-            while ($Message.Length -lt $TargetMessageLength) {
+            while ($Message.Length -lt $TargetMessageLength){
                 $Message = $Message + $HeaderCharsArray[$HeaderCharIndex]
                 $HeaderCharIndex++
-                if ($HeaderCharIndex -gt ($HeaderCharsArray.length-1)) {
+                if($HeaderCharIndex -gt ($HeaderCharsArray.length-1)){
                     $HeaderCharIndex = 0
                 }
             }
             $Message
          }
-        'multilineheader' {
+        'multilineheader'{
             # Just output the header line
             [string]$HeaderLine = ''
             $HeaderCharIndex = 0
-            while ($HeaderLine.Length -lt $TargetMessageLength) {
+            while ($HeaderLine.Length -lt $TargetMessageLength){
                 $HeaderLine = $HeaderLine + $HeaderCharsArray[$HeaderCharIndex]
                 $HeaderCharIndex++
-                if ($HeaderCharIndex -gt ($HeaderCharsArray.length-1)) {
+                if($HeaderCharIndex -gt ($HeaderCharsArray.length-1)){
                     $HeaderCharIndex = 0
                 }
             }

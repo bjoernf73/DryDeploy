@@ -1,10 +1,10 @@
 # Må testes med: 
 # - lists;  of objects, list of strings, 
 # - objects; simple one-level-psobject and complex psobjects containing strings, arrays of psobjetcs, array of strings, and so on
-function Out-DryPositionedElement {
+function Out-DryPositionedElement{
     [CmdletBinding(DefaultParameterSetName="updatescreen")]
     [Alias("odpe")]
-    param (
+    param(
         [Alias("obj")]
         [Parameter(ParameterSetName="updatescreen",Mandatory,
         HelpMessage="The Object to output (to screen). May be a string, a list ([System.Collections.Generic.List[]]) or array, or a PSCustomObject")]
@@ -44,18 +44,18 @@ function Out-DryPositionedElement {
         [System.ConsoleColor]$BackgroundColor
     )
 
-    try {
+    try{
         # Store the initial position
         $InitialPosition = $Host.UI.RawUI.Cursorposition
 
         # Create the globally scoped variable that holds positions
-        if ($null -eq $GLOBAL:dry_var_global_PositionedElements) {
+        if($null -eq $GLOBAL:dry_var_global_PositionedElements){
             $GLOBAL:dry_var_global_PositionedElements = [System.Collections.Generic.List[PSCustomObject]]::new()
         }
 
-        if ($Scratch) {
-            :ScratchLoop foreach ($PositionedElement in $GLOBAL:dry_var_global_PositionedElements) { 
-                if ($PositionedElement.Name -eq $Name) { 
+        if($Scratch){
+            :ScratchLoop foreach($PositionedElement in $GLOBAL:dry_var_global_PositionedElements){ 
+                if($PositionedElement.Name -eq $Name){ 
                     $GLOBAL:dry_var_global_PositionedElements.Remove($PositionedElement)
                     break ScratchLoop
                 }
@@ -63,16 +63,16 @@ function Out-DryPositionedElement {
         }
         
         # Determine the position of the element
-        if ($Position) {
+        if($Position){
             $PositionObj = New-Object -TypeName PSCustomObject -Property @{
                 Name     = $Name
                 Position = $Position
             }
-            $GLOBAL:dry_var_global_PositionedElements = $GLOBAL:dry_var_global_PositionedElements | Where-Object { $_.Name -ne $Name}
+            $GLOBAL:dry_var_global_PositionedElements = $GLOBAL:dry_var_global_PositionedElements | Where-Object{ $_.Name -ne $Name}
             $GLOBAL:dry_var_global_PositionedElements.Add($PositionObj)
         }
-        else {
-            if ($null -eq ($GLOBAL:dry_var_global_PositionedElements | Where-Object { $_.Name -eq $Name})) {
+        else{
+            if($null -eq ($GLOBAL:dry_var_global_PositionedElements | Where-Object{ $_.Name -eq $Name})){
                 [System.Management.Automation.Host.Coordinates]$Position = $Host.UI.RawUI.Cursorposition
                 $PositionObj = New-Object -TypeName PSCustomObject -Property @{
                     Name     = $Name
@@ -80,37 +80,37 @@ function Out-DryPositionedElement {
                 }
                 $GLOBAL:dry_var_global_PositionedElements.Add($PositionObj)
             }
-            else {
-                [System.Management.Automation.Host.Coordinates]$Position = ($GLOBAL:dry_var_global_PositionedElements | Where-Object { $_.Name -eq $Name}).Position
+            else{
+                [System.Management.Automation.Host.Coordinates]$Position = ($GLOBAL:dry_var_global_PositionedElements | Where-Object{ $_.Name -eq $Name}).Position
             }
         }
 
         # Set params to Write-Host
         $WriteHostParams = @{}
-        if ($ForegroundColor) {
+        if($ForegroundColor){
             $WriteHostParams+=@{
                 ForegroundColor = $ForegroundColor
             }
         }
-        if ($BackgroundColor) {
+        if($BackgroundColor){
             $WriteHostParams+=@{
                 BackGroundColor = $BackgroundColor
             }
         }
-        if ($List) {
+        if($List){
             $Host.UI.RawUI.Cursorposition = $Position
             ($Object | Format-List | Out-String) | Write-Host @WriteHostParams
         }
-        else {
+        else{
             $Host.UI.RawUI.Cursorposition = $Position
             ($Object | Format-Table | Out-String) | Write-Host @WriteHostParams
         }
 
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
         $Host.UI.RawUI.Cursorposition = $InitialPosition
     }
 }

@@ -1,6 +1,6 @@
-function dry.action.ansible.wsl {
+function dry.action.ansible.wsl{
     [CmdletBinding()]  
-    param (
+    param(
         [Parameter(Mandatory,HelpMessage="The resolved action object")]
         [PSObject]$Action,
 
@@ -10,29 +10,35 @@ function dry.action.ansible.wsl {
         [Parameter(Mandatory,HelpMessage="The resolved global configuration object")]
         [PSObject]$Configuration,
 
-        [Parameter(HelpMessage="Hash directly from the command line to be 
-        added as parameters to the function that iniates the action")]
-        [HashTable]$ActionParams
+        [Parameter(HelpMessage="From dd's -ActionParams, a hash that will be passed on to the configuration program")]
+        [hashtable]$ActionParams
     )
-    try {
+    try{
         # the main.yml of the ansible playbook
         $AnsiblePlaybookPath = $Resolved.WslConfigSourcePath + "/main.yml"
-        ol v @('Ansible playbook in wsl',"$AnsiblePlaybookPath")
 
         # inventory ini file in powershell on windows and the wsl equivalent
         $TargetInventoryFile = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name)-inv.ini"
         $wslTargetInventoryFile = $Resolved.WslConfigTargetPath + "/$($Action.Resource.Name)-inv.ini"
-        ol v @('Inventory in wsl',"$wslTargetInventoryFile")
-
+        
+        # inventory ini file in powershell on windows and the wsl equivalent
+        $AnsibleLogFile = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name)-ansible.log"
+        $wslAnsibleLogFile = $Resolved.WslConfigTargetPath + "/$($Action.Resource.Name)-ansible.log"
+        
         # remove files that may exist from a previous run
-        if (Test-Path -Path $Resolved.ConfigTargetPath -ErrorAction Ignore) {
+        if(Test-Path -Path $Resolved.ConfigTargetPath -ErrorAction Ignore){
             Remove-Item -Path $Resolved.ConfigTargetPath -Recurse -Force -Confirm:$false
         }
         
         # create the target folder
-        if (-not (Test-Path -Path $Resolved.ConfigTargetPath -ErrorAction Ignore)) {
+        if(-not (Test-Path -Path $Resolved.ConfigTargetPath -ErrorAction Ignore)){
             New-Item -Path $Resolved.ConfigTargetPath -ItemType Directory -Confirm:$false -Force | Out-Null
         }
+
+        # output to screen 
+        ol i @('Ansible playbook in wsl',"$AnsiblePlaybookPath")
+        ol i @('Inventory in wsl',"$wslTargetInventoryFile")
+        ol i @('log in wsl',"$wslAnsibleLogFile")
 
         # start creating contents of inventory file
         $InventoryINIContent = @"
@@ -43,132 +49,115 @@ $($Resolved.Target)
 [$($Action.Resource.Name):vars]
 
 "@
-        # add the variables that are not secrets
-        foreach ($Var in $Resolved.vars | Where-Object { $_.secret -eq $false}) {
-            $InventoryINIContent += "$($Var.Name)=$($Var.Value)`n"
+        # variables that are not secrets are written to the inventory file
+        foreach($var in $Resolved.vars | Where-Object{ $_.secret -eq $false}){
+            $InventoryINIContent += "$($var.Name)=$($var.Value)`n"
         }
-        #$InventoryINIContent | Out-File -FilePath $TargetInventoryFile -Encoding utf8 -Force -ErrorAction Stop
-
+    
+        # write the inventory file using UTF8 without BOM
         $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
-        [System.IO.File]::WriteAllLines($TargetInventoryFile, $InventoryINIContent, $Utf8NoBomEncoding)
+        [system.io.file]::WriteAllLines($TargetInventoryFile, $InventoryINIContent, $Utf8NoBomEncoding)
 
-
+        # output paths to screen
         ol v @('Ansible Inventory file created at',"$TargetInventoryFile")
         ol v @('Ansible Inventory wsl path',"$wslTargetInventoryFile")
-        # display content in verbose output
-        Get-Content -Path $TargetInventoryFile -Encoding utf8 | ForEach-Object { ol v $_ }
 
         # ansible-playbook arguments
-        [System.Collections.ArrayList]$Arguments = @("-i", 
+        [system.collections.arraylist]$Arguments = @(
+            "-i", 
             $wslTargetInventoryFile, 
-            $AnsiblePlaybookPath, 
+            $AnsiblePlaybookPath,
             "--extra-vars", 
             "`"ansible_password=$($Resolved.Credentials.credential1.GetNetworkCredential().Password) ansible_become_pass=$($Resolved.Credentials.credential1.GetNetworkCredential().Password)`""
         )
+       
+        # add target to known_hosts
+        ol i "Add the target [$($Action.Resource.Name) ($($Resolved.Target))] to known_hosts in wsl" -sh
+        ol i @('command',"Start-Process 'wsl' -ArgumentList `"-d Ubuntu -- ssh-keyscan -H $($Resolved.Target) >> ~/.ssh/known_hosts`" -NoNewWindow -Wait")
+        Start-Process 'wsl' -ArgumentList "-d Ubuntu -- ssh-keyscan -H $($Resolved.Target) >> ~/.ssh/known_hosts" -NoNewWindow -Wait
 
-        #  "`"ansible_user=$($Credentials.credential1.username) ansible_password=$($Credentials.credential1.GetNetworkCredential().Password)`"")
+        # run the playbook
+        ol i "Run the ansible-playbook in wsl" -sh
+        ol i @('command',"Start-Process 'wsl' -ArgumentList `"-d Ubuntu -- export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments -vvvv`" -NoNewWindow -Wait")
+        Start-Process 'wsl' -ArgumentList "-d Ubuntu -- export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments" -NoNewWindow -Wait
 
-        <#
-        foreach ($Var in $Resolved.vars | Where-Object { $_.secret -eq $true}) {
-            $Arguments += "-var"
-            $Arguments += "$($Var.Name)=`"$($Var.Value)`""
-
-            $DisplayArguments += "-var"
-            $DisplayArguments += "$($Var.Name)=`"**********`""
+        # test if wsl ran successfully
+        if($LASTEXITCODE -ne 0){
+            throw "wsl failed to run ansible-playbook: $LASTEXITCODE" 
         }
-        #>
         
-        <#
-        $ValidateArguments = $Arguments
-        $ValidateDisplayArguments = $DisplayArguments
-        
-        $ValidateArguments += "$($PackerFile.FullName)"
-        $ValidateDisplayArguments += "$($PackerFile.FullName)"
-        
-        # cd to target
-        Set-Location -Path $Resolved.ConfigTargetPath -ErrorAction Stop
+        # test if ansible ran successfully. If so, we should have a log file with a PLAY RECAP
+        if(Test-Path -Path $AnsibleLogFile -ErrorAction Ignore){
+            ol i @('Ansible log file found at',"$AnsibleLogFile")
 
-        # Packer Validate
-        ol i @('Packer Validate',"& $PackerExe validate $ValidateDisplayArguments")
-        & $PackerExe validate $ValidateArguments
-        if ($LastExitCode -ne 0) {
-            throw "Packer Validate failed: $LastExitCode" 
-        }
+            $PlayRecapObj=[pscustomobject]@{
+                ok=$null
+                changed=$null
+                unreachable=$null
+                failed=$null
+                skipped=$null
+                rescued=$null
+                ignored=$null
+            }
 
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        #   ACTIONPARAMS
-        #   When working with a single Action type, for instance during development, 
-        #   it is possible to pass a hashtable of extra commmand line paramaters to 
-        #   DryDeploy that will be passed to the receiving program, in this case 
-        #   Ansible.
-        #   Params may be switches (like '-no-color') or key value pairs 
-        #   (like '-parallelism=2'). The hash table should in these two cases look 
-        #   like this: 
-        #       $ActionParams = @{
-        #            'no-color'    = $null 
-        #            'parallelism' = 2
-        #       }
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        if ($ActionParams) {
-            foreach ($ActionParam in $ActionParams.GetEnumerator()) {
-                if ($null -eq $ActionParam.Value) {
-                    # Switch
-                    $Arguments += "-$($ActionParam.Name)"
-                    $DisplayArguments += "-$($ActionParam.Name)"
-                }
-                else {
-                    # Key-Value pair
-                    $Arguments += "-$($ActionParam.Name)=$($ActionParam.Value)"
-                    $DisplayArguments += "-$($ActionParam.Name)=$($ActionParam.Value)"
-                }
+            # find the PLAY RECAP, match values using pattern, and update the PlayRecapObj
+            $Pattern = "(ok|changed|unreachable|failed|skipped|rescued|ignored)=(\d+)\s"
+            $PlayRecap = ((Get-Content -Path $AnsibleLogFile -Encoding utf8 | Select-String -Pattern "PLAY\sRECAP\s\*\*" -Context 0, 2) -split "`n")[-1]
+            $MatchResults = [regex]::Matches($PlayRecap,$Pattern)
+            if($MatchResults.Count -lt 7){
+                $DoNotDeleteAnsibleLogFile = $true
+                throw "No PLAY RECAP found in Ansible log file: $AnsibleLogFile"
+            }
+            foreach($match in $MatchResults) {
+                $PlayRecapObj."$($match.Groups[1].Value)" = [int]$match.Groups[2].Value
+            }
+
+            # the failed and unreachable count determines if we throw an error or not.
+            if($PlayRecapObj.failed -gt 0){
+                $DoNotDeleteAnsibleLogFile = $true
+                throw "One or more Ansible Plays failed, see log file: $AnsibleLogFile"
+            }
+            elseif($PlayRecapObj.unreachable -gt 0){
+                $DoNotDeleteAnsibleLogFile = $true
+                throw "One or more Ansible target were unreachable, see log file: $AnsibleLogFile"
+            }
+            elseif($null -eq $PlayRecapObj.ok -or
+                   $null -eq $PlayRecapObj.changed -or
+                   $null -eq $PlayRecapObj.unreachable -or
+                   $null -eq $PlayRecapObj.failed -or
+                   $null -eq $PlayRecapObj.skipped -or
+                   $null -eq $PlayRecapObj.rescued -or
+                   $null -eq $PlayRecapObj.ignored){
+                $DoNotDeleteAnsibleLogFile = $true
+                throw "No Ansible plays were run, see log file: $AnsibleLogFile"
+            }
+            else{
+                ol i 'Ansible plays succeeded - results below' -sh
+                ol i -MsgObj $PlayRecapObj
             }
         }
-        $Arguments += "$($PackerFile.FullName)"
-        $DisplayArguments += "$($PackerFile.FullName)"
-
-        # add force
-        if ($GLOBAL:dry_var_global_Force) {
-            $Arguments.Insert(0,"-force")
-            $DisplayArguments.Insert(0,"-force")
-            
-        }
-
-       
-        #>
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        #   ansible-playbook
-        #   
-        #   run the playbook in wsl
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        #ol i @('Packer Build',"& $PackerExe build $DisplayArguments")
-        # ol i @('Packer Build',"& $PackerExe build $Arguments")
-        ol i @('ssh-keyscan(wsl)',"Start-Process wsl -ArgumentList `"-d Ubuntu -- ssh-keyscan -H $($Resolved.Target) >> ~/.ssh/known_hosts`" -NoNewWindow -Wait")
-        Start-Process wsl -ArgumentList "-d Ubuntu -- ssh-keyscan -H $($Resolved.Target) >> ~/.ssh/known_hosts" -NoNewWindow -Wait
-
-        ol i @('ansible-playbook(wsl)',"Start-Process wsl -ArgumentList `"-d Ubuntu -- ansible-playbook $Arguments -vvvv`" -NoNewWindow -Wait")
-        Start-Process wsl -ArgumentList "-d Ubuntu -- ansible-playbook $Arguments" -NoNewWindow -Wait
-        if ($LastExitCode -ne 0) {
-            throw "ansible-playbook(wsl) failed: $LastExitCode" 
+        else{
+            throw "Ansible log file not found: $AnsibleLogFile"
         }
     }
-    catch {
+    catch{
+        # if anything throws, keeep the ansible log file
+        $DoNotDeleteAnsibleLogFile = $true
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
         # Remove temporary files
-        if ($GLOBAL:dry_var_global_KeepConfigFiles) {
+        if($GLOBAL:dry_var_global_KeepConfigFiles){
             ol i @('Keeping ConfigFiles in',"$($Resolved.ConfigTargetPath)")
         }
-        else {
+        elseif($true -eq $DoNotDeleteAnsibleLogFile){
+            ol i @('Keeping ConfigFiles in',"$($Resolved.ConfigTargetPath)")
+        }
+        else{
             ol i @('Removing ConfigFiles from',"$($Resolved.ConfigTargetPath)")
             Remove-Item -Path $Resolved.ConfigTargetPath -Recurse -Force -Confirm:$false
         }
-
         Get-Variable -Scope Script | Remove-Variable -ErrorAction Ignore -Verbose:$false
         ol i "Action 'ansible.wsl' is finished" -sh
     }
 }
-        
-        
-        
-   

@@ -37,8 +37,8 @@ Get-DryVariableValue -Variables $Variables -Name DomainNB
 Returns the value property of the PSObject in $Variables 
 that has a .name property of 'DomainNB' 
 #>
-function Get-DryVariableValue {
-    param (
+function Get-DryVariableValue{
+    param(
         [Parameter(Mandatory)]
         [System.Collections.Generic.List[PSObject]]$Variables,
 
@@ -46,24 +46,24 @@ function Get-DryVariableValue {
         [string]$Name
     )
     
-    try {
+    try{
         Remove-Variable -Name Variable -ErrorAction Ignore
-        $Variable = $Variables | Where-Object {
+        $Variable = $Variables | Where-Object{
             $_.Name -eq $Name
         }
-        if ($null -eq $Variable) {
+        if($null -eq $Variable){
             ol w "Variables does not contain a variable named '$Name'"
             throw "Variables does not contain a variable named '$Name'"
         }
-        elseif ($Variable -is [Array]) {
+        elseif($Variable -is [array]){
             ol w "Variables contains multiple variables named '$Name'"
             throw "Variables contains multiple variables named '$Name'"
         }
-        else {
+        else{
             return $Variable.Value
         } 
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

@@ -19,9 +19,9 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function ConvertTo-DryUtilsSize {            
+function ConvertTo-DryUtilsSize{            
     [cmdletbinding()]            
-    param (   
+    param(   
         [Parameter(Mandatory)]            
         [string]$Value,
            
@@ -33,34 +33,34 @@ function ConvertTo-DryUtilsSize {
     ol v "Got '$Value' to convert to '$To'." 
 
     $Value = $Value.Trim()
-    switch($Value) {            
-        {$_ -match "^\d+$"} { 
+    switch($Value){            
+       {$_ -match "^\d+$"}{ 
             [double]$NewValue = $_ 
         }            
-        {$_ -match "^\d+KB$"} {
+       {$_ -match "^\d+KB$"}{
             [double]$Newvalue = $_.Remove(($_.Length-2),2)
             $Newvalue = $NewValue * 1024 }            
-        {$_ -match "^\d+MB$"} {
+       {$_ -match "^\d+MB$"}{
             [double]$Newvalue = $_.Remove(($_.Length-2),2)
             $Newvalue = $NewValue * 1024 * 1024}            
-        {$_ -match "^\d+GB$"} {
+       {$_ -match "^\d+GB$"}{
             [double]$Newvalue = $_.Remove(($_.Length-2),2)
             $Newvalue = $NewValue * 1024 * 1024 * 1024}            
-        {$_ -match "^\d+TB$"} {
+       {$_ -match "^\d+TB$"}{
             [double]$Newvalue = $_.Remove(($_.Length-2),2)
             $Newvalue = $NewValue * 1024 * 1024 * 1024 * 1024} 
-        default {
+        default{
             throw "I don't regonize '$value' as a number to convert?"
         }            
     }            
     
     ol v "Value in bytes is '$NewValue'." 
-    switch ($To) {            
-        "Bytes" {return $NewValue}            
-        "KB" {$NewValue = $NewValue/1KB}            
-        "MB" {$NewValue = $NewValue/1MB}            
-        "GB" {$NewValue = $NewValue/1GB}            
-        "TB" {$NewValue = $NewValue/1TB}                         
+    switch($To){            
+        "Bytes"{return $NewValue}            
+        "KB"{$NewValue = $NewValue/1KB}            
+        "MB"{$NewValue = $NewValue/1MB}            
+        "GB"{$NewValue = $NewValue/1GB}            
+        "TB"{$NewValue = $NewValue/1TB}                         
     }            
     ol v "The new value in '$to' is '$NewValue'"           
     return [Math]::Round($Newvalue,$Precision,[MidPointRounding]::AwayFromZero)               

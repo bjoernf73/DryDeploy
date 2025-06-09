@@ -21,12 +21,12 @@
 
 $ClassesPath = "$PSScriptRoot\classes\*.ps1"
 $Classes     = Resolve-Path -Path $ClassesPath -ErrorAction Stop
-foreach ($Class in $Classes) {
+foreach($Class in $Classes){
     . $Class.Path
 }
 
 $ExportedFunctionsPath = "$PSScriptRoot\xfunctions\*.ps1"
 $ExportedFunctions     = Resolve-Path -Path $ExportedFunctionsPath -ErrorAction Stop
-foreach ($function in $ExportedFunctions) {
+foreach($function in $ExportedFunctions){
     . $Function.Path
 }

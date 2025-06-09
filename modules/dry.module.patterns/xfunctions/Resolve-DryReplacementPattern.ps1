@@ -20,9 +20,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Resolve-DryReplacementPattern {
+function Resolve-DryReplacementPattern{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [AllowEmptyString()]
         [string]$InputText,
@@ -31,9 +31,9 @@ function Resolve-DryReplacementPattern {
         [System.Collections.Generic.List[PSObject]]$Variables
     )
     
-    foreach ($Variable in $Variables) {
+    foreach($Variable in $Variables){
         $Pattern = "###$($Variable.Name)###"
-        if ($InputText -match $Pattern) {
+        if($InputText -match $Pattern){
             $Value = $Variable.Value 
             $InputText = $InputText -replace $Pattern,$Value
         }

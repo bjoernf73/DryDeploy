@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Get-DryConfigCombo {
+function Get-DryConfigCombo{
     [cmdletbinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [string]$Path,
 
@@ -39,7 +39,7 @@ function Get-DryConfigCombo {
         bad to try to read it if it doesn't exist anymore - the read fails and you're unable to replace it")]
         [switch]$NewModuleConfig
     )
-    try {
+    try{
         $SystemDependencies = $SystemOptions.dependencies."$($Platform.platform)"."$($Platform.edition)"
         # Create the PSCustomObject 
         $ConfigCombo = [PSCustomObject]@{
@@ -53,7 +53,7 @@ function Get-DryConfigCombo {
         }
         
         $ConfigCombo.systemconfig.name = 'DryDeploy'
-        if ($null -ne $SystemDependencies) {
+        if($null -ne $SystemDependencies){
             $ConfigCombo.systemconfig.dependencies = $SystemDependencies
         }
         # add methods to the object
@@ -65,15 +65,15 @@ function Get-DryConfigCombo {
         $ConfigCombo | Add-Member -MemberType ScriptMethod -Name 'Change'      -Value $dry_core_sb_configcombo_change
         $ConfigCombo | Add-Member -MemberType ScriptMethod -Name 'Show'        -Value $dry_core_sb_configcombo_show
         
-        if ($ConfigCombo.Exists()) {
+        if($ConfigCombo.Exists()){
             $ConfigCombo.Read($NewEnvConfig,$NewModuleConfig)
         }
-        else {
+        else{
             $ConfigCombo.Save()
         }
         return $ConfigCombo
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

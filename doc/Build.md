@@ -10,26 +10,26 @@ The `build` is in essence a 2-ply scheme, or receipe, of how to build a module:
 
 ```json
 "build":
-    {
+   {
         "order_type": "role",
         "roles": 
         [ 
-            { "role": "dc-domctrl-froot","order": 1,"actions": 
+           { "role": "dc-domctrl-froot","order": 1,"actions": 
                 [    
-                    {  "action": "terra.run",   "order": 1 },
-                    {  "action": "dsc.run",     "order": 2 }
+                   {  "action": "terra.run",   "order": 1 },
+                   {  "action": "dsc.run",     "order": 2 }
                 ]
             },
-            { "role": "dc-domctrl-add", "order": 2,"actions": 
+           { "role": "dc-domctrl-add", "order": 2,"actions": 
                 [
-                    {  "action": "terra.run",   "order": 1 }, 
-                    {  "action": "dsc.run",     "order": 2 }
+                   {  "action": "terra.run",   "order": 1 }, 
+                   {  "action": "dsc.run",     "order": 2 }
                 ]
             },
-            { "role": "ca-certauth-root","order": 3,"actions": 
+           { "role": "ca-certauth-root","order": 3,"actions": 
                 [
-                    {  "action": "terra.run",   "order": 1 },
-                    {  "action": "dsc.run",     "order": 2 }
+                   {  "action": "terra.run",   "order": 1 },
+                   {  "action": "dsc.run",     "order": 2 }
                 ]
             }
         ]	
@@ -63,28 +63,28 @@ When `"order_type": "site"`, all instances belonging to the first site (defined 
 An `action` may depend on another action using the `depends_on` property. Consider the build below.
 ```json
 "build":
-    {
+   {
         "order_type": "role",
         "roles": 
         [
-            { "role": "ca-certauth-root","order": 1,  "actions": 
+           { "role": "ca-certauth-root","order": 1,  "actions": 
                 [
-                    { "action": "terra.run",  "order": 1, "description": "Clones vSphere template + OS Customization" },
-                    { "action": "dsc.run",    "order": 2, "description": "Downloads CertReq, signes and issuses Sub CA cert",
-                        "depends_on": { 
+                   { "action": "terra.run",  "order": 1, "description": "Clones vSphere template + OS Customization" },
+                   { "action": "dsc.run",    "order": 2, "description": "Downloads CertReq, signes and issuses Sub CA cert",
+                        "depends_on":{ 
                             "role": "ca.cert-auth.issuing",
                             "dependency_type": "every",
                             "action": "dsc.run",
                             "phase": 1}},
-                    { "action": "win.reboot", "order": 3, "description": "Restarts computer and waits until ready",
-                        "depends_on": { "dependency_type": "chained" }}
+                   { "action": "win.reboot", "order": 3, "description": "Restarts computer and waits until ready",
+                        "depends_on":{ "dependency_type": "chained" }}
                 ]
             },
-            { "role": "ca-certauth-issuing", "order": 2, "actions": 
+           { "role": "ca-certauth-issuing", "order": 2, "actions": 
                 [
-                    { "action": "terra.run", "order": 1,             "description": "Clones vSphere template + OS Customization"    },
-                    { "action": "dsc.run",   "order": 2, "phase": 1, "description": "Deploys Enterprise SubCA features and CertReq" },
-                    { "action": "dsc.run",   "order": 3, "phase": 2, "description": "Fetches signed CA cert and configures CA"      },    
+                   { "action": "terra.run", "order": 1,             "description": "Clones vSphere template + OS Customization"    },
+                   { "action": "dsc.run",   "order": 2, "phase": 1, "description": "Deploys Enterprise SubCA features and CertReq" },
+                   { "action": "dsc.run",   "order": 3, "phase": 2, "description": "Fetches signed CA cert and configures CA"      },    
             ...]
             }
         ]
@@ -93,7 +93,7 @@ An `action` may depend on another action using the `depends_on` property. Consid
 The second Action (`"order": 2`) of role *ca-certauth-root* has the following `depends_on` configuration: 
 ```json
 { "action": "dsc.run",    "order": 2, "description": "Downloads CertReq, signes and issuses Sub CA cert",
-    "depends_on": { 
+    "depends_on":{ 
         "role": "ca.cert-auth.issuing",
         "dependency_type": "every",
         "action": "dsc.run",
@@ -110,7 +110,7 @@ Note also the Action than follows immediately after, the Action with `"order": 3
     "description": "Restarts computer and waits until ready",
     "order": 3,
     "depends_on": 
-    {
+   {
         "dependency_type": "chained"
     },
     ...

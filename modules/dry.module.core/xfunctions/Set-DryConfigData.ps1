@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Set-DryConfigData {
+function Set-DryConfigData{
     [cmdletbinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [string]$Path,
 
@@ -35,25 +35,25 @@ function Set-DryConfigData {
         [Parameter(Mandatory,HelpMessage="Object to write to file")]
         [PSCustomObject]$Configuration
     )
-    try {
+    try{
         $FullPath = Resolve-DryUtilsFullPath -Path $Path
         $Folder = Split-Path -Path $FullPath -ErrorAction Stop -Parent -ErrorAction Stop
-        if (-not(Test-Path -Path $FolderPath -ErrorAction Ignore)) {
+        if(-not(Test-Path -Path $FolderPath -ErrorAction Ignore)){
             New-Item -Path $Folder -ItemType Directory -Force -Confirm:$false -ErrorAction Stop
         }
-        switch ($Type) {
-            'json' {
+        switch($Type){
+            'json'{
                 $Configuration = ConvertTo-Json -DryFromJson -Path $File.FullName -Force -Confirm:$false -ErrorAction Stop
             }
-            'yml' {
-                try {
+            'yml'{
+                try{
                     $Configuration | ConvertTo-Yaml -Path $File.FullName -ErrorAction Stop 
                 }
-                catch [System.Management.Automation.CommandNotFoundException] {
+                catch [System.Management.Automation.CommandNotFoundException]{
                     ol w 'Missing Powershell Module','powershell-yaml'
                     throw $_
                 }
-                catch {
+                catch{
                     throw $_
                 }
                 
@@ -61,7 +61,7 @@ function Set-DryConfigData {
         }
     
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

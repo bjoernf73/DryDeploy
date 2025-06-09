@@ -1,9 +1,9 @@
 Using Module dry.module.ad
 # Using Module ActiveDirectory
 # Using Module GroupPolicy
-function dry.action.ad.import {
+function dry.action.ad.import{
     [CmdletBinding()]  
-    param (
+    param(
         [Parameter(Mandatory,HelpMessage="The resolved action object")]
         [PSObject]
         $Action,
@@ -19,11 +19,10 @@ function dry.action.ad.import {
 
         [Parameter(HelpMessage="Hash directly from the command line to be 
         added as parameters to the function that iniates the action")]
-        [HashTable]
+        [hashtable]
         $ActionParams
     )
-
-    try {
+    try{
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             Execution Type 
             
@@ -34,7 +33,7 @@ function dry.action.ad.import {
             'Local' and 'Remote' execution. The Get-DryAdExecutionType query function
             tests if the prerequisites for a Local execution is there
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        Enum ExecutionType { Local; Remote }        
+        Enum ExecutionType{ Local; Remote }        
         [ExecutionType]$ExecutionType = Get-DryAdExecutionType -Configuration $Configuration
         ol i 'Execution Type',$ExecutionType
 
@@ -47,7 +46,7 @@ function dry.action.ad.import {
             Configuration = $Configuration 
             ExecutionType = $ExecutionType
         }
-        if ($ExecutionType -eq 'Remote') {
+        if($ExecutionType -eq 'Remote'){
             $GetDryADConnectionPointParams += @{
                 Credential = $Resolved.Credentials.credential1
             }
@@ -56,8 +55,8 @@ function dry.action.ad.import {
         ol i "Connection Point (Domain Controller)",$ActiveDirectoryConnectionPoint
         
         # Wait for the winrm interface to come up
-        if ($ExecutionType -eq 'Remote') {
-            $SessionConfig = $Configuration.CoreConfig.connections | Where-Object { 
+        if($ExecutionType -eq 'Remote'){
+            $SessionConfig = $Configuration.CoreConfig.connections | Where-Object{ 
                 $_.type -eq 'winrm'
             }
             $WaitWinRMParams             = @{
@@ -70,11 +69,11 @@ function dry.action.ad.import {
             }
             $WinRMStatus = Wait-DryWinRM @WaitWinRMParams
 
-            switch ($WinRMStatus) {
-                $false {
+            switch($WinRMStatus){
+                $false{
                     throw "Failed to Connect to: $ActiveDirectoryConnectionPoint"
                 }
-                $true {
+                $true{
                     ol i @("Connected to","$ActiveDirectoryConnectionPoint")
                 }  
             }
@@ -87,11 +86,11 @@ function dry.action.ad.import {
                 SessionConfig = $SessionConfig
             }
     
-            try {
+            try{
                 ol i "Establishing PSSession to","$ActiveDirectoryConnectionPoint"
                 $PSSession = New-DrySession @ADImportSessionParams
             }
-            catch {
+            catch{
                 ol e @('Failed to establish PSSession to',"$ActiveDirectoryConnectionPoint")
                 $PSCmdLet.ThrowTerminatingError($_)
             }
@@ -102,18 +101,18 @@ function dry.action.ad.import {
             ConfigurationPath = $Resolved.ConfigSourcePath
             DryDeploy         = $true
         }
-        if ($ExecutionType -eq 'Remote') {
+        if($ExecutionType -eq 'Remote'){
             $SetDryADConfigurationParams += @{
                 PSSession = $PSSession
             }
         }
-        else {
+        else{
             $SetDryADConfigurationParams += @{
                 DomainController = $ActiveDirectoryConnectionPoint
             }
         }
 
-        if ($ActionParams) {
+        if($ActionParams){
             $SetDryADConfigurationParams+=$ActionParams
         }
         ol d "Calling 'Import-DryADConfiguration' with the following splat"
@@ -121,10 +120,10 @@ function dry.action.ad.import {
         Import-DryADConfiguration @SetDryADConfigurationParams
         $PSSession | Remove-PSSession -ErrorAction continue
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
         @('ActiveDirectory','GroupPolicy','GPOManagement','RegistryPolicyParser','dry.module.ad'
         ).foreach({
             Remove-Module -Name $_ -ErrorAction 'Ignore' -Verbose:$false |

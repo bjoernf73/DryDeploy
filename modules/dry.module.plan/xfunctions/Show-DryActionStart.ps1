@@ -20,19 +20,19 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Show-DryActionStart {
+function Show-DryActionStart{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [DryAction] $Action
     )
-    try {
+    try{
             ol i " "
             ol i "Resource:      [$($Action.ResourceName)]"
-        if ($Action.Phase) {
+        if($Action.Phase){
             ol i "Action:        [$($Action.Action)] - Phase [$($Action.Phase)]"
         }
-        else { 
+        else{ 
             ol i "Action:        [$($Action.Action)]"
         }
             ol i " "
@@ -40,7 +40,7 @@ function Show-DryActionStart {
             ol i " "
             ol i " " -h
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

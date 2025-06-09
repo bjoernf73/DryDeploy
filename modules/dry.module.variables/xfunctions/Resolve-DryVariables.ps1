@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Resolve-DryVariables {
+function Resolve-DryVariables{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory,HelpMessage="The variables to resolve. The variables may be expressions that resolves environment specific values by referencing
         the environment configuration (`$Configuration), the resource object (`$Resource), the action object (`$Action), or any other variable in a scope available
         inside the function (for instance the global scope)")]
@@ -54,122 +54,122 @@ function Resolve-DryVariables {
         [ValidateSet('hashtable', 'list')]
         [string]$OutPutType = 'list'
     )
-    try {
-        switch ($OutPutType) {
-            'hashtable' {
-                $PRIVATE:PrivateVariablesHash = [HashTable]::New()
+    try{
+        switch($OutPutType){
+            'hashtable'{
+                $PRIVATE:PrivateVariablesHash = [hashtable]::New()
             }
-            'list' {
+            'list'{
                 $PRIVATE:PrivateVariablesList = [System.Collections.Generic.List[PSObject]]::New()
             }
         }
     
         # $VariablesList is an optional list of existing variables that will bundled together with the resolved $Variables
-        if ($VariablesList) {
-            foreach ($Var in $VariablesList) { 
+        if($VariablesList){
+            foreach($Var in $VariablesList){ 
                 Remove-Variable -Name VarCopy -ErrorAction Ignore -Scope Local
                 $VarCopy = $Var.PSObject.Copy()
                 $PrivateVariablesList.Add($VarCopy)
 
                 # Create the variable in the local scope, so subsequent expressions can use previously resolved variable values
-                if (Get-Variable -Name $VarCopy.Name -Scope Local -ErrorAction Ignore) {
+                if(Get-Variable -Name $VarCopy.Name -Scope Local -ErrorAction Ignore){
                     Set-Variable -Name $VarCopy.Name -Value $VarCopy.Value -Scope Local
                 }
-                else {
+                else{
                     New-Variable -Name $VarCopy.Name -Value $VarCopy.Value -Scope Local  
                 }
             }
         }    
 
-        foreach ($Var in $Variables) {
+        foreach($Var in $Variables){
             Remove-Variable -name VarValue -ErrorAction Ignore
-            switch ($Var.value_type) {
-                'expression' {
-                    try {
+            switch($Var.value_type){
+                'expression'{
+                    try{
                         Remove-Variable -name VarValue -ErrorAction Ignore
-                        switch ($Var.parameter_type) {
-                            'PSCredential' {
+                        switch($Var.parameter_type){
+                            'PSCredential'{
                                 [PSCredential]$VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
                             }
-                            'Array' {
-                                [Array]$VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
+                            'Array'{
+                                [array]$VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
                             }
-                            'Int' {
+                            'Int'{
                                 [int]$VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
                             }
-                            {$_ -in @('bool','boolean')} {
+                           {$_ -in @('bool','boolean')}{
                                 [bool]$VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
                             }
-                            'String' {
+                            'String'{
                                 [string]$VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
                             }
-                            {$_ -in @('PSObject','PSCustomObject')} {
+                           {$_ -in @('PSObject','PSCustomObject')}{
                                 [PSCustomObject]$VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
                             }
-                            default {
+                            default{
                                 # Accept whatever type is returned
                                 $VarValue = Invoke-Expression -Command $Var.value -ErrorAction Stop
                             }
                         }
                     }
-                    catch {
+                    catch{
                         ol e "Error executing variable expression for: '$($Var.name)', expression: '$($Var.value)'"
                         $PSCmdlet.ThrowTerminatingError($_)
                     }  
                 }
-                {$_ -in @('string','int')} {
-                    switch ($Var.parameter_type) {
-                        'Array' {
-                            [Array]$VarValue = $Var.value 
+               {$_ -in @('string','int')}{
+                    switch($Var.parameter_type){
+                        'Array'{
+                            [array]$VarValue = $Var.value 
                         }
-                        'Int' {
+                        'Int'{
                             [int]$VarValue = $Var.value 
                         }
-                        {$_ -in @('bool','boolean')} {
+                       {$_ -in @('bool','boolean')}{
                             [bool]$VarValue = $Var.value 
                         }
-                        'String' {
+                        'String'{
                             [string]$VarValue = $Var.value 
                         }
-                        default {
+                        default{
                             # Accept whatever type is returned
                             $VarValue = $Var.value
                         }
                     }
                 }
-                {$_ -in 'bool','boolean'} {
+               {$_ -in 'bool','boolean'}{
                     # The variable value is a boolean
-                    try {
+                    try{
                         [Boolean]$VarValue = $Var.Value
-                        switch ($Var.parameter_type) {
-                            'Array' {
-                                [Array]$VarValue = @($Var.value)
+                        switch($Var.parameter_type){
+                            'Array'{
+                                [array]$VarValue = @($Var.value)
                             }
-                            'Int' {
+                            'Int'{
                                 [int]$VarValue = $Var.value 
                             }
-                            'String' {
+                            'String'{
                                 [string]$VarValue = ($Var.value).ToString()
                             }
-                            default {
+                            default{
                                 # Accept whatever type is returned
                                 $VarValue = $Var.value
                             }
                         }
                     }
-                    catch {
+                    catch{
                         ol e "Error converting '$($Var.name)' to boolean. The value was '$($Var.value)'"
                         $PSCmdlet.ThrowTerminatingError($_)
                     }  
                 }
-                'function' {
+                'function'{
                     # The variable value is a function call
-                    try {
+                    try{
                         Remove-Variable -name VarValue,FunctionParamsHash,FunctionParamsNameArr,FunctionParamsName -ErrorAction Ignore
-                        $FunctionParamsHash = [HashTable]::New()
+                        $FunctionParamsHash = [hashtable]::New()
                         $FunctionParamsNameArr = @($Var.parameters | Get-Member -MemberType NoteProperty | Select-Object -Property Name).Name
                         
-                        foreach ($FunctionParamsName in $FunctionParamsNameArr) {
+                        foreach($FunctionParamsName in $FunctionParamsNameArr){
                             # First, value of $Var.parameters."$FunctionParamsName" is now string like '$Resource' and not a variable representing the object $Resource. 
                             # Fix that by invoking the string
                             $Var.parameters."$FunctionParamsName" = Invoke-Expression -Command ($Var.parameters."$FunctionParamsName") -Erroraction 'Stop'
@@ -178,50 +178,50 @@ function Resolve-DryVariables {
                             $FunctionParamsHash+= @{ $FunctionParamsName = $Var.parameters."$FunctionParamsName" }
                         }
                     
-                        switch ($Var.parameter_type) {
-                            'PSCredential' {
+                        switch($Var.parameter_type){
+                            'PSCredential'{
                                 [PSCredential]$VarValue = & $Var.function @FunctionParamsHash
                             }
-                            'Array' {
-                                [Array]$VarValue = & $Var.function @FunctionParamsHash
+                            'Array'{
+                                [array]$VarValue = & $Var.function @FunctionParamsHash
                             }
-                            'Int' {
+                            'Int'{
                                 [int]$VarValue = & $Var.function @FunctionParamsHash
                             }
-                            {$_ -in @('bool','boolean')} {
+                           {$_ -in @('bool','boolean')}{
                                 [bool]$VarValue = & $Var.function @FunctionParamsHash
                             }
-                            'String' {
+                            'String'{
                                 [string]$VarValue = & $Var.function @FunctionParamsHash
                             }
-                            {$_ -in @('PSObject','PSCustomObject')} {
+                           {$_ -in @('PSObject','PSCustomObject')}{
                                 [PSCustomObject]$VarValue = & $Var.function @FunctionParamsHash
                             }
-                            default {
+                            default{
                                 # Accept whatever type is returned
                                 $VarValue = & $Var.function @FunctionParamsHash
                             }
                         } 
                     }
-                    catch {
+                    catch{
                         ol e "Error executing variable expression for: '$($Var.name)', expression: '$($Var.value)'"
                         $PSCmdlet.ThrowTerminatingError($_)
                     }
                 }
             }
             # fail if it's null, unless property allow_null allows it
-            if (($null -eq $VarValue) -and ($Var.allow_null -ne $true)) {
+            if(($null -eq $VarValue) -and ($Var.allow_null -ne $true)){
                 ol e 'Variable resolved null',"$($Var.Name)"
                 throw "Variable '$($Var.Name)' resolved null"
             }
 
             # fail if it's a string and it's trimmed value is an empty string, unless allow_null allows it
-            if ($VarValue -is [string]) {
-                if ($VarValue.trim() -eq '') {
-                    if ($Var.allow_null) {
+            if($VarValue -is [string]){
+                if($VarValue.trim() -eq ''){
+                    if($Var.allow_null){
                         ol w 'Variable resolved empty string, but allowed',"$($Var.Name) (string)"
                     }
-                    else {
+                    else{
                         ol e 'Variable resolved empty string',"$($Var.Name) (string)"
                         throw "Variable '$($Var.Name)' resolved empty string"
                     }
@@ -229,12 +229,12 @@ function Resolve-DryVariables {
             }
 
             # fail if it's an array with no elements, unless allow_null allows it
-            if ($VarValue -is [array]) {
-                if ($VarValue.count -eq 0) {
-                    if ($Var.allow_null) {
+            if($VarValue -is [array]){
+                if($VarValue.count -eq 0){
+                    if($Var.allow_null){
                         ol w 'Variable resolved 0 elements, but allowed',"$($Var.Name) (array)"
                     }
-                    else {
+                    else{
                         ol e 'Variable resolved 0 array elements',"$($Var.Name) (array)"
                         throw "Variable '$($Var.Name)' resolved 0 array elements"
                     }
@@ -242,21 +242,21 @@ function Resolve-DryVariables {
             }
 
             # Create the variable in the local scope, so subsequent expressions can use previously resolved variable values
-            if (Get-Variable -Name $Var.Name -Scope Local -ErrorAction Ignore) {
+            if(Get-Variable -Name $Var.Name -Scope Local -ErrorAction Ignore){
                 Set-Variable -Name $Var.Name -Value $VarValue -Scope Local
             }
-            else {
+            else{
                 New-Variable -Name $Var.Name -Value $VarValue -Scope Local  
             }
 
             # Add value to the correct output object
-            switch ($OutPutType) {
-                'hashtable' {
+            switch($OutPutType){
+                'hashtable'{
                     $PrivateVariablesHash += @{$Var.Name = $VarValue}
                 }
-                'list' {
+                'list'{
                     $Secret = $false
-                    if ($true -eq $Var.secret) {
+                    if($true -eq $Var.secret){
                         $Secret = $true
                     }
                     $PrivateVariablesList.Add([PSCustomObject]@{
@@ -268,17 +268,17 @@ function Resolve-DryVariables {
             }
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
     }
  
-    switch ($OutPutType) {
-        'hashtable' {
+    switch($OutPutType){
+        'hashtable'{
             return $PrivateVariablesHash
         }
-        'list' {
+        'list'{
             return $PrivateVariablesList
         }
     }

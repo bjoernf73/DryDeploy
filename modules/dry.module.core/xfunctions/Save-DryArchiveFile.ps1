@@ -19,9 +19,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #>
 
-function Save-DryArchiveFile {
+function Save-DryArchiveFile{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory,HelpMessage="Path to, or file system object ([System.IO.File]) 
         of the file to archive")]
         [System.IO.FileInfo]
@@ -38,14 +38,14 @@ function Save-DryArchiveFile {
         [string]
         $ArchiveFolder
     )
-    try {
-        if (-not $ArchiveFolder) {
+    try{
+        if(-not $ArchiveFolder){
             $ArchiveFolder = Split-Path -Path $ArchiveFile
         }
         $ArchiveSourceFolder = Resolve-DryUtilsFullPath -Path (Split-Path -Path $ArchiveFile)
         $ArchiveTargetFolder = Resolve-DryUtilsFullPath -Path $ArchiveFolder -Force
     
-        if (-not (Test-Path -Path $ArchiveTargetFolder -ErrorAction Ignore)) {
+        if(-not (Test-Path -Path $ArchiveTargetFolder -ErrorAction Ignore)){
             New-Item -Path $ArchiveTargetFolder -ItemType Directory -ErrorAction Stop -Force | Out-Null
         }
 
@@ -55,20 +55,20 @@ function Save-DryArchiveFile {
         $ArchiveFileNewFullName = Join-Path -Path $ArchiveSourceFolder -ChildPath $ArchiveFileNewName
         $ArchiveFile | Rename-Item -NewName $ArchiveFileNewName -Confirm:$false
         
-        if ($ArchiveSourceFolder -ne $ArchiveTargetFolder) {
+        if($ArchiveSourceFolder -ne $ArchiveTargetFolder){
             Get-Item -Path $ArchiveFileNewFullName -ErrorAction Stop | 
             Move-Item -Destination $ArchiveTargetFolder -ErrorAction Stop
         }
 
         # removes the oldest archived files, keeping the $ToKeep newest
-        $OldArchivedFiles = Get-ChildItem -Path "$ArchiveTargetFolder\*" | Where-Object { 
+        $OldArchivedFiles = Get-ChildItem -Path "$ArchiveTargetFolder\*" | Where-Object{ 
             ($_.Name -match "^ARCH_[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{1,2}-[0-9]{1,2}-[0-9]{1,2}_") -and
             ($_.Name -like "*$ArchiveFileName")
         }
 
         # only keep the $ToKeep newest files
         $OldArchivedFilesList = [System.Collections.Generic.List[PSObject]]::New()
-        foreach ($OldArchivedFile in $OldArchivedFiles) {
+        foreach($OldArchivedFile in $OldArchivedFiles){
             $OldArchivedFilesList.Add([PSCustomObject]@{
                 'File'="$OldArchivedFile"
                 'Date'="$(($OldArchivedFile.BaseName -Split '_')[1])"
@@ -77,19 +77,19 @@ function Save-DryArchiveFile {
         $SortedOldArchivedFilesList = [System.Collections.Generic.List[PSObject]]::New()
         $OldArchivedFilesList | 
         Sort-Object -Property 'Date' | 
-        foreach-Object {
+        foreach-Object{
             $SortedOldArchivedFilesList.Add($_)
         }
-        while ($SortedOldArchivedFilesList.count -gt $ToKeep) {
+        while ($SortedOldArchivedFilesList.count -gt $ToKeep){
             ($SortedOldArchivedFilesList[0]).File | 
             Remove-Item -Force -Confirm:$false -ErrorAction 'Stop'
             $SortedOldArchivedFilesList.RemoveAt(0)
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
         $ArchiveFolder = $null
         $ArchiveFile = $null 
         $ArchiveTargetFolder = $null

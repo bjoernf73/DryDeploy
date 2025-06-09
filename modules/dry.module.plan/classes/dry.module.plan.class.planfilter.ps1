@@ -1,6 +1,6 @@
 using Namespace System.Collections.Generic
 using Namespace System.Collections
-class PlanFilter {
+class PlanFilter{
     [String[]]$ResourceNames
     [String[]]$ExcludeResourceNames
     [String[]]$RoleNames
@@ -22,7 +22,7 @@ class PlanFilter {
         [Int[]]$Phases,
         [Int[]]$ExcludePhases,
         [Int[]]$BuildSteps,
-        [Int[]]$ExcludeBuildSteps) {
+        [Int[]]$ExcludeBuildSteps){
             
         $This.ResourceNames        = $ResourceNames
         $This.ExcludeResourceNames = $ExcludeResourceNames
@@ -41,138 +41,138 @@ class PlanFilter {
         [string]$RoleName,
         [string]$ActionName,
         [int]$Phase,
-        [int]$ActionOrder) {
+        [int]$ActionOrder){
         
         $ResourceValidated = $RoleValidated = $ActionValidated = $PhaseValidated = $ActionOrderValidated = $false
         
         # ResourceName
-        if ($null -eq $This.ResourceNames) {
+        if($null -eq $This.ResourceNames){
             $ResourceValidated = $true
         }
-        elseif ($ResourceName -in $This.ResourceNames) {
+        elseif($ResourceName -in $This.ResourceNames){
             $ResourceValidated = $true
         }
-        else {
+        else{
             $NameMatch = $false
-            $NameMatch = Invoke-Command -ScriptBlock {($This.ResourceNames).foreach({ if ($ResourceName -match "^$_") { $NameMatch = $true } }); $NameMatch}
-            if ($NameMatch) {
+            $NameMatch = Invoke-Command -ScriptBlock{($This.ResourceNames).foreach({ if($ResourceName -match "^$_"){ $NameMatch = $true } }); $NameMatch}
+            if($NameMatch){
                 $ResourceValidated = $true
             }
         }
 
         # ExcludeResourceName
-        if ($null -eq $This.ExcludeResourceNames) { # do nothin'
+        if($null -eq $This.ExcludeResourceNames){ # do nothin'
         }
-        elseif ($ResourceName -in $This.ExcludeResourceNames) {
+        elseif($ResourceName -in $This.ExcludeResourceNames){
             $ResourceValidated = $false
         }
-        else {
+        else{
             $NameMatch = $false
-            $NameMatch = Invoke-Command -Scriptblock {($This.ExcludeResourceNames).foreach({if ($ResourceName -match "^$_") {$NameMatch = $true}}); $NameMatch}
-            if ($NameMatch) {
+            $NameMatch = Invoke-Command -Scriptblock{($This.ExcludeResourceNames).foreach({if($ResourceName -match "^$_"){$NameMatch = $true}}); $NameMatch}
+            if($NameMatch){
                 $ResourceValidated = $false
             }
         }
 
         # RoleName
-        if ($null -eq $This.RoleNames) {
+        if($null -eq $This.RoleNames){
             $RoleValidated = $true
         }
-        elseif ($RoleName -in $This.RoleNames) {
+        elseif($RoleName -in $This.RoleNames){
             $RoleValidated = $true
         }
-        else {
+        else{
             $NameMatch = $false
-            $NameMatch = Invoke-Command -Scriptblock {($This.RoleNames).foreach({if ($RoleName -match "^$_") {$NameMatch = $true}}); return $NameMatch}
-            if ($NameMatch) {
+            $NameMatch = Invoke-Command -Scriptblock{($This.RoleNames).foreach({if($RoleName -match "^$_"){$NameMatch = $true}}); return $NameMatch}
+            if($NameMatch){
                 $RoleValidated = $true
             }
         }
 
         # ExcludeRoleName
-        if ($null -eq $This.ExcludeRoleNames) { # do nothin'  
+        if($null -eq $This.ExcludeRoleNames){ # do nothin'  
         }
-        elseif ($RoleName -in $This.ExcludeRoleNames) {
+        elseif($RoleName -in $This.ExcludeRoleNames){
             $RoleValidated = $false
         }
-        else {
+        else{
             $NameMatch = $false
-            $NameMatch = Invoke-Command -Scriptblock {($This.ExcludeRoleNames).foreach({if ($RoleName -match "^$_") {$NameMatch = $true}}); return $NameMatch}
-            if ($NameMatch) {
+            $NameMatch = Invoke-Command -Scriptblock{($This.ExcludeRoleNames).foreach({if($RoleName -match "^$_"){$NameMatch = $true}}); return $NameMatch}
+            if($NameMatch){
                 $RoleValidated = $false
             }
         }
 
         # ActionName
-        if ($null -eq $This.ActionNames) {
+        if($null -eq $This.ActionNames){
             $ActionValidated = $true
         }
-        elseif ($ActionName -in $This.ActionNames) {
+        elseif($ActionName -in $This.ActionNames){
             $ActionValidated = $true
         }
-        else {
+        else{
             $NameMatch = $false
-            $NameMatch = Invoke-Command -Scriptblock {($This.ActionNames).foreach({if ($ActionName -match "^$_") {$NameMatch = $true}}); return $NameMatch} 
-            if ($NameMatch) {
+            $NameMatch = Invoke-Command -Scriptblock{($This.ActionNames).foreach({if($ActionName -match "^$_"){$NameMatch = $true}}); return $NameMatch} 
+            if($NameMatch){
                 $ActionValidated = $true 
             }
         }
 
         # ExcludeActionName
-        if ($null -eq $This.ExcludeActionNames) { # Do nothing
+        if($null -eq $This.ExcludeActionNames){ # Do nothing
         }
-        elseif ($ActionName -in $This.ExcludeActionNames) {
+        elseif($ActionName -in $This.ExcludeActionNames){
             $ActionValidated = $false
         }
-        else {
+        else{
             $NameMatch = $false
-            $NameMatch = Invoke-Command -Scriptblock {($This.ExcludeActionNames).foreach({if ($ActionName -match "^$_") {$NameMatch = $true}}); return $NameMatch}
-            if ($NameMatch) {
+            $NameMatch = Invoke-Command -Scriptblock{($This.ExcludeActionNames).foreach({if($ActionName -match "^$_"){$NameMatch = $true}}); return $NameMatch}
+            if($NameMatch){
                 $ActionValidated = $false 
             }
         }
 
         # Phase
-        if ($null -eq $This.Phases) {
+        if($null -eq $This.Phases){
             $PhaseValidated = $true
         }
-        elseif ($Phase -in $This.Phases) {
+        elseif($Phase -in $This.Phases){
             $PhaseValidated = $true
         }
 
         # ExcludePhase
-        if ($null -eq $This.ExcludePhases) {
+        if($null -eq $This.ExcludePhases){
             # do nothin'
         }
-        elseif ($Phase -in $This.ExcludePhases) {
+        elseif($Phase -in $This.ExcludePhases){
             $PhaseValidated = $false
         }
 
         # ActionOrder
-        if ($null -eq $This.BuildSteps) {
+        if($null -eq $This.BuildSteps){
             $ActionOrderValidated = $true
         }
-        elseif ($ActionOrder -in $This.BuildSteps) {
+        elseif($ActionOrder -in $This.BuildSteps){
             $ActionOrderValidated = $true
         }
 
         # ExcludeActionOrder
-        if ($null -eq $This.ExcludeBuildSteps) {
+        if($null -eq $This.ExcludeBuildSteps){
             # do nothin'
         }
-        elseif ($ActionOrder -in $This.ExcludeBuildSteps) {
+        elseif($ActionOrder -in $This.ExcludeBuildSteps){
             $ActionOrderValidated = $false
         }
 
         # return true only if all are validated, false if not
-        if ($ResourceValidated -and 
+        if($ResourceValidated -and 
             $RoleValidated -and
             $ActionValidated -and 
             $PhaseValidated -and
-            $ActionOrderValidated) {
+            $ActionOrderValidated){
             return $true
         }
-        else {
+        else{
             return $false
         }
     }

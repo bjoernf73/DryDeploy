@@ -24,50 +24,50 @@
 
 #! Should rather be configured to allow winrm 
 #! to the specific resources a run configures
-function Set-DryWinrm { 
+function Set-DryWinrm{ 
     [CmdLetBinding()]
-    param ()
+    param()
 
-    try {
+    try{
        
         $ChangedSomething = $false
         $Service = Get-Service -Name 'WinRM' -ErrorAction Stop
-        if ($Service.StartType -ne 'Automatic') {
-            if (Test-DryElevated) {
+        if($Service.StartType -ne 'Automatic'){
+            if(Test-DryElevated){
                 $Service | Set-Service -StartupType 'Automatic'
                 $ChangedSomething = $true
             }
-            else {
+            else{
                 throw 'Run elevated to -init'
             }
         }
         
-        if ($Service.Status -ne 'Running') {
-            if (Test-DryElevated) {
+        if($Service.Status -ne 'Running'){
+            if(Test-DryElevated){
                 $Service | Start-Service -ErrorAction Stop
                 $ChangedSomething = $true
             }
-            else {
+            else{
                 throw 'Run elevated to -init'
             }
         }
         $TrustedHostsPath = 'Wsman:\localhost\Client\TrustedHosts'
         $TrustedHosts = Get-Item -Path $TrustedHostsPath -ErrorAction Stop
-        if ($TrustedHosts.Value -ne '*') {
-            if (Test-DryElevated) {
+        if($TrustedHosts.Value -ne '*'){
+            if(Test-DryElevated){
                 Set-Item -Path $TrustedHostsPath -Value * -Force
                 $ChangedSomething = $true
             }
-            else {
+            else{
                 throw 'Run elevated to -init'
             }
         }
         
-        if ($ChangedSomething) {
+        if($ChangedSomething){
             $Service | Restart-Service -Force -ErrorAction Stop
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

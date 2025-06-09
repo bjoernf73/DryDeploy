@@ -20,9 +20,9 @@
 #>
 
 
-function Wait-DryUtilsRestart {
+function Wait-DryUtilsRestart{
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory)]
         [string]$ComputerName,
 
@@ -35,12 +35,12 @@ function Wait-DryUtilsRestart {
      
     [bool]$RebootConfirmed = $false
     $TestResults = @()
-    for ($i=0; $i -lt $MinimumTimeOuts; $i++) {
+    for ($i=0; $i -lt $MinimumTimeOuts; $i++){
         $TestResults += $false
     }
 
-    do {
-        if ( Test-Connection -ComputerName $ComputerName -Protocol TCP -Count 1 ) {
+    do{
+        if( Test-Connection -ComputerName $ComputerName -Protocol TCP -Count 1 ){
             # Add result to $TestResults
         }
     }

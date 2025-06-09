@@ -17,9 +17,9 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-function dry.action.ad.move { 
+function dry.action.ad.move{ 
     [CmdletBinding()]  
-    param (
+    param(
         [Parameter(Mandatory,HelpMessage="The resolved action object")]
         [PSObject]
         $Action,
@@ -35,16 +35,16 @@ function dry.action.ad.move {
 
         [Parameter(HelpMessage="Hash directly from the command line to be 
         added as parameters to the function that iniates the action")]
-        [HashTable]
+        [hashtable]
         $ActionParams
     )
 
-    try {
+    try{
         $MetaConfig = $Resolved.ActionMetaConfig
         $RoleOUType = $Resolved.ActionType
         $RoleOU = $MetaConfig.ous."$RoleOUType"
         
-        if ($null -eq $RoleOU) {
+        if($null -eq $RoleOU){
             throw "Action does not contain an OU of type '$RoleOUType'"
         }
         # Replace replacement patterns                             
@@ -76,7 +76,7 @@ function dry.action.ad.move {
         #  tests if the prerequisites for a Local execution is there
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        Enum ExecutionType { Local; Remote }        
+        Enum ExecutionType{ Local; Remote }        
         [ExecutionType]$ExecutionType = Get-DryAdExecutionType -Configuration $Configuration
         ol i 'Execution Type',$ExecutionType
 
@@ -92,7 +92,7 @@ function dry.action.ad.move {
             Configuration = $Configuration 
             ExecutionType = $ExecutionType
         }
-        if ($ExecutionType -eq 'Remote') {
+        if($ExecutionType -eq 'Remote'){
             $GetDryADConnectionPointParams += @{
                 Credential    = $Credential
             }
@@ -107,13 +107,13 @@ function dry.action.ad.move {
         #   Action: Create session
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        if ($ExecutionType -eq 'Remote') {
+        if($ExecutionType -eq 'Remote'){
             # Create the session
             $SessionConfig = $Configuration.CoreConfig.connections | 
-            Where-Object { 
+            Where-Object{ 
                 $_.type -eq 'winrm'
             }
-            if ($null -eq $SessionConfig) {
+            if($null -eq $SessionConfig){
                 throw "Unable to find 'connection' of type 'winrm' in environment config"
             }
 
@@ -131,13 +131,13 @@ function dry.action.ad.move {
             ComputerName = $Action.Resource.Name
             TargetOU     = $RoleOU
         }
-        switch ($ExecutionType) {
-            'Remote' {
+        switch($ExecutionType){
+            'Remote'{
                 $MoveDryADComputerParams += @{
                     PSSession = $AdMoveSession       
                 }
             }
-            'Local' {
+            'Local'{
                 $MoveDryADComputerParams += @{
                     DomainController = $ActiveDirectoryConnectionPoint       
                 }
@@ -153,17 +153,17 @@ function dry.action.ad.move {
         $MoveDryADComputerParams+= @{'Test'=$true}
         ol i @("Testing location of '$($Action.Resource.name)' computer object","$RoleOU")
         
-        if ((Move-DryADComputer @MoveDryADComputerParams) -eq $true) {
+        if((Move-DryADComputer @MoveDryADComputerParams) -eq $true){
             ol i "Successfully completed the MoveToOU Action"
         }
-        else {
+        else{
             throw "Failed Action MoveToOU"
         }        
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    finally {
+    finally{
         $AdMoveSession | Remove-PSSession -ErrorAction Ignore 
         Remove-Module -Name 'dry.module.ad' -Force -ErrorAction continue
         ol i "Action 'ad.move' is finished" -sh

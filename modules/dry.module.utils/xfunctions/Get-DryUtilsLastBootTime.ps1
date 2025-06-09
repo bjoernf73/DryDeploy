@@ -20,35 +20,35 @@
 #>
 
 
-function Get-DryUtilsLastBootTime {
+function Get-DryUtilsLastBootTime{
     [cmdletbinding()]            
-    param (
+    param(
         [Parameter(Mandatory)]
         [System.Management.Automation.Runspaces.PSSession]$Session
     )
-    $ScriptBlock = {
-        try {
+    $ScriptBlock ={
+        try{
             $Result = ( 
                 Get-CimInstance -ClassName win32_operatingsystem | 
                 Select-Object -Property lastbootuptime).lastbootuptime 
             return $Result
         }
-        catch {
+        catch{
             $PSCmdlet.ThrowTerminatingError($_)
         }
     }
 
-    try {
+    try{
         $BootTime = Invoke-Command -session $Session -ScriptBlock $scriptblock
 
-        if ($BootTime -is [DateTime]) {
+        if($BootTime -is [DateTime]){
             return $BootTime
         }
-        else {
+        else{
             throw "$BootTime"
         }
     }
-    catch {
+    catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }
