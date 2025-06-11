@@ -189,14 +189,9 @@ $AnsibleTargetString
             Start-Process 'wsl' -ArgumentList "-d Ubuntu -- export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments" -NoNewWindow -Wait
          }
          else{
-            ol i @('command',"Start-Process '/bin/sh' -ArgumentList `"export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments -vvvv`" -NoNewWindow -Wait")
+            ol i @('command',"Start-Process 'sh' -ArgumentList `"export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments -vvvv`" -NoNewWindow -Wait")
             Start-Process 'sh' -ArgumentList "export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments" -NoNewWindow -Wait
          }
-
-        # test if wsl ran successfully
-        if($LASTEXITCODE -ne 0){
-            throw "failed to run ansible-playbook: $LASTEXITCODE" 
-        }
         
         # test if ansible ran successfully. If so, we should have a log file with a PLAY RECAP
         if(Test-Path -Path $AnsibleLogFile -ErrorAction Ignore){
