@@ -103,7 +103,7 @@ winserver.example.com ansible_connection=winrm ansible_user=Administrator ansibl
         ol i @('Log file path',"$wslAnsibleLogFile")
 
         # start creating contents of inventory file
-        $AnsibleTargetString = "$($Resolved.Target) ansible_connection=$AnsibleConnectionType ansible_user=$($Resolved.Credentials.credential1.GetNetworkCredential().UserName)"
+        $AnsibleTargetString = "$($Resolved.Target) ansible_connection=$AnsibleConnectionType ansible_user=$($Resolved.Credentials.credential1.GetNetworkCredential().UserName) ansible_log_path=$wslAnsibleLogFile"
         if($AnsibleAuthenticationType -eq 'key'){
             $AnsibleTargetString += " ansible_ssh_private_key_file=how_do_we_do_this"
         }
@@ -195,7 +195,7 @@ $AnsibleTargetString
             #& export ANSIBLE_LOG_PATH=$wslAnsibleLogFile
 
             ol i @('command',"& ansible-playbook $Arguments")
-            Start-Process 'sh' -ArgumentList "export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments" -NoNewWindow -Wait
+            Start-Process 'sh' -ArgumentList "ansible-playbook $Arguments" -NoNewWindow -Wait
          }
         
         # test if ansible ran successfully. If so, we should have a log file with a PLAY RECAP
