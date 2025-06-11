@@ -21,9 +21,9 @@
                 $this.envconfig.dependencies      = $EnvConfig.dependencies."$($this.platform)"."$($this.edition)"
                 # the dependencies_hash is a calculated property - but we read the value already on file, if any
                 $this.envconfig.dependencies_hash = $ConfigCombo.envconfig.dependencies_hash
-                $this.envconfig.coreconfigpath    = (Join-Path -Path $this.envconfig.path -ChildPath 'CoreConfig')
-                $this.envconfig.userconfigpath    = (Join-Path -Path $this.envconfig.path -ChildPath 'UserConfig')
-                $this.envconfig.BaseConfigPath      = (Join-Path -Path $this.envconfig.path -ChildPath 'BaseConfig')
+                $this.envconfig.coreconfigpath    = (Join-Path -Path $this.envconfig.path -ChildPath 'coreconfig')
+                $this.envconfig.userconfigpath    = (Join-Path -Path $this.envconfig.path -ChildPath 'userconfig')
+                $this.envconfig.BaseConfigPath      = (Join-Path -Path $this.envconfig.path -ChildPath 'baseconfig')
             }
         }
         
@@ -40,9 +40,9 @@
                 
                 # the dependencies_hash is a calculated property - but we read the value already on file, if any
                 $this.moduleconfig.dependencies_hash = $ConfigCombo.moduleconfig.dependencies_hash
-                $this.moduleconfig.buildpath         = (Join-Path -Path $this.moduleconfig.path -ChildPath 'Build')
-                $this.moduleconfig.rolespath         = (Join-Path -Path $this.moduleconfig.path -ChildPath 'Roles')
-                $this.moduleconfig.credentialspath   = (Join-Path -Path $this.moduleconfig.path -ChildPath 'Credentials')
+                $this.moduleconfig.buildpath         = (Join-Path -Path $this.moduleconfig.path -ChildPath 'build')
+                $this.moduleconfig.rolespath         = (Join-Path -Path $this.moduleconfig.path -ChildPath 'roles')
+                $this.moduleconfig.credentialspath   = (Join-Path -Path $this.moduleconfig.path -ChildPath 'credentials')
             }
         }
 
