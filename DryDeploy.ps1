@@ -1031,7 +1031,7 @@ try{
             
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
        {$_ -in 'Plan','Apply','GetConfig','Resolve','Interactive'}{
-            $dry_var_Paths | Add-Member -MemberType NoteProperty -Name 'BaseConfigDirectory' -Value (Join-Path -Path $dry_var_global_ConfigCombo.envconfig.path -ChildPath 'BaseConfig')
+            $dry_var_Paths | Add-Member -MemberType NoteProperty -Name 'BaseConfigDirectory' -Value (Join-Path -Path $dry_var_global_ConfigCombo.envconfig.path -ChildPath 'baseconfig')
             $dry_var_Paths | Add-Member -MemberType NoteProperty -Name 'ModuleConfigDirectory' -Value $dry_var_global_ConfigCombo.moduleconfig.path
             $GLOBAL:dry_var_global_Configuration = Get-DryEnvConfig -ConfigCombo $dry_var_global_ConfigCombo -Paths $dry_var_Paths
             $GLOBAL:dry_var_global_Configuration = Get-DryModuleConfig -ConfigCombo $dry_var_global_ConfigCombo -Configuration $GLOBAL:dry_var_global_Configuration 

@@ -53,9 +53,9 @@ function Get-DryEnvConfig{
             UserConfig = $null
             Paths = $Paths
         }
-        $Configuration.CoreConfig = Get-DryConfigData -Path (Join-Path -Path $ConfigCombo.envconfig.path -ChildPath 'CoreConfig') -ErrorAction Stop
-        if(Test-Path -Path (Join-Path -Path $ConfigCombo.envconfig.path -ChildPath 'UserConfig')){
-            $Configuration.UserConfig = Get-DryConfigData -Path (Join-Path -Path $ConfigCombo.envconfig.path -ChildPath 'UserConfig') -Configuration $Configuration -ErrorAction Stop
+        $Configuration.CoreConfig = Get-DryConfigData -Path (Join-Path -Path $ConfigCombo.envconfig.path -ChildPath 'coreconfig') -ErrorAction Stop
+        if(Test-Path -Path (Join-Path -Path $ConfigCombo.envconfig.path -ChildPath 'userconfig')){
+            $Configuration.UserConfig = Get-DryConfigData -Path (Join-Path -Path $ConfigCombo.envconfig.path -ChildPath 'userconfig') -Configuration $Configuration -ErrorAction Stop
         }
         return $Configuration
     }
