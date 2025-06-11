@@ -14,16 +14,78 @@ function dry.action.ansible.wsl{
         [hashtable]$ActionParams
     )
     try{
-        # the main.yml of the ansible playbook
-        $AnsiblePlaybookPath = $Resolved.WslConfigSourcePath + "/main.yml"
-
-        # inventory ini file in powershell on windows and the wsl equivalent
-        $TargetInventoryFile = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name)-inv.ini"
-        $wslTargetInventoryFile = $Resolved.WslConfigTargetPath + "/$($Action.Resource.Name)-inv.ini"
+        # Connection type can be ssh or winrm, defaults to ssh
+        $AnsibleConnectionType = 'ssh'
+        if($Resolved.TypeMetaConfig.connection -notin 'psrp', 'winrm', 'ssh', $null){
+            throw "Unknown connection type: $($Resolved.TypeMetaConfig.connection). Expected 'ssh', 'winrm' or 'psrp'."
+        }
+        if($null -ne $Resolved.TypeMetaConfig.connection){
+            $AnsibleConnectionType = $Resolved.TypeMetaConfig.connection
+        }
+        ol i @('Ansible connection type',$AnsibleConnectionType)
         
-        # inventory ini file in powershell on windows and the wsl equivalent
-        $AnsibleLogFile = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name)-ansible.log"
-        $wslAnsibleLogFile = $Resolved.WslConfigTargetPath + "/$($Action.Resource.Name)-ansible.log"
+        # Authentication type can be password or key, defaults to password
+        $AnsibleAuthenticationType = 'password'
+        if($Resolved.TypeMetaConfig.authentication -notin 'password', 'key', $null){
+            throw "Unknown authentication type: $($Resolved.TypeMetaConfig.authentication). Expected 'password' or 'key'."
+        }
+        if($null -ne $Resolved.TypeMetaConfig.authentication){
+            $AnsibleAuthenticationType = $Resolved.TypeMetaConfig.authentication
+        }
+        ol i @('Ansible authentication type',$AnsibleAuthenticationType)
+
+        # supported platforms are Win32NT and Unix. $GLOBAL:dry_var_global_Platform.Platform contains the platform information
+        <#
+            Name                           Value
+            ----                           -----
+            Separator                      :
+            Slash                          /
+            Home                           /home/bjoernf
+            Platform                       Unix
+            RootWorkingDirectory           /home/bjoernf/DryDeploy
+            Edition                        Core
+            Version                        7.5.1
+        #>
+        $AnsibleWsl = $false
+        if($GLOBAL:dry_var_global_Platform.Platform -eq 'Win32NT'){
+            # we need to run the ansible playbook in wsl
+            $AnsibleWsl = $true
+        }
+
+        <#
+        [linux_servers]
+server1.example.com ansible_connection=ssh ansible_user=myuser
+
+[windows_servers]
+winserver.example.com ansible_connection=winrm ansible_user=Administrator ansible_password=SecurePass ansible_winrm_transport=ntlm
+        #>
+        
+        
+        # the entrypoint of the ansible playbook must be the main.yml at root
+        switch($AnsibleWsl){
+            $true {
+                $AnsiblePlaybookPath = $Resolved.WslConfigSourcePath + "/main.yml"
+            
+                # ansible inventory ini file in powershell on windows and the wsl equivalent
+                $TargetInventoryFile = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name)-inv.ini"
+                $wslTargetInventoryFile = $Resolved.WslConfigTargetPath + "/$($Action.Resource.Name)-inv.ini"
+                
+                # ansible log file in powershell on windows and the wsl equivalent
+                $AnsibleLogFile = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name)-ansible.log"
+                $wslAnsibleLogFile = $Resolved.WslConfigTargetPath + "/$($Action.Resource.Name)-ansible.log"
+            }
+            $false {
+                $AnsiblePlaybookPath = $Resolved.ConfigSourcePath + "/main.yml"
+                
+                # ansible inventory ini and log file paths
+                $TargetInventoryFile = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name)-inv.ini"
+                $AnsibleLogFile = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name)-ansible.log"
+
+                # not running in wsl, these path are just the same
+                $wslTargetInventoryFile = $TargetInventoryFile
+                $wslAnsibleLogFile = $AnsibleLogFile
+            }
+        }
         
         # remove files that may exist from a previous run
         if(Test-Path -Path $Resolved.ConfigTargetPath -ErrorAction Ignore){
@@ -36,19 +98,54 @@ function dry.action.ansible.wsl{
         }
 
         # output to screen 
-        ol i @('Ansible playbook in wsl',"$AnsiblePlaybookPath")
-        ol i @('Inventory in wsl',"$wslTargetInventoryFile")
-        ol i @('log in wsl',"$wslAnsibleLogFile")
+        ol i @('Ansible playbook entrypoint',"$AnsiblePlaybookPath")
+        ol i @('Inventory file path',"$wslTargetInventoryFile")
+        ol i @('Log file path',"$wslAnsibleLogFile")
 
         # start creating contents of inventory file
+        $AnsibleTargetString = "$($Resolved.Target) ansible_connection=$AnsibleConnectionType ansible_user=$($Resolved.Credentials.credential1.GetNetworkCredential().UserName)"
+        if($AnsibleAuthenticationType -eq 'key'){
+            $AnsibleTargetString += " ansible_ssh_private_key_file=how_do_we_do_this"
+        }
+        if($AnsibleConnectionType -eq 'psrp'){
+            $DefaultPSRPPort = 5985
+            $DefaultPSRPProtocol = 'http'
+            if($Resolved.TypeMetaConfig.psrp_protocol -eq 'https'){
+                $DefaultPSRPPort = 5986
+                $DefaultPSRPProtocol = 'https'
+            }
+
+            if($null -eq $Resolved.TypeMetaConfig.psrp_protocol){
+                $ResolvedProtocol = $DefaultPSRPProtocol
+            }
+            else{
+                $ResolvedProtocol = $Resolved.TypeMetaConfig.psrp_protocol
+            }
+            if($null -eq $Resolved.TypeMetaConfig.psrp_port){
+                $ResolvedPort = $DefaultPSRPPort
+            }
+            else{
+                $ResolvedPort = $Resolved.TypeMetaConfig.psrp_port
+            }
+            
+            $AnsibleTargetString += " ansible_psrp_protocol=$($ResolvedProtocol)"
+            $AnsibleTargetString += " ansible_psrp_port=$($ResolvedPort)"
+            $AnsibleTargetString += " ansible_psrp_cert_validation=ignore"
+        }
+
+        #ansible_psrp_protocol
+        #ansible_psrp_port
+
+        
+        # the inventory file content
         $InventoryINIContent = @"
 # Ansible Inventory file for $($Action.Resource.Name)   
 [$($Action.Resource.Name)]
-$($Resolved.Target)
+$AnsibleTargetString
 
 [$($Action.Resource.Name):vars]
 
-"@
+"@     
         # variables that are not secrets are written to the inventory file
         foreach($var in $Resolved.vars | Where-Object{ $_.secret -eq $false}){
             $InventoryINIContent += "$($var.Name)=$($var.Value)`n"
@@ -57,10 +154,7 @@ $($Resolved.Target)
         # write the inventory file using UTF8 without BOM
         $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
         [system.io.file]::WriteAllLines($TargetInventoryFile, $InventoryINIContent, $Utf8NoBomEncoding)
-
-        # output paths to screen
-        ol v @('Ansible Inventory file created at',"$TargetInventoryFile")
-        ol v @('Ansible Inventory wsl path',"$wslTargetInventoryFile")
+        ol i @('Ansible Inventory file written',"$TargetInventoryFile")
 
         # ansible-playbook arguments
         [system.collections.arraylist]$Arguments = @(
@@ -70,20 +164,38 @@ $($Resolved.Target)
             "--extra-vars", 
             "`"ansible_password=$($Resolved.Credentials.credential1.GetNetworkCredential().Password) ansible_become_pass=$($Resolved.Credentials.credential1.GetNetworkCredential().Password)`""
         )
+
+        # the meta config allows you to specify a number of seconds to sleep before contacting the target
+        if($Resolved.TypeMetaConfig.sleep_before_seconds){
+            Start-DryUtilsSleep -Seconds $Resolved.TypeMetaConfig.sleep_before_seconds -Message "Sleeping $($Resolved.TypeMetaConfig.sleep_before_seconds) seconds before contacting target"
+        }
        
         # add target to known_hosts
-        ol i "Add the target [$($Action.Resource.Name) ($($Resolved.Target))] to known_hosts in wsl" -sh
-        ol i @('command',"Start-Process 'wsl' -ArgumentList `"-d Ubuntu -- ssh-keyscan -H $($Resolved.Target) >> ~/.ssh/known_hosts`" -NoNewWindow -Wait")
-        Start-Process 'wsl' -ArgumentList "-d Ubuntu -- ssh-keyscan -H $($Resolved.Target) >> ~/.ssh/known_hosts" -NoNewWindow -Wait
+        ol i "Add the target [$($Action.Resource.Name) ($($Resolved.Target))] to known_hosts" -sh
+        if($true -eq $AnsibleWsl){
+            ol i @('command',"Start-Process 'wsl' -ArgumentList `"-d Ubuntu -- ssh-keyscan -H $($Resolved.Target) >> ~/.ssh/known_hosts`" -NoNewWindow -Wait")
+            Start-Process 'wsl' -ArgumentList "-d Ubuntu -- ssh-keyscan -H $($Resolved.Target) >> ~/.ssh/known_hosts" -NoNewWindow -Wait
+        }
+        else{
+            ol i @('command',"ssh-keyscan -H $($Resolved.Target) >> ~/.ssh/known_hosts")
+            Start-Process 'ssh-keyscan' -ArgumentList "-H $($Resolved.Target) >> ~/.ssh/known_hosts" -NoNewWindow -Wait
+        }
+        
 
         # run the playbook
-        ol i "Run the ansible-playbook in wsl" -sh
-        ol i @('command',"Start-Process 'wsl' -ArgumentList `"-d Ubuntu -- export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments -vvvv`" -NoNewWindow -Wait")
-        Start-Process 'wsl' -ArgumentList "-d Ubuntu -- export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments" -NoNewWindow -Wait
+        ol i "Run the ansible-playbook" -sh
+         if($true -eq $AnsibleWsl){
+            ol i @('command',"Start-Process 'wsl' -ArgumentList `"-d Ubuntu -- export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments -vvvv`" -NoNewWindow -Wait")
+            Start-Process 'wsl' -ArgumentList "-d Ubuntu -- export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments" -NoNewWindow -Wait
+         }
+         else{
+            ol i @('command',"Start-Process '/bin/sh' -ArgumentList `"export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments -vvvv`" -NoNewWindow -Wait")
+            Start-Process '/bin/sh' -ArgumentList "export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments" -NoNewWindow -Wait
+         }
 
         # test if wsl ran successfully
         if($LASTEXITCODE -ne 0){
-            throw "wsl failed to run ansible-playbook: $LASTEXITCODE" 
+            throw "failed to run ansible-playbook: $LASTEXITCODE" 
         }
         
         # test if ansible ran successfully. If so, we should have a log file with a PLAY RECAP
