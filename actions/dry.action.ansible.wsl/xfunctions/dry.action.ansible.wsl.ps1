@@ -201,6 +201,7 @@ $AnsibleTargetString
             #ol i @('command',"Start-Process 'sh' -ArgumentList 'ansible-playbook $Arguments' -NoNewWindow -Wait")
             #Start-Process 'sh' -ArgumentList "ansible-playbook $Arguments" -NoNewWindow -Wait
             ol i @('command',"Start-Process 'ansible-playbook' -ArgumentList `"$Arguments`" -NoNewWindow -Wait")
+            $env:ANSIBLE_LOG_PATH=$AnsibleLogFile
             Start-Process 'ansible-playbook' -ArgumentList "$Arguments" -NoNewWindow -Wait
          }
         
