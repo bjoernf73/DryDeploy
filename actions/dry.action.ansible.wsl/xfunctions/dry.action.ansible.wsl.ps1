@@ -198,8 +198,10 @@ $AnsibleTargetString
             #ol i @('command',"& export ANSIBLE_LOG_PATH=$wslAnsibleLogFile")
             #& export ANSIBLE_LOG_PATH=$wslAnsibleLogFile
 
-            ol i @('command',"Start-Process 'sh' -ArgumentList 'ansible-playbook $Arguments' -NoNewWindow -Wait")
-            Start-Process 'sh' -ArgumentList "ansible-playbook $Arguments" -NoNewWindow -Wait
+            #ol i @('command',"Start-Process 'sh' -ArgumentList 'ansible-playbook $Arguments' -NoNewWindow -Wait")
+            #Start-Process 'sh' -ArgumentList "ansible-playbook $Arguments" -NoNewWindow -Wait
+            ol i @('command',"Start-Process 'ansible-playbook' -ArgumentList `"$Arguments`" -NoNewWindow -Wait")
+            Start-Process 'ansible-playbook' -ArgumentList "$Arguments" -NoNewWindow -Wait
          }
         
         # test if ansible ran successfully. If so, we should have a log file with a PLAY RECAP
