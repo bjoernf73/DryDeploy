@@ -51,30 +51,23 @@ function dry.action.ansible.wsl{
             # we need to run the ansible playbook in wsl
             $AnsibleWsl = $true
         }
-
-        <#
-        [linux_servers]
-server1.example.com ansible_connection=ssh ansible_user=myuser
-
-[windows_servers]
-winserver.example.com ansible_connection=winrm ansible_user=Administrator ansible_password=SecurePass ansible_winrm_transport=ntlm
-        #>
-        
         
         # the entrypoint of the ansible playbook must be the main.yml at root
         switch($AnsibleWsl){
             $true {
+                ol i @("ansible-playbook environment","wsl (running DryDeploy on Windows)")
                 $AnsiblePlaybookPath = $Resolved.WslConfigSourcePath + "/main.yml"
             
                 # ansible inventory ini file in powershell on windows and the wsl equivalent
                 $TargetInventoryFile = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name)-inv.ini"
-                $wslTargetInventoryFile = $Resolved.WslConfigTargetPath + "/$($Action.Resource.Name)-inv.ini"
+                $LinuxTargetInventoryFile = $Resolved.WslConfigTargetPath + "/$($Action.Resource.Name)-inv.ini"
                 
                 # ansible log file in powershell on windows and the wsl equivalent
                 $AnsibleLogFile = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name)-ansible.log"
-                $wslAnsibleLogFile = $Resolved.WslConfigTargetPath + "/$($Action.Resource.Name)-ansible.log"
+                $LinuxAnsibleLogFile = $Resolved.WslConfigTargetPath + "/$($Action.Resource.Name)-ansible.log"
             }
             $false {
+                ol i @("ansible-playbook environment","native (running DryDeploy on Linux)")
                 $AnsiblePlaybookPath = $Resolved.ConfigSourcePath + "/main.yml"
                 
                 # ansible inventory ini and log file paths
@@ -82,8 +75,8 @@ winserver.example.com ansible_connection=winrm ansible_user=Administrator ansibl
                 $AnsibleLogFile = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name)-ansible.log"
 
                 # not running in wsl, these path are just the same
-                $wslTargetInventoryFile = $TargetInventoryFile
-                $wslAnsibleLogFile = $AnsibleLogFile
+                $LinuxTargetInventoryFile = $TargetInventoryFile
+                $LinuxAnsibleLogFile = $AnsibleLogFile
             }
         }
         
@@ -99,11 +92,11 @@ winserver.example.com ansible_connection=winrm ansible_user=Administrator ansibl
 
         # output to screen 
         ol i @('Ansible playbook entrypoint',"$AnsiblePlaybookPath")
-        ol i @('Inventory file path',"$wslTargetInventoryFile")
-        ol i @('Log file path',"$wslAnsibleLogFile")
+        ol i @('Inventory file path',"$LinuxTargetInventoryFile")
+        ol i @('Log file path',"$LinuxAnsibleLogFile")
 
         # start creating contents of inventory file
-        $AnsibleTargetString = "$($Resolved.Target) ansible_connection=$AnsibleConnectionType ansible_user=$($Resolved.Credentials.credential1.GetNetworkCredential().UserName) ansible_log_path=$wslAnsibleLogFile"
+        $AnsibleTargetString = "$($Resolved.Target) ansible_connection=$AnsibleConnectionType ansible_user=$($Resolved.Credentials.credential1.GetNetworkCredential().UserName) ansible_log_path=$LinuxAnsibleLogFile"
         if($AnsibleAuthenticationType -eq 'key'){
             $AnsibleTargetString += " ansible_ssh_private_key_file=how_do_we_do_this"
         }
@@ -133,10 +126,6 @@ winserver.example.com ansible_connection=winrm ansible_user=Administrator ansibl
             $AnsibleTargetString += " ansible_psrp_cert_validation=ignore"
         }
 
-        #ansible_psrp_protocol
-        #ansible_psrp_port
-
-        
         # the inventory file content
         $InventoryINIContent = @"
 # Ansible Inventory file for $($Action.Resource.Name)   
@@ -159,7 +148,7 @@ $AnsibleTargetString
         # ansible-playbook arguments
         [system.collections.arraylist]$Arguments = @(
             "-i", 
-            $wslTargetInventoryFile, 
+            $LinuxTargetInventoryFile, 
             $AnsiblePlaybookPath,
             "--extra-vars", 
             "`"ansible_password=$($Resolved.Credentials.credential1.GetNetworkCredential().Password) ansible_become_pass=$($Resolved.Credentials.credential1.GetNetworkCredential().Password)`""
@@ -173,37 +162,25 @@ $AnsibleTargetString
         # add target to known_hosts
         ol i "Add the target [$($Action.Resource.Name) ($($Resolved.Target))] to known_hosts" -sh
         if($true -eq $AnsibleWsl){
-            ol i @("ansible-playbook environment","wsl (running DryDeploy on Windows)")
             ol i @('command',"Start-Process 'wsl' -ArgumentList `"-d Ubuntu -- ssh-keyscan -H $($Resolved.Target) | grep -v -f ~/.ssh/known_hosts >> ~/.ssh/known_hosts`" -NoNewWindow -Wait")
             Start-Process 'wsl' -ArgumentList "-d Ubuntu -- ssh-keyscan -H $($Resolved.Target) | grep -v -f ~/.ssh/known_hosts >> ~/.ssh/known_hosts" -NoNewWindow -Wait
         }
         else{
-            ol i @("ansible-playbook environment","native (running DryDeploy on Linux)")
             ol i @('command',"ssh-keyscan -H $($Resolved.Target) | grep -v -f ~/.ssh/known_hosts >> ~/.ssh/known_hosts")
             & ssh-keyscan -H $($Resolved.Target) | grep -v -f ~/.ssh/known_hosts >> ~/.ssh/known_hosts
         }
         
 
         # run the playbook
-        
-         if($true -eq $AnsibleWsl){
-            ol i @("ansible-playbook environment","wsl (running DryDeploy on Windows)")
-            ol i @('command',"Start-Process 'wsl' -ArgumentList `"-d Ubuntu -- export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments -vvvv`" -NoNewWindow -Wait")
-            Start-Process 'wsl' -ArgumentList "-d Ubuntu -- export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments" -NoNewWindow -Wait
-         }
-         else{
-            ol i @("ansible-playbook environment","native (running DryDeploy on Linux)")
-            #ol i @('command',"Start-Process 'sh' -ArgumentList `"export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments -vvvv`" -NoNewWindow -Wait")
-            #Start-Process 'sh' -ArgumentList "export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments" -NoNewWindow -Wait
-            #ol i @('command',"& export ANSIBLE_LOG_PATH=$wslAnsibleLogFile")
-            #& export ANSIBLE_LOG_PATH=$wslAnsibleLogFile
-
-            #ol i @('command',"Start-Process 'sh' -ArgumentList 'ansible-playbook $Arguments' -NoNewWindow -Wait")
-            #Start-Process 'sh' -ArgumentList "ansible-playbook $Arguments" -NoNewWindow -Wait
+        if($true -eq $AnsibleWsl){
+            ol i @('command',"Start-Process 'wsl' -ArgumentList `"-d Ubuntu -- export ANSIBLE_LOG_PATH=$LinuxAnsibleLogFile; ansible-playbook $Arguments -vvvv`" -NoNewWindow -Wait")
+            Start-Process 'wsl' -ArgumentList "-d Ubuntu -- export ANSIBLE_LOG_PATH=$LinuxAnsibleLogFile; ansible-playbook $Arguments" -NoNewWindow -Wait
+        }
+        else{
             ol i @('command',"Start-Process 'ansible-playbook' -ArgumentList `"$Arguments`" -NoNewWindow -Wait")
             $env:ANSIBLE_LOG_PATH=$AnsibleLogFile
             Start-Process 'ansible-playbook' -ArgumentList "$Arguments" -NoNewWindow -Wait
-         }
+        }
         
         # test if ansible ran successfully. If so, we should have a log file with a PLAY RECAP
         if(Test-Path -Path $AnsibleLogFile -ErrorAction Ignore){
