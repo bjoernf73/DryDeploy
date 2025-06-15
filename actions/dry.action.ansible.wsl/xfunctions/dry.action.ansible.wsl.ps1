@@ -173,24 +173,26 @@ $AnsibleTargetString
         # add target to known_hosts
         ol i "Add the target [$($Action.Resource.Name) ($($Resolved.Target))] to known_hosts" -sh
         if($true -eq $AnsibleWsl){
+            ol i @("ansible-playbook environment","wsl (running DryDeploy on Windows)")
             ol i @('command',"Start-Process 'wsl' -ArgumentList `"-d Ubuntu -- ssh-keyscan -H $($Resolved.Target) | grep -v -f ~/.ssh/known_hosts >> ~/.ssh/known_hosts`" -NoNewWindow -Wait")
             Start-Process 'wsl' -ArgumentList "-d Ubuntu -- ssh-keyscan -H $($Resolved.Target) | grep -v -f ~/.ssh/known_hosts >> ~/.ssh/known_hosts" -NoNewWindow -Wait
         }
         else{
+            ol i @("ansible-playbook environment","native (running DryDeploy on Linux)")
             ol i @('command',"ssh-keyscan -H $($Resolved.Target) | grep -v -f ~/.ssh/known_hosts >> ~/.ssh/known_hosts")
-            Start-Process 'ssh-keyscan' -ArgumentList "-H $($Resolved.Target) | grep -v -f ~/.ssh/known_hosts >> ~/.ssh/known_hosts" -NoNewWindow -Wait
+            & ssh-keyscan -H $($Resolved.Target) | grep -v -f ~/.ssh/known_hosts >> ~/.ssh/known_hosts
         }
         
 
         # run the playbook
         
          if($true -eq $AnsibleWsl){
-            ol i @("ansible-playbook environment","wsl")
+            ol i @("ansible-playbook environment","wsl (running DryDeploy on Windows)")
             ol i @('command',"Start-Process 'wsl' -ArgumentList `"-d Ubuntu -- export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments -vvvv`" -NoNewWindow -Wait")
             Start-Process 'wsl' -ArgumentList "-d Ubuntu -- export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments" -NoNewWindow -Wait
          }
          else{
-            ol i @("ansible-playbook environment","native")
+            ol i @("ansible-playbook environment","native (running DryDeploy on Linux)")
             #ol i @('command',"Start-Process 'sh' -ArgumentList `"export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments -vvvv`" -NoNewWindow -Wait")
             #Start-Process 'sh' -ArgumentList "export ANSIBLE_LOG_PATH=$wslAnsibleLogFile; ansible-playbook $Arguments" -NoNewWindow -Wait
             #ol i @('command',"& export ANSIBLE_LOG_PATH=$wslAnsibleLogFile")
