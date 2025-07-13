@@ -181,6 +181,11 @@ $AnsibleTargetString
             $env:ANSIBLE_LOG_PATH=$AnsibleLogFile
             Start-Process 'ansible-playbook' -ArgumentList "$Arguments" -NoNewWindow -Wait
         }
+
+        # this was placed in the packer.run action by mistake - keeping for now - remove when all ok
+        # use one of these
+        #wsl -d Ubuntu -- watch -n 1 ls
+        #Start-Process wsl -ArgumentList "-d Ubuntu -- ansible-playbook " -NoNewWindow -Wait
         
         # test if ansible ran successfully. If so, we should have a log file with a PLAY RECAP
         if(Test-Path -Path $AnsibleLogFile -ErrorAction Ignore){
