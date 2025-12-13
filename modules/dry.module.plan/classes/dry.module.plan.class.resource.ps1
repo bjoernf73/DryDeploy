@@ -54,7 +54,7 @@ class Resource{
             throw "The Build contains multiple Roles matching '$($This.Role)'"
         }
         # Get a copy of the Build Object. The Build is now instantiated by a Resource, 
-        # but there may be many Resources in the Plan using that Tempolate. So, not to contaminate 
+        # but there may be many Resources in the Plan using that Template. So, not to contaminate 
         # the Template with the unique GUID of each Action, use a copy
         $ResourceBuild = Get-DryUtilsPSObjectCopy -Object $BuildTemplate
         $ResourceBuild.actions.foreach({
