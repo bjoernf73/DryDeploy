@@ -125,6 +125,15 @@ function dry.action.ansible.wsl{
             $AnsibleTargetString += " ansible_psrp_port=$($ResolvedPort)"
             $AnsibleTargetString += " ansible_psrp_cert_validation=ignore"
         }
+        elseif($AnsibleConnectionType -eq 'ssh'){
+            # if the connection type is ssh, we need to add the ssh port if it is not the default 22
+            if($null -ne $Resolved.TypeMetaConfig.ssh_port -and $Resolved.TypeMetaConfig.ssh_port -ne 22){
+                $AnsibleTargetString += " ansible_port=$($Resolved.TypeMetaConfig.ssh_port)"
+            }
+            else{
+                $AnsibleTargetString += " ansible_port=22"
+            }
+        }
 
         # the inventory file content
         $InventoryINIContent = @"

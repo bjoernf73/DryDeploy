@@ -27,7 +27,8 @@ class DryAction{
         [PSCustomObject]$ActionObject,
         [Resource]$Resource,
         [Resources]$Resources,
-        [Plan]$Plan){
+        [Plan]$Plan)
+    {
         $This.ResolvedActionOrder  = $false
         $This.Action               = $ActionObject.Action
         $This.Description          = $ActionObject.Description
@@ -596,7 +597,7 @@ class Plan{
     [string] GetAvailableActionGuid($OrderPart){
         try{
             $ActionOrderPart = ''
-            # The OrderPart is a string like 000200050000. We must keep the 00020005 and increase the 0000-part
+            # The OrderPart is a string like 000 0000. We must keep the 00020005 and increase the 0000-part
             # one by one and test all actions one by one to see if that order-part is available or in use
             $DependentActionOrderPart = $OrderPart.SubString(0,8)
             :ActionLoop for ($Count = 1; $Count -lt 9999; $Count++){

@@ -50,12 +50,6 @@ class Resources{
                             dns         = $null
                         }
                         
-                        <#
-                            Role: Get Available Roles, display the list for the 
-                            user, prompt for and get selection  
-                        #>
-                        #ol i "Select role" -sh
-                        #ol i " "
                         $iRolesToSelectFrom = [ArrayList]::New()
                         foreach($iRole in $Configuration.build.roles){
                             $iIndex              = $iRole.order
@@ -72,7 +66,6 @@ class Resources{
                         $GetDryInputParams = @{
                             Prompt             = "Enter index of a role"
                             PromptChoiceString = "$($Configuration.build.roles.order)"
-                            #Description        = "The list above are roles that you may select from in interactive mode. You may select a different module (.\DryDeploy.ps1 -ModuleConfig ..\path\to\config) if the role you are looking for is not in the list"
                             FailedMessage      = "You need to select the index of the role, i.e. one of '$($Configuration.build.roles.order)' or 'q' to quit"
                             ValidateSet        = $Configuration.build.roles.order
                         }
@@ -80,22 +73,10 @@ class Resources{
                         if($sRoleIndex -in $Configuration.build.roles.order){
                             $sSelected.Role  = ($iRolesToSelectFrom | Where-Object{ $_.index -eq $sRoleIndex}).role
                             $sSelected.Short = ($iRolesToSelectFrom | Where-Object{ $_.index -eq $sRoleIndex}).short
-                            #$sSelected.Short = Get-DryObjectPropertyFromObjectArray -ObjectArray $Configuration.RoleMetaConfigs -IDProperty 'role' -IDPropertyValue $sSelected.Role -Property 'role_short_name'
                         }
                         else{
                             break
                         }
-                        #ol i " "
-                        #ol i -obj $sSelected -msgtitle "Your Selections" -Fore $SelectionColor
-                        
-
-                        <#
-                            Short: A short name of the role. The short (short_role_name) should be used in the resource name, and 
-                            for a domain member, the server may be separated from other roles in an OU with the same name as the
-                            short.  
-                        #>
-                        #ol i "Enter short (short name of role)" -sh
-                        #ol i " "
                         $iRolesToSelectFrom = $null
                         $iRolesStrings = $null
                         [scriptblock]$ValidateShortRoleNameScript = {
@@ -112,7 +93,6 @@ class Resources{
                         $GetDryInputParams = @{
                             Prompt               = "Customize the Short (2-8 characters), or ENTER for default ('$($sSelected.Short)')"
                             PromptChoiceString   = ""
-                            #Description          = "The list above is an example of roles and corresponding short role names for inspiration"
                             FailedMessage        = "The short role name should be 2-8 chars, not contain special chars but plain letters, and not start or end with a number. The role short name is significant it you have an Active Directory that separates roles into OU's based on the role short name. If you don't, just accept the defult"
                             ValidateScript       = $ValidateShortRoleNameScript
                             ValidateScriptParams = @()
@@ -124,17 +104,6 @@ class Resources{
                         }
 
                         $sSelected.Short = $sShortRoleName
-                        #ol i " "
-                        #ol i -obj $sSelected -msgtitle "Your Selections" -Fore $SelectionColor
-                        #ol i " "
-
-                        <#
-                            Subnet: Get Available Sites and Subnets, display the list for 
-                            the user, prompt for and get selection found in 
-                            CoreConfig.network.sites[n].subnets 
-                        #>
-                        #ol i "Select network" -sh
-                        #ol i " "
                         $iSubnetsToSelectFrom = [ArrayList]::New()
                         $iSubnetsIndex = 0
                         $iSubnetsIndexArray = $null; $iSubnetsIndexArray = @()
@@ -161,7 +130,6 @@ class Resources{
                         $GetDryInputParams = @{
                             Prompt             = "Enter index of a subnet"
                             PromptChoiceString = "$iSubnetsIndexArray"
-                            #Description        = "The list above are subnets that you may select from. You may select a different environment (.\DryDeploy.ps1 -EnvConfig ..\path\to\config) if the subnet you are looking for is not in the list"
                             FailedMessage      = "You need to select the index of the subnet, i.e. one of '$iSubnetsIndexArray'"
                             ValidateSet        = $iSubnetsIndexArray
                         }
@@ -176,14 +144,7 @@ class Resources{
                         $sSubnetCidrString = "$($sSite.ip_subnet)/$sSubnetMaskBits"
                         $sSelected.Site   = $sSite.site
                         $sSelected.Subnet = $sSubnetCidrString
-                        #ol i -obj $sSelected -msgtitle "Your Selections" -Fore $SelectionColor
-                        #ol i " "
-            
-                        <#
-                            IP: Get the IP of the resource
-                        #>
-                        #ol i "Enter IP of the resource" -sh
-                        #ol i " "
+    
                         [scriptblock]$ValidateScript = {
                             param(
                                 $sSiteNet,
@@ -195,7 +156,6 @@ class Resources{
                         $GetDryInputParams = @{
                             Prompt               = "Enter IP in the $sSubnetCidrString network"
                             PromptChoiceString   = "<IP>, 'dhcp'"
-                            #Description          = "Enter an ipv4 address in the subnet you've selected, or simply enter 'dhcp'"
                             FailedMessage        = "You need to enter a proper ip in the correct subnet"
                             ValidateScript       = $ValidateScript
                             ValidateScriptParams = @($sSite.ip_subnet,$sSite.subnet_mask)
@@ -203,27 +163,8 @@ class Resources{
                         [string]$sResourceIP = Get-DryInput @GetDryInputParams
                         $sSelected.IP = $sResourceIP
                         $sSite | Add-Member -MemberType NoteProperty -Name 'ip_address' -Value $sResourceIP
-                        #ol i -obj $sSelected -msgtitle "Your Selections" -Fore $SelectionColor
-                        #ol i " "
-            
-                        <#
-                            Name: Get the name of the resource
-                        #>
-                        #ol i "Enter a resource name" -sh
-                        #ol i " "
-                        <#
-                            $iResourcesExample = $Configuration.CoreConfig.resources | Select-Object -Property name,role
-                            $iResourcesStrings = ($($iResourcesExample | Out-String).Split("`r`n")) | Where-Object{ $_.Trim() -ne ''}
-                            foreach($iString in $iResourcesStrings){
-                                ol i "$iString"
-                            }
-                            ol i " "
-                        #>
-                        #ol i -obj $sSelected -msgtitle "Your Selections" -Fore $SelectionColor
                         $GetDryInputParams = @{
                             Prompt        = "Enter name of the resource"
-                            #Description   = "If you see a list above, they are names and corresponding roles of resources specified in your current environment config. If the list is empty, you probably clickops eveything, don't you? If you do see some names there, they are only listed here to inspire you to make the slightest effort to approximate the current naming convention used in your environment. If no such convention is obvious, well...that's on you."
-                            #! the input should be an array of validatescripts and error messages, so that each can be validated, and the appropriate error message displayed
                             FailedMessage = "The name should not be an FQDN ('.' in name is not allowed)"
                             ValidateScript ={param($DryInput); (($DryInput -ne '') -and ($null -ne $DryInput) -and ($DryInput -notmatch "\."))}
                         }
@@ -359,103 +300,50 @@ class Resources{
     }
 
     [Void] DoOrder ([PSObject]$Network,[PSObject]$Build){
-        
         [array]$Sites = @(($Network.Sites).Name)
         [array]$RoleOrder  = @($Build.roles)
-        [string]$OrderType = $Build.order_type
-
-        if($OrderType -notin @('site','role')){
-            [string]$OrderType = 'role'
-        }
-
         $ResourceCount     = 0
         $ResolvedResources = @()
 
-        switch($OrderType){
-            'site'{
-                # Resources are deployed site by site. Within  
-                # the site, the resource order will be followed
-                foreach($Site in $Sites){
-                    for ($RoleCount = 1; $RoleCount -le $RoleOrder.count; $RoleCount++){
-            
-                        Remove-Variable -Name BuildRole -ErrorAction Ignore
-                        $BuildRole = $null
-                        $BuildRole = $RoleOrder | Where-Object{
-                            $_.order -eq $RoleCount
-                        }
-            
-                        if($BuildRole -is [array]){
-                            throw "Multiple Roles in the Build with order $RoleCount"
-                        }
-                        elseif($null -eq $BuildRole){
-                            throw "No Roles in the Build with order $RoleCount"
-                        }
+        # Resources are deployed according to the resource order in the build 
+        for ($RoleCount = 1; $RoleCount -le $RoleOrder.count; $RoleCount++){
     
-                        $BuildRoleName = $BuildRole.Role
-    
-                        Remove-Variable -Name 'CurrentSiteAndConfopResources' -ErrorAction Ignore
-                        $CurrentSiteAndConfopResources = @()
-                        $This.Resources | foreach-Object{
-                            if(($_.Network.Site -eq $Site) -and ($_.Role -eq $BuildRoleName)){
-                                $CurrentSiteAndConfopResources += $_
-                            }
-                    
-                        }
-                        if($CurrentSiteAndConfopResources){
-                            # Multiple resources of the same Role at the same site will be ordered alphabetically by name
-                            $CurrentSiteAndConfopResources = $CurrentSiteAndConfopResources | Sort-Object -Property Name
-                            foreach($CurrentSiteAndConfopResource in $CurrentSiteAndConfopResources){
-                                $ResourceCount++
-                                $CurrentSiteAndConfopResource.ResourceOrder =  $ResourceCount 
-                                $ResolvedResources += $CurrentSiteAndConfopResource
-                            }
-                        } 
-                    }  
-                }
+            Remove-Variable -Name BuildRole -ErrorAction Ignore
+            
+            $BuildRole = $RoleOrder | Where-Object{
+                $_.order -eq $RoleCount
             }
-            'role'{
-                # Resources are deployed according to the resource order
-                # in the Build regardless of site
-                for ($RoleCount = 1; $RoleCount -le $RoleOrder.count; $RoleCount++){
+
+            if($BuildRole -is [array]){
+                throw "Multiple Roles in the Build with order $RoleCount"
+            }
+            elseif($null -eq $BuildRole){
+                throw "No Roles in the Build with order $RoleCount"
+            }
+
+            $BuildRoleName = $BuildRole.Role
+
+            Remove-Variable -Name 'CurrentSiteAndConfopResources' -ErrorAction Ignore
+            foreach($Site in $Sites){
+                
+                $CurrentSiteAndConfopResources = @()
+                $This.Resources | foreach-Object{
+                    if(($_.Network.Site -eq $Site) -and ($_.Role -eq $BuildRoleName)){
+                        $CurrentSiteAndConfopResources += $_
+                    }
             
-                    Remove-Variable -Name BuildRole -ErrorAction Ignore
-                   
-                    $BuildRole = $RoleOrder | Where-Object{
-                        $_.order -eq $RoleCount
-                    }
-        
-                    if($BuildRole -is [array]){
-                        throw "Multiple Roles in the Build with order $RoleCount"
-                    }
-                    elseif($null -eq $BuildRole){
-                        throw "No Roles in the Build with order $RoleCount"
-                    }
-
-                    $BuildRoleName = $BuildRole.Role
-
-                    Remove-Variable -Name 'CurrentSiteAndConfopResources' -ErrorAction Ignore
-                    foreach($Site in $Sites){
-                        
-                        $CurrentSiteAndConfopResources = @()
-                        $This.Resources | foreach-Object{
-                            if(($_.Network.Site -eq $Site) -and ($_.Role -eq $BuildRoleName)){
-                                $CurrentSiteAndConfopResources += $_
-                            }
-                    
-                        }
-                        if($CurrentSiteAndConfopResources){
-                            # Multiple resources of the same Role at the same site will be ordered alphabetically by name
-                            $CurrentSiteAndConfopResources = $CurrentSiteAndConfopResources | Sort-Object -Property Name
-                            foreach($CurrentSiteAndConfopResource in $CurrentSiteAndConfopResources){
-                                $ResourceCount++
-                                $CurrentSiteAndConfopResource.ResourceOrder =  $ResourceCount 
-                                $ResolvedResources += $CurrentSiteAndConfopResource
-                            }
-                        }  
+                }
+                if($CurrentSiteAndConfopResources){
+                    # Multiple resources of the same Role will be ordered alphabetically by name
+                    $CurrentSiteAndConfopResources = $CurrentSiteAndConfopResources | Sort-Object -Property Name
+                    foreach($CurrentSiteAndConfopResource in $CurrentSiteAndConfopResources){
+                        $ResourceCount++
+                        $CurrentSiteAndConfopResource.ResourceOrder =  $ResourceCount 
+                        $ResolvedResources += $CurrentSiteAndConfopResource
                     }
                 }  
             }
-        }  
+        }
     }
 
     [Void] Save ($ResourcesFile,$Archive,$ArchiveFolder){
