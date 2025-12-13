@@ -366,12 +366,21 @@ class Plan{
 
     [Void] hidden AddActionOrder(){
         if(($This.Actions).count -gt 1){
-            [ArrayList]$This.Actions = [ArrayList]$This.Actions | Sort-Object -Property Action_Guid
+            # Sort by Action_Guid which now has simple integer prefix
+            [ArrayList]$This.Actions = [ArrayList]($This.Actions | Sort-Object -Property Action_Guid)
         }
+        
+        # Assign sequential ActionOrder based on sorted position
         $ActionCount = 0
         $This.Actions.foreach({
             $ActionCount++
             $_.ActionOrder = $ActionCount
+            
+            # Ensure Action_Guid reflects the current order
+            if($_.Action_Guid -match '^\d+-(.+)$'){
+                $GuidPart = $Matches[1]
+                $_.Action_Guid = "{0:D8}-{1}" -f $ActionCount, $GuidPart
+            }
         })
         $This.UnresolvedActions = $false
     }
@@ -568,52 +577,52 @@ class Plan{
     
     [string] ResolveActionGuid($DependencyGuid,$ActionGuid){
         try{
-            $DependencyAction = $null
-            $DependencyAction = [ArrayList]::New()
-            $DependecyActionCount = 0 
-            $DashActualGuidPart = $ActionGuid.SubString(12)
-            $This.Actions.foreach({
-                if($DependencyGuid -eq $_.Action_Guid){
-                    $DependencyAction.Add($_)
-                    $DependecyActionCount++
-                }
-            })
+            # Find the dependency action
+            $DependencyAction = $This.Actions | Where-Object { $_.Action_Guid -eq $DependencyGuid }
+            
             if($null -eq $DependencyAction){
-                throw "Unable to find Dependency Action"
+                throw "Unable to find Dependency Action with GUID: $DependencyGuid"
             }
-            if($DependecyActionCount -ne 1){
-                throw "Multiple Dependency Actions found"
+            if(@($DependencyAction).Count -ne 1){
+                throw "Multiple Dependency Actions found with GUID: $DependencyGuid"
             }
-            $DependencyActionOrderPart = ($DependencyAction.Action_Guid).SubString(0,12)
-            $AvailableActionOrderPart = $This.GetAvailableActionGuid($DependencyActionOrderPart)
-            $AvailableGuid = $AvailableActionOrderPart + $DashActualGuidPart
-            return $AvailableGuid
+            
+            # Get the next available order position after the dependency
+            # We need to insert after the dependency action's order
+            $InsertAfterOrder = $DependencyAction.ActionOrder
+            
+            # Generate a new unique GUID for this action
+            # Keep the original GUID's unique part, just change the ordering prefix
+            $GuidPart = $ActionGuid.Split('-', 2)[1]
+            $NewActionGuid = "{0:D8}-{1}" -f ($InsertAfterOrder + 1), $GuidPart
+            
+            return $NewActionGuid
         }
         catch{
             throw $_
         }
     }
 
-    [string] GetAvailableActionGuid($OrderPart){
+    [Void] IncrementActionOrdersFrom([int]$StartingOrder){
+        <#
+            When inserting an action at a specific order position, we need to increment
+            all actions at or after that position to make room.
+        #>
         try{
-            $ActionOrderPart = ''
-            # The OrderPart is a string like 000 0000. We must keep the 00020005 and increase the 0000-part
-            # one by one and test all actions one by one to see if that order-part is available or in use
-            $DependentActionOrderPart = $OrderPart.SubString(0,8)
-            :ActionLoop for ($Count = 1; $Count -lt 9999; $Count++){
-                $ActionGuidMatch = $DependentActionOrderPart + ('{0:d4}' -f $Count)
-                $MatchFound = $false
-                $This.Actions.foreach({
-                    if($_.Action_Guid -Match "^$ActionGuidMatch"){
-                        $MatchFound = $true
-                    }
-                })
-                if($MatchFound -eq $false){
-                    $ActionOrderPart = $ActionGuidMatch
-                    Break ActionLoop
+            $ActionsToIncrement = $This.Actions | Where-Object { 
+                $null -ne $_.ActionOrder -and $_.ActionOrder -ge $StartingOrder 
+            } | Sort-Object -Property ActionOrder -Descending
+            
+            foreach($Action in $ActionsToIncrement){
+                $OldOrder = $Action.ActionOrder
+                $Action.ActionOrder = $OldOrder + 1
+                
+                # Update the Action_Guid to reflect new order
+                if($Action.Action_Guid -match '^(\d+)-(.+)$'){
+                    $GuidPart = $Matches[2]
+                    $Action.Action_Guid = "{0:D8}-{1}" -f $Action.ActionOrder, $GuidPart
                 }
             }
-            return $ActionOrderPart
         }
         catch{
             throw $_
