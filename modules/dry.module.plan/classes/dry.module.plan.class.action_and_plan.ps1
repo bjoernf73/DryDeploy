@@ -340,24 +340,35 @@ class Plan{
 
     [Void] hidden ResolveUnresolvedActions(){
         try{
+            ol v "Resolving $($This.UnresolvedActionsList.Count) unresolved (chained) actions"
             $This.UnresolvedActionsList = @($This.UnresolvedActionsList | Sort-Object -Property Action_Guid)
 
             # Get each Action in Plan that the Unresolved (chained) Action depends on
             $This.UnresolvedActionsList.foreach({
                 $DependencyGuid       = $_.Chained_Guid
                 $ActionGuid           = $_.Action_Guid
+                ol v "Resolving chained action: Role='$($_.Role)' Action='$($_.Action)' Resource='$($_.ResourceName)'"
+                ol v "Dependency GUID: $DependencyGuid"
+                ol v "Action GUID: $ActionGuid"
+                
                 $DependentActionGuids = $This.GetEveryDependencyActionGuid($_.Chained_Guid)
 
                 if($DependentActionGuids.Count -eq 0){
+                    ol e "Unable to find Dependent Action with Guid matching $DependencyGuid"
+                    ol e "Available actions in plan: $($This.Actions.Count)"
                     throw "Unable to find Dependent Action with Guid matching $DependencyGuid"
                 }
+                
+                ol v "Found $($DependentActionGuids.Count) dependent action(s)"
                 foreach($DependentActionGuid in $DependentActionGuids){
                     # get the action guid
                     $InstanceActionGuid = $This.ResolveActionGuid($DependentActionGuid,$ActionGuid) 
+                    ol v "Creating instance with GUID: $InstanceActionGuid"
                     $This.Actions.Add([DryAction]::New($_,$InstanceActionGuid))
                 }
             })
             $This.UnresolvedActionsList = [ArrayList]::New()
+            ol v "All unresolved actions have been resolved"
         }
         catch{
             throw $_
@@ -365,12 +376,16 @@ class Plan{
     }
 
     [Void] hidden AddActionOrder(){
+        ol v "Finalizing action order for $($This.Actions.Count) actions"
+        
         if(($This.Actions).count -gt 1){
             # Sort by Action_Guid which now has simple integer prefix
+            ol v "Sorting actions by Action_Guid"
             [ArrayList]$This.Actions = [ArrayList]($This.Actions | Sort-Object -Property Action_Guid)
         }
         
         # Assign sequential ActionOrder based on sorted position
+        ol v "Assigning sequential ActionOrder and normalizing Action_Guids"
         $ActionCount = 0
         $This.Actions.foreach({
             $ActionCount++
@@ -383,6 +398,7 @@ class Plan{
             }
         })
         $This.UnresolvedActions = $false
+        ol v "Action ordering complete. All $ActionCount actions have sequential order."
     }
 
     [Void] ResolvePlanOrder($PlanFile){
@@ -528,13 +544,42 @@ class Plan{
 
     [String[]] GetEveryDependencyActionGuid (
         [string]$DependencyGuid){
+        <#
+            This overload is used for chained dependencies where we need to find
+            all instances of an action across multiple resources. With the new format,
+            we match by the GUID part (after the dash), not the order prefix.
+        #>
         $EveryDependencyActionGuid = $null
         $EveryDependencyActionGuid = @()
-        $This.Actions.foreach({
-            if($_.Action_Guid -match "$DependencyGuid$"){
-                $EveryDependencyActionGuid += $_.Action_Guid
-            }
-        })
+        
+        ol v "Searching for actions matching dependency GUID: $DependencyGuid"
+        
+        # Extract the GUID part from the DependencyGuid (everything after the dash)
+        if($DependencyGuid -match '^(\d+)-(.+)$'){
+            $GuidPart = $Matches[2]
+            ol v "Extracted GUID part: $GuidPart"
+            ol v "Searching $($This.Actions.Count) actions for matching GUID part"
+            
+            $This.Actions.foreach({
+                # Match actions that have the same GUID part
+                if($_.Action_Guid -match "-$([regex]::Escape($GuidPart))$"){
+                    ol v "Found match: $($_.Action_Guid) (Role: $($_.Role), Action: $($_.Action))"
+                    $EveryDependencyActionGuid += $_.Action_Guid
+                }
+            })
+        }
+        else{
+            ol v "Using fallback matching (old format or direct GUID)"
+            # Fallback for old format or direct GUID matching
+            $This.Actions.foreach({
+                if($_.Action_Guid -match "$DependencyGuid$"){
+                    ol v "Found match: $($_.Action_Guid)"
+                    $EveryDependencyActionGuid += $_.Action_Guid
+                }
+            })
+        }
+        
+        ol v "Found $($EveryDependencyActionGuid.Count) total match(es)"
         return $EveryDependencyActionGuid
     }
 
@@ -577,25 +622,35 @@ class Plan{
     
     [string] ResolveActionGuid($DependencyGuid,$ActionGuid){
         try{
+            ol v "Resolving Action GUID after dependency"
+            ol v "Dependency GUID: $DependencyGuid"
+            ol v "Original Action GUID: $ActionGuid"
+            
             # Find the dependency action
             $DependencyAction = $This.Actions | Where-Object { $_.Action_Guid -eq $DependencyGuid }
             
             if($null -eq $DependencyAction){
+                ol e "Unable to find Dependency Action with GUID: $DependencyGuid"
+                ol e "Available actions count: $($This.Actions.Count)"
                 throw "Unable to find Dependency Action with GUID: $DependencyGuid"
             }
             if(@($DependencyAction).Count -ne 1){
+                ol e "Multiple Dependency Actions found with GUID: $DependencyGuid (Count: $(@($DependencyAction).Count))"
                 throw "Multiple Dependency Actions found with GUID: $DependencyGuid"
             }
             
             # Get the next available order position after the dependency
             # We need to insert after the dependency action's order
             $InsertAfterOrder = $DependencyAction.ActionOrder
+            ol v "Dependency is at order position: $InsertAfterOrder"
+            ol v "New action will be inserted at position: $($InsertAfterOrder + 1)"
             
             # Generate a new unique GUID for this action
             # Keep the original GUID's unique part, just change the ordering prefix
             $GuidPart = $ActionGuid.Split('-', 2)[1]
             $NewActionGuid = "{0:D8}-{1}" -f ($InsertAfterOrder + 1), $GuidPart
             
+            ol v "New Action GUID: $NewActionGuid"
             return $NewActionGuid
         }
         catch{
