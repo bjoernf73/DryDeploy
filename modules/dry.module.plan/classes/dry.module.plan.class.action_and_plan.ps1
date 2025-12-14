@@ -279,14 +279,32 @@ class Plan{
                 # multiple other Actions because of an explicit dependency. If that is the
                 # case, create an independent Action for for each dependency 
                 if($Action.Dependency_Guids){
+                    # Extract the GUID part from the original Action_Guid to reuse for all instances
+                    if($CurrentAction.Action_Guid -match '^(\d+)-(.+)$'){
+                        $OriginalOrderPrefix = $Matches[1]
+                        $SharedGuidPart = $Matches[2]
+                    }
+                    else{
+                        throw "Invalid Action_Guid format: $($CurrentAction.Action_Guid)"
+                    }
+                    
+                    $InstanceCount = 0
                     foreach($Dependency_Guid in $Action.Dependency_Guids){
+                        $InstanceCount++
+                        
+                        # All instances share the same GUID part (so chained actions can find them all)
+                        # But give each a unique temporary order prefix to ensure deterministic sorting
+                        # Use a very high number plus instance count to avoid collisions
+                        $TempOrderPrefix = 99900000 + $InstanceCount
+                        $UniqueActionGuid = "{0:D8}-{1}" -f $TempOrderPrefix, $SharedGuidPart
+                        
                         $Action = [DryAction]::New(
                             $CurrentAction,
                             $CurrentResource,
                             $Resources,
                             $This,
                             $Dependency_Guid,
-                            $CurrentAction.Action_Guid
+                            $UniqueActionGuid
                         )
                         $This.Actions.Add($Action)
                     }
@@ -351,19 +369,43 @@ class Plan{
                 ol v "Dependency GUID: $DependencyGuid"
                 ol v "Action GUID: $ActionGuid"
                 
+                # For chained actions, we need to find the previous action by GUID part
+                # because the previous action may have had its Action_Guid modified by ResolveActionGuid
                 $DependentActionGuids = $This.GetEveryDependencyActionGuid($_.Chained_Guid)
 
                 if($DependentActionGuids.Count -eq 0){
                     ol e "Unable to find Dependent Action with Guid matching $DependencyGuid"
                     ol e "Available actions in plan: $($This.Actions.Count)"
+                    ol e "Searching for GUID part in existing actions..."
+                    # Debug: show what GUIDs are in the plan
+                    $This.Actions | ForEach-Object { ol e "  Available: $($_.Action_Guid) - $($_.Role) / $($_.Action)" }
                     throw "Unable to find Dependent Action with Guid matching $DependencyGuid"
                 }
                 
                 ol v "Found $($DependentActionGuids.Count) dependent action(s)"
+                
+                # For chained dependencies, create one instance after EACH occurrence
+                # Extract the GUID part to reuse for all instances
+                if($ActionGuid -match '^(\d+)-(.+)$'){
+                    $OriginalOrderPrefix = $Matches[1]
+                    $SharedGuidPart = $Matches[2]
+                }
+                else{
+                    throw "Invalid Action_Guid format for chained action: $ActionGuid"
+                }
+                
+                $InstanceCount = 0
                 foreach($DependentActionGuid in $DependentActionGuids){
+                    $InstanceCount++
+                    
+                    # All instances share the same GUID part (so subsequent chains can find them)
+                    # Use a unique temporary order prefix to ensure deterministic sorting
+                    $TempOrderPrefix = 99900000 + $InstanceCount
+                    $UniqueActionGuid = "{0:D8}-{1}" -f $TempOrderPrefix, $SharedGuidPart
+                    
                     # get the action guid
-                    $InstanceActionGuid = $This.ResolveActionGuid($DependentActionGuid,$ActionGuid) 
-                    ol v "Creating instance with GUID: $InstanceActionGuid"
+                    $InstanceActionGuid = $This.ResolveActionGuid($DependentActionGuid,$UniqueActionGuid) 
+                    ol v "Creating chained instance $InstanceCount with GUID: $InstanceActionGuid"
                     $This.Actions.Add([DryAction]::New($_,$InstanceActionGuid))
                 }
             })
@@ -639,16 +681,78 @@ class Plan{
                 throw "Multiple Dependency Actions found with GUID: $DependencyGuid"
             }
             
-            # Get the next available order position after the dependency
-            # We need to insert after the dependency action's order
-            $InsertAfterOrder = $DependencyAction.ActionOrder
-            ol v "Dependency is at order position: $InsertAfterOrder"
+            # Extract the order from the dependency's Action_Guid (not from ActionOrder property which isn't set yet)
+            # During initial plan construction, ActionOrder is null/0, but the Action_Guid has the order encoded
+            if($DependencyAction.Action_Guid -match '^(\d+)-'){
+                $DependencyOrder = [int]$Matches[1]
+            }
+            else{
+                throw "Unable to extract order from Dependency Action_Guid: $($DependencyAction.Action_Guid)"
+            }
+            
+            # Find the next available position after the dependency
+            # Check all existing actions to find the highest order that's greater than dependency
+            $InsertAfterOrder = $DependencyOrder
+            
+            # Get all actions that depend on this SPECIFIC dependency
+            # (not just any actions that happen to be positioned after it)
+            # This ensures we stack multiple actions that depend on the SAME dependency sequentially
+            $ActionsAfterThisDependency = $This.Actions | Where-Object {
+                # Only consider actions that actually depend on this specific dependency
+                if($_.Dependency_Guid -eq $DependencyGuid -and $_.Action_Guid -match '^(\d+)-'){
+                    $ThisOrder = [int]$Matches[1]
+                    # Exclude temporary high prefixes (> 99000000)
+                    return ($ThisOrder -lt 99000000)
+                }
+                return $false
+            }
+            
+            if($ActionsAfterThisDependency){
+                # Find the highest order among actions that depend on this same dependency
+                $HighestAfterOrder = [int](($ActionsAfterThisDependency | ForEach-Object {
+                    if($_.Action_Guid -match '^(\d+)-'){ [int]$Matches[1] }
+                } | Measure-Object -Maximum).Maximum)
+                
+                $InsertAfterOrder = $HighestAfterOrder
+            }
+            
+            ol v "Dependency is at order position: $DependencyOrder (from Action_Guid)"
+            ol v "Inserting after position: $InsertAfterOrder"
             ol v "New action will be inserted at position: $($InsertAfterOrder + 1)"
+            
+            # Increment all actions at position (InsertAfterOrder + 1) and beyond to make room
+            $InsertPosition = $InsertAfterOrder + 1
+            $ActionsToIncrement = $This.Actions | Where-Object {
+                if($_.Action_Guid -match '^(\d+)-'){
+                    $ThisOrder = [int]$Matches[1]
+                    # Increment actions at or after our insertion point
+                    # Exclude temporary high prefixes (>= 99000000)
+                    return ($ThisOrder -ge $InsertPosition -and $ThisOrder -lt 99000000)
+                }
+                return $false
+            }
+            
+            if($ActionsToIncrement){
+                ol v "Incrementing $(@($ActionsToIncrement).Count) existing action(s) to make room for insertion"
+                $ActionsToIncrement | ForEach-Object {
+                    if($_.Action_Guid -match '^(\d+)-(.+)$'){
+                        $CurrentOrder = [int]$Matches[1]
+                        $CurrentGuidPart = $Matches[2]
+                        $NewOrder = $CurrentOrder + 1
+                        $_.Action_Guid = '{0:d8}-{1}' -f $NewOrder, $CurrentGuidPart
+                        ol v "  Incremented action from position $CurrentOrder to $NewOrder"
+                    }
+                }
+            }
             
             # Generate a new unique GUID for this action
             # Keep the original GUID's unique part, just change the ordering prefix
-            $GuidPart = $ActionGuid.Split('-', 2)[1]
-            $NewActionGuid = "{0:D8}-{1}" -f ($InsertAfterOrder + 1), $GuidPart
+            if($ActionGuid -notmatch '^(\d+)-(.+)$'){
+                throw "Invalid ActionGuid format: $ActionGuid (expected format: 00000001-guid)"
+            }
+            $GuidPart = $Matches[2]
+            ol v "The GUID part is: $GuidPart"
+            $NewActionGuid = '{0:d8}-{1}' -f $InsertPosition, $GuidPart
             
             ol v "New Action GUID: $NewActionGuid"
             return $NewActionGuid
