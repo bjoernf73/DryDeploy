@@ -1,5 +1,5 @@
 try{
-    $Script = "$PSScriptRoot\DryDeploy.ps1"
+    $Script = "$PSScriptRoot\functions\DryDeploy.ps1"
     $README = "$PSScriptRoot\README.md"
     $Folder = "$PSScriptRoot\590bfb52\"
     $File   = "$Folder\DryDeploy.ps1.md"

@@ -347,6 +347,7 @@ $Config = .\DryDeploy.ps1 -GetConfig
 Returns the configuration object, and assigns it to the variable 
 '$Config' so you may inspect it's content 'offline' 
 #>
+function DryDeploy {
 [CmdLetBinding(DefaultParameterSetName='ShowPlan')]
 param( 
     [Parameter(ParameterSetName='Github',
@@ -395,7 +396,7 @@ param(
     [Parameter(ParameterSetName='Apply',
     HelpMessage='Array of one or more Actions to include. All others 
     are excluded. If not specified, all actions are included')]
-    [ArgumentCompleter({(Get-ChildItem -Path ".\actions\*" | 
+    [ArgumentCompleter({(Get-ChildItem -Path "$PSScriptRoot\..\actions\*" | 
         Select-Object -ExpandProperty Name) | 
         foreach-Object{ $_ -Replace "^dry\.action\.",''}})]
     [String[]]
@@ -407,7 +408,7 @@ param(
     [Parameter(ParameterSetName='Apply',
     HelpMessage='Array of one or more Actions to exclude. All others 
     are included. If not specified, no actions are excluded')]
-    [ArgumentCompleter({(Get-ChildItem -Path ".\actions\*" | 
+    [ArgumentCompleter({(Get-ChildItem -Path "$PSScriptRoot\..\actions\*" | 
         Select-Object -ExpandProperty Name) | 
         foreach-Object{ $_ -Replace "^dry\.action\.",''}})]
     [String[]]
@@ -690,8 +691,8 @@ function Get-DryPlatform{
             Slash                   = &{switch($PSPlatform){'Win32NT'{return '\'} 'Unix'{return '/'}}}
             Separator               = &{switch($PSPlatform){'Win32NT'{return ';'} 'Unix'{return ':'}}}
             LocalModulesDirectories = @(
-                ([IO.Path]::GetFullPath("$(Join-Path -Path $ScriptPath -ChildPath 'modules')")),
-                ([IO.Path]::GetFullPath("$(Join-Path -Path $ScriptPath -ChildPath 'actions')"))
+                ([IO.Path]::GetFullPath("$(Join-Path -Path (Split-Path -Path $ScriptPath -Parent) -ChildPath 'modules')")),
+                ([IO.Path]::GetFullPath("$(Join-Path -Path (Split-Path -Path $ScriptPath -Parent) -ChildPath 'actions')"))
             )
             RootWorkingDirectory    =  &{switch($PSPlatform){
                 'Win32NT'{return (Join-Path -Path "$($env:UserProfile)" -ChildPath 'DryDeploy')} 
@@ -1603,4 +1604,5 @@ finally{
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
     Get-Variable -Scope Local | Where-Object{$_.Name -match '^dry_var_*'} | Remove-Variable -Scope Local -Force
     Get-Variable -Scope Global | Where-Object{$_.Name -match '^dry_var_*'} | Remove-Variable -Scope Global -Force
+}
 }
