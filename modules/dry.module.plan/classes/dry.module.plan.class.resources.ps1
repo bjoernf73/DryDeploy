@@ -227,40 +227,50 @@ class Resources{
     }
 
     [Void] AddActionGuids (){
+        # Generate Action_Guids with simple sequential ordering
+        $GlobalActionOrder = 0
         $This.Resources.foreach({
-            $ResourceOrder = $_.ResourceOrder
             foreach($Action in $_.ActionOrder){
-                $ActionOrder = $Action.order
-                $Action | Add-Member -MemberType NoteProperty -Name 'Action_Guid' -Value ($This.NewActionGuid($ResourceOrder,$ActionOrder))
+                $GlobalActionOrder++
+                # Format: simple integer order + unique GUID
+                # Example: 00000001-guid, 00000002-guid, etc.
+                $Action | Add-Member -MemberType NoteProperty -Name 'Action_Guid' -Value ($This.NewActionGuid($GlobalActionOrder))
             }
         })
     } 
 
-    [string] NewActionGuid([int]$ResourceOrder,[int]$ActionOrder){ 
-        return [string]('{0:d4}' -f $ResourceOrder) + [string]('{0:d4}' -f $ActionOrder) + '0000-' + ((New-Guid).Guid)
+    [string] NewActionGuid([int]$GlobalOrder){ 
+        # Simplified format: 8-digit order number + GUID
+        return "{0:D8}-{1}" -f $GlobalOrder, ((New-Guid).Guid)
     }
 
 
     [string] GetPreviuosDependencyActionGuid (
         [string]$Action_Guid 
     ){
-        [int]$ResourceOrder = $Action_Guid.Substring(0,4)
-        [int]$ActionOrder = $Action_Guid.Substring(4,4)
-        $ActionOrder--
-        $Resource = $This.Resources | Where-Object{ 
-            $_.ResourceOrder -eq $ResourceOrder
+        # Extract the order number from the Action_Guid (format: 00000005-guid)
+        if($Action_Guid -match '^(\d+)-'){
+            [int]$CurrentOrder = [int]$Matches[1]
+            $PreviousOrder = $CurrentOrder - 1
+            
+            if($PreviousOrder -lt 1){
+                throw "Unable to find previous Action - current action is first (Order: $CurrentOrder)"
+            }
+            
+            # Find the action with the previous order by searching through resources
+            foreach($Resource in $This.Resources){
+                foreach($Action in $Resource.ActionOrder){
+                    if($Action.Action_Guid -match "^{0:D8}-" -f $PreviousOrder){
+                        return $Action.Action_Guid
+                    }
+                }
+            }
+            
+            throw "Unable to find previous Action with Order $PreviousOrder"
         }
-        $Action = $Resource.ActionOrder | Where-Object{
-            $_.Order -eq $ActionOrder
+        else{
+            throw "Invalid Action_Guid format: $Action_Guid"
         }
-
-        if($null -eq $Action){
-            throw "Unable to find previous Action (Resource: $ResourceOrder, Action $ActionOrder)"
-        }
-
-        # Only return the GUID-part - that will be matched to the previous Action
-        # when that Action eventually get's into to Plan
-        return ($Action.Action_Guid).SubString(12)
     }
 
     # Find first Action in plan and return true if it matches $ActionSpec

@@ -1,0 +1,118 @@
+{ 
+    "build":
+    {
+        "order_type": "role",
+        "roles": 
+        [
+            {
+                "role": "dc-domctrl-froot", "order": 1, "actions": 
+                [
+                    { "action": "terra.run",  "order": 1,                     "description": "Clones Template + OS customization",  "credentials":  { "credential1": "vcenter-admin", "credential2": "local-admin"  }},
+                    { "action": "dsc.run",    "order": 2,  "source": "base",  "description": "OS Base Config",                      "credentials":  { "credential1": "local-admin"}},
+                    { "action": "dsc.run",    "order": 3,  "phase": 1,        "description": "Deploys ADDS Forest (first DC)",      "credentials":  { "credential1": "local-admin", "credential2": "domain-admin", "credential3": "safemode-admin"}},
+                    { "action": "win.reboot", "order": 4,  "phase": 1,        "description": "Restarts computer",                   "credentials":  { "credential1": "domain-admin"          }},
+                    { "action": "dsc.run",    "order": 5,  "phase": 2,        "description": "Configure DFS Namespace",             "credentials":  { "credential1": "domain-admin"          }},
+                    { "action": "ad.import",  "order": 6,                     "description": "Configures AD objects",               "credentials":  { "credential1": "domain-admin"          }},
+                    { "action": "win.reboot", "order": 7,  "phase": 2,        "description": "Restarts 2 times with gpupdate",      "credentials":  { "credential1": "domain-admin"          }}
+                ]
+            },
+            {
+                "role": "dc-domctrl-froot-nosec", "order": 2, "actions": 
+                [
+                    { "action": "terra.run",  "order": 1,                     "description": "Clones Template + OS customization",  "credentials":  { "credential1": "vcenter-admin", "credential2": "local-admin"  }},
+                    { "action": "dsc.run",    "order": 2,  "source": "base",  "description": "OS Base Config",                      "credentials":  { "credential1": "local-admin"}},
+                    { "action": "dsc.run",    "order": 3,  "phase": 1,        "description": "Deploys ADDS Forest (first DC)",      "credentials":  { "credential1": "local-admin", "credential2": "domain-admin", "credential3": "safemode-admin"}},
+                    { "action": "win.reboot", "order": 4,  "phase": 1,        "description": "Restarts computer",                   "credentials":  { "credential1": "domain-admin"          }},
+                    { "action": "dsc.run",    "order": 5,  "phase": 2,        "description": "Configure DFS Namespace",             "credentials":  { "credential1": "domain-admin"          }},
+                    { "action": "ad.import",  "order": 6,                     "description": "Configures AD objects",               "credentials":  { "credential1": "domain-admin"          }},
+                    { "action": "win.reboot", "order": 7,  "phase": 2,        "description": "Restarts 2 times with gpupdate",      "credentials":  { "credential1": "domain-admin"          }}
+                ]
+            },
+            {   
+                "role": "dc-domctrl-add", "order": 3, "actions": 
+                [
+                    { "action": "terra.run",  "order": 1,                     "description": "Clones Template + OS customization",   "credentials":  { "credential1": "vcenter-admin",  "credential2": "local-admin",  "credential3": "domain-admin" }},
+                    { "action": "dsc.run",    "order": 2,  "source": "base",  "description": "OS Base Config",                       "credentials":  { "credential1": "local-admin"}},
+                    { "action": "dsc.run",    "order": 3,  "phase": 1,        "description": "Ensures sites in place before promo",  "credentials":  { "credential1": "domain-admin",   "credential2": "domain-admin"         }},
+                    { "action": "dsc.run",    "order": 4,  "phase": 2,        "description": "Deploys ADDS (additional DC)",         "credentials":  { "credential1": "domain-admin",   "credential2": "domain-admin",        "credential3": "safemode-admin"  }},
+                    { "action": "dsc.run",    "order": 5,  "phase": 3,        "description": "Configure DFS Namespace",              "credentials":  { "credential1": "domain-admin",   "credential2": "domain-admin"         }},
+                    { "action": "win.reboot", "order": 6,                     "description": "Restarts and gpupdate",                "credentials":  { "credential1": "domain-admin"    }}
+                ]
+            },
+            {
+                "role": "ca-certauth-root", "order": 4, "actions": 
+                [
+                    { "action": "terra.run",  "order": 1,                     "description": "Clones Template + OS customization",   "credentials":  { "credential1": "vcenter-admin",        "credential2": "local-admin"   }},
+                    { "action": "dsc.run",    "order": 2,  "source": "base",  "description": "OS Base Config",                       "credentials":  { "credential1": "local-admin"}},
+                    { "action": "dsc.run",    "order": 3,  "phase": 1,        "description": "Deploys Standalone Root CA",           "credentials":  { "credential1": "local-admin",   "credential2": "local-admin"   }},
+                    { "action": "dsc.run",    "order": 4,  "phase": 2,        "description": "Adds DNS record for Root CA to DNS",   "credentials":  { "credential1": "domain-admin",         "credential2": "domain-admin"         }},
+                    { "action": "win.reboot", "order": 5,                     "description": "Restarts and gpupdates",               "credentials":  { "credential1": "local-admin"    }},
+                    { "action": "dsc.run",    "order": 6,  "phase": 3,        "description": "Downloads CertReq, sign+issue Sub CA", "credentials":  { "credential1": "local-admin",   "credential2": "local-admin"   }, 
+                        "depends_on": {
+                            "role": "ca-certauth-iss", "dependency_type": "every", "dependency_numbered_action": 0, "action": "dsc.run", "phase": 1 
+                        }
+                    },
+                    { "action": "win.reboot", "order": 7,               "description": "Restart and gpupdate",                 "credentials":  { "credential1": "local-admin" },
+                        "depends_on": {  
+                            "dependency_type": "chained" 
+                        }
+                    }
+                ]
+            },
+            {
+                "role": "ca-certauth-iss", "order": 5, "actions": 
+                [
+                    { "action": "ad.import",   "order": 1,  "source": "base", "description": "Configures Base AD objects",           "credentials":  { "credential1": "domain-admin"       }},
+                    { "action": "ad.import",   "order": 2,  "phase": 1,       "description": "CA-specific AD objects",               "credentials":  { "credential1": "domain-admin"       }},
+                    { "action": "terra.run",   "order": 3,                    "description": "Clones Template + OS customization",   "credentials":  { "credential1": "vcenter-admin",     "credential2": "local-admin",  "credential3": "domain-admin"  }},
+                    { "action": "dsc.run",     "order": 4,  "source": "base", "description": "OS Base Config",                       "credentials":  { "credential1": "domain-admin"}},
+                    { "action": "ad.move",     "order": 5,                    "description": "Moves AD computer object to role OU",  "credentials":  { "credential1": "domain-admin"       }},
+                    { "action": "win.reboot",  "order": 6,                    "description": "Restart and gpupdate",                 "credentials":  { "credential1": "domain-admin",      "credential2": "Deploy-CA-Admin"                                     }},
+                    { "action": "dsc.run",     "order": 7,  "phase": 1,       "description": "Deploys Enterprise SubCA",             "credentials":  { "credential1": "Deploy-CA-Admin",   "credential2": "Deploy-CA-Admin"                                     }},
+                    { "action": "dsc.run",     "order": 8,  "phase": 2,       "description": "Fetches signed CA cert + Config CA",   "credentials":  { "credential1": "Deploy-CA-Admin",   "credential2": "Deploy-CA-Admin"                                     }},
+                    { "action": "ad.import",   "order": 9,  "phase": 2,       "description": "ACL on Certificate Templates",         "credentials":  { "credential1": "domain-admin"       }},
+                    { "action": "dsc.run",     "order": 10, "phase": 3,       "description": "Configures OCSP (Online Responder)",   "credentials":  { "credential1": "Deploy-CA-Admin",   "credential2": "Deploy-CA-Admin"                                     }},
+                    { "action": "ad.import",   "order": 11, "phase": 3,       "description": "Certificate GPO",                      "credentials":  { "credential1": "domain-admin"       }},
+                    { "action": "packer.run",  "order": 12, "phase": 1,       "description": "Imports and Publishes cert templates", "credentials":  { "credential1": "Deploy-CA-Admin"    }},
+                    { "action": "packer.run",  "order": 13, "phase": 2,       "description": "Config Online Responder Revocation",   "credentials":  { "credential1": "Deploy-CA-Admin"    }}
+                ]
+            },
+            {
+                "role": "ca-certauth-12r2-rootissuing",
+                "order": 6,
+                "actions": 
+                [
+                    {  "action": "ad.import",  "order": 1,  "source": "base", "description": "Config AD from base",                   "credentials": { "credential1": "domain-admin"}},
+                    {  "action": "ad.import",  "order": 2,  "phase": 1,       "description": "Config AD",                             "credentials": { "credential1": "domain-admin"}},
+                    {  "action": "terra.run",  "order": 3,                    "description": "Clones template and customizes",        "credentials": { "credential1": "vcenter-admin",    "credential2": "ws22-local-admin", "credential3": "domain-admin"}},
+                    {  "action": "ad.move",    "order": 4,                    "description": "Move to OU",                            "credentials": { "credential1": "domain-admin"}},
+                    {  "action": "win.reboot", "order": 5,  "phase": 1,       "description": "Restarts computer",                     "credentials": { "credential1": "domain-admin"}},
+                    {  "action": "dsc.run",    "order": 6,                    "description": "Deploys Enterprise Root CA",            "credentials": { "credential1": "domain-admin",     "credential2": "domain-admin"}},
+                    {  "action": "win.reboot", "order": 7,  "phase": 2,       "description": "Restarts computer",                     "credentials": { "credential1": "domain-admin"}},
+                    {  "action": "ad.import",  "order": 8,  "phase": 2,       "description": "Certificate Services groups",           "credentials": { "credential1": "domain-admin"}},
+                    {  "action": "packer.run", "order": 9,  "phase": 1,       "description": "Imports and Publish cert-templates",    "credentials": { "credential1": "domain-admin"}},
+                    {  "action": "packer.run", "order": 10, "phase": 2,       "description": "Config Online Responder Revocation",    "credentials": { "credential1": "domain-admin"}},
+                    {  "action": "ad.import",  "order": 11, "phase": 3,       "description": "Publish templates",                     "credentials": { "credential1": "domain-admin"}}
+                ]
+            },
+            {
+                "role": "adm-winclient",
+                "order": 7,
+                "actions": 
+                [ 
+                    { "action": "ad.import",  "order": 1,  "source": "base", "description": "AD Configuration from base",   "credentials":  { "credential1": "domain-admin"    }},
+                    { "action": "ad.import",  "order": 2,  "description": "Role GPO + Domain Admin membership",             "credentials":  { "credential1": "domain-admin"    }},
+                    { "action": "terra.run",  
+                        "order": 3,  "description": "Clones Template + OS customization",
+                        "credentials":  { "credential1": "vcenter-admin",  "credential2": "local-admin", "credential3": "domain-admin"  },
+                        "on_error": [ 
+                            { "action": "packer.run",  "phase": 1,  "description": "Get's content of sysprep logs", "credentials":  { "credential1": "local-admin" }}
+                        ]
+                    },
+                    { "action": "ad.move",    "order": 4,  "description": "Moves AD computer object to role OU",            "credentials":  { "credential1": "domain-admin"    }},
+                    { "action": "win.reboot", "order": 5,  "description": "Restarts computer + gpupdate",                   "credentials":  { "credential1": "domain-admin", "credential2": "domain-admin" }}
+                ]
+            }
+        ]	
+    }
+}
