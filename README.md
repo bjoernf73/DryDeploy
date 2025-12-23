@@ -1,12 +1,4 @@
----
-external help file: -help.xml
-Module Name:
-online version:
-schema: 2.0.0
----
-
-# DryDeploy.ps1
-
+![DryDeploy](./.img/DryDeploy.png)
 ## SYNOPSIS
 DryDeploy is a promiscuous deployment orchestrator - swinging among 
 available technologies. 
@@ -56,9 +48,9 @@ In DryDeploy,
 you run a simple command to change the EnvConfig, then you -Plan, 
 then you -Apply. 
 
-PS C:\DryDeploy\> .\DryDeploy.ps1 -Plan
+PS C:\DryDeploy\> DryDeploy -Plan
 
-PS C:\DryDeploy\> .\DryDeploy.ps1 -Apply
+PS C:\DryDeploy\> DryDeploy -Apply
 
 Go shopping while DryDeploy works through your build.
 Want it in a 
@@ -184,7 +176,7 @@ the order in which Actions of the Roles are deployed
 
 ### EXAMPLE 1
 ```
-.\DryDeploy.ps1 -Init
+DryDeploy -Init
 ```
 
 Will prepare your system for deployment.
@@ -195,7 +187,7 @@ if not
 
 ### EXAMPLE 2
 ```
-.\DryDeploy.ps1 -ModuleConfig ..\ModuleConfigs\MyModule -EnvConfig ..\EnvConfigs\MyEnvironment
+DryDeploy -ModuleConfig ..\ModuleConfigs\MyModule -EnvConfig ..\EnvConfigs\MyEnvironment
 ```
 
 Creates a configuration combination of a module configuration and
@@ -206,7 +198,7 @@ SetConfig parameterset again.
 
 ### EXAMPLE 3
 ```
-.\DryDeploy.ps1 -Plan
+DryDeploy -Plan
 ```
 
 Will create a full plan for all resources in the configuration that
@@ -214,14 +206,14 @@ is of a role that matches roles in your ModuleConfig
 
 ### EXAMPLE 4
 ```
-.\DryDeploy.ps1
+DryDeploy
 ```
 
 Displays the current Plan
 
 ### EXAMPLE 5
 ```
-.\DryDeploy.ps1 -Plan -Resources dc,ca
+DryDeploy -Plan -Resources dc,ca
 ```
 
 Creates a partial plan, containing only Resources whos name is 
@@ -229,7 +221,7 @@ or matches "dc*" or "ca*"
 
 ### EXAMPLE 6
 ```
-.\DryDeploy.ps1 -Plan -Resources dc,ca -Actions terra,ad
+DryDeploy -Plan -Resources dc,ca -Actions terra,ad
 ```
 
 Creates a partial plan, containing only Resources whos name is 
@@ -239,7 +231,7 @@ matches "terra*" (for instance "terra.run") or "ad*" (for instance
 
 ### EXAMPLE 7
 ```
-.\DryDeploy.ps1 -Plan -ExcludeResources DC,DB
+DryDeploy -Plan -ExcludeResources DC,DB
 ```
 
 Creates a partial plan, excluding any Resource whos name is or 
@@ -247,7 +239,7 @@ matches "DC*" or "DB*"
 
 ### EXAMPLE 8
 ```
-.\DryDeploy.ps1 -Resolve
+DryDeploy -Resolve
 ```
 
 Resolves all credentials, variables and options for each Action 
@@ -255,14 +247,14 @@ in the current plan, but does not actually invoke the Action
 
 ### EXAMPLE 9
 ```
-.\DryDeploy.ps1 -Apply
+DryDeploy -Apply
 ```
 
 Applies the current Plan.
 
 ### EXAMPLE 10
 ```
-.\DryDeploy.ps1 -Apply -Force
+DryDeploy -Apply -Force
 ```
 
 Applies the current Plan, destroying any resource with the same 
@@ -270,7 +262,7 @@ identity as the resource you are creating.
 
 ### EXAMPLE 11
 ```
-.\DryDeploy.ps1 -Apply -Resources ca002 -Actions ad.import
+DryDeploy -Apply -Resources ca002 -Actions ad.import
 ```
 
 Applies only actions of the Plan where the Resources name is or 
@@ -279,7 +271,7 @@ matches "ca002*", and the name of the Action that is or matches
 
 ### EXAMPLE 12
 ```
-$Config = .\DryDeploy.ps1 -GetConfig
+$Config = DryDeploy -GetConfig
 ```
 
 Returns the configuration object, and assigns it to the variable 
@@ -354,7 +346,7 @@ Those
 credentials are specified in the Plan by Aliases, for instance
 'local-admin' or 'domain-admin' or 'db-svc-user'.
 Run
-.\DryDeploy.ps1 -Resolve to resolve those Aliases into actual 
+DryDeploy -Resolve to resolve those Aliases into actual 
 credentials before you -Apply.
 If you don't, you may be 
 prompted at the beginning av each Action for which a credential

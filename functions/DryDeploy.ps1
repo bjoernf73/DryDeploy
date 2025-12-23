@@ -347,6 +347,7 @@ $Config = .\DryDeploy.ps1 -GetConfig
 Returns the configuration object, and assigns it to the variable 
 '$Config' so you may inspect it's content 'offline' 
 #>
+function DryDeploy {
 [CmdLetBinding(DefaultParameterSetName='ShowPlan')]
 param( 
     [Parameter(ParameterSetName='Github',
@@ -395,7 +396,7 @@ param(
     [Parameter(ParameterSetName='Apply',
     HelpMessage='Array of one or more Actions to include. All others 
     are excluded. If not specified, all actions are included')]
-    [ArgumentCompleter({(Get-ChildItem -Path ".\actions\*" | 
+    [ArgumentCompleter({(Get-ChildItem -Path "$PSScriptRoot\..\actions\*" | 
         Select-Object -ExpandProperty Name) | 
         foreach-Object{ $_ -Replace "^dry\.action\.",''}})]
     [String[]]
@@ -407,7 +408,7 @@ param(
     [Parameter(ParameterSetName='Apply',
     HelpMessage='Array of one or more Actions to exclude. All others 
     are included. If not specified, no actions are excluded')]
-    [ArgumentCompleter({(Get-ChildItem -Path ".\actions\*" | 
+    [ArgumentCompleter({(Get-ChildItem -Path "$PSScriptRoot\..\actions\*" | 
         Select-Object -ExpandProperty Name) | 
         foreach-Object{ $_ -Replace "^dry\.action\.",''}})]
     [String[]]
@@ -652,33 +653,11 @@ param(
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
 
 #region PreModulesFunctions
-function Get-DryScriptPath{
-    [CmdletBinding()]
-    param(
-    )
-    try{
-        if(($null -ne $PSScriptRoot) -And (Test-Path -Path $PSScriptRoot -ErrorAction 'Ignore')){
-            $PSScriptRoot
-        }
-        elseif(((Split-Path -Path $MyInvocation.MyCommand.Path) -match "^[a-zA-Z]\:\\") -or
-                ((Split-Path -Path $MyInvocation.MyCommand.Path) -match "^/")){
-            Split-Path -Path $MyInvocation.MyCommand.Path
-        }
-        else{
-            throw 'Unable to determine script path'
-        }
-    }
-    catch{
-        $PSCmdlet.ThrowTerminatingError($_)
-    }
-    finally{
-    }
-}
 
 function Get-DryPlatform{
     [CmdletBinding()]
     param(
-        $ScriptPath
+        $ModuleRoot
     )
     try{
         $PSPlatform = &{ switch($PSVersionTable.Platform){ $null{return 'Win32NT'} default{return $PSVersionTable.Platform }}}
@@ -690,8 +669,8 @@ function Get-DryPlatform{
             Slash                   = &{switch($PSPlatform){'Win32NT'{return '\'} 'Unix'{return '/'}}}
             Separator               = &{switch($PSPlatform){'Win32NT'{return ';'} 'Unix'{return ':'}}}
             LocalModulesDirectories = @(
-                ([IO.Path]::GetFullPath("$(Join-Path -Path $ScriptPath -ChildPath 'modules')")),
-                ([IO.Path]::GetFullPath("$(Join-Path -Path $ScriptPath -ChildPath 'actions')"))
+                ([IO.Path]::GetFullPath("$(Join-Path -Path $ModuleRoot -ChildPath 'modules')")),
+                ([IO.Path]::GetFullPath("$(Join-Path -Path $ModuleRoot -ChildPath 'actions')"))
             )
             RootWorkingDirectory    =  &{switch($PSPlatform){
                 'Win32NT'{return (Join-Path -Path "$($env:UserProfile)" -ChildPath 'DryDeploy')} 
@@ -742,8 +721,8 @@ function Set-DryPSModulePath{
 try{
     if($ShowAllErrors){$Error.clear()}
     $dry_var_OriginalPSModulePath                     = $env:PSModulePath #to be set back in finally
-    $GLOBAL:dry_var_global_ScriptPath                 = Get-DryScriptPath
-    $GLOBAL:dry_var_global_Platform                   = Get-DryPlatform -ScriptPath $GLOBAL:dry_var_global_ScriptPath
+    $GLOBAL:dry_var_global_ModuleRoot                 = Split-Path -Path $PSScriptRoot
+    $GLOBAL:dry_var_global_Platform                   = Get-DryPlatform -ModuleRoot $GLOBAL:dry_var_global_ModuleRoot
     Set-DryPSModulePath -Platform $GLOBAL:dry_var_global_Platform
     # Remove DD modules that may have escaped the removal in finally{}
     Get-Module | Where-Object{(
@@ -791,7 +770,7 @@ try{
     [string]$dry_var_UserOptionsFile    = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'UserOptions.json' # the user may create this file to override the defaults
     [string]$dry_var_TempConfigsDir     = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'TempConfigs'
     [string]$dry_var_ArchiveDir         = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'Archived'
-    [string]$dry_var_SystemOptionsFile  = Join-Path -Path $dry_var_global_ScriptPath           -ChildPath 'SystemOptions.json'
+    [string]$dry_var_SystemOptionsFile  = Join-Path -Path $dry_var_global_ModuleRoot           -ChildPath 'SystemOptions.json'
     [string]$GLOBAL:dry_var_global_CredentialsFile    = Join-Path -Path $dry_var_global_RootWorkingDirectory -ChildPath 'dry_deploy_credentials.json'
 
     $dry_var_Paths = [PSCustomObject]@{
@@ -1603,4 +1582,5 @@ finally{
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
     Get-Variable -Scope Local | Where-Object{$_.Name -match '^dry_var_*'} | Remove-Variable -Scope Local -Force
     Get-Variable -Scope Global | Where-Object{$_.Name -match '^dry_var_*'} | Remove-Variable -Scope Global -Force
+}
 }
