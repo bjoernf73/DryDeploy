@@ -1,4 +1,4 @@
-﻿<# 
+<#
  This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -6,11 +6,11 @@
 #>
 
 
-<# 
-.Synopsis 
-    Translates a path 'Servers/Serverroles/CA' (from root to leaf) to a 
-    domainDN like OU=CA,OU=ServerRoles,OU=Servers (from leaf to root). 
-#> 
+<#
+.Synopsis
+    Translates a path 'Servers/Serverroles/CA' (from root to leaf) to a
+    domainDN like OU=CA,OU=ServerRoles,OU=Servers (from leaf to root).
+#>
 function ConvertTo-DryUtilsDistinguishedName{
     [CmdletBinding()]
     param(
@@ -22,16 +22,16 @@ function ConvertTo-DryUtilsDistinguishedName{
         [ValidateSet("upper", "lower", "ignore", "capitalize", "capitalized")]
         [string]$Case = 'ignore'
     )
-    
-    # chop off any leading or trailing slashes and spaces. 
+
+    # chop off any leading or trailing slashes and spaces.
     $Name = $Name.Trim()
     $Name = $Name.Trim('/')
-    ol d @('Input', $Name)   
-   
+    ol d @('Input', $Name)
+
     try{
         [string]$ConvertedName = ""
         if(
-            ($Name -match "^ou=") -or 
+            ($Name -match "^ou=") -or
             ($Name -match "^cn=")
         ){
             # the name is alerady a dN
@@ -42,24 +42,24 @@ function ConvertTo-DryUtilsDistinguishedName{
             $ConvertedName = $name
         }
         else{
-            # names like root/middle/leaf will be converted 
-            # to ou=leaf,ou=middle,ou=root. Must assume that 
+            # names like root/middle/leaf will be converted
+            # to ou=leaf,ou=middle,ou=root. Must assume that
             # these are OUs, not CNs (or DCs)
             $NameArr = @($Name -split "/")
-            for ($c = ($nameArr.Count - 1); $c -ge 0; $c--){  
+            for ($c = ($nameArr.Count - 1); $c -ge 0; $c--){
                 $ConvertedName += "OU=$($nameArr[$c]),"
             }
             $ConvertedName = $ConvertedName.TrimEnd(',')
         }
 
         ol d @('Sending to ConvertTo-DryUtilsCase' , "$ConvertedName")
-        $ConvertedName = ConvertTo-DryUtilsCase -Name $ConvertedName -Case $Case 
+        $ConvertedName = ConvertTo-DryUtilsCase -Name $ConvertedName -Case $Case
 
-        ol d @('Returning', "$ConvertedName")  
+        ol d @('Returning', "$ConvertedName")
         $ConvertedName
     }
     catch{
-        ol w "Error converting '$Name' to distinguishedName"  
+        ol w "Error converting '$Name' to distinguishedName"
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }

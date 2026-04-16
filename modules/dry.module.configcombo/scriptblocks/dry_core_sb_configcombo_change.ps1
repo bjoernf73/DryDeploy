@@ -11,7 +11,7 @@
         [string]$Type
     )
     try{
-        $FullPath = Resolve-DryUtilsFullPath -Path $Path 
+        $FullPath = Resolve-DryUtilsFullPath -Path $Path
         $RootConfigFile = Join-Path -Path $FullPath -ChildPath 'Config.json'
         [PSCustomObject]$RootConfig = Get-DryFromJson -Path $RootConfigFile
         if($RootConfig.type -ne "$Type"){
@@ -28,11 +28,11 @@
             }
             $this."$PropTypeName".name         = $RootConfig.name
             $this."$PropTypeName".type         = $Type
-            $this."$PropTypeName".guid         = $RootConfig.guid 
+            $this."$PropTypeName".guid         = $RootConfig.guid
             $this."$PropTypeName".path         = $FullPath
             $this."$PropTypeName".description  = $RootConfig.description
             $this."$PropTypeName".dependencies = $RootConfig.dependencies."$($this.platform)"."$($this.edition)"
-            
+
             switch($Type){
                 'environment'{
                     $this.envconfig.coreconfigpath  = (Join-Path -Path $FullPath -ChildPath 'coreconfig')

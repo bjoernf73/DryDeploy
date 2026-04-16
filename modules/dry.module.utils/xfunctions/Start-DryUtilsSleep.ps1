@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)

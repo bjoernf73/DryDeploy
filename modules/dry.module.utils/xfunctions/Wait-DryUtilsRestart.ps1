@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -18,7 +18,7 @@ function Wait-DryUtilsRestart{
     )
 
     throw "This function does not do anything until it is written"
-     
+
     [bool]$RebootConfirmed = $false
     $TestResults = @()
     for ($i=0; $i -lt $MinimumTimeOuts; $i++){

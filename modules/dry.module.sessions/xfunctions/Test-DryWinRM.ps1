@@ -1,4 +1,4 @@
-<# 
+<#
  This module establishes sessions to target machines for use by DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -30,7 +30,7 @@ function Test-DryWinRM{
         $Session = New-DrySession @NewDrySessionParams
         if($Session.Availability -eq "Available"){
             $AvailableSession = $true
-            $Session | Remove-PSSession -ErrorAction Ignore 
+            $Session | Remove-PSSession -ErrorAction Ignore
         }
         $AvailableSession
     }

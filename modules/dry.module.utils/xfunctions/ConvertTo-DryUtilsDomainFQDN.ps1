@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -6,16 +6,16 @@
 #>
 
 
-<# 
-	.Synopsis 
-	Converts a domain distinguishedName to domain FQDN 
-#> 
+<#
+	.Synopsis
+	Converts a domain distinguishedName to domain FQDN
+#>
 function ConvertTo-DryUtilsDomainFQDN{
     [CmdLetBinding()]
     param(
         [Parameter(Mandatory)]
         [ValidateScript({
-            [RegEx]$rx = "^(dc|DC|Dc|dC)=.*,(dc|DC|Dc|dC)=.*"; 
+            [RegEx]$rx = "^(dc|DC|Dc|dC)=.*,(dc|DC|Dc|dC)=.*";
             $Parts = $_ -Split ',';
             (($rx.Match($_)).Success -eq $true) -and ($Parts.foreach({
                     $_ -match "^(dc|DC|Dc|dC)=.*"
@@ -24,7 +24,7 @@ function ConvertTo-DryUtilsDomainFQDN{
         })]
         [string]$DomainDN
     )
-    
+
     try{
         $DomainDN2 = $DomainDN.Remove(0,3)
         $DNParts = $domainDN2 -Split "dc="

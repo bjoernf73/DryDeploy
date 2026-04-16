@@ -15,14 +15,14 @@ function Resolve-DryCredential{
         [Parameter(ParametersetName="InputString",Mandatory,HelpMessage="Expects a string matching one of the replacement strings")]
         [string]$InputString
     )
-    
+
     try{
         if($InputObject){
-            # make a copy of the object, or else the changes 
+            # make a copy of the object, or else the changes
             # may be written back to the original object
             $CopyObject = $InputObject.PSObject.Copy()
             # loop through all properties of $InputObject
-            $CopyObject.PSObject.Properties | 
+            $CopyObject.PSObject.Properties |
                 Foreach-Object{
                 $PropertyName = $_.Name
                 $PropertyValue = $_.Value
@@ -31,31 +31,31 @@ function Resolve-DryCredential{
                 # call for each element of the array
                 if(($PropertyValue -is [string]) -and ($PropertyValue -match "___cred___.*___")){
                     # Call Resolve-DryPassword that returns the replaced string
-                    $PropertyValue = Resolve-DryCredential -InputString $PropertyValue  
+                    $PropertyValue = Resolve-DryCredential -InputString $PropertyValue
                 }
                 elseif($PropertyValue -is [PSObject]){
                     # make a nested call to this function
-                    $PropertyValue = Resolve-DryCredential -InputObject $PropertyValue 
-                } 
+                    $PropertyValue = Resolve-DryCredential -InputObject $PropertyValue
+                }
                 elseif($PropertyValue -is [array]){
                     # nested call for each array element
-                    $PropertyValue = @(  $PropertyValue | Foreach-Object{ 
+                    $PropertyValue = @(  $PropertyValue | Foreach-Object{
                         if(($_ -is [string]) -and ($_ -match "___cred___.*___")){
-                            Resolve-DryCredential -InputText $_ 
-                        } 
+                            Resolve-DryCredential -InputText $_
+                        }
                         elseif(($_ -is [string]) -and ($_ -notmatch "___cred___.*___")){
                             # just return the original object
                             $_
                         }
                         else{
-                            Resolve-DryCredential -InputObject $_ 
+                            Resolve-DryCredential -InputObject $_
                         }
                     })
                 }
                 $CopyObject."$PropertyName" = $PropertyValue
             }
             return $CopyObject
-        } 
+        }
         else{
             # Get the credential alias which is <name> in '___pwd___<name>___'
             $CredentialName = $InputString.Substring(10,($InputString.length-13))

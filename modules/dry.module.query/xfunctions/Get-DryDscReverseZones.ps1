@@ -1,12 +1,12 @@
-# This module is an action module for use with DryDeploy. It runs a DSC 
+# This module is an action module for use with DryDeploy. It runs a DSC
 # Config on a target
 # Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
 # LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.action.dsc.run/main/LICENSE
-# 
+#
 
 
 function Get-DryDscReverseZones{
-    [CmdletBinding()]  
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
         [psobject]$Resource,
@@ -17,9 +17,9 @@ function Get-DryDscReverseZones{
     try{
         # Holds all reverse zones at site
         $AllReverseZonesAtSite = @()
-        
+
         # Get resource's site
-        $Site = $Configuration.CoreConfig.network.sites | 
+        $Site = $Configuration.CoreConfig.network.sites |
         Where-Object{ $_.Name -eq $Resource.network.site }
         if(($Site -is [array]) -or ($null -eq $Site)){
             Write-Error "Multiple or no sites matched pattern '$($Resource.network.site)'" -ErrorAction Stop

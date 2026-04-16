@@ -1,7 +1,7 @@
-<# 
+<#
  This module provides core functionality for DryDeploy.
 
- 
+
 #>
 
 function Get-DryModuleConfig{
@@ -27,11 +27,11 @@ function Get-DryModuleConfig{
         $Configuration = Get-DryConfigData -Path $ConfigCombo.moduleconfig.buildpath -Configuration $Configuration
 
         # Each folder below $ConfigCombo.moduleconfig.rolespath should have a Config.Json containing
-        # meta properties for the Roles. Pick up and create a an array RoleMetaConfigs, and add to the configuration. 
+        # meta properties for the Roles. Pick up and create a an array RoleMetaConfigs, and add to the configuration.
         $RoleConfigFolders = Get-ChildItem -Path $ConfigCombo.moduleconfig.rolespath -Attributes Directory -ErrorAction Stop
         $COObjects = @()
         $RoleConfigFolders.foreach({
-            $COObject = New-Object -TypeName PSObject 
+            $COObject = New-Object -TypeName PSObject
             $COObjectJson = Get-DryFromJson -Path (Join-Path -Path $_.FullName -ChildPath 'Config.json')
             $COObjectJson.PSObject.Properties.Foreach({
                 $COObject | Add-Member -MemberType NoteProperty -Name $_.Name -Value $_.Value
@@ -40,7 +40,7 @@ function Get-DryModuleConfig{
         })
         $Configuration | Add-Member -MemberType NoteProperty -Name RoleMetaConfigs -Value $COObjects
 
-        # Credentials 
+        # Credentials
         if(Test-Path -Path $ConfigCombo.moduleconfig.credentialspath){
             $Configuration = Get-DryConfigData -Path $ConfigCombo.moduleconfig.credentialspath -Configuration $Configuration
         }

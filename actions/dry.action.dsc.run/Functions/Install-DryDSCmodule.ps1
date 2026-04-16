@@ -1,13 +1,13 @@
-# This module is an action module for use with DryDeploy. It runs a DSC 
+# This module is an action module for use with DryDeploy. It runs a DSC
 # Config on a target
 # Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
 # LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.action.dsc.run/main/LICENSE
-# 
+#
 
 
 function Install-DryDSCmodule{
-    
-    [cmdletbinding()] 
+
+    [cmdletbinding()]
     param(
         [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
         [PSObject[]]$ModuleObject,
@@ -18,11 +18,11 @@ function Install-DryDSCmodule{
     Begin{
         if($Session){
            $Remote = $true
-            ol v "Installing modules on remote target '$($Session.Computername)'" 
+            ol v "Installing modules on remote target '$($Session.Computername)'"
         }
         else{
             $Remote = $false
-            ol v "Installing modules on local system" 
+            ol v "Installing modules on local system"
         }
     }
     Process{
@@ -31,16 +31,16 @@ function Install-DryDSCmodule{
         # version
         if($_.requiredversion){
             $Version = $_.requiredversion
-        } 
+        }
         elseif($_.minimumversion){
             $Version = $_.minimumversion
-        } 
+        }
         elseif($_.maximumversion){
             $Version = $_.minimumversion
         }
-        
+
         # info to log
-       ol v "Checking module: '$ModuleName', version: '$Version'" 
+       ol v "Checking module: '$ModuleName', version: '$Version'"
         try{
             if($Session){
                 # remote and start
@@ -53,10 +53,10 @@ function Install-DryDSCmodule{
                     try{
                         if(Get-Module -ListAvailable -Name $ModuleName | Where-Object{ $_.version -eq $Version } ){
                             return "AlreadyInstalled"
-                        } 
+                        }
                         else{
                             [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-                            Install-PackageProvider nuget -Force | 
+                            Install-PackageProvider nuget -Force |
                             Out-Null
                             # here you should add versions, install-module supports max and min versions etc
                             $InstallModuleParams = @{
@@ -70,26 +70,26 @@ function Install-DryDSCmodule{
                             Install-Module @InstallModuleParams
                             return "Installed"
                         }
-                    } 
+                    }
                     catch{
                         $_
                     }
                 } -ArgumentList $ModuleName,$Version
-            } 
+            }
             else{
                 try{
                     if(get-module -ListAvailable -Name $ModuleName | Where-Object{ $_.version -eq $Version } ){
-                        ol v 'DSC Module already installed',"$ModuleName ($Version)"  
+                        ol v 'DSC Module already installed',"$ModuleName ($Version)"
                         $Result = "AlreadyInstalled"
-                    } 
+                    }
                     else{
-                       ol v "Module not installed: '$ModuleName', version: '$Version', trying to install." 
-                        
+                       ol v "Module not installed: '$ModuleName', version: '$Version', trying to install."
+
                         #Install-PackageProvider -Name 'nuget' -Scope CurrentUser -force 4>>$GLOBAL:VerboseStreamFile 6>>$GLOBAL:InfoStreamFile 1>>$GLOBAL:SuccessStreamFile
-                        #Output-Streams 
+                        #Output-Streams
                         # here you should add versions, install-module supports max and min versions etc
                         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-                        Install-Module -Name $ModuleName -RequiredVersion $Version -Scope CurrentUser -Force -Confirm:$false 
+                        Install-Module -Name $ModuleName -RequiredVersion $Version -Scope CurrentUser -Force -Confirm:$false
 
                         $Result = "Installed"
                     }
@@ -107,24 +107,24 @@ function Install-DryDSCmodule{
             if($Result -is [System.Management.Automation.ErrorRecord]){
                ol v 'Unable to install DSC module',"$name"
                $PSCmdlet.ThrowTerminatingError($Result)
-            } 
+            }
             elseif($Result -eq "AlreadyInstalled"){
-                ol i 'DSC Module already installed',"$ModuleName ($Version)" 
-            } 
+                ol i 'DSC Module already installed',"$ModuleName ($Version)"
+            }
             elseif($Result -eq "Installed"){
-                ol i 'DSC Module installed',"$ModuleName ($Version)" 
-            } 
+                ol i 'DSC Module installed',"$ModuleName ($Version)"
+            }
             else{
                 throw "Unknown return type? ($Result)"
             }
         }
-    } # Process 
+    } # Process
     End{
         if($Remote){
-           ol v "Done Installing modules on remote system '$($Session.Computername)'" 
+           ol v "Done Installing modules on remote system '$($Session.Computername)'"
         }
         else{
-           ol v "Done Installing modules on local system" 
+           ol v "Done Installing modules on local system"
         }
     }
 }

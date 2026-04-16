@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -15,10 +15,10 @@ function ConvertTo-DryUtilsCase{
 
         [ValidateSet('upper','lower','ignore','capitalized','capitalize')]
         [Parameter(Mandatory)]
-        [string]$Case 
+        [string]$Case
     )
     if($Case -eq 'capitalize'){ $Case = 'capitalized' }
-   
+
     function PRIVATE:Capitalize-String{
         [CmdLetBinding()]
         param(
@@ -30,7 +30,7 @@ function ConvertTo-DryUtilsCase{
 
         if($Name.length -le 1){
             return $Name.ToUppper()
-        } 
+        }
         elseif($Name -match ' '){
             $Parts = $Name.split(' ')
             [string]$AccumulatedParts = ''
@@ -40,15 +40,15 @@ function ConvertTo-DryUtilsCase{
                 $AccumulatedParts += $UpperCasePart + $LowerCasePart + ' '
             }
             return $AccumulatedParts.Trim()
-        } 
+        }
         else{
             $UpperCasePart = ($Name.SubString(0,1)).ToUpper()
             $LowerCasePart = ($Name.Substring(1,($Name.length-1))).ToLower()
             $ReturnString = $UpperCasePart + $LowerCasePart
             return $ReturnString
-        }        
+        }
     }
-    
+
     switch($Case){
         'ignore'{
             $ReturnValue = $Name
@@ -71,7 +71,7 @@ function ConvertTo-DryUtilsCase{
                     $AccumulatedStringValue += ($delimter + $Namepart + ',')
                 }
                 $ReturnValue = $AccumulatedStringValue.TrimEnd(',')
-            } 
+            }
             else{
                 $ReturnValue = Capitalize-String -Name $Name
             }

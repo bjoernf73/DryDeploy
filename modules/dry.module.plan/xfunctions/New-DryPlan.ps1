@@ -1,6 +1,6 @@
-<# 
-    This module contains functions to resolve, get, modify and show a DryDeploy 
-    Plan.  
+<#
+    This module contains functions to resolve, get, modify and show a DryDeploy
+    Plan.
 
     Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
     LICENSE: https://raw.githubusercontent.com/bjoernf73/DryDeploy/main/LICENSE
@@ -46,7 +46,7 @@ function New-DryPlan{
         $ExcludeRoleNames,
 
         [Parameter()]
-        [array] 
+        [array]
         $ActionNames,
 
         [Parameter()]
@@ -54,23 +54,23 @@ function New-DryPlan{
         $ExcludeActionNames,
 
         [Parameter()]
-        [Int[]] 
+        [Int[]]
         $BuildSteps,
 
         [Parameter()]
-        [Int[]] 
+        [Int[]]
         $ExcludeBuildSteps,
 
         [Parameter()]
-        [Int[]] 
+        [Int[]]
         $Phases,
 
         [Parameter()]
-        [Int[]] 
+        [Int[]]
         $ExcludePhases
     )
-    
-    $Resources = $null 
+
+    $Resources = $null
     $Resources = [Resources]::New($Configuration,$ConfigCombo,$false)
     $Resources.Save($ResourcesFile,$true,$ArchiveFolder)
     $Plan = [Plan]::New($Resources)
@@ -85,7 +85,7 @@ function New-DryPlan{
         # However, always set applyselected to false
         $_.ApplySelected = $false
     })
-    
+
     # Set the PlanOrder based on PlanSelected
     $Plan.ResolvePlanOrder($PlanFile)
     $Plan.Save($PlanFile,$true,$ArchiveFolder)

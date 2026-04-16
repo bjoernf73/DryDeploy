@@ -1,12 +1,12 @@
-# This module is an action module for use with DryDeploy. It reboots a 
+# This module is an action module for use with DryDeploy. It reboots a
 # windows machine
 # Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
 # LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.action.win.reboot/main/LICENSE
-# 
+#
 
 
 function dry.action.win.reboot{
-    [CmdletBinding()]  
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory,HelpMessage="The resolved action object")]
         [PSObject]
@@ -21,7 +21,7 @@ function dry.action.win.reboot{
         [PSObject]
         $Configuration,
 
-        [Parameter(HelpMessage="Hash directly from the command line to be 
+        [Parameter(HelpMessage="Hash directly from the command line to be
         added as parameters to the function that iniates the action")]
         [hashtable]
         $ActionParams
@@ -30,10 +30,10 @@ function dry.action.win.reboot{
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   DEFAULT
         #
-        #   The action does not require, but may have a metaconfig specifying the number 
+        #   The action does not require, but may have a metaconfig specifying the number
         #   of reboots, and wether or not to do gpupdate. Spescify the defaults
         #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         [int]    $NumberOfReboots  = 1
         [Bool]   $GPUpdate         = $true
         [string] $ConfigOrDefault  = 'Default'
@@ -41,17 +41,17 @@ function dry.action.win.reboot{
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   METACONFIG
         #
-        #   The MetaConfig is a configfile with info about the config. If it exists, 
-        #   expect the properties 'reboots' and 'gpupdate'. If not, use the default 
+        #   The MetaConfig is a configfile with info about the config. If it exists,
+        #   expect the properties 'reboots' and 'gpupdate'. If not, use the default
         #   defined previously
         #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         if($Resolved.ActionMetaConfig){
             [int]$NumberOfReboots = $Resolved.ActionMetaConfig.reboots
             [Bool]$GPUpdate = $Resolved.ActionMetaConfig.gpupdate
             [string]$ConfigOrDefault        = 'Config'
         }
-        
+
         switch($GPUpdate){
             $true{
                 $WithOrWithout = 'with'
@@ -79,18 +79,18 @@ function dry.action.win.reboot{
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   SESSION
         #
-        #   The action uses a PSSession to connect. After the (optional) gpupdate and 
+        #   The action uses a PSSession to connect. After the (optional) gpupdate and
         #   reboot, it reuses the credential(s) to create a new session just to verify
         #   that the target is up and reachable
         #
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        
+
         # get the winrm session options
-        $SessionConfig = $Configuration.CoreConfig.connections | 
-        Where-Object{ 
+        $SessionConfig = $Configuration.CoreConfig.connections |
+        Where-Object{
             $_.type -eq 'winrm'
         }
-        
+
         if($null -eq $SessionConfig){
             throw "Unable to find 'connection' of type 'winrm' in environment config"
         }
@@ -100,17 +100,17 @@ function dry.action.win.reboot{
         #
         #   Run the loop $NumberOfReboot times
         #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #       
-        
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
         for ($RebootCount = 1; $RebootCount -le $NumberOfReboots; $RebootCount++){
             ol i @("Reboot $WithOrWithout GPUpdate","$RebootCount of $NumberOfReboots")
-            
+
             if($GPUpdate){
                 $InvokeInPSSessionParams = @{
                     Credential     = $Credentials
-                    Command        = 'gpupdate' 
-                    Computername   = $Action.Resource.resolved_network.ip_address 
-                    ArgumentString = '/force' 
+                    Command        = 'gpupdate'
+                    Computername   = $Action.Resource.resolved_network.ip_address
+                    ArgumentString = '/force'
                     SessionConfig  = $SessionConfig
                 }
                 ol i 'GPUpdate...'
@@ -118,15 +118,15 @@ function dry.action.win.reboot{
             }
 
             $InvokeInPSSessionParams = @{
-                Command       = 'Restart-Computer' 
-                Arguments     = @{'Force'=$true} 
+                Command       = 'Restart-Computer'
+                Arguments     = @{'Force'=$true}
                 Credential    = $Credentials
-                Computername  = $Action.Resource.resolved_network.ip_address 
+                Computername  = $Action.Resource.resolved_network.ip_address
                 SessionConfig = $SessionConfig
             }
             ol i 'Rebooting...'
             Invoke-DryInPSSession @InvokeInPSSessionParams
-    
+
             $WaitWinRMInterfaceParams = @{
                 IP                       = $Action.Resource.resolved_network.ip_address
                 Credential               = $Credentials
@@ -135,7 +135,7 @@ function dry.action.win.reboot{
                 SessionConfig            = $SessionConfig
                 SecondsToWaitBeforeStart = 30
             }
-    
+
             $WinRMStatus = Wait-DryWinRM @WaitWinRMInterfaceParams
             switch($WinRMStatus){
                 $false{
@@ -143,21 +143,21 @@ function dry.action.win.reboot{
                 }
                 $true{
                     ol i @('Successfully connected',"$($Action.Resource.name) (IP: $($Action.Resource.resolved_network.ip_address))")
-                }  
+                }
             }
         }
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        #   SLEEP AFTER 
+        #   SLEEP AFTER
         #
-        #   Sleeps the configured number of secons (.sleep_after_seconds) to let services 
+        #   Sleeps the configured number of secons (.sleep_after_seconds) to let services
         #   on the restartet resource come up
         #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #   
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         if($null -ne $Resolved.ActionMetaConfig.sleep_after_seconds){
             Start-DryUtilsSleep -Seconds $Resolved.ActionMetaConfig.sleep_after_seconds -Message "Sleeping $($Resolved.ActionMetaConfig.sleep_after_seconds) seconds before continuing..."
         }
-        ol i "All reboots were successful" -sh    
+        ol i "All reboots were successful" -sh
     }
     catch{
         $PSCmdlet.ThrowTerminatingError($_)

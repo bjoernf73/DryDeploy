@@ -4,7 +4,7 @@ function Convert-DryUtilsIpAddressToMaskLength{
         [string]$IPAddress
     )
 
-    $Result = 0; 
+    $Result = 0;
     [IPAddress]$IP = $IPAddress
     $Octets = $IP.IPAddressToString.Split('.');
     foreach($Octet in $Octets){

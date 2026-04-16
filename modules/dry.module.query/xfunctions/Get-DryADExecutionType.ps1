@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides query functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -7,12 +7,12 @@
 
 <#
 .SYNOPSIS
-Tests if Config AD execution type should be Remote or Local 
+Tests if Config AD execution type should be Remote or Local
 
 .DESCRIPTION
-Queries if all prerequisites for a local execution is met and 
+Queries if all prerequisites for a local execution is met and
 returns 'Local' if they are, else returns 'Remote'
-   
+
 .PARAMETER Configuration
 The full $Configuration#>
 function Get-DryAdExecutionType{
@@ -21,14 +21,14 @@ function Get-DryAdExecutionType{
         [Parameter(Mandatory)]
         [PSObject]$Configuration
     )
-    
+
     $LocalPrereqs = @{
         DomainComputer               = $false
         DomainComputerInTargetDomain = $false
         ADModuleInstalled            = $false
         GPOModuleInstalled           = $false
     }
-    
+
     try{
         if($PSVersionTable.PSEdition -eq 'Core'){
             if($PSVersionTable.Platform -ne 'Win32NT'){
@@ -36,12 +36,12 @@ function Get-DryAdExecutionType{
                 return 'Remote'
             }
         }
-                
+
         $LocalPrereqs['DomainComputer'] = $false
         $LocalPrereqs['DomainComputerInTargetDomain'] = $false
         $LocalPrereqs['ADModuleInstalled'] = $false
         $LocalPrereqs['GPOModuleInstalled'] = $false
-       
+
         # Test: If executing system is in a domain and that domain is our target
         if((Get-CimInstance -Class Win32_ComputerSystem -ErrorAction SilentlyContinue).PartOfDomain){
             $LocalPrereqs['DomainComputer'] = $true

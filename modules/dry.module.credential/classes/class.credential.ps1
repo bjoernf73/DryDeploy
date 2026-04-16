@@ -27,7 +27,7 @@ class Credentials{
 
     [ArrayList] ReadFromFile(){
         try{
-            return [ArrayList] $(Get-Content -Path $This.Path -ErrorAction Stop | 
+            return [ArrayList] $(Get-Content -Path $This.Path -ErrorAction Stop |
             ConvertFrom-Json -ErrorAction Stop).Credentials
         }
         catch{
@@ -38,9 +38,9 @@ class Credentials{
     [Void] WriteToFile(){
         try{
             $SetContentParams   = @{
-                Path            = $This.Path 
-                Value           = (ConvertTo-Json -InputObject $This -Depth 20) 
-                Force           = $true 
+                Path            = $This.Path
+                Value           = (ConvertTo-Json -InputObject $This -Depth 20)
+                Force           = $true
                 ErrorAction     = 'Stop'
             }
             Set-Content @SetContentParams
@@ -63,12 +63,12 @@ class Credentials{
                 UserName        = $Credential.UserName
                 encryptedstring = $Credential.Password | ConvertFrom-SecureString -ErrorAction Stop
             }
-    
+
             if($This.TestCredential($Alias,$EnvConfig)){
                 ol w "Credential '$Alias' in '$EnvConfig' exists already - removing, and adding the new instance"
             }
-            $This.Credentials = @($This.Credentials | 
-            Where-Object{ 
+            $This.Credentials = @($This.Credentials |
+            Where-Object{
                 (-not (($_.Alias -eq $Alias) -and ($_.EnvConfig -eq $EnvConfig)))
             })
             $This.Credentials += @($CredObj)
@@ -83,12 +83,12 @@ class Credentials{
         [string]$Alias,
         [string]$EnvConfig,
         [string]$Type,
-        [string]$UserName, 
+        [string]$UserName,
         [string]$pw){
         try{
             [SecureString]$SecStringPassword = ConvertTo-SecureString $pw -AsPlainText -Force
             [PSCredential]$Credential        = New-Object System.Management.Automation.PSCredential ($UserName, $SecStringPassword)
-            
+
             $CredObj            = [PSCustomObject]@{
                 Alias           = $Alias
                 EnvConfig    = $EnvConfig
@@ -100,8 +100,8 @@ class Credentials{
             if($This.TestCredential($Alias,$EnvConfig)){
                 ol w "The Credential '$Alias' exists already - removing it, and adding the new instance"
             }
-            $This.Credentials = @($This.Credentials | 
-            Where-Object{ 
+            $This.Credentials = @($This.Credentials |
+            Where-Object{
                 (-not (($_.Alias -eq $Alias) -and ($_.EnvConfig -eq $EnvConfig)))
             })
             $This.Credentials += @($CredObj)
@@ -113,8 +113,8 @@ class Credentials{
     }
 
     [Void] AddCredentialPlaceholder(
-        [string]$Alias, 
-        [string]$EnvConfig, 
+        [string]$Alias,
+        [string]$EnvConfig,
         [string]$Type,
         [string]$UserName){
         try{
@@ -132,12 +132,12 @@ class Credentials{
         }
         catch{
             throw $_
-        } 
+        }
     }
 
     [Void] AddCredentialPlaceholder(
-        [string]$Alias, 
-        [string]$EnvConfig, 
+        [string]$Alias,
+        [string]$EnvConfig,
         [string]$Type){
         try{
             if(-not ($This.TestCredential($Alias,$EnvConfig))){
@@ -153,7 +153,7 @@ class Credentials{
         }
         catch{
             throw $_
-        } 
+        }
     }
 
     [PSCredential] PromptForCredential(
@@ -185,7 +185,7 @@ class Credentials{
         }
     }
 
-    [PSCredential] GetCredential( 
+    [PSCredential] GetCredential(
         [string]$Alias,
         [string]$EnvConfig){
         try{
@@ -205,7 +205,7 @@ class Credentials{
                         return [PSCredential]($This.GetCredentialFromEncryptedSecureString($Alias,$EnvConfig))
                     }
                 }
-                
+
                 #>
                 if($CredentialMatch.Type -eq 'hashicorpvault'){
                     return [PSCredential]($This.GetCredentialFromHashicorpVault($Alias,$EnvConfig,$CredentialMatch))
@@ -220,7 +220,7 @@ class Credentials{
                     # defaulting to encryptedsecurestring
                     ol w "Unable to determine the Credential Type - defaulting to 'encryptedstring'"
                     return [PSCredential]($This.GetCredentialFromEncryptedSecureString($Alias,$EnvConfig,$CredentialMatch))
-                }       
+                }
             }
             else{
                 if($GLOBAL:dry_var_global_SuppressInteractivePrompts){
@@ -250,13 +250,13 @@ class Credentials{
                     else{
                         [PSCredential]$Credential = ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:dry_var_global_Configuration.CredentialsType))
                     }
-                    
+
                 }
                 else{
                     $SecureString = ConvertTo-SecureString -String $CredObject.encryptedstring -ErrorAction 'Stop'
                     [PSCredential]$Credential = New-Object System.Management.Automation.PSCredential ($CredObject.UserName, $SecureString)
                 }
-                
+
                 if($GLOBAL:dry_var_global_ShowPasswords){
                     ol w @("Credential: $Alias ($EnvConfig)","$($CredObject.UserName) ==> $($Credential.GetNetworkCredential().Password)")
                 }
@@ -286,15 +286,15 @@ class Credentials{
                     return $Credential
                 }
             }
-            catch{ 
+            catch{
                 throw $_
             }
         }
         catch{
-            <#   
-                $PSCmdLet.ThrowTerminatingError($_) in classes generates the 'Not 
-                all code paths returns value within method' in classes other than 
-                'void' - using 'throw $_' instead 
+            <#
+                $PSCmdLet.ThrowTerminatingError($_) in classes generates the 'Not
+                all code paths returns value within method' in classes other than
+                'void' - using 'throw $_' instead
             #>
             throw $_
         }
@@ -312,7 +312,7 @@ class Credentials{
                 }
                 $SecureString = ConvertTo-SecureString -String $CredObject.encryptedstring -ErrorAction 'Stop'
                 [PSCredential]$Credential = New-Object System.Management.Automation.PSCredential ($CredObject.UserName, $SecureString)
-                
+
                 if($GLOBAL:dry_var_global_ShowPasswords){
                     ol w @("Credential: $Alias ($EnvConfig)","$($CredObject.UserName) ==> $($Credential.GetNetworkCredential().Password)")
                 }
@@ -330,15 +330,15 @@ class Credentials{
                     return ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:dry_var_global_Configuration.CredentialsType))
                 }
             }
-            catch{ 
+            catch{
                 throw "Failed to get credential '$Alias' in '$EnvConfig'"
             }
         }
         catch{
-            <#   
-                $PSCmdLet.ThrowTerminatingError($_) in classes generates the 'Not 
-                all code paths returns value within method' in classes other than 
-                'void' - using 'throw $_' instead 
+            <#
+                $PSCmdLet.ThrowTerminatingError($_) in classes generates the 'Not
+                all code paths returns value within method' in classes other than
+                'void' - using 'throw $_' instead
             #>
             throw $_
         }
@@ -356,7 +356,7 @@ class Credentials{
                 }
                 $SecureString = ConvertTo-SecureString -String $CredObject.encryptedstring -ErrorAction 'Stop'
                 [PSCredential]$Credential = New-Object System.Management.Automation.PSCredential ($CredObject.UserName, $SecureString)
-                
+
                 if($GLOBAL:dry_var_global_ShowPasswords){
                     ol w @("Credential: $Alias ($EnvConfig)","$($CredObject.UserName) ==> $($Credential.GetNetworkCredential().Password)")
                 }
@@ -374,15 +374,15 @@ class Credentials{
                     return ($This.PromptForCredential($Alias,$EnvConfig,$GLOBAL:dry_var_global_Configuration.CredentialsType))
                 }
             }
-            catch{ 
+            catch{
                 throw "Failed to get credential '$Alias' in '$EnvConfig'"
             }
         }
         catch{
-            <#   
-                $PSCmdLet.ThrowTerminatingError($_) in classes generates the 'Not 
-                all code paths returns value within method' in classes other than 
-                'void' - using 'throw $_' instead 
+            <#
+                $PSCmdLet.ThrowTerminatingError($_) in classes generates the 'Not
+                all code paths returns value within method' in classes other than
+                'void' - using 'throw $_' instead
             #>
             throw $_
         }
@@ -408,18 +408,18 @@ class Credentials{
             $CredentialMatches = @($This.Credentials | Where-Object{
                 ($_.Alias -eq $Alias) -and ($_.EnvConfig -eq $EnvConfig)
             })
-            if($CredentialMatches.count -gt 1){  
-                throw "Multiple credentials '$Alias' in '$EnvConfig'" 
+            if($CredentialMatches.count -gt 1){
+                throw "Multiple credentials '$Alias' in '$EnvConfig'"
             }
-            elseif($CredentialMatches.count -eq 0){ 
-                return $false 
+            elseif($CredentialMatches.count -eq 0){
+                return $false
             }
-            else{ 
-                return $true 
+            else{
+                return $true
             }
         }
-        catch{ 
-            throw $_ 
+        catch{
+            throw $_
         }
     }
 }

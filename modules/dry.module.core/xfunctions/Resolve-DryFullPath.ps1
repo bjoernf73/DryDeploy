@@ -1,15 +1,15 @@
-<# 
+<#
  This module provides core functionality for DryDeploy.
 
- 
+
 #>
 function Resolve-DryFullPath{
     [cmdletbinding()]
     param(
-        [string] 
+        [string]
         $Path,
 
-        [System.IO.DirectoryInfo] 
+        [System.IO.DirectoryInfo]
         $RootPath
     )
 
@@ -24,7 +24,7 @@ function Resolve-DryFullPath{
         if($PSVersionTable.Platform -eq 'Unix'){
             $slash = '/'
         }
-        
+
         # Path cannot be a system.io-object, because it does not necessarily exist
         if($Path -match "^\."){
             # Path relative to the current directory

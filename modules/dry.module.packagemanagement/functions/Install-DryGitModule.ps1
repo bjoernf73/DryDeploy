@@ -1,6 +1,6 @@
-<# 
- This module provides functions for bootstrapping package management, 
- registering package sources and package installations for use with 
+<#
+ This module provides functions for bootstrapping package management,
+ registering package sources and package installations for use with
  DryDeploy. ModuleConfigs may specify dependencies in it's root config
  that this module processes.
 
@@ -8,9 +8,9 @@
  LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.module.packagemanagement/main/LICENSE
 #>
 
-function Install-DryGitModule{ 
+function Install-DryGitModule{
     [CmdLetBinding()]
-    
+
     param(
         [Parameter(HelpMessage="The Source URI of the git repository to clone (or checkout)")]
         $Source,
@@ -25,7 +25,7 @@ function Install-DryGitModule{
 
     try{
         Switch -Regex ($Source){
-            "[^/\\]{1,}(?=\.git$)"{ 
+            "[^/\\]{1,}(?=\.git$)"{
                 [string]$ProjectName = $Matches[0].ToString()
             }
             default{
@@ -35,13 +35,13 @@ function Install-DryGitModule{
         [string]$ProjectPath       = Join-Path -Path $Path -ChildPath $ProjectName
         [string]$ProjectDotGitPath = Join-Path -Path $ProjectPath -ChildPath '.git'
 
-        if((Test-Path -Path $ProjectPath) -and 
+        if((Test-Path -Path $ProjectPath) -and
             (-not (Test-Path -Path $ProjectDotGitPath))){
             throw "The target folder '$ProjectPath' exists, but is not a git project"
         }
         elseif(Test-Path -Path $ProjectPath){
             Sync-GitBranch -RepoRoot $ProjectPath -ErrorAction Stop | Out-Null
-        } 
+        }
         else{
             Copy-GitRepository -Source $Source -DestinationPath $ProjectPath -ErrorAction Stop
         }
@@ -49,7 +49,7 @@ function Install-DryGitModule{
     catch{
         $PSCmdlet.ThrowTerminatingError($_)
     }
-    
+
     try{
         if($Branch){
             [Git.Automation.BranchInfo]$CurrentBranch = Get-GitBranch -RepoRoot $ProjectPath -Current -ErrorAction Stop

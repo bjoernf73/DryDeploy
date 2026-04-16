@@ -1,5 +1,5 @@
-<# 
- This module is contains logging and console output functions for DryDeploy. 
+<#
+ This module is contains logging and console output functions for DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
  LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.module.query/main/LICENSE
@@ -22,8 +22,8 @@ function Get-DryInput{
         [Parameter(ParameterSetName="prompt")]
         $DefaultValue,
 
-        [Parameter(ParameterSetName="prompt",HelpMessage = "May be used for simple values like 
-        a list of allowed numbers to choose from in a prompt. Will automatically be shown in 
+        [Parameter(ParameterSetName="prompt",HelpMessage = "May be used for simple values like
+        a list of allowed numbers to choose from in a prompt. Will automatically be shown in
         the prompt allowed values 'box' (in from of the prompt in [<here>])")]
         [string]$PromptChoiceString,
 
@@ -42,7 +42,7 @@ function Get-DryInput{
 
         [Parameter(HelpMessage="A scriptblock to validate the user input. The scriptblock will be passed
         the `$ValidateScriptParams and the `$iInput as the last argument")]
-        [scriptblock]$ValidateScript, 
+        [scriptblock]$ValidateScript,
 
         [array]$ValidateScriptParams
 
@@ -96,7 +96,7 @@ function Get-DryInput{
                                 throw "goto catch"
                             }
                         }
-                    } 
+                    }
                 }
             }
             catch{
@@ -113,7 +113,7 @@ function Get-DryInput{
         else{
             $PromptChoiceString = "<value>"
         }
-        
+
         # make sure left_column is a certain length
         <#
         while ($FormattedMessage.length -lt $LoggingOptions.left_column_width){
@@ -129,7 +129,7 @@ function Get-DryInput{
         }
         # start the prompt loop
         $WriteHostParams = @{
-            NoNewLine = $true 
+            NoNewLine = $true
         }
         if($LoggingOptions.input.foreground_color){
             $WriteHostParams += @{
@@ -151,7 +151,7 @@ function Get-DryInput{
         }
         elseif($ValidateScript){
             do{
-                $FormattedMessage | Write-Host @WriteHostParams 
+                $FormattedMessage | Write-Host @WriteHostParams
                 $DryInput = Read-Host -Prompt " "
                 if(($null -ne $DefaultValue) -and ($DryInput.Trim() -eq '')){
                     $DryInput = $DefaultValue
@@ -165,7 +165,7 @@ function Get-DryInput{
         else{
             # no validation
             do{
-                $FormattedMessage | Write-Host @WriteHostParams 
+                $FormattedMessage | Write-Host @WriteHostParams
                 $DryInput = Read-Host -Prompt " "
                 if(($null -ne $DefaultValue) -and ($DryInput.Trim() -eq '')){
                     $DryInput = $DefaultValue
@@ -180,7 +180,7 @@ function Get-DryInput{
             }
             while (($DryInput.trim() -eq ''))
         }
-        
+
         if($DryInput -eq 'q'){
             break
         }

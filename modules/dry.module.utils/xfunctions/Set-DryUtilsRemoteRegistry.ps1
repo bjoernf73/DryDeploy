@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -6,7 +6,7 @@
 #>
 
 function Set-DryUtilsRemoteRegistry{
-    [CmdletBinding()] 
+    [CmdletBinding()]
     param(
         [Parameter()]
         [ValidateSet('LocalMachine','HKEY_CLASSES_ROOT','HKEY_CURRENT_USER','HKEY_LOCAL_MACHINE','HKEY_USERS','HKEY_CURRENT_CONFIG','HKEY_DYN_DATA')]
@@ -24,32 +24,32 @@ function Set-DryUtilsRemoteRegistry{
         [Parameter(Mandatory)]
         [ValidateSet('Binary','Dword','ExpandString','MultiString','QWord','String')]
         [Microsoft.Win32.RegistryValueKind]$ValueType,
-        
+
         [Parameter(HelpMessage="PSSession to the target system")]
         [System.Management.Automation.Runspaces.PSSession]$PSSession
     )
     try{
-    
+
         switch($BaseKey){
-            'HKEY_CLASSES_ROOT'{ 
-                [uint32]$BaseKeyInt = 2147483648 
+            'HKEY_CLASSES_ROOT'{
+                [uint32]$BaseKeyInt = 2147483648
             }
-            'HKEY_CURRENT_USER'{ 
-                [uint32]$BaseKeyInt = 2147483649 
+            'HKEY_CURRENT_USER'{
+                [uint32]$BaseKeyInt = 2147483649
             }
-            'HKEY_LOCAL_MACHINE'{ 
-                [uint32]$BaseKeyInt = 2147483650 
+            'HKEY_LOCAL_MACHINE'{
+                [uint32]$BaseKeyInt = 2147483650
             }
-            'HKEY_USERS'{ 
-                [uint32]$BaseKeyInt = 2147483651 
+            'HKEY_USERS'{
+                [uint32]$BaseKeyInt = 2147483651
             }
-            'HKEY_CURRENT_CONFIG'{ 
-                [uint32]$BaseKeyInt = 2147483653 
+            'HKEY_CURRENT_CONFIG'{
+                [uint32]$BaseKeyInt = 2147483653
             }
-            'HKEY_DYN_DATA'{ 
-                [uint32]$BaseKeyInt = 2147483654 
+            'HKEY_DYN_DATA'{
+                [uint32]$BaseKeyInt = 2147483654
             }
-            default{ 
+            default{
                 throw "Unknown BaseKey: $BaseKey"
             }
         }
@@ -72,20 +72,20 @@ function Set-DryUtilsRemoteRegistry{
                     )
 
                     $Result = @($false,$null)
-                    try{     
+                    try{
                         $InvokeCimMethodParams = @{
-                            'Namespace'='root\cimv2' 
-                            'ClassName'='StdRegProv' 
-                            'MethodName'='SetDWORDvalue' 
+                            'Namespace'='root\cimv2'
+                            'ClassName'='StdRegProv'
+                            'MethodName'='SetDWORDvalue'
                             'Arguments'=@{hDefKey=$BaseKeyInt; sSubKeyName=$LeafKey; sValueName=$ValueName; uValue=$ValueData }
                             'ErrorAction'='Stop'
                         }
                         Invoke-CimMethod @InvokeCimMethodParams | Out-Null
                         $Result[0] = $true
-                    } 
+                    }
                     catch{
                         $Result[1]=$_
-                    }  
+                    }
                     finally{
                         $Result
                     }
@@ -101,8 +101,8 @@ function Set-DryUtilsRemoteRegistry{
                         'Session'=$PSSession
                     }
                 }
-                $Result = Invoke-Command @InvokeCommandParams  
-                
+                $Result = Invoke-Command @InvokeCommandParams
+
             }
             'ExpandString'{
                 # System.Management.ManagementBaseObject GetExpandedStringValue(System.UInt32 hDefKey, System.String sSubKeyName, System.String sValueName)
@@ -113,11 +113,11 @@ function Set-DryUtilsRemoteRegistry{
                 # System.Management.ManagementBaseObject GetMultiStringValue(System.UInt32 hDefKey, System.StringsSubKeyName, System.String sValueName)
                 ol w "'MultiString' is untested!"
                 $CurrentValue = $Class.GetMultiStringValue($BaseKeyInt,$LeafKey,$ValueName)
-            } 
+            }
             'QWord'{
                 ol w "'Qword' is untested!"
                 $CurrentValue = $Class.GetQWordValue($BaseKeyInt,$LeafKey,$ValueName)
-            } 
+            }
             'String'{
                 # System.Management.ManagementBaseObject GetStringValue(System.UInt32 hDefKey, System.String sSubKeyName, System.String sValueName)
                 ol w "'String' is untested!"
@@ -139,6 +139,6 @@ function Set-DryUtilsRemoteRegistry{
         $PSCmdlet.ThrowTerminatingError($_)
     }
     finally{
-        
-    } 
+
+    }
 }

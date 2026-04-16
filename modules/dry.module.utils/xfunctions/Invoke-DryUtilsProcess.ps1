@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -6,12 +6,12 @@
 #>
 
 function Invoke-DryUtilsProcess{
-    [CmdletBinding()]            
+    [CmdletBinding()]
     param(
-        [string]$Exe, 
+        [string]$Exe,
         $Arguments
     )
-    
+
     try{
         $process = New-Object System.Diagnostics.ProcessStartInfo
         $process.FileName = $exe
@@ -24,13 +24,13 @@ function Invoke-DryUtilsProcess{
 
         $p = New-Object System.Diagnostics.Process
         $p.StartInfo = $process
-        $p.Start() 
+        $p.Start()
 
         $StdOutStr = ""
         $StdErrStr = ""
-    
+
         while(!($p.StandardOutput.EndOfStream)){
-            $StdOutStr = $StdOutStr + "`n" + $p.StandardOutput.ReadLine() 
+            $StdOutStr = $StdOutStr + "`n" + $p.StandardOutput.ReadLine()
         }
 
         while(!($p.StandardError.EndOfStream)){
@@ -44,9 +44,9 @@ function Invoke-DryUtilsProcess{
             Arguments = $Arguments
             StdOut = $StdOutStr
             StdErr = $StdErrStr
-            ExitCode = $p.ExitCode  
+            ExitCode = $p.ExitCode
         }
-        
+
         return $RetObj
     }
     catch{

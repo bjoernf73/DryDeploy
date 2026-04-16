@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -19,9 +19,9 @@ function Get-DryFromJson{
         $File,
 
         [Parameter(Mandatory,Position=0,ParameterSetName='MaybeStringPath',
-        HelpMessage="While the existence of the file that `$Path or `$File refers to is verified by 
+        HelpMessage="While the existence of the file that `$Path or `$File refers to is verified by
         ValidateScripts, `$MaybePath is not. As such, you may use MaybePath if you're getting an
-        optional file. If the file does not exist, the function will accept that and return `$null, 
+        optional file. If the file does not exist, the function will accept that and return `$null,
         without throwing an exception")]
         [System.String]
         $MaybePath
@@ -30,9 +30,9 @@ function Get-DryFromJson{
         switch($PSCmdlet.ParameterSetName){
             'StringPath'{
                 ol d 'Trying to get file from [string]',$Path
-                [string]$StrPath = $Path  
+                [string]$StrPath = $Path
                 [System.IO.FileInfo]$File = Get-ChildItem -Path $Path -ErrorAction Stop
-                [PSCustomObject]((($File | Get-Content -Raw -ErrorAction Stop) -replace '("(\\.|[^\\"])*")|/\*[\S\s]*?\*/|//.*', '$1') | 
+                [PSCustomObject]((($File | Get-Content -Raw -ErrorAction Stop) -replace '("(\\.|[^\\"])*")|/\*[\S\s]*?\*/|//.*', '$1') |
                 ConvertFrom-Json -ErrorAction Stop)
             }
             'FileInfoPath'{
@@ -40,14 +40,14 @@ function Get-DryFromJson{
                 [string]$StrPath = $File.FullName
                 # this seems counter intuitive, but the system.io.fileinfo object may just be a string cast to [system.io.fileinfo]
                 [System.IO.FileInfo]$File = Get-ChildItem -Path $File -ErrorAction Stop
-                [PSCustomObject]((($File | Get-Content -Raw -ErrorAction Stop) -replace '("(\\.|[^\\"])*")|/\*[\S\s]*?\*/|//.*', '$1') | 
+                [PSCustomObject]((($File | Get-Content -Raw -ErrorAction Stop) -replace '("(\\.|[^\\"])*")|/\*[\S\s]*?\*/|//.*', '$1') |
                 ConvertFrom-Json -ErrorAction Stop)
             }
             'MaybeStringPath'{
                 try{
                     ol d 'Trying to get file from [string]',$MaybePath
                     [System.IO.FileInfo]$File = Get-ChildItem -Path $MaybePath -ErrorAction Stop
-                    [PSCustomObject]((($File | Get-Content -Raw -ErrorAction Stop) -replace '("(\\.|[^\\"])*")|/\*[\S\s]*?\*/|//.*', '$1') | 
+                    [PSCustomObject]((($File | Get-Content -Raw -ErrorAction Stop) -replace '("(\\.|[^\\"])*")|/\*[\S\s]*?\*/|//.*', '$1') |
                     ConvertFrom-Json -ErrorAction Stop)
                 }
                 catch [System.Management.Automation.ItemNotFoundException]{
@@ -56,9 +56,9 @@ function Get-DryFromJson{
                 }
                 catch{
                     $PSCmdlet.ThrowTerminatingError($_)
-                } 
+                }
             }
-        }        
+        }
     }
     catch{
         switch($PSCmdlet.ParameterSetName){

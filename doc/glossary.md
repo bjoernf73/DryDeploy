@@ -2,9 +2,9 @@
 
 ## Roles
 
-- `role`: Is not an instance, but a *blueprint* of some configurable thing. For instance, the first Domain Controller in a forest has certain configurations attached to it. The `role` is a repository of the configuration files used to describe the build of that role, but the as a *blueprint*, it lacks the variable values that makes it an instance. 
+- `role`: Is not an instance, but a *blueprint* of some configurable thing. For instance, the first Domain Controller in a forest has certain configurations attached to it. The `role` is a repository of the configuration files used to describe the build of that role, but the as a *blueprint*, it lacks the variable values that makes it an instance.
 
-- `resource`: Is an instantiation of a `role`. A `resource` is unique. If you delete it, that `resource` is gone, never to surface again in history. Any new instantiation of a `role`, even with the same name, same property values, is a different `resource`. 
+- `resource`: Is an instantiation of a `role`. A `resource` is unique. If you delete it, that `resource` is gone, never to surface again in history. Any new instantiation of a `role`, even with the same name, same property values, is a different `resource`.
 
 ## EnvConfigs
 - `EnvConfig`: is a configuration that describes an environment. If you're DevOpsing, you should have at least 3 environments, a dev, a test, in addition to your production. Even in a home lab, you should have at least 3 envs.

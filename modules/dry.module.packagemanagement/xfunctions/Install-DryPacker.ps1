@@ -1,6 +1,6 @@
-<# 
- This module provides functions for bootstrapping package management, 
- registering package sources and package installations for use with 
+<#
+ This module provides functions for bootstrapping package management,
+ registering package sources and package installations for use with
  DryDeploy. ModuleConfigs may specify dependencies in it's root config
  that this module processes.
 
@@ -8,12 +8,12 @@
  LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.module.packagemanagement/main/LICENSE
 #>
 
-function Install-DryPacker{ 
+function Install-DryPacker{
     [CmdletBinding()]
     param(
         [string]$PackerTestedVersion
     )
-    
+
     try{
         if(-not (Test-DryExeAvailability -Exe 'packer.exe')){
             if(Test-DryElevated){

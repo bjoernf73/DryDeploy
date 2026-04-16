@@ -1,5 +1,5 @@
-<# 
- This module is contains logging and console output functions for DryDeploy. 
+<#
+ This module is contains logging and console output functions for DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
  LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.module.query/main/LICENSE

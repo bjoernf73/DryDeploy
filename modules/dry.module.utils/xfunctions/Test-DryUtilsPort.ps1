@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -7,7 +7,7 @@
 
 function Test-DryUtilsPort{
     [Cmdletbinding()]
-    param(  
+    param(
         [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [string[]]$ComputerName,
 
@@ -17,7 +17,7 @@ function Test-DryUtilsPort{
         [int]$Count = 1,
 
         [int]$Delay = 500,
-        
+
         [int]$TcpTimeout = 1000,
 
         [int]$UdpTimeout = 1000,
@@ -27,13 +27,13 @@ function Test-DryUtilsPort{
         [Switch]$Udp
     )
 
-    Begin{  
-        if((-not $Tcp) -and 
+    Begin{
+        if((-not $Tcp) -and
             (-not $Udp)){
             $Tcp = $true
         }
-        #Typically you never do this, but in this case I felt it was for the benefit of the function  
-        #as any errors will be noted in the output of the Report          
+        #Typically you never do this, but in this case I felt it was for the benefit of the function
+        #as any errors will be noted in the output of the Report
         $ErrorActionPreference   = 'SilentlyContinue'
         $Report                  = @()
         $StopWatch               = New-Object System.Diagnostics.Stopwatch
@@ -52,7 +52,7 @@ function Test-DryUtilsPort{
                     $StopWatch.Start()
                     $Connect     = $TcpClient.BeginConnect($Computer, $Port, $null, $null)
                     $Wait        = $Connect.AsyncWaitHandle.WaitOne($TcpTimeout, $false)
-                    
+
                     if(-not $Wait){
                         $TcpClient.Close()
                         $StopWatch.Stop()
@@ -95,9 +95,9 @@ function Test-DryUtilsPort{
                         $ReceiveBytes = $UdpClient.Receive([ref]$RemoteEndpoint)
                         $StopWatch.Stop()
                         [string]$ReturnedData = $a.GetString($ReceiveBytes)
-                        
+
                         ol v "$($Computer): Connection Successful"
-                            
+
                         $Result.Open  = $true
                         $Result.Notes = $ReturnedData
                     }
@@ -118,6 +118,6 @@ function Test-DryUtilsPort{
         }
     }
     End{
-        $Report 
+        $Report
     }
 }

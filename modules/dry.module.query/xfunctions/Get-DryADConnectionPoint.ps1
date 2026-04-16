@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides query functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -8,31 +8,31 @@
 <#
 .SYNOPSIS
 Gets a an Active Directory Connection Point, which is a computer that
-allows DC, returning it's short name, DomainFQDN, or IP 
+allows DC, returning it's short name, DomainFQDN, or IP
 
 .DESCRIPTION
 Queries the Configuration, and test's available DC's, preferring the
-closest one. Test's which DC is responding, returning that. You may 
-specify the format you want returned, whether it's the short name, 
-full FQDN ir IP. 
-   
+closest one. Test's which DC is responding, returning that. You may
+specify the format you want returned, whether it's the short name,
+full FQDN ir IP.
+
 .PARAMETER Configuration
-The full $Configuration 
+The full $Configuration
 
 .EXAMPLE
 Get-DryDC -Configuration $Configuration -Resource $Resource
 Return's IP of the DC at the $Resource's site, if there is
-one and it's pingable 
+one and it's pingable
 
 .EXAMPLE
 \n
 $Params = @{
-'Configuration'=$Configuration; 
-'Resource'=$Resource 
+'Configuration'=$Configuration;
+'Resource'=$Resource
 }
 Get-DryDC @params -DomainFQDN -NoPing
 
-Return's DomainFQDN of the DC at the $Resource's site, if there 
+Return's DomainFQDN of the DC at the $Resource's site, if there
 is one, even though it's down (unpingable)
 #>
 function Get-DryADConnectionPoint{
@@ -54,7 +54,7 @@ function Get-DryADConnectionPoint{
         [Parameter(HelpMessage="Don't validate the connection - just give it to me")]
         [Switch]$NoValidate
     )
-    
+
     try{
         if($null -ne $Resource.network.site){
             $Site = $Configuration.CoreConfig.network.sites | Where-Object{
@@ -105,7 +105,7 @@ function Get-DryADConnectionPoint{
                                 $ADConnectionPoint = $ADConnectionPoints[$PRIVATE:count]
                             }
                         }
-                    } 
+                    }
                 }
                 catch{
                     $PSCmdlet.ThrowTerminatingError($_)
@@ -115,7 +115,7 @@ function Get-DryADConnectionPoint{
                 }
             }
             while (
-                ($ConnectionPointVerified -eq $false) -and 
+                ($ConnectionPointVerified -eq $false) -and
                 ($PRIVATE:count -lt $ADConnectionPoints.count)
             )
         }

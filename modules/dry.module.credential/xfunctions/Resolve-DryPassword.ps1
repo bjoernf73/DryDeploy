@@ -15,13 +15,13 @@ function Resolve-DryPassword{
         [Parameter(ParametersetName="InputString",Mandatory,HelpMessage="Expects a string matching one of the replacement strings")]
         [string]$InputString
     )
-    
+
     try{
         if($InputObject){
-            # make a copy of the object, or else the changes 
+            # make a copy of the object, or else the changes
             # may be written back to the original object
             $CopyObject = $InputObject.PSObject.Copy()
-            $CopyObject.PSObject.Properties | 
+            $CopyObject.PSObject.Properties |
                 Foreach-Object{
                 $PropertyName = $_.Name
                 $PropertyValue = $_.Value
@@ -35,26 +35,26 @@ function Resolve-DryPassword{
                 elseif($PropertyValue -is [PSObject]){
                     # make a nested call to this function
                     $PropertyValue = Resolve-DryPassword -InputObject $PropertyValue
-                } 
+                }
                 elseif($PropertyValue -is [array]){
                     # nested call for each array element
-                    $PropertyValue = @(  $PropertyValue | Foreach-Object{ 
+                    $PropertyValue = @(  $PropertyValue | Foreach-Object{
                         if(($_ -is [string]) -and ($_ -match "___pwd___.*___")){
-                            Resolve-DryPassword -InputText $_ 
-                        } 
+                            Resolve-DryPassword -InputText $_
+                        }
                         elseif(($_ -is [string]) -and ($_ -notmatch "___pwd___.*___")){
                             # just return the original object - there is nothing to do
                             $_
                         }
                         else{
-                            Resolve-DryPassword -InputObject $_ 
+                            Resolve-DryPassword -InputObject $_
                         }
                     })
                 }
                 $CopyObject."$PropertyName" = $PropertyValue
             }
             return $CopyObject
-        } 
+        }
         else{
             # Get the credential alias which is <alias> in '___pwd___<alias>___'
             $CredentialName = $InputString.Substring(9,($InputString.length-12))

@@ -1,4 +1,4 @@
-<# 
+<#
  This module establishes sessions to target machines for use by DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -35,9 +35,9 @@ function New-DrySession{
             .SYNOPSIS
             When multiple credentials are passed in the Credential parameter,
             this function will iterate over those Credentials. The first time
-            the function is called, the first Credential in the set is returned. 
-            The second time, the second credential in the set is returned, and 
-            so on. When there are no more Credentials in the set, it starts anew, 
+            the function is called, the first Credential in the set is returned.
+            The second time, the second credential in the set is returned, and
+            so on. When there are no more Credentials in the set, it starts anew,
             returning the first in the set, and so on.
         #>
         function Get-CurrentCredential{
@@ -47,7 +47,7 @@ function New-DrySession{
                 [Ref]$CredCounter
             )
             [System.Management.Automation.PSCredential[]]$Credential = (Get-Variable -Name Credential -Scope 1 -ValueOnly)
-           
+
             if($CredCounter.Value -ge $Credential.count){
                 $CredCounter.Value = 0
                 return $Credential[0]
@@ -58,7 +58,7 @@ function New-DrySession{
                 return $Credential[$ThisCredCount]
             }
         }
-      
+
         # Mandatories
         $DrySessionParams = @{
             ComputerName   = $Computername
@@ -69,7 +69,7 @@ function New-DrySession{
         # Optionals
         if($SessionConfig){
             if($SessionConfig.usessl -eq $true){
-                
+
                 switch($SessionType){
                     'PSSession'{
                         if($PSVersionTable.Platform -eq 'Unix'){
@@ -89,7 +89,7 @@ function New-DrySession{
                         $SessionOption = New-CimSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck -UseSsl
                         $DrySessionParams += @{ 'SessionOption'=$SessionOption }
                     }
-                } 
+                }
             }
             else{
                 $SessionTypeOption = "http"
@@ -104,24 +104,24 @@ function New-DrySession{
         switch($SessionType){
             'PSSession'{
                 do{
-                    $RetryCount++ 
+                    $RetryCount++
                     $DrySessionParams['Credential'] = (Get-CurrentCredential -CredCounter ([Ref]$CredCounter))
                     $UserName = ($DrySessionParams['Credential']).UserName
                     ol i "$SessionType to $Computername ($SessionTypeOption)","$RetryCount of $MaxRetries, user $UserName ($(Get-Date -Format HH:mm:ss))"
 
-                    try{   
+                    try{
                         $Session = New-PSSession @DrySessionParams -ErrorAction 'Stop'
                         if($Session.Availability -eq "Available"){
                             $Established = $true
-                        } 
-                        else{ 
+                        }
+                        else{
                             if($RetryCount -ge $MaxRetries){
                                 ol v "Status","FAILED"
                             }
                             else{
                                 ol w "Sleep and retry","$($_.ToString())"
                                 Start-Sleep -Seconds 10
-                            } 
+                            }
                         }
                     }
                     catch{
@@ -142,7 +142,7 @@ function New-DrySession{
                     $DrySessionParams['Credential'] = (Get-CurrentCredential -CredCounter ([Ref]$CredCounter))
                     $UserName = ($DrySessionParams['Credential']).UserName
                     ol i "$SessionType to $Computername ($SessionTypeOption)","$RetryCount of $MaxRetries, user $UserName ($(Get-Date -Format HH:mm:ss))"
-                    
+
                     try{
                         $Session = New-CIMSession @DrySessionParams -ErrorAction 'Stop'
                         $Established = $true
@@ -174,5 +174,5 @@ function New-DrySession{
     }
     catch{
         $PSCmdlet.ThrowTerminatingError($_)
-    } 
+    }
 }

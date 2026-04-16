@@ -1,8 +1,8 @@
 
-<# 
+<#
  This module provides core functionality for DryDeploy.
 
- 
+
 #>
 
 $ExportedFunctionsPath = "$PSScriptRoot\xfunctions\*.ps1"

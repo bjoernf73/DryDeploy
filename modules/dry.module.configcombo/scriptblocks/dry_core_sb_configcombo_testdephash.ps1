@@ -31,7 +31,7 @@
         }
         else{
             return $false
-        } 
+        }
     }
     catch{
         $PSCmdlet.ThrowTerminatingError($_)

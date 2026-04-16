@@ -2,7 +2,7 @@ Using Module dry.module.ad
 # Using Module ActiveDirectory
 # Using Module GroupPolicy
 function dry.action.ad.import{
-    [CmdletBinding()]  
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory,HelpMessage="The resolved action object")]
         [PSObject]
@@ -17,23 +17,23 @@ function dry.action.ad.import{
         [PSObject]
         $Configuration,
 
-        [Parameter(HelpMessage="Hash directly from the command line to be 
+        [Parameter(HelpMessage="Hash directly from the command line to be
         added as parameters to the function that iniates the action")]
         [hashtable]
         $ActionParams
     )
     try{
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-            Execution Type 
-            
+            Execution Type
+
             In a Greenfield deployment, this is running an a computer outside the domain
             and we must remote into a domain controller to execute each configuration
             action. However, if this is running on a domain member in that domain, we
-            assume that the config  may run locally. The DryAD module supports both 
+            assume that the config  may run locally. The DryAD module supports both
             'Local' and 'Remote' execution. The Get-DryAdExecutionType query function
             tests if the prerequisites for a Local execution is there
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
-        Enum ExecutionType{ Local; Remote }        
+        Enum ExecutionType{ Local; Remote }
         [ExecutionType]$ExecutionType = Get-DryAdExecutionType -Configuration $Configuration
         ol i 'Execution Type',$ExecutionType
 
@@ -42,8 +42,8 @@ function dry.action.ad.import{
            ad.import will target a domain controller on the site the resource belongs to
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         $GetDryADConnectionPointParams = @{
-            Resource      = $Action.Resource 
-            Configuration = $Configuration 
+            Resource      = $Action.Resource
+            Configuration = $Configuration
             ExecutionType = $ExecutionType
         }
         if($ExecutionType -eq 'Remote'){
@@ -53,10 +53,10 @@ function dry.action.ad.import{
         }
         $ActiveDirectoryConnectionPoint = Get-DryADConnectionPoint @GetDryADConnectionPointParams
         ol i "Connection Point (Domain Controller)",$ActiveDirectoryConnectionPoint
-        
+
         # Wait for the winrm interface to come up
         if($ExecutionType -eq 'Remote'){
-            $SessionConfig = $Configuration.CoreConfig.connections | Where-Object{ 
+            $SessionConfig = $Configuration.CoreConfig.connections | Where-Object{
                 $_.type -eq 'winrm'
             }
             $WaitWinRMParams             = @{
@@ -75,9 +75,9 @@ function dry.action.ad.import{
                 }
                 $true{
                     ol i @("Connected to","$ActiveDirectoryConnectionPoint")
-                }  
+                }
             }
-            
+
             # Create session to run the configuration in
             $ADImportSessionParams += @{
                 SessionType   = 'PSSession'
@@ -85,7 +85,7 @@ function dry.action.ad.import{
                 Credential    = $Resolved.Credentials.credential1
                 SessionConfig = $SessionConfig
             }
-    
+
             try{
                 ol i "Establishing PSSession to","$ActiveDirectoryConnectionPoint"
                 $PSSession = New-DrySession @ADImportSessionParams
@@ -95,7 +95,7 @@ function dry.action.ad.import{
                 $PSCmdLet.ThrowTerminatingError($_)
             }
         }
-        
+
         $SetDryADConfigurationParams = @{
             Variables         = $Resolved.vars
             ConfigurationPath = $Resolved.ConfigSourcePath
@@ -133,7 +133,7 @@ function dry.action.ad.import{
         @(Get-Variable -Scope Script).foreach({
             $_ | Remove-Variable -ErrorAction Ignore
         })
-        
+
         ol i "Action 'ad.import' is finished" -sh
     }
 }

@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -26,7 +26,7 @@ function Save-DryUtilsToJson{
     )
 
     try{
-        $InputObject | 
+        $InputObject |
         ConvertTo-Json -Depth $Depth -ErrorAction Stop |
         Out-File -FilePath $Path -Encoding $Encoding -ErrorAction Stop -Force:$Force
     }

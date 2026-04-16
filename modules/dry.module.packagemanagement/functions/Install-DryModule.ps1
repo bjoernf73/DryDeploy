@@ -1,6 +1,6 @@
-<# 
- This module provides functions for bootstrapping package management, 
- registering package sources and package installations for use with 
+<#
+ This module provides functions for bootstrapping package management,
+ registering package sources and package installations for use with
  DryDeploy. ModuleConfigs may specify dependencies in it's root config
  that this module processes.
 
@@ -8,9 +8,9 @@
  LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.module.packagemanagement/main/LICENSE
 #>
 
-function Install-DryModule{ 
+function Install-DryModule{
     [CmdLetBinding()]
-    
+
     param(
         [Parameter(Mandatory,ValueFromPipeline,HelpMessage="The module to install")]
         [PSObject]$Module
@@ -39,7 +39,7 @@ function Install-DryModule{
                 Repository = $Module.repository
             }
         }
-        
+
         if($Module.minimumversion){
             $InstallModuleParams += @{
                 MinimumVersion = $Module.minimumversion
@@ -94,7 +94,7 @@ function Install-DryModule{
                     throw "Some Nuget Modules must be installed in the 'AllUsers' scope - run elevated (Run as Administrator)"
                 }
             }
-            Install-Module @InstallModuleParams 
+            Install-Module @InstallModuleParams
         }
     }
     catch{

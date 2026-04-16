@@ -1,12 +1,12 @@
-<# 
+<#
  This module provides core functionality for DryDeploy.
 
- 
+
 #>
 
 function Resolve-DryActionOptions{
     [CmdletBinding()]
-    param( 
+    param(
         [Parameter(Mandatory)]
         [PSObject]$Action,
 
@@ -19,11 +19,11 @@ function Resolve-DryActionOptions{
         [Parameter()]
         [Switch]$NoFiles
     )
-    
+
     try{
         <#
-            Example Paths in Configuration: 
-            
+            Example Paths in Configuration:
+
             RootWorkingDirectory  : C:\Users\user\DryDeploy
             PlanFile              : C:\Users\user\DryDeploy\dry_deploy_plan.json
             ResourcesFile         : C:\Users\user\DryDeploy\dry_deploy_resources.json
@@ -69,7 +69,7 @@ function Resolve-DryActionOptions{
             'base'{
                 [string]$BaseConfigSourcePath = Join-Path -Path $Configuration.Paths.BaseConfigDirectory -ChildPath $Action.Resource.BaseConfig
                 [string]$ConfigSourcePath     = Join-Path -Path $BaseConfigSourcePath -ChildPath $Action.Action
-                
+
                 [string]$RoleFilesSourcePath   = Join-Path -Path $BaseConfigSourcePath -ChildPath 'Files'
                 [string]$ActionFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
                 if($Action.Phase -gt 0){
@@ -87,7 +87,7 @@ function Resolve-DryActionOptions{
 
 
         <#
-            Resolve all credentials 
+            Resolve all credentials
         #>
         $Credentials = $null
         $Credentials = New-Object -TypeName PSCustomObject
@@ -95,12 +95,12 @@ function Resolve-DryActionOptions{
         $Action.Credentials.PSObject.Properties.foreach({$c++})
         for ($CredCount = 1; $CredCount -le $c; $CredCount++){
             $GetCredentialsParams = @{
-                Alias     = $Action.credentials."Credential$CredCount" 
+                Alias     = $Action.credentials."Credential$CredCount"
                 EnvConfig = $ConfigCombo.envconfig.name
             }
             $AddMemberParams = @{
-                MemberType = 'NoteProperty' 
-                Name       = "Credential$CredCount" 
+                MemberType = 'NoteProperty'
+                Name       = "Credential$CredCount"
                 Value      = (Get-DryCredential @GetCredentialsParams)
             }
             $Credentials | Add-Member @AddMemberParams
@@ -113,27 +113,27 @@ function Resolve-DryActionOptions{
                 [string]$ActionType = $ActionMetaConfig.default
                 [array]$SupportedTypes = @($ActionMetaConfig.supported_types)
 
-                # Test if the Resource specifies a type for this Action, and modify  
-                # ActionType only if specified type is supported - else keep the default 
+                # Test if the Resource specifies a type for this Action, and modify
+                # ActionType only if specified type is supported - else keep the default
                 if($Action.Resource.options."$ActionTypePropertyName"){
                     if($Action.Resource.options."$ActionTypePropertyName" -in $SupportedTypes){
                         $ActionType = $Action.Resource.options."$ActionTypePropertyName"
                     }
                 }
 
-                
+
                 [string]$ConfigSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath $ActionType
                 [string]$TypeFilesSourcePath = Join-Path -Path $ConfigSourcePath -ChildPath 'Files'
                 [string]$TypeMetaConfigFile = Join-Path -Path $ConfigSourcePath -ChildPath 'Config.json'
                 [PSCustomObject]$TypeMetaConfig = Get-DryFromJson -Path $TypeMetaConfigFile
-                
+
             }
             <#
                 An action may 'follow' another Action's type. For instance, the 'MoveToOU'
                 Action has a 'default' equalling the ad.import 'default' for a specific
                 Role, but if that Role's type is modified by $Action.Resource.options.ad.import_type,
-                then MoveToOU must modify accordingly. The ActionMetaConfig's 'follow_type' property 
-                specifies which Action's type to follow 
+                then MoveToOU must modify accordingly. The ActionMetaConfig's 'follow_type' property
+                specifies which Action's type to follow
             #>
             if($ActionMetaConfig.follow_type){
                 $ActionType = $ActionMetaConfig.default
@@ -150,10 +150,10 @@ function Resolve-DryActionOptions{
 
 
         if($TypeMetaConfig.target_expression){
-            [string]$Target = Invoke-Expression -Command $TypeMetaConfig.target_expression 
+            [string]$Target = Invoke-Expression -Command $TypeMetaConfig.target_expression
         }
         else{
-            # dhcp da? hvordan gjør vi det? 
+            # dhcp da? hvordan gjør vi det?
             [string]$Target = $Action.Resource.Resolved_Network.ip_address
         }
 
@@ -208,8 +208,8 @@ function Resolve-DryActionOptions{
         if($TypeMetaConfigFile){
             $OptionsObject | Add-Member -MemberType NoteProperty -Name 'TypeMetaConfigFile' -Value $TypeMetaConfigFile
         }
-        
-        
+
+
         if($ActionMetaConfig.vars){
             # There are variables to be resolved for the Action
             $ResolveDryVarParams = @{

@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides core functionality for DryDeploy.
 #>
 function Get-DryObjectPropertyFromObjectArray{
@@ -7,7 +7,7 @@ function Get-DryObjectPropertyFromObjectArray{
         [Parameter(Mandatory)]
         [array]$ObjectArray,
 
-        [Parameter(Mandatory,HelpMessage="The object property name that  
+        [Parameter(Mandatory,HelpMessage="The object property name that
         identifies the object from which `$Property will be returned")]
         [string]$IDProperty,
 
@@ -34,24 +34,24 @@ function Get-DryObjectPropertyFromObjectArray{
 
         [Parameter(HelpMessage="By default, we assume that the ObjectArray
         contains one, and only one, unique object to match, and an exception
-        will be thrown if that's not the case. Use this if multiple matches 
-        is expected. This is automatically true if `$First, `$Last or 
+        will be thrown if that's not the case. Use this if multiple matches
+        is expected. This is automatically true if `$First, `$Last or
         `$Number")]
         [Switch]$AllowMultipleMatches,
 
         [Parameter(HelpMessage="The default we assume that the ObjectArray
-        should contain a match, and an exception will be thrown if that's 
+        should contain a match, and an exception will be thrown if that's
         not the case. Use this to allow no match. `$null will be returned
         if no match is found.")]
         [Switch]$AllowNoMatch,
 
-        [Parameter(HelpMessage="The default, assumes that the property 
-        `$Property should exist on the matching object, and an exception 
-        will be thrown if that's not the case. Use to allow this, and 
+        [Parameter(HelpMessage="The default, assumes that the property
+        `$Property should exist on the matching object, and an exception
+        will be thrown if that's not the case. Use to allow this, and
         just return `$null")]
         [Switch]$AllowNoProperty
     )
-    
+
     try{
         ol 5 @('IDProperty',$IDProperty)
         ol 5 @('IDPropertyValue',$IDPropertyValue)
@@ -133,7 +133,7 @@ function Get-DryObjectPropertyFromObjectArray{
     catch{
         ol 3 "The input object array is returned below:"
         $ObjectArray
-        
+
         ol 3 "And these are the input params:"
         ol 3 @('IDProperty',$IDProperty)
         ol 3 @('IDPropertyValue',$IDPropertyValue)

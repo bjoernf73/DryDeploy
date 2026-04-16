@@ -8,7 +8,7 @@ class Resources{
     Resources ([PSCustomObject]$Configuration,[PSCustomObject]$ConfigCombo, [bool]$Interactive){
         $This.Resources = [ArrayList]::New()
         switch($Interactive){
-            $false{ 
+            $false{
                 # Loop through the resources in the build
                 foreach($Resource in $Configuration.CoreConfig.resources | Where-Object{ $_.role -in @($Configuration.Build.roles.role) }){
                     $Resource = [Resource]::New(
@@ -49,7 +49,7 @@ class Resources{
                             mask        = $null
                             dns         = $null
                         }
-                        
+
                         $iRolesToSelectFrom = [ArrayList]::New()
                         foreach($iRole in $Configuration.build.roles){
                             $iIndex              = $iRole.order
@@ -82,13 +82,13 @@ class Resources{
                         [scriptblock]$ValidateShortRoleNameScript = {
                             param($DryInput)
                             $DryInput = $DryInput.Trim()
-                            ($DryInput -is [string]) -and 
+                            ($DryInput -is [string]) -and
                             ($DryInput.length -ge 2) -and
                             ($DryInput.length -le 8) -and
                             ($DryInput -notmatch "\d$") -and
                             ($DryInput -notmatch "^\d")
                         }
-                        
+
                         ol i " "
                         $GetDryInputParams = @{
                             Prompt               = "Customize the Short (2-8 characters), or ENTER for default ('$($sSelected.Short)')"
@@ -121,7 +121,7 @@ class Resources{
                                 }
                             }
                         }
-            
+
                         $iSubnetsStrings = ($($iSubnetsToSelectFrom | Format-Table * | Out-String).Split("`r`n")) | Where-Object{ $_.Trim() -ne ''}
                         foreach($iString in $iSubnetsStrings){
                             ol i "$iString"
@@ -144,7 +144,7 @@ class Resources{
                         $sSubnetCidrString = "$($sSite.ip_subnet)/$sSubnetMaskBits"
                         $sSelected.Site   = $sSite.site
                         $sSelected.Subnet = $sSubnetCidrString
-    
+
                         [scriptblock]$ValidateScript = {
                             param(
                                 $sSiteNet,
@@ -186,10 +186,10 @@ class Resources{
                         if($sHappyWithSelection -in 'y','yes'){
                             $HappyWithTheSelection = $true
                         }
-            
+
                     }
                     while ($HappyWithTheSelection -eq $false)
-                    
+
                     if($HappyWithTheSelection){
                         $This.Resources += [Resource]::New(
                             $sSelected.Name,
@@ -221,7 +221,7 @@ class Resources{
                 while ($true -eq $AddAnotherResource)
             }
         }
-        
+
         $This.DoOrder($Configuration.CoreConfig.Network,$Configuration.Build)
         $This.AddActionGuids()
     }
@@ -237,26 +237,26 @@ class Resources{
                 $Action | Add-Member -MemberType NoteProperty -Name 'Action_Guid' -Value ($This.NewActionGuid($GlobalActionOrder))
             }
         })
-    } 
+    }
 
-    [string] NewActionGuid([int]$GlobalOrder){ 
+    [string] NewActionGuid([int]$GlobalOrder){
         # Simplified format: 8-digit order number + GUID
         return "{0:D8}-{1}" -f $GlobalOrder, ((New-Guid).Guid)
     }
 
 
     [string] GetPreviuosDependencyActionGuid (
-        [string]$Action_Guid 
+        [string]$Action_Guid
     ){
         # Extract the order number from the Action_Guid (format: 00000005-guid)
         if($Action_Guid -match '^(\d+)-'){
             [int]$CurrentOrder = [int]$Matches[1]
             $PreviousOrder = $CurrentOrder - 1
-            
+
             if($PreviousOrder -lt 1){
                 throw "Unable to find previous Action - current action is first (Order: $CurrentOrder)"
             }
-            
+
             # Find the action with the previous order by searching through resources
             foreach($Resource in $This.Resources){
                 foreach($Action in $Resource.ActionOrder){
@@ -265,7 +265,7 @@ class Resources{
                     }
                 }
             }
-            
+
             throw "Unable to find previous Action with Order $PreviousOrder"
         }
         else{
@@ -275,17 +275,17 @@ class Resources{
 
     # Find first Action in plan and return true if it matches $ActionSpec
     [Bool] IsThisFirstActionInPlan ([string]$ActionGuid){
-        
+
         # Loop though Resources using their ResourceOrder-property
         :ResourceLoop for ($ResourceOrder = 1; $ResourceOrder -le $This.Resources.Count; $ResourceOrder++){
-            $CurrentResource = $This.Resources | 
-            Where-Object{ 
+            $CurrentResource = $This.Resources |
+            Where-Object{
                 $_.ResourceOrder -eq $ResourceOrder
             }
             # Loop through Actions using their Order-property
             for ($ActionOrder = 1; $ActionOrder -le $CurrentResource.ActionOrder.Count; $ActionOrder++){
-                $CurrentAction = $CurrentResource.ActionOrder | 
-                Where-Object{ 
+                $CurrentAction = $CurrentResource.ActionOrder |
+                Where-Object{
                     $_.Order -eq $ActionOrder
                 }
                 # As soon as we meet an Action without an explicit dependency, it is considered the first Action
@@ -315,11 +315,11 @@ class Resources{
         $ResourceCount     = 0
         $ResolvedResources = @()
 
-        # Resources are deployed according to the resource order in the build 
+        # Resources are deployed according to the resource order in the build
         for ($RoleCount = 1; $RoleCount -le $RoleOrder.count; $RoleCount++){
-    
+
             Remove-Variable -Name BuildRole -ErrorAction Ignore
-            
+
             $BuildRole = $RoleOrder | Where-Object{
                 $_.order -eq $RoleCount
             }
@@ -335,23 +335,23 @@ class Resources{
 
             Remove-Variable -Name 'CurrentSiteAndConfopResources' -ErrorAction Ignore
             foreach($Site in $Sites){
-                
+
                 $CurrentSiteAndConfopResources = @()
                 $This.Resources | foreach-Object{
                     if(($_.Network.Site -eq $Site) -and ($_.Role -eq $BuildRoleName)){
                         $CurrentSiteAndConfopResources += $_
                     }
-            
+
                 }
                 if($CurrentSiteAndConfopResources){
                     # Multiple resources of the same Role will be ordered alphabetically by name
                     $CurrentSiteAndConfopResources = $CurrentSiteAndConfopResources | Sort-Object -Property Name
                     foreach($CurrentSiteAndConfopResource in $CurrentSiteAndConfopResources){
                         $ResourceCount++
-                        $CurrentSiteAndConfopResource.ResourceOrder =  $ResourceCount 
+                        $CurrentSiteAndConfopResource.ResourceOrder =  $ResourceCount
                         $ResolvedResources += $CurrentSiteAndConfopResource
                     }
-                }  
+                }
             }
         }
     }
@@ -360,11 +360,11 @@ class Resources{
         if($Archive){
             # Archive previous resources Plan-file and create new
             if(Test-Path -Path $ResourcesFile -ErrorAction SilentlyContinue){
-                ol v "ResourcesFile '$ResourcesFile' exists, archiving" 
+                ol v "ResourcesFile '$ResourcesFile' exists, archiving"
                 Save-DryArchiveFile -ArchiveFile $ResourcesFile -ArchiveFolder $ArchiveFolder
             }
         }
-        
+
         ol v "Saving resourcesfile '$ResourcesFile'"
         Set-Content -Path $ResourcesFile -Value (ConvertTo-Json -InputObject $This -Depth 100) -Force
     }

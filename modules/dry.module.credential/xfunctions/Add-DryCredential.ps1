@@ -30,9 +30,9 @@ function Add-DryCredential{
         if($null -eq $GLOBAL:dry_var_global_Configuration.CredentialsType){
             throw "Missing global variable 'CredentialsType' (defined in DryDeploy.ps1)"
         }
-        
+
         switch($PsCmdlet.ParameterSetName){
-            "Credential" { 
+            "Credential" {
                 $DryCredentials.AddCredential($Alias,$GLOBAL:dry_var_global_ConfigCombo.envconfig.name,$GLOBAL:dry_var_global_Configuration.CredentialsType,$Credential)
             }
             "UserNameAndPassword" {
@@ -42,5 +42,5 @@ function Add-DryCredential{
     }
     catch{
         $PSCmdlet.ThrowTerminatingError($_)
-    }    
+    }
 }

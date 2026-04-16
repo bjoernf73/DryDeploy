@@ -3,7 +3,7 @@ using Namespace System.Collections
 class Network{
     [string]$Name
     [string]$Switch_Name
-    [string]$Ip_Subnet 
+    [string]$Ip_Subnet
     [string]$Subnet_Mask
     [string]$Default_Gateway
     [string]$Reverse_Zone
@@ -16,23 +16,23 @@ class Network{
          [PSCustomObject]$NetworkRef,
          [array]$Sites
     ){
-        $Site = $Sites | 
-        Where-Object{ 
-            $_.Name -eq $NetworkRef.site 
+        $Site = $Sites |
+        Where-Object{
+            $_.Name -eq $NetworkRef.site
         }
-        
+
         if($null -eq $Site){
             Write-Error "No sites matched pattern '$($NetworkRef.site)'" -ErrorAction Stop
         }
         elseif($Site -is [array]){
             Write-Error "Multiple sites matched pattern '$($NetworkRef.site)'" -ErrorAction Stop
         }
-    
-        $Subnet = $Site.Subnets | 
-        Where-Object{ 
-            $_.Name -eq $NetworkRef.subnet_name 
+
+        $Subnet = $Site.Subnets |
+        Where-Object{
+            $_.Name -eq $NetworkRef.subnet_name
         }
-        
+
         if($null -eq $Subnet){
             Write-Error "No subnets matched pattern '$($NetworkRef.subnet_name)'" -ErrorAction Stop
         }
@@ -52,7 +52,7 @@ class Network{
         if($NetworkRef.ip_index){
             $Snet = $Subnet.ip_subnet + '/' + $Subnet.subnet_mask
             $This.ip_address = ((Invoke-PSipcalc -NetworkAddress $Snet -Enumerate).IPenumerated)[($($NetworkRef.ip_index)-1)]
-        } 
+        }
         elseif($NetworkRef.ip_address){
             $This.ip_address = $NetworkRef.ip_address
         }

@@ -1,4 +1,4 @@
-<# 
+<#
  This module establishes sessions to target machines for use by DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -38,30 +38,30 @@ function Wait-DrySSH{
     )
     if($IP){
         $Address = $IP
-    } 
+    }
     else{
         $Address = $ComputerName
     }
-    
+
     ol i 'Waiting for SSH interface' -sh
     ol i 'Address and port',"$Address`:$Port"
     $StartTime = Get-Date
-    
+
     # if, for instance, a restart is required in the midst of all of this, the function may
-    # return true too early, so we sleep a specified number of seconds before checking 
+    # return true too early, so we sleep a specified number of seconds before checking
     # increment the element counter and update progress
     for ($Timer = 1; $Timer -lt $SecondsToWaitBeforeStart; $Timer++){
         $WriteProgressParameters = @{
             Activity        = "Testing SSH Interface on '$Address'"
             Status          = "Waiting $($SecondsToWaitBeforeStart-$Timer) seconds before starting"
-            PercentComplete = (($Timer / $SecondsToWaitBeforeStart) * 100 )   
+            PercentComplete = (($Timer / $SecondsToWaitBeforeStart) * 100 )
         }
         Write-Progress @WriteProgressParameters
         Start-Sleep -seconds 1
     }
     Write-Progress -Completed -Activity "[$Address`:$Port]: Waiting for SSH interface"
-    
-    
+
+
     # Target time
     [datetime]$TargetTime = (Get-Date).AddSeconds($SecondsToTry)
     ol i "I will try until","$TargetTime"
@@ -76,10 +76,10 @@ function Wait-DrySSH{
         $WriteProgressParameters = @{
             Activity        = "[$Address`:$Port]: Waiting for SSH interface"
             Status          = "Port Down"
-            PercentComplete = ((($ProgressTotalTime-$ProgressTimeLeft) / $ProgressTotalTime) * 100 )   
-        }   
-        Write-Progress @WriteProgressParameters    
-        
+            PercentComplete = ((($ProgressTotalTime-$ProgressTimeLeft) / $ProgressTotalTime) * 100 )
+        }
+        Write-Progress @WriteProgressParameters
+
         # First, the port must be up
         if((Test-DryUtilsPort -Port $port -ComputerName $Address -ErrorAction SilentlyContinue).Open -eq $true){
             $PortUp = $true
@@ -101,10 +101,10 @@ function Wait-DrySSH{
                 }
                 else{
                     ol i "Connection is: '$($SSHSession.Connected)'"
-                    $NowTime = Get-date 
+                    $NowTime = Get-date
                     $Span = [int]((New-TimeSpan -Start $StartTime -End $NowTime).TotalSeconds)
                     $TimeLeft = [int]((New-TimeSpan -Start $NowTime -end $TargetTime).TotalSeconds)
-                    
+
                     # sleep and let loop retry
                     if($NowTime -lt $TargetTime){
                         ol i "[$Address`:$Port]: Still waiting (SSH not ready). Been waiting for $Span of $TimeLeft seconds"
@@ -112,24 +112,24 @@ function Wait-DrySSH{
                         $WriteProgressParameters = @{
                             'Activity'="[$Address`:$Port]: Waiting for SSH interface"
                             'Status'="SSH Down"
-                            'PercentComplete'=((($ProgressTotalTime-$ProgressTimeLeft) / $ProgressTotalTime) * 100 )   
-                        }   
-                        Write-Progress @WriteProgressParameters    
+                            'PercentComplete'=((($ProgressTotalTime-$ProgressTimeLeft) / $ProgressTotalTime) * 100 )
+                        }
+                        Write-Progress @WriteProgressParameters
                         Start-Sleep -Seconds $SecondsToWaitBetweenTries
                     }
                     else{
                         ol i "[$Address`:$Port]: Been waiting for $Span seconds - time's up - there's no point to this"
                     }
-                
+
                 }
             }
             while ( ($SSHUp -eq $false)  -and ((Get-Date) -lt $TargetTime) )
         }
         else{
-            $NowTime = Get-date 
+            $NowTime = Get-date
             $Span = [int]((New-TimeSpan -Start $StartTime -End $NowTime).TotalSeconds)
             $TimeLeft = [int]((New-TimeSpan -Start $NowTime -end $TargetTime).TotalSeconds)
-            
+
             # sleep and let loop retry
             if($(Get-Date) -lt $TargetTime){
                 ol i "[$Address`:$Port]: Still waiting (port not up). Been waiting for $Span of $TimeLeft seconds"
@@ -139,16 +139,16 @@ function Wait-DrySSH{
                 ol i "[$Address`:$Port]: Been waiting for $Span seconds - time's up - there's no point to this"
                 Write-Progress -Completed -Activity "[$Address`:$Port]: Waiting for SSH interface"
             }
-        } 
+        }
     }
     while (  ($portUp -eq $false)  -and ((Get-Date) -lt $TargetTime) )
-    
+
     $EndTime = Get-Date
     $TotalMinutes = ($EndTime - $StartTime).minutes
     ol v "[$Address`:$Port]: Waited a total of $TotalMinutes minutes. Status is '$State'"
-    
+
     switch($SSHUp){
-        $true{ 
+        $true{
             ol i "[$Address`:$Port]: SSH is UP"
             $true
         }

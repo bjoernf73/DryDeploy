@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides query functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -7,31 +7,31 @@
 
 <#
 .SYNOPSIS
-Gets a DC, returning it's short name, DomainFQDN, or IP 
+Gets a DC, returning it's short name, DomainFQDN, or IP
 
 .DESCRIPTION
 Queries the Configuration, and test's available DC's, preferring the
-closest one. Test's which DC is responding, returning that. You may 
-specify the format you want returned, whether it's the short name, 
-full FQDN ir IP. 
-   
+closest one. Test's which DC is responding, returning that. You may
+specify the format you want returned, whether it's the short name,
+full FQDN ir IP.
+
 .PARAMETER Configuration
-The full $Configuration 
+The full $Configuration
 
 .EXAMPLE
 Get-DryDC -Configuration $Configuration -Resource $Resource
 Return's IP of the DC at the $Resource's site, if there is
-one and it's pingable 
+one and it's pingable
 
 .EXAMPLE
 \n
 $Params = @{
-'Configuration'=$Configuration; 
-'Resource'=$Resource 
+'Configuration'=$Configuration;
+'Resource'=$Resource
 }
 Get-DryDC @params -DomainFQDN -NoPing
 
-Return's DomainFQDN of the DC at the $Resource's site, if there 
+Return's DomainFQDN of the DC at the $Resource's site, if there
 is one, even though it's down (unpingable)
 #>
 function Get-DryDC{
@@ -45,7 +45,7 @@ function Get-DryDC{
         HelpMessage='Returnes short name of the DC')]
         [Switch]$ShortName,
 
-        [Parameter(HelpMessage="Don't require response to 
+        [Parameter(HelpMessage="Don't require response to
         ping -  just gimme it")]
         [Switch]$NoPing,
 
@@ -55,7 +55,7 @@ function Get-DryDC{
         [Parameter(Mandatory)]
         [PSObject]$Resource
     )
-    
+
     try{
         $Role = $Configuration.RoleMetaConfigs | Where-Object{
             $_.Role -eq "$Role"

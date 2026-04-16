@@ -5,16 +5,16 @@
   .DESCRIPTION
   The dry.module.log module exports the function 'Out-DryLog' that is universally
   used in the DryDeploy project. The function logs and manages text displayed on
-  the console. Set-DryLoggingOptions gets and sets logging options for Out-DryLog. 
-  The Out-DryLog function defines itself a set of defaults, but only if a global 
-  variable $GLOBAL:LoggingOptions does not exist.It first sets the defaults, den DryDeploy's SystemOptions.json may define one or more options that will 
-  override the default options. Lastly, the user may define a UserOptions.json that 
+  the console. Set-DryLoggingOptions gets and sets logging options for Out-DryLog.
+  The Out-DryLog function defines itself a set of defaults, but only if a global
+  variable $GLOBAL:LoggingOptions does not exist.It first sets the defaults, den DryDeploy's SystemOptions.json may define one or more options that will
+  override the default options. Lastly, the user may define a UserOptions.json that
   may define one or more options that will override both the systemoptions and the
   default options.
 
   .PARAMETER SystemConfig
-  A logging options object defined by the system. Any value defined in the 
-  SystemConfig overrides values defined by default. 
+  A logging options object defined by the system. Any value defined in the
+  SystemConfig overrides values defined by default.
 
    .PARAMETER UserConfig
   A logging options object defined by the user. Any value defined in the UserConfig
@@ -70,7 +70,7 @@ function Set-DryLoggingOptions{
             if($null -ne $SystemConfig."$_".background_color){$LoggingOptions."$_".background_color = $SystemConfig."$_".background_color}
             if($null -ne $SystemConfig."$_".display_location){$LoggingOptions."$_".display_location = $SystemConfig."$_".display_location}
             if($null -ne $SystemConfig."$_".text_type)       {$LoggingOptions."$_".text_type =        $SystemConfig."$_".text_type}
-            
+
             # success and fail also have a status_text property
             if($_ -in @('success','fail')){
                 if($null -ne $SystemConfig."$_".status_text) {$LoggingOptions."$_".status_text =      $SystemConfig."$_".status_text}
@@ -84,19 +84,19 @@ function Set-DryLoggingOptions{
         if($null -ne $UserConfig.warn_on_too_narrow_console){$LoggingOptions.warn_on_too_narrow_console = $UserConfig.warn_on_too_narrow_console}
         if($null -ne $UserConfig.array_first_element_length){$LoggingOptions.array_first_element_length = $UserConfig.array_first_element_length}
         if($null -ne $UserConfig.post_buffer)               {$LoggingOptions.post_buffer =                $UserConfig.post_buffer}
-        
+
         $Streams.foreach({
             if($null -ne $UserConfig."$_".foreground_color){$LoggingOptions."$_".foreground_color = $UserConfig."$_".foreground_color}
             if($null -ne $UserConfig."$_".background_color){$LoggingOptions."$_".background_color = $UserConfig."$_".background_color}
             if($null -ne $UserConfig."$_".display_location){$LoggingOptions."$_".display_location = $UserConfig."$_".display_location}
             if($null -ne $UserConfig."$_".text_type)       {$LoggingOptions."$_".text_type =        $UserConfig."$_".text_type}
-            
+
             # success and fail also have a status_text property
             if($_ -in @('success','fail')){
                 if($null -ne $UserConfig."$_".status_text) {$LoggingOptions."$_".status_text =      $UserConfig."$_".status_text}
             }
         })
-    
+
         # nolog may be specified on the command line and overrides any property log_to_file specified other places
         if($nolog){
             $LoggingOptions.log_to_file = $false
@@ -106,7 +106,7 @@ function Set-DryLoggingOptions{
         # Make path to logfile global, archive existing log and create new log file
         if(($LoggingOptions.path) -and ($LoggingOptions.log_to_file -eq $true)){
             if(Test-Path -Path $LoggingOptions.path -ErrorAction SilentlyContinue){
-                Save-DryArchiveFile -ArchiveFile $LoggingOptions.path -ArchiveFolder $ArchiveDirectory     
+                Save-DryArchiveFile -ArchiveFile $LoggingOptions.path -ArchiveFolder $ArchiveDirectory
             }
             New-Item -Path $LoggingOptions.path -ItemType File -Force | Out-Null
         }

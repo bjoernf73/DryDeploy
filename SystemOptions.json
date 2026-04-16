@@ -23,7 +23,7 @@
                             "MinimumVersion": "2.2"
                         },
                        {
-                            "Name": "Posh-Git", 
+                            "Name": "Posh-Git",
                             "MinimumVersion": "1.0.0"
                         },
                        {
@@ -98,7 +98,7 @@
                             "MinimumVersion": "2.2"
                         },
                        {
-                            "Name": "Posh-Git", 
+                            "Name": "Posh-Git",
                             "MinimumVersion": "1.0.0"
                         },
                        {

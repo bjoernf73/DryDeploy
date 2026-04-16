@@ -1,7 +1,7 @@
 <#
- This module is a string-pattern-in-object-propety-values replacement module 
+ This module is a string-pattern-in-object-propety-values replacement module
  for use with DryDeploy
- 
+
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
  LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.module.pattern.replace/main/LICENSE
 #>
@@ -24,7 +24,7 @@ function Resolve-DryReplacementPatterns{
     try{
         if(($InputObject -is [array]) -and $InputObject.count -eq 0){
             return
-        } 
+        }
         elseif($InputObject){
             if($InputObject -is [array]){
                 # make a copy of the object, so changes don't infect the original
@@ -42,19 +42,19 @@ function Resolve-DryReplacementPatterns{
                     $PropertyName  = $_.Name
                     $PropertyValue = $_.Value
                     if(($PropertyName -match "common_variables$") -or ($PropertyName -match "resource_variables$")){
-                        # the common_variables and resource_variables define the strings to replace, so 
+                        # the common_variables and resource_variables define the strings to replace, so
                         # avoid replacing them, return the original object
                     }
                     elseif($PropertyValue -is [string]){
                         # if name is a string, we can replace
-                        $PropertyValue = Resolve-DryReplacementPattern -InputText $PropertyValue -Variables $Variables     
+                        $PropertyValue = Resolve-DryReplacementPattern -InputText $PropertyValue -Variables $Variables
                     }
                     elseif($PropertyValue -is [array]){
                         # nested call for each element in array
-                        $PropertyValue = @($PropertyValue | Foreach-Object{ 
+                        $PropertyValue = @($PropertyValue | Foreach-Object{
                             if($_ -is [string]){
                                 Resolve-DryReplacementPatterns -InputText $_ -Variables $Variables
-                            } 
+                            }
                             else{
                                 Resolve-DryReplacementPatterns -InputObject $_ -Variables $Variables
                             }
@@ -63,13 +63,13 @@ function Resolve-DryReplacementPatterns{
                     elseif($PropertyValue -is [PSObject]){
                         # nested call
                         $PropertyValue = Resolve-DryReplacementPatterns -InputObject $PropertyValue -Variables $Variables
-                    } 
+                    }
                     $CopyObject."$PropertyName" = $PropertyValue
                 }
                 return $CopyObject
             }
-        } 
-        else{ 
+        }
+        else{
             Resolve-DryReplacementPattern -InputText $InputText -Variables $Variables
         }
     }

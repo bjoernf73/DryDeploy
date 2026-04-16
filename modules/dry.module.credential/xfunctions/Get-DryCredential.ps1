@@ -26,5 +26,5 @@ function Get-DryCredential{
     }
     catch{
         $PSCmdlet.ThrowTerminatingError($_)
-    }    
+    }
 }

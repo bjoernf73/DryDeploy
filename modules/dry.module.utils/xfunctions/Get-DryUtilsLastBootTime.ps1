@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -7,16 +7,16 @@
 
 
 function Get-DryUtilsLastBootTime{
-    [cmdletbinding()]            
+    [cmdletbinding()]
     param(
         [Parameter(Mandatory)]
         [System.Management.Automation.Runspaces.PSSession]$Session
     )
     $ScriptBlock ={
         try{
-            $Result = ( 
-                Get-CimInstance -ClassName win32_operatingsystem | 
-                Select-Object -Property lastbootuptime).lastbootuptime 
+            $Result = (
+                Get-CimInstance -ClassName win32_operatingsystem |
+                Select-Object -Property lastbootuptime).lastbootuptime
             return $Result
         }
         catch{

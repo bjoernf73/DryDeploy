@@ -1,7 +1,7 @@
-<# 
+<#
  This module provides core functionality for DryDeploy.
 
- 
+
 #>
 
 function Copy-DryActionConfigurations{
@@ -16,7 +16,7 @@ function Copy-DryActionConfigurations{
         [Parameter()]
         [string]$ConfigOSSourcePath
     )
-    
+
     try{
         # Make sure TargetFolderPath is empty
         if(Test-Path -Path $ConfigTargetPath -ErrorAction Ignore){
@@ -30,8 +30,8 @@ function Copy-DryActionConfigurations{
             ol i "Role source","$ConfigSourcePath"
             # Copy all Role configuration files to $ConfigTargetPath
             ol v "& robocopy.exe `"$ConfigSourcePath`" `"$ConfigTargetPath`" /E"
-            & robocopy.exe "$ConfigSourcePath" "$ConfigTargetPath" /E  *>&1 | 
-            Tee-Object -Variable RoboOutput | 
+            & robocopy.exe "$ConfigSourcePath" "$ConfigTargetPath" /E  *>&1 |
+            Tee-Object -Variable RoboOutput |
             Out-Null
 
             if($LASTEXITCODE -gt 7){
@@ -57,8 +57,8 @@ function Copy-DryActionConfigurations{
         if($ConfigOSSourcePath){
             ol i "Copy including OS configs from source","$ConfigOSSourcePath"
             ol v "& robocopy.exe `"$ConfigOSSourcePath`" `"$ConfigTargetPath`" /E"
-            & robocopy.exe "$ConfigOSSourcePath" "$ConfigTargetPath" /E  *>&1 | 
-            Tee-Object -Variable RoboOutput | 
+            & robocopy.exe "$ConfigOSSourcePath" "$ConfigTargetPath" /E  *>&1 |
+            Tee-Object -Variable RoboOutput |
             Out-Null
 
             if($LASTEXITCODE -gt 7){

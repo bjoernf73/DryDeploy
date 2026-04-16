@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -8,32 +8,32 @@
 
 <#
 .SYNOPSIS
-Tests a Directory for specific properties 
+Tests a Directory for specific properties
 
 .DESCRIPTION
-Tests a directory for specific properties, like does it exist, 
-is it empty and so on. Can also create the directory if it does 
-not exist 
-   
+Tests a directory for specific properties, like does it exist,
+is it empty and so on. Can also create the directory if it does
+not exist
+
 .PARAMETER EmptyOrNotExist
 Will only pass if the directory either a. does exist, or, if it
 does, b. it is empty. else, an error is thrown
 
 .PARAMETER NotExist
-Will only pass if the directory either does not exist 
+Will only pass if the directory either does not exist
 
 .PARAMETER Exist
 Will only pass if the directory exists
 
 .PARAMETER Create
-If all tests passes, the directory will be created if it does 
+If all tests passes, the directory will be created if it does
 not exist
 
 .EXAMPLE
 Test-DryUtilsDirectory -Path 'c:\test' -EmptyOrNotExist -Create
-If the directory does not exist, or it it exists but is empty, 
-the test passes. If the directory does not exist, it will be 
-created.  
+If the directory does not exist, or it it exists but is empty,
+the test passes. If the directory does not exist, it will be
+created.
 
 .EXAMPLE
 Test-DryUtilsDirectory -Path 'c:\test' -NotExist
@@ -49,7 +49,7 @@ function Test-DryUtilsDirectory{
         [Parameter(Mandatory)]
         [System.IO.DirectoryInfo]$Path,
 
-        [Parameter(HelpMessage="Will pass if the directory does not exist, 
+        [Parameter(HelpMessage="Will pass if the directory does not exist,
         or if it exists but is empty")]
         [Switch]$EmptyOrNotExist,
 
@@ -63,10 +63,10 @@ function Test-DryUtilsDirectory{
         already exist")]
         [Switch]$Create
     )
-    
+
     try{
         $Validated = $false
-        
+
         if($EmptyOrNotExist){
             # Will pass if the directory does not exist, or if it exists and is empty
             if(-not (Test-Path -Path $Path -ErrorAction Ignore)){
@@ -99,7 +99,7 @@ function Test-DryUtilsDirectory{
         if($Exist){
             # Will pass if the directory exists
             if(
-                (Test-Path -Path $Path -ErrorAction Ignore) -and 
+                (Test-Path -Path $Path -ErrorAction Ignore) -and
                 ((Get-Item -Path $Path).PSisContainer -eq $true)
             ){
                 $Validated = $true

@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides core functionality for DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -27,7 +27,7 @@ function Get-DryConfigCombo{
     )
     try{
         $SystemDependencies = $SystemOptions.dependencies."$($Platform.platform)"."$($Platform.edition)"
-        # Create the PSCustomObject 
+        # Create the PSCustomObject
         $ConfigCombo = [PSCustomObject]@{
             name                     = 'default'
             path                     = "$Path"
@@ -37,7 +37,7 @@ function Get-DryConfigCombo{
             moduleconfig             = [PSCustomObject]@{ name = ''; type = 'module';       guid = ''; path = $null; description = ''; dependencies_hash = ''; dependencies = $null; buildpath = $null; rolespath = $null; credentialspath = $null}
             systemconfig             = [PSCustomObject]@{ name = ''; type = 'system';       interactive = $false;                      dependencies_hash = ''; dependencies = $null}
         }
-        
+
         $ConfigCombo.systemconfig.name = 'DryDeploy'
         if($null -ne $SystemDependencies){
             $ConfigCombo.systemconfig.dependencies = $SystemDependencies
@@ -50,7 +50,7 @@ function Get-DryConfigCombo{
         $ConfigCombo | Add-Member -MemberType ScriptMethod -Name 'TestDepHash' -Value $dry_core_sb_configcombo_testdephash
         $ConfigCombo | Add-Member -MemberType ScriptMethod -Name 'Change'      -Value $dry_core_sb_configcombo_change
         $ConfigCombo | Add-Member -MemberType ScriptMethod -Name 'Show'        -Value $dry_core_sb_configcombo_show
-        
+
         if($ConfigCombo.Exists()){
             $ConfigCombo.Read($NewEnvConfig,$NewModuleConfig)
         }

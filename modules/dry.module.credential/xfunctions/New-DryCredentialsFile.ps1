@@ -12,7 +12,7 @@ function New-DryCredentialsFile{
     )
 
     try{
-        
+
         if(Test-Path -Path $Path -ErrorAction SilentlyContinue){
             ol d "The Credentials file exists already"
         }
@@ -22,10 +22,10 @@ function New-DryCredentialsFile{
                 path        = "$Path"
                 accessed    = $null
             }
-            Save-DryUtilsToJson -Path $Path -InputObject $Credentials 
+            Save-DryUtilsToJson -Path $Path -InputObject $Credentials
         }
     }
     catch{
         $PSCmdlet.ThrowTerminatingError($_)
-    }    
+    }
 }

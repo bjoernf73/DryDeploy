@@ -33,5 +33,5 @@ function Add-DryCredentialPlaceholder{
     }
     catch{
         $PSCmdlet.ThrowTerminatingError($_)
-    }    
+    }
 }

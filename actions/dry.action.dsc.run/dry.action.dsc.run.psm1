@@ -1,8 +1,8 @@
-# This module is an action module for use with DryDeploy. It runs a DSC 
+# This module is an action module for use with DryDeploy. It runs a DSC
 # Config on a target
 # Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
 # LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.action.dsc.run/main/LICENSE
-# 
+#
 
 
 # Dot source all functionscripts - the manifest limits exported functions

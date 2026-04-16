@@ -1,6 +1,6 @@
-<# 
-    This module contains functions to resolve, get, modify and show a DryDeploy 
-    Plan.  
+<#
+    This module contains functions to resolve, get, modify and show a DryDeploy
+    Plan.
 
     Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
     LICENSE: https://raw.githubusercontent.com/bjoernf73/DryDeploy/main/LICENSE
@@ -35,7 +35,7 @@ function Get-DryPlan{
         $ActionNames,
 
         [Parameter()]
-        [array] 
+        [array]
         $ExcludeActionNames,
 
         [Parameter()]
@@ -62,9 +62,9 @@ function Get-DryPlan{
     $Plan = [Plan]::New($PlanFile)
     $PlanFilter = [PlanFilter]::New($ResourceNames,$ExcludeResourceNames,$RoleNames,$ExcludeRoleNames,$ActionNames,$ExcludeActionNames,$Phases,$ExcludePhases,$BuildSteps,$ExcludeBuildSteps)
     <#
-        At runtime (i.e. when you -Apply), selections made by the the parameters -Resources, 
-        -Roles, -Actions and -Phases, are only applied to actions that are already selected in the 
-        current Plan (i.e. when you -Plan). At each -Apply, the ApplySelected is reevaluated. 
+        At runtime (i.e. when you -Apply), selections made by the the parameters -Resources,
+        -Roles, -Actions and -Phases, are only applied to actions that are already selected in the
+        current Plan (i.e. when you -Plan). At each -Apply, the ApplySelected is reevaluated.
     #>
     $Plan.Actions.foreach({
         if($_.PlanSelected -eq $true){
@@ -94,7 +94,7 @@ function Get-DryPlan{
             $Plan.ActiveActions++
         }
     })
-    
+
     $Plan.Save($PlanFile,$false,$null)
     return $Plan
 }

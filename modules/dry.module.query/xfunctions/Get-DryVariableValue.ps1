@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides query functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -7,21 +7,21 @@
 
 <#
 .SYNOPSIS
-Gets a named variable value from $Variables 
+Gets a named variable value from $Variables
 
 .DESCRIPTION
 Variables is a (System.Collections.Generic.)List of PSObjects
 with a name and value property. You pass in $Variables and the
-name, I return the value 
-   
+name, I return the value
+
 .PARAMETER Variables
 The [System.Collections.Generic.List] containing [PSObject]s
-with a name and a value property 
+with a name and a value property
 
 .EXAMPLE
 Get-DryVariableValue -Variables $Variables -Name DomainNB
-Returns the value property of the PSObject in $Variables 
-that has a .name property of 'DomainNB' 
+Returns the value property of the PSObject in $Variables
+that has a .name property of 'DomainNB'
 #>
 function Get-DryVariableValue{
     param(
@@ -31,7 +31,7 @@ function Get-DryVariableValue{
         [Parameter(HelpMessage="The variable name to get from `$Variables")]
         [string]$Name
     )
-    
+
     try{
         Remove-Variable -Name Variable -ErrorAction Ignore
         $Variable = $Variables | Where-Object{
@@ -47,7 +47,7 @@ function Get-DryVariableValue{
         }
         else{
             return $Variable.Value
-        } 
+        }
     }
     catch{
         $PSCmdlet.ThrowTerminatingError($_)

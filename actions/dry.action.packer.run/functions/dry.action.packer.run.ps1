@@ -1,6 +1,6 @@
 using namespace System.Collections.Generic
 function dry.action.packer.run{
-    [CmdletBinding()]  
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory,HelpMessage="The resolved action object")]
         [PSObject]
@@ -15,7 +15,7 @@ function dry.action.packer.run{
         [PSObject]
         $Configuration,
 
-        [Parameter(HelpMessage="Hash directly from the command line to be 
+        [Parameter(HelpMessage="Hash directly from the command line to be
         added as parameters to the function that iniates the action")]
         [hashtable]
         $ActionParams
@@ -34,24 +34,24 @@ function dry.action.packer.run{
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   METACONFIG
         #   The MetaConfig is a configfile with info about the actual Packer config
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         [PSObject]$MetaConfig = $Resolved.TypeMetaConfig
         Set-Variable -Name 'MetaConfig' -Value $MetaConfig -Scope Global -Force
 
-        
+
         ol i @('Packer vars file',"$TargetVarsFile")
-       
+
         # Remove files that may exist from a previous run
         if(Test-Path -Path $ConfigTargetPath -ErrorAction Ignore){
             ol i @('Removing ConfigFiles from',"$ConfigTargetPath")
             Remove-Item -Path $ConfigTargetPath -Recurse -Force -Confirm:$false
         }
-        
+
         # Create the target folder
         if(-not (Test-Path -Path $ConfigTargetPath -ErrorAction Ignore)){
             New-Item -Path $ConfigTargetPath -ItemType Directory -Confirm:$false -Force | Out-Null
         }
-        
+
         # Loop through files in the layout
         foreach($File in $MetaConfig.files){
             # define full source and destination
@@ -71,22 +71,22 @@ function dry.action.packer.run{
                 }
             }
         }
-        
+
         # Output the vars file. Using json, we don't have to create a shady text-parsing-function for this.
-        # Use utf8 by default, but allow the configuration to modify that by specifying vars_encoding 
+        # Use utf8 by default, but allow the configuration to modify that by specifying vars_encoding
         $Encoding = 'ascii'
         if($MetaConfig.vars_encoding){
             $Encoding = $MetaConfig.vars_encoding
         }
-        $VariablesHash | 
-        ConvertTo-Json -Depth 50 -ErrorAction Stop | 
+        $VariablesHash |
+        ConvertTo-Json -Depth 50 -ErrorAction Stop |
         Out-File -FilePath $TargetVarsFile -Encoding $Encoding -ErrorAction Stop
 
         # Make sure the tested Packer version or newer is installed and in path.
         # The $TestedPackerVersion is defined in the top of this file. Eventually, as
-        # dry.module.pkgmgmt is implemented, this will call a function in that module 
+        # dry.module.pkgmgmt is implemented, this will call a function in that module
         # instead
-        if(Get-Command -CommandType Application -Name 'packer'){ 
+        if(Get-Command -CommandType Application -Name 'packer'){
             [Version]$Version = ("{0}" -f ((& packer version) -replace "^Packer v"))
             if($Version -lt $TestedPackerVersion){
                 throw "You need Packer $($TestedPackerVersion.ToString()) or newer installed and in path"
@@ -94,11 +94,11 @@ function dry.action.packer.run{
             else{
                 ol i "Packer version installed","v$($Version.ToString())"
             }
-            $PackerExe = (Get-Command -Name 'packer' | 
+            $PackerExe = (Get-Command -Name 'packer' |
                 Select-Object -Property Source).Source
-        } 
-        else{ 
-            throw "You need to have Packer v$TestedPackerVersion (minimum) installed and in path" 
+        }
+        else{
+            throw "You need to have Packer v$TestedPackerVersion (minimum) installed and in path"
         }
 
         # Packer Arguments
@@ -110,14 +110,14 @@ function dry.action.packer.run{
 
             $DisplayArguments += "-var"
             $DisplayArguments += "$($Var.Name)=`"**********`""
-            
+
         }
         $ValidateArguments = $Arguments
         $ValidateDisplayArguments = $DisplayArguments
-        
+
         $ValidateArguments += "$($PackerFile.FullName)"
         $ValidateDisplayArguments += "$($PackerFile.FullName)"
-        
+
         # cd to target
         Set-Location -Path $ConfigTargetPath -ErrorAction Stop
 
@@ -125,20 +125,20 @@ function dry.action.packer.run{
         ol i @('Packer Validate',"& $PackerExe validate $ValidateDisplayArguments")
         & $PackerExe validate $ValidateArguments
         if($LastExitCode -ne 0){
-            throw "Packer Validate failed: $LastExitCode" 
+            throw "Packer Validate failed: $LastExitCode"
         }
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   ACTIONPARAMS
-        #   When working with a single Action type, for instance during development, 
-        #   it is possible to pass a hashtable of extra commmand line paramaters to 
-        #   DryDeploy that will be passed to the receiving program, in this case 
+        #   When working with a single Action type, for instance during development,
+        #   it is possible to pass a hashtable of extra commmand line paramaters to
+        #   DryDeploy that will be passed to the receiving program, in this case
         #   Packer.
-        #   Params may be switches (like '-no-color') or key value pairs 
-        #   (like '-parallelism=2'). The hash table should in these two cases look 
-        #   like this: 
+        #   Params may be switches (like '-no-color') or key value pairs
+        #   (like '-parallelism=2'). The hash table should in these two cases look
+        #   like this:
         #       $ActionParams = @{
-        #            'no-color'    = $null 
+        #            'no-color'    = $null
         #            'parallelism' = 2
         #       }
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -163,7 +163,7 @@ function dry.action.packer.run{
         if($GLOBAL:dry_var_global_Force){
             $Arguments.Insert(0,"-force")
             $DisplayArguments.Insert(0,"-force")
-            
+
         }
 
         # add on-error
@@ -177,25 +177,25 @@ function dry.action.packer.run{
         }
         $Arguments.Insert(0,"-on-error=$OnError")
         $DisplayArguments.Insert(0,"-on-error=$OnError")
-        
+
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         #   Packer Build
-        #   
+        #
         #   Build the config
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         ol i @('Packer Build',"& $PackerExe build $DisplayArguments")
         # ol i @('Packer Build',"& $PackerExe build $Arguments")
         & $PackerExe build $Arguments
-        
+
         if($LastExitCode -ne 0){
-            throw "Packer Build failed: $LastExitCode" 
+            throw "Packer Build failed: $LastExitCode"
         }
 
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-            if dhcp, update the resource with IP from packer. 
+            if dhcp, update the resource with IP from packer.
 
-            This is dependent on the packer config containing provisioners that 
-            a. put's the ip of the target machine in a utf8-encoded file named '62f93fde-f2c1-437f-81f5-8abcdcd48444.ip4'. The file must use EXACTLY this name - it is NOT variable. 
+            This is dependent on the packer config containing provisioners that
+            a. put's the ip of the target machine in a utf8-encoded file named '62f93fde-f2c1-437f-81f5-8abcdcd48444.ip4'. The file must use EXACTLY this name - it is NOT variable.
             b. downloads the file to the local machine to the $Configuration.ConfigTargetPath folder
 
             provisioner "powershell"{
@@ -203,7 +203,7 @@ function dry.action.packer.run{
                 elevated_password = "${var.winrm_password}"
                 elevated_user     = "${var.winrm_username}"
                 inline            = [
-                    "Write-Output 'Get the IP, save to C:\\62f93fde-f2c1-437f-81f5-8abcdcd48444.ip4'", 
+                    "Write-Output 'Get the IP, save to C:\\62f93fde-f2c1-437f-81f5-8abcdcd48444.ip4'",
                     "Get-NetIPAddress -AddressFamily IPv4 | Where-Object{ $_.PrefixOrigin -eq 'DHCP'} | Select-Object -ExpandProperty IPAddress | Out-File -FilePath C:\\62f93fde-f2c1-437f-81f5-8abcdcd48444.ip4 -Encoding UTF8 -Force"
                 ]
                 valid_exit_codes  = [0]
@@ -218,9 +218,9 @@ function dry.action.packer.run{
             }
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         $dry_var_IPRegex = [regex]"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-        if(($Action.Resource.Resolved_Network.IP_Address -eq 'dhcp') -and 
+        if(($Action.Resource.Resolved_Network.IP_Address -eq 'dhcp') -and
             (Test-Path -Path $IPFile -ErrorAction Ignore)){
-            
+
             ol v "Packer IP GUID-file ($IPFile) exists. Trying to resolve IP of the resource"
             $GLOBAL:dry_var_global_ResolvedIPv4 = Get-Content -Path $IPFile -Encoding utf8 -ErrorAction Stop
             if($GLOBAL:dry_var_global_ResolvedIPv4 -match $dry_var_IPRegex){

@@ -1,4 +1,4 @@
-<# 
+<#
  This module establishes sessions to target machines for use by DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -35,7 +35,7 @@ function Invoke-DryInPSSession{
         [Switch]$IgnoreErrors
 
     )
-    
+
     try{
         $GetDrySessionParameters = @{
             ComputerName  = $ComputerName
@@ -45,7 +45,7 @@ function Invoke-DryInPSSession{
             IgnoreErrors  = $IgnoreErrors
         }
         $Session = New-DrySession @GetDrySessionParameters
-        
+
         if($Session.Availability -eq "Available"){
             switch($pscmdlet.parametersetname){
                 'Command'{
@@ -53,14 +53,14 @@ function Invoke-DryInPSSession{
                         $Result = Invoke-Command -session $Session -ScriptBlock{
                             param($RemoteCommand,$RemoteArgumenstSplat)
                             return & ($RemoteCommand) @RemoteArgumenstSplat
-                            
+
                         } -ArgumentList $Command, $Arguments
                     }
                     else{
                         $Result = Invoke-Command -session $Session -ScriptBlock{
                             param($RemoteCommand)
                             return & ($RemoteCommand)
-                            
+
                         } -ArgumentList $Command
                     }
                 }
@@ -78,7 +78,7 @@ function Invoke-DryInPSSession{
                             param($RemoteCommand,$RemoteArgumenstString)
                             & ($RemoteCommand) $RemoteArgumenstString
                             return $LASTEXITCODE
-                            
+
                         } -ArgumentList $Command, $ArgumentString
                     }
                     else{
@@ -86,12 +86,12 @@ function Invoke-DryInPSSession{
                             param($RemoteCommand)
                             & ($RemoteCommand)
                             return $LASTEXITCODE
-                            
+
                         } -ArgumentList $Command
                     }
                 }
             }
-        } 
+        }
         else{
             if($IgnoreErrors){
                 return $false
@@ -99,10 +99,10 @@ function Invoke-DryInPSSession{
             else{
                 throw "Unable to start PSSession to $ComputerName"
             }
-        }  
+        }
     }
     catch{
-        $PSCmdlet.ThrowTerminatingError($_) 
+        $PSCmdlet.ThrowTerminatingError($_)
     }
     finally{
         $Session | Remove-PSSession -ErrorAction Ignore

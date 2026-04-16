@@ -1,6 +1,6 @@
-<# 
- This module provides functions for bootstrapping package management, 
- registering package sources and package installations for use with 
+<#
+ This module provides functions for bootstrapping package management,
+ registering package sources and package installations for use with
  DryDeploy. ModuleConfigs may specify dependencies in it's root config
  that this module processes.
 
@@ -10,7 +10,7 @@
 
 function Install-DryChocoPackage{
     [CmdLetBinding()]
-    
+
     param(
         [Parameter(HelpMessage="Name of the Package to install")]
         [string]$Name,

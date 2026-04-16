@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -8,7 +8,7 @@
 function Resolve-DryUtilsFullPath{
     [CmdLetBinding()]
     [OutputType([System.String],[System.Management.Automation.PathInfo],[System.IO.FileInfo],[System.IO.DirectoryInfo])]
-    
+
     param(
         [Parameter(Mandatory,HelpMessage="Releative or absolute path of any kind")]
         [ValidateNotNullOrEmpty()]

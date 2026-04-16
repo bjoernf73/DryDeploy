@@ -1,5 +1,5 @@
 function dry.action.ansible.wsl{
-    [CmdletBinding()]  
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory,HelpMessage="The resolved action object")]
         [PSObject]$Action,
@@ -23,7 +23,7 @@ function dry.action.ansible.wsl{
             $AnsibleConnectionType = $Resolved.TypeMetaConfig.connection
         }
         ol i @('Ansible connection type',$AnsibleConnectionType)
-        
+
         # Authentication type can be password or key, defaults to password
         $AnsibleAuthenticationType = 'password'
         if($Resolved.TypeMetaConfig.authentication -notin 'password', 'key', $null){
@@ -51,17 +51,17 @@ function dry.action.ansible.wsl{
             # we need to run the ansible playbook in wsl
             $AnsibleWsl = $true
         }
-        
+
         # the entrypoint of the ansible playbook must be the main.yml at root
         switch($AnsibleWsl){
             $true {
                 ol i @("ansible-playbook environment","wsl (running DryDeploy on Windows)")
                 $AnsiblePlaybookPath = $Resolved.WslConfigSourcePath + "/main.yml"
-            
+
                 # ansible inventory ini file in powershell on windows and the wsl equivalent
                 $TargetInventoryFile = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name)-inv.ini"
                 $LinuxTargetInventoryFile = $Resolved.WslConfigTargetPath + "/$($Action.Resource.Name)-inv.ini"
-                
+
                 # ansible log file in powershell on windows and the wsl equivalent
                 $AnsibleLogFile = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name)-ansible.log"
                 $LinuxAnsibleLogFile = $Resolved.WslConfigTargetPath + "/$($Action.Resource.Name)-ansible.log"
@@ -69,7 +69,7 @@ function dry.action.ansible.wsl{
             $false {
                 ol i @("ansible-playbook environment","native (running DryDeploy on Linux)")
                 $AnsiblePlaybookPath = $Resolved.ConfigSourcePath + "/main.yml"
-                
+
                 # ansible inventory ini and log file paths
                 $TargetInventoryFile = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name)-inv.ini"
                 $AnsibleLogFile = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name)-ansible.log"
@@ -79,18 +79,18 @@ function dry.action.ansible.wsl{
                 $LinuxAnsibleLogFile = $AnsibleLogFile
             }
         }
-        
+
         # remove files that may exist from a previous run
         if(Test-Path -Path $Resolved.ConfigTargetPath -ErrorAction Ignore){
             Remove-Item -Path $Resolved.ConfigTargetPath -Recurse -Force -Confirm:$false
         }
-        
+
         # create the target folder
         if(-not (Test-Path -Path $Resolved.ConfigTargetPath -ErrorAction Ignore)){
             New-Item -Path $Resolved.ConfigTargetPath -ItemType Directory -Confirm:$false -Force | Out-Null
         }
 
-        # output to screen 
+        # output to screen
         ol i @('Ansible playbook entrypoint',"$AnsiblePlaybookPath")
         ol i @('Inventory file path',"$LinuxTargetInventoryFile")
         ol i @('Log file path',"$LinuxAnsibleLogFile")
@@ -120,7 +120,7 @@ function dry.action.ansible.wsl{
             else{
                 $ResolvedPort = $Resolved.TypeMetaConfig.psrp_port
             }
-            
+
             $AnsibleTargetString += " ansible_psrp_protocol=$($ResolvedProtocol)"
             $AnsibleTargetString += " ansible_psrp_port=$($ResolvedPort)"
             $AnsibleTargetString += " ansible_psrp_cert_validation=ignore"
@@ -137,18 +137,18 @@ function dry.action.ansible.wsl{
 
         # the inventory file content
         $InventoryINIContent = @"
-# Ansible Inventory file for $($Action.Resource.Name)   
+# Ansible Inventory file for $($Action.Resource.Name)
 [$($Action.Resource.Name)]
 $AnsibleTargetString
 
 [$($Action.Resource.Name):vars]
 
-"@     
+"@
         # variables that are not secrets are written to the inventory file
         foreach($var in $Resolved.vars | Where-Object{ $_.secret -eq $false}){
             $InventoryINIContent += "$($var.Name)=$($var.Value)`n"
         }
-    
+
         # write the inventory file using UTF8 without BOM
         $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
         [system.io.file]::WriteAllLines($TargetInventoryFile, $InventoryINIContent, $Utf8NoBomEncoding)
@@ -156,10 +156,10 @@ $AnsibleTargetString
 
         # ansible-playbook arguments
         [system.collections.arraylist]$Arguments = @(
-            "-i", 
-            $LinuxTargetInventoryFile, 
+            "-i",
+            $LinuxTargetInventoryFile,
             $AnsiblePlaybookPath,
-            "--extra-vars", 
+            "--extra-vars",
             "`"ansible_password=$($Resolved.Credentials.credential1.GetNetworkCredential().Password) ansible_become_pass=$($Resolved.Credentials.credential1.GetNetworkCredential().Password)`""
         )
 
@@ -167,7 +167,7 @@ $AnsibleTargetString
         if($Resolved.TypeMetaConfig.sleep_before_seconds){
             Start-DryUtilsSleep -Seconds $Resolved.TypeMetaConfig.sleep_before_seconds -Message "Sleeping $($Resolved.TypeMetaConfig.sleep_before_seconds) seconds before contacting target"
         }
-       
+
         # add target to known_hosts
         ol i "Add the target [$($Action.Resource.Name) ($($Resolved.Target))] to known_hosts" -sh
         if($true -eq $AnsibleWsl){
@@ -178,7 +178,7 @@ $AnsibleTargetString
             ol i @('command',"ssh-keyscan -H $($Resolved.Target) | grep -v -f ~/.ssh/known_hosts >> ~/.ssh/known_hosts")
             & ssh-keyscan -H $($Resolved.Target) | grep -v -f ~/.ssh/known_hosts >> ~/.ssh/known_hosts
         }
-        
+
 
         # run the playbook
         if($true -eq $AnsibleWsl){
@@ -195,7 +195,7 @@ $AnsibleTargetString
         # use one of these
         #wsl -d Ubuntu -- watch -n 1 ls
         #Start-Process wsl -ArgumentList "-d Ubuntu -- ansible-playbook " -NoNewWindow -Wait
-        
+
         # test if ansible ran successfully. If so, we should have a log file with a PLAY RECAP
         if(Test-Path -Path $AnsibleLogFile -ErrorAction Ignore){
             ol i @('Ansible log file found at',"$AnsibleLogFile")

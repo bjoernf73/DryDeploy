@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides functions to resolve values from expressions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -12,11 +12,11 @@ function ConvertTo-DryHashtable{
         in the returned hashtable")]
         [PSObject[]]$Variables,
 
-        [Parameter(HelpMessage="Variables may have a property 'secret'. If `$NotSecrets is true, and 'secret' is also true, 
+        [Parameter(HelpMessage="Variables may have a property 'secret'. If `$NotSecrets is true, and 'secret' is also true,
         that variable will not be included in the resulting hashtable")]
         [Switch]$NotSecrets,
 
-        [Parameter(HelpMessage="Variables may have a property 'secret'. If `$OnlySecrets is true, only variables who's property 
+        [Parameter(HelpMessage="Variables may have a property 'secret'. If `$OnlySecrets is true, only variables who's property
         'secret' equals true will be included in the returned hashtable")]
         [Switch]$OnlySecrets
     )

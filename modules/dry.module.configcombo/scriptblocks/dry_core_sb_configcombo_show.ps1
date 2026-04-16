@@ -42,7 +42,7 @@
         else{
             ol w "Use -EnvConfig to select an environment"
         }
-        
+
         ol i ' '
         ol i 'ModuleConfig' -sh
         if($null -ne $this.moduleconfig.path){
@@ -53,7 +53,7 @@
         else{
             ol w "Use -ModuleConfig to select a module"
         }
-        ol i ' ' 
+        ol i ' '
         if($SystemDepOK -and $ModuleDepOK -and $EnvDepOK){
             ol i 'Does this config need -Init?','No' -ForegroundColor Green
         }

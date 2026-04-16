@@ -1,7 +1,7 @@
-<# 
+<#
  This module provides core functionality for DryDeploy.
 
- 
+
 #>
 
 function Set-DryConfigData{
@@ -32,7 +32,7 @@ function Set-DryConfigData{
             }
             'yml'{
                 try{
-                    $Configuration | ConvertTo-Yaml -Path $File.FullName -ErrorAction Stop 
+                    $Configuration | ConvertTo-Yaml -Path $File.FullName -ErrorAction Stop
                 }
                 catch [System.Management.Automation.CommandNotFoundException]{
                     ol w 'Missing Powershell Module','powershell-yaml'
@@ -41,10 +41,10 @@ function Set-DryConfigData{
                 catch{
                     throw $_
                 }
-                
+
             }
         }
-    
+
     }
     catch{
         $PSCmdlet.ThrowTerminatingError($_)

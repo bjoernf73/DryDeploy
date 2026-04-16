@@ -2,7 +2,7 @@ using Namespace System.Collections.Generic
 using Namespace System.Collections
 class Resource{
     [string]$Name
-    [string]$Role 
+    [string]$Role
     [string]$Role_Short_Name
     [string]$BaseConfig
     [string]$Description
@@ -53,8 +53,8 @@ class Resource{
         elseif($BuildTemplate -is [array]){
             throw "The Build contains multiple Roles matching '$($This.Role)'"
         }
-        # Get a copy of the Build Object. The Build is now instantiated by a Resource, 
-        # but there may be many Resources in the Plan using that Template. So, not to contaminate 
+        # Get a copy of the Build Object. The Build is now instantiated by a Resource,
+        # but there may be many Resources in the Plan using that Template. So, not to contaminate
         # the Template with the unique GUID of each Action, use a copy
         $ResourceBuild = Get-DryUtilsPSObjectCopy -Object $BuildTemplate
         $ResourceBuild.actions.foreach({

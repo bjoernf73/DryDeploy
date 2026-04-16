@@ -1,5 +1,5 @@
-# Må testes med: 
-# - lists;  of objects, list of strings, 
+# Må testes med:
+# - lists;  of objects, list of strings,
 # - objects; simple one-level-psobject and complex psobjects containing strings, arrays of psobjetcs, array of strings, and so on
 function Out-DryPositionedElement{
     [CmdletBinding(DefaultParameterSetName="updatescreen")]
@@ -12,9 +12,9 @@ function Out-DryPositionedElement{
 
         [Alias("alias")]
         [Parameter(ParameterSetName="updatescreen",Mandatory,
-        HelpMessage="The identifying name of the Object. The Name and it's position will be stored in a variable `$dry_var_global_PositionedElements 
+        HelpMessage="The identifying name of the Object. The Name and it's position will be stored in a variable `$dry_var_global_PositionedElements
         in the global scope, so on subsequent calls, the initial position of `$Name will be used. If `$Position, then that will be used and an entry
-        with the corresponding `$Name will be created in `$dry_var_global_PositionedElements, or overwritten if it exists. If not `$Position, and an 
+        with the corresponding `$Name will be created in `$dry_var_global_PositionedElements, or overwritten if it exists. If not `$Position, and an
         entry with the corresponding `$Name in `$dry_var_global_PositionedElements does not exist, the current cursor position will be used and an entry
         created")]
         [string]$Name,
@@ -31,7 +31,7 @@ function Out-DryPositionedElement{
         HelpMessage="Remove this objects position from the `$dry_var_global_PositionedElements list")]
         [Switch]$Scratch,
 
-        [Alias("fore")]    
+        [Alias("fore")]
         [AllowNull()]
         [Parameter(ParameterSetName="updatescreen",HelpMessage="Override the global options and the default fore color")]
         [Parameter(ParameterSetName="array",HelpMessage="Override the global options and the default fore color")]
@@ -54,14 +54,14 @@ function Out-DryPositionedElement{
         }
 
         if($Scratch){
-            :ScratchLoop foreach($PositionedElement in $GLOBAL:dry_var_global_PositionedElements){ 
-                if($PositionedElement.Name -eq $Name){ 
+            :ScratchLoop foreach($PositionedElement in $GLOBAL:dry_var_global_PositionedElements){
+                if($PositionedElement.Name -eq $Name){
                     $GLOBAL:dry_var_global_PositionedElements.Remove($PositionedElement)
                     break ScratchLoop
                 }
             }
         }
-        
+
         # Determine the position of the element
         if($Position){
             $PositionObj = New-Object -TypeName PSCustomObject -Property @{

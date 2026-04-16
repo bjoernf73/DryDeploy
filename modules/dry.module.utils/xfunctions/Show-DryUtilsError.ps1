@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -20,7 +20,7 @@ function Show-DryUtilsError{
     ol i @('Function',$Function) -Fore Red
     ol i @('Script',$Script) -Fore Red
     ol i @('Line',$Line) -Fore Red
-    
+
     $Exceptions = $Err.Exception.ToString() -split "`n"
     $Exc = 1
     $Exceptions.foreach({

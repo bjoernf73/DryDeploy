@@ -23,7 +23,7 @@ class PlanFilter{
         [Int[]]$ExcludePhases,
         [Int[]]$BuildSteps,
         [Int[]]$ExcludeBuildSteps){
-            
+
         $This.ResourceNames        = $ResourceNames
         $This.ExcludeResourceNames = $ExcludeResourceNames
         $This.RoleNames            = $RoleNames
@@ -42,9 +42,9 @@ class PlanFilter{
         [string]$ActionName,
         [int]$Phase,
         [int]$ActionOrder){
-        
+
         $ResourceValidated = $RoleValidated = $ActionValidated = $PhaseValidated = $ActionOrderValidated = $false
-        
+
         # ResourceName
         if($null -eq $This.ResourceNames){
             $ResourceValidated = $true
@@ -90,7 +90,7 @@ class PlanFilter{
         }
 
         # ExcludeRoleName
-        if($null -eq $This.ExcludeRoleNames){ # do nothin'  
+        if($null -eq $This.ExcludeRoleNames){ # do nothin'
         }
         elseif($RoleName -in $This.ExcludeRoleNames){
             $RoleValidated = $false
@@ -112,9 +112,9 @@ class PlanFilter{
         }
         else{
             $NameMatch = $false
-            $NameMatch = Invoke-Command -Scriptblock{($This.ActionNames).foreach({if($ActionName -match "^$_"){$NameMatch = $true}}); return $NameMatch} 
+            $NameMatch = Invoke-Command -Scriptblock{($This.ActionNames).foreach({if($ActionName -match "^$_"){$NameMatch = $true}}); return $NameMatch}
             if($NameMatch){
-                $ActionValidated = $true 
+                $ActionValidated = $true
             }
         }
 
@@ -128,7 +128,7 @@ class PlanFilter{
             $NameMatch = $false
             $NameMatch = Invoke-Command -Scriptblock{($This.ExcludeActionNames).foreach({if($ActionName -match "^$_"){$NameMatch = $true}}); return $NameMatch}
             if($NameMatch){
-                $ActionValidated = $false 
+                $ActionValidated = $false
             }
         }
 
@@ -165,9 +165,9 @@ class PlanFilter{
         }
 
         # return true only if all are validated, false if not
-        if($ResourceValidated -and 
+        if($ResourceValidated -and
             $RoleValidated -and
-            $ActionValidated -and 
+            $ActionValidated -and
             $PhaseValidated -and
             $ActionOrderValidated){
             return $true

@@ -14,18 +14,18 @@
     PrivateData = @{
         PSData = @{
             Tags = @(
-                'Deployment', 
-                'Windows Deployment', 
-                'Automation', 
-                'Windows Automation', 
-                'Orchestration', 
+                'Deployment',
+                'Windows Deployment',
+                'Automation',
+                'Windows Automation',
+                'Orchestration',
                 'Windows Orchestration',
                 'Powershell',
-                'anti-SCCM', 
+                'anti-SCCM',
                 'DSC',
                 'Desired State Configuration',
-                'packer', 
-                'terraform', 
+                'packer',
+                'terraform',
                 'ansible'
             )
             LicenseUri = 'https://github.com/bjoernf73/DryDeploy/blob/main/LICENSE'

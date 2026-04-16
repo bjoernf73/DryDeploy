@@ -2,9 +2,9 @@ Using Namespace System.Collections.Generic
 Using Namespace System.Management.Automation
 Using Namespace System.IO
 function dry.action.terra.run{
-    [CmdletBinding()]  
+    [CmdletBinding()]
     param(
-        [Parameter(Mandatory,HelpMessage="The resolved action 
+        [Parameter(Mandatory,HelpMessage="The resolved action
         object")]
         [PSObject]
         $Action,
@@ -13,13 +13,13 @@ function dry.action.terra.run{
         [PSObject]
         $Resolved,
 
-        [Parameter(Mandatory,HelpMessage="The resolved global 
+        [Parameter(Mandatory,HelpMessage="The resolved global
         configuration object")]
         [PSObject]
         $Configuration,
 
-        [Parameter(HelpMessage="Hash directly from the command 
-        line to be added as parameters to the function that 
+        [Parameter(HelpMessage="Hash directly from the command
+        line to be added as parameters to the function that
         iniates the action")]
         [hashtable]
         $ActionParams
@@ -34,29 +34,29 @@ function dry.action.terra.run{
         [string]    $TargetVarsFile   = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name).auto.tfvars.json"
         [string]    $TargetStateFile  = Join-Path -Path $Resolved.ConfigTargetPath -ChildPath "$($Action.Resource.Name).tfstate"
         [hashtable] $VariablesHash    = ConvertTo-DryHashtable -Variables $Resolved.vars -NotSecrets
-        
+
         # Output the tfvars file. Using json, we don't have to create a shady text-parsing-function for this.
-        # Use ascii by default, but allow the configuration to modify that by specifying tfvars_encoding 
+        # Use ascii by default, but allow the configuration to modify that by specifying tfvars_encoding
         $Encoding = 'ascii'
         if($Resolved.MetaConfig.tfvars_encoding){
             $Encoding = $Resolved.MetaConfig.tfvars_encoding
         }
-        $VariablesHash | 
-        ConvertTo-Json -Depth 50 -ErrorAction Stop | 
+        $VariablesHash |
+        ConvertTo-Json -Depth 50 -ErrorAction Stop |
         Out-File -FilePath $TargetVarsFile -Encoding $Encoding -ErrorAction Stop -Force
-        
+
         Set-Location -Path $Resolved.ConfigSourcePath -ErrorAction Stop
 
         # Terraform Init
-        & terraform init 
+        & terraform init
         if($LastExitCode -ne 0){
-            throw "Terraform Init failed: $LastExitCode" 
+            throw "Terraform Init failed: $LastExitCode"
         }
-        
+
         # Terraform Validate
         & terraform validate
         if($LastExitCode -ne 0){
-            throw "Terraform Validate failed: $LastExitCode" 
+            throw "Terraform Validate failed: $LastExitCode"
         }
 
         # Terraform Apply
@@ -70,18 +70,18 @@ function dry.action.terra.run{
 
         <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
             ActionParams
-            When working with a single Action type, for instance during development, 
-            it is possible to pass a hashtable of extra commmand line paramaters to 
-            DryDeploy.ps1 that will be passed to the receiving program, in this case 
-            Terraform.  
+            When working with a single Action type, for instance during development,
+            it is possible to pass a hashtable of extra commmand line paramaters to
+            DryDeploy.ps1 that will be passed to the receiving program, in this case
+            Terraform.
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
         if($ActionParams){
             foreach($ActionParam in $ActionParams.GetEnumerator()){
                 <#
                     Params may be switches (like '-no-color') or key value pairs (like '-parallelism=2')
-                    The hash table should in these two cases look like this: 
+                    The hash table should in these two cases look like this:
                     $ActionParams = @{
-                        'no-color'    = $null 
+                        'no-color'    = $null
                         'parallelism' = 2
                     }
                 #>
@@ -101,7 +101,7 @@ function dry.action.terra.run{
         ol v "& terraform apply -auto-approve $Arguments"
         & terraform apply -auto-approve $Arguments
         if($LastExitCode -ne 0){
-            throw "Terraform Apply failed: $LastExitCode" 
+            throw "Terraform Apply failed: $LastExitCode"
         }
         else{
             <# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -109,7 +109,7 @@ function dry.action.terra.run{
             # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #>
             if($Action.Resource.Resolved_Network.IP_Address -eq 'dhcp'){
                 ol v "Getting IP of the resource"
-                $StateObj = $null 
+                $StateObj = $null
                 $StateResource = $null
                 $StateObj = Get-Content -Path $TargetStateFile | ConvertFrom-Json
                 $StateResource = $StateObj.Resources | Where-Object{
@@ -128,7 +128,7 @@ function dry.action.terra.run{
                     }
                 }
             }
-        }   
+        }
     }
     catch{
         $PSCmdlet.ThrowTerminatingError($_)
@@ -144,12 +144,12 @@ function dry.action.terra.run{
         }
         $SourceFilePath = $null
         $SourceFile = $null
-        $TargetVarsFile = $null 
-        $TargetStateFile = $null 
+        $TargetVarsFile = $null
+        $TargetStateFile = $null
         $VariablesHash = $null
-        $Encoding = $null 
+        $Encoding = $null
         $Resolved = $null
-        $Arguments = $null 
+        $Arguments = $null
         $ActionParams = $null
         ol i "Action 'terra.run' is finished" -sh
     }

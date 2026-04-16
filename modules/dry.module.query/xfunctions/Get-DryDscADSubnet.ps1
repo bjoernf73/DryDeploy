@@ -1,12 +1,12 @@
-# This module is an action module for use with DryDeploy. It runs a DSC 
+# This module is an action module for use with DryDeploy. It runs a DSC
 # Config on a target
 # Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
 # LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.action.dsc.run/main/LICENSE
-# 
+#
 
 
 function Get-DryDscADSubnet{
-    [CmdletBinding()]  
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
         [psobject]$Resource,
@@ -17,7 +17,7 @@ function Get-DryDscADSubnet{
     try{
         # Holds all subnets at the site, but the resource's own subnet is first, then the rest
         $AllSubnetsatSite = @()
-        
+
         # Get resource's site
         $Site = $Configuration.CoreConfig.network.sites | Where-Object{ $_.Name -eq $Resource.network.site }
         if(($Site -is [array]) -or ($null -eq $Site)){
@@ -32,7 +32,7 @@ function Get-DryDscADSubnet{
 
         # Get the other subnet's at that site. Might be one, might be many, might be none
         $OtherSubnets = @( $Site.Subnets | Where-Object{ $_.Name -ne $Resource.network.subnet_name })
-        
+
         # First add resource's subnet
         $Subnetobject = Invoke-PSipcalc -networkaddress "$($Subnet.ip_subnet)/$($Subnet.subnet_mask)"
         $AllSubnetsatSite+= "$($Subnetobject.NetworkAddress)/$($Subnetobject.NetworkLength)"

@@ -1,7 +1,7 @@
-<# 
+<#
  This module provides core functionality for DryDeploy.
 
- 
+
 #>
 
 function New-DryItem{

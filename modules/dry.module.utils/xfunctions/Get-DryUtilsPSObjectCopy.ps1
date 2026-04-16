@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -14,10 +14,10 @@ function Get-DryUtilsPSObjectCopy{
         [Parameter(HelpMessage="Properties to add or change")]
         [hashtable]$Properties
     )
-  
-    [PSObject]$Copy = $Object | ConvertTo-Json -Depth 100 -Compress -ErrorAction Stop | 
+
+    [PSObject]$Copy = $Object | ConvertTo-Json -Depth 100 -Compress -ErrorAction Stop |
     ConvertFrom-Json -ErrorAction Stop
-    
+
     # Will only work on properties at root though
     if($Properties){
         foreach($Key in $Properties.Keys){

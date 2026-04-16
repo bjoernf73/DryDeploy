@@ -1,6 +1,6 @@
-<# 
- This module provides functions for bootstrapping package management, 
- registering package sources and package installations for use with 
+<#
+ This module provides functions for bootstrapping package management,
+ registering package sources and package installations for use with
  DryDeploy. ModuleConfigs may specify dependencies in it's root config
  that this module processes.
 
@@ -8,14 +8,14 @@
  LICENSE: https://raw.githubusercontent.com/bjoernf73/dry.module.packagemanagement/main/LICENSE
 #>
 
-#! Should rather be configured to allow winrm 
+#! Should rather be configured to allow winrm
 #! to the specific resources a run configures
-function Set-DryWinrm{ 
+function Set-DryWinrm{
     [CmdLetBinding()]
     param()
 
     try{
-       
+
         $ChangedSomething = $false
         $Service = Get-Service -Name 'WinRM' -ErrorAction Stop
         if($Service.StartType -ne 'Automatic'){
@@ -27,7 +27,7 @@ function Set-DryWinrm{
                 throw 'Run elevated to -init'
             }
         }
-        
+
         if($Service.Status -ne 'Running'){
             if(Test-DryElevated){
                 $Service | Start-Service -ErrorAction Stop
@@ -48,7 +48,7 @@ function Set-DryWinrm{
                 throw 'Run elevated to -init'
             }
         }
-        
+
         if($ChangedSomething){
             $Service | Restart-Service -Force -ErrorAction Stop
         }

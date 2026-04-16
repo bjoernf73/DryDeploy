@@ -1,6 +1,6 @@
-<# 
- This module provides functions for bootstrapping package management, 
- registering package sources and package installations for use with 
+<#
+ This module provides functions for bootstrapping package management,
+ registering package sources and package installations for use with
  DryDeploy. ModuleConfigs may specify dependencies in it's root config
  that this module processes.
 
@@ -78,7 +78,7 @@ function Install-DryDependencies{
                             RequiredVersion = $Module.requiredversion
                         }
                     }
-                    Install-DryChocoPackage @InstallChocoParams 
+                    Install-DryChocoPackage @InstallChocoParams
                 }
             }
         }
@@ -86,9 +86,9 @@ function Install-DryDependencies{
         # Download git projects to a PSModule path
         if($Dependencies.git){
             ol i 'GITs' -sh
-            if(-not $GitsPath){ 
+            if(-not $GitsPath){
                 [string]$UserProfile = [Environment]::GetEnvironmentVariable("UserProfile")
-                [string]$GitsPath = ([Environment]::GetEnvironmentVariable("PSModulePath") -split ';') | Where-Object{ 
+                [string]$GitsPath = ([Environment]::GetEnvironmentVariable("PSModulePath") -split ';') | Where-Object{
                     $_ -match ($UserProfile -replace '\\','\\')
                 }
             }
@@ -96,14 +96,14 @@ function Install-DryDependencies{
             if(-not (Test-Path -Path $GitsPath)){
                 New-Item -Path $GitsPath -Force -ItemType Directory -ErrorAction Stop | Out-Null
             }
-            
+
             foreach($Project in $Dependencies.git.projects){
                 ol i @('Git',$Project.url)
                 $InstallDryGitModuleParams = @{
                     Source = $Project.url
                     Path = $GitsPath
                 }
-                
+
                 if($Project.branch){
                     $InstallDryGitModuleParams += @{
                         Branch = $Project.branch
@@ -126,7 +126,7 @@ function Install-DryDependencies{
             }
         }
         $ConfigCombo.Save()
-        ol i "Dependencies installed" -sh 
+        ol i "Dependencies installed" -sh
     }
     catch{
         $PSCmdlet.ThrowTerminatingError($_)

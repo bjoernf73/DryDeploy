@@ -4,7 +4,7 @@ try{
     $Folder = "$PSScriptRoot\590bfb52\"
     $File   = "$Folder\DryDeploy.ps1.md"
     $NFile  = "$Folder\README.md"
-    
+
     if(Test-Path -Path $Folder -ErrorAction Ignore){
         Remove-Item -Path $Folder -Recurse -Force
     }

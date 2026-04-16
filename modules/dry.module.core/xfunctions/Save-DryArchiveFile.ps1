@@ -1,19 +1,19 @@
-<# 
+<#
  This module provides core functionality for DryDeploy.
 
- 
+
 #>
 
 function Save-DryArchiveFile{
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,HelpMessage="Path to, or file system object ([System.IO.File]) 
+        [Parameter(Mandatory,HelpMessage="Path to, or file system object ([System.IO.File])
         of the file to archive")]
         [System.IO.FileInfo]
         $ArchiveFile,
 
-        [Parameter(HelpMessage="Number of archived files to keep. I will count existing 
-        archived files, and delete all but the `$ToKeep newest (based on the sortable 
+        [Parameter(HelpMessage="Number of archived files to keep. I will count existing
+        archived files, and delete all but the `$ToKeep newest (based on the sortable
         date in filename). If 0, I won't delete any old archive files")]
         [int]
         $ToKeep = 50,
@@ -29,7 +29,7 @@ function Save-DryArchiveFile{
         }
         $ArchiveSourceFolder = Resolve-DryUtilsFullPath -Path (Split-Path -Path $ArchiveFile)
         $ArchiveTargetFolder = Resolve-DryUtilsFullPath -Path $ArchiveFolder -Force
-    
+
         if(-not (Test-Path -Path $ArchiveTargetFolder -ErrorAction Ignore)){
             New-Item -Path $ArchiveTargetFolder -ItemType Directory -ErrorAction Stop -Force | Out-Null
         }
@@ -39,14 +39,14 @@ function Save-DryArchiveFile{
         $ArchiveFileNewName = "ARCH_" + $(($ArchiveFile.LastWriteTime | Get-Date -format s) -replace ':','-') + "_$ArchiveFileName"
         $ArchiveFileNewFullName = Join-Path -Path $ArchiveSourceFolder -ChildPath $ArchiveFileNewName
         $ArchiveFile | Rename-Item -NewName $ArchiveFileNewName -Confirm:$false
-        
+
         if($ArchiveSourceFolder -ne $ArchiveTargetFolder){
-            Get-Item -Path $ArchiveFileNewFullName -ErrorAction Stop | 
+            Get-Item -Path $ArchiveFileNewFullName -ErrorAction Stop |
             Move-Item -Destination $ArchiveTargetFolder -ErrorAction Stop
         }
 
         # removes the oldest archived files, keeping the $ToKeep newest
-        $OldArchivedFiles = Get-ChildItem -Path "$ArchiveTargetFolder\*" | Where-Object{ 
+        $OldArchivedFiles = Get-ChildItem -Path "$ArchiveTargetFolder\*" | Where-Object{
             ($_.Name -match "^ARCH_[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{1,2}-[0-9]{1,2}-[0-9]{1,2}_") -and
             ($_.Name -like "*$ArchiveFileName")
         }
@@ -60,13 +60,13 @@ function Save-DryArchiveFile{
             })
         }
         $SortedOldArchivedFilesList = [System.Collections.Generic.List[PSObject]]::New()
-        $OldArchivedFilesList | 
-        Sort-Object -Property 'Date' | 
+        $OldArchivedFilesList |
+        Sort-Object -Property 'Date' |
         foreach-Object{
             $SortedOldArchivedFilesList.Add($_)
         }
         while ($SortedOldArchivedFilesList.count -gt $ToKeep){
-            ($SortedOldArchivedFilesList[0]).File | 
+            ($SortedOldArchivedFilesList[0]).File |
             Remove-Item -Force -Confirm:$false -ErrorAction 'Stop'
             $SortedOldArchivedFilesList.RemoveAt(0)
         }
@@ -76,13 +76,13 @@ function Save-DryArchiveFile{
     }
     finally{
         $ArchiveFolder = $null
-        $ArchiveFile = $null 
+        $ArchiveFile = $null
         $ArchiveTargetFolder = $null
         $ArchiveSourceFolder = $null
         $ArchiveFileName = $null
         $ArchiveFileNewName = $null
         $ArchiveFileNewFullName = $null
-        $OldArchivedFiles = $null 
+        $OldArchivedFiles = $null
         $OldArchivedFile = $null
         $OldArchivedFilesList = $null
         $SortedOldArchivedFilesList = $null

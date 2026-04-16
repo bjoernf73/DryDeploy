@@ -1,7 +1,7 @@
-<# 
+<#
  This module provides core functionality for DryDeploy.
 
- 
+
 #>
 
 function Get-DryObjectFromObjectArray{
@@ -10,7 +10,7 @@ function Get-DryObjectFromObjectArray{
         [Parameter(Mandatory)]
         [array]$ObjectArray,
 
-        [Parameter(Mandatory,HelpMessage="The object property name that  
+        [Parameter(Mandatory,HelpMessage="The object property name that
         identifies the object")]
         [string]$IDProperty,
 
@@ -33,18 +33,18 @@ function Get-DryObjectFromObjectArray{
 
         [Parameter(HelpMessage="By default, we assume that the ObjectArray
         contains one, and only one, unique object to match, and an exception
-        will be thrown if that's not the case. Use this if multiple matches 
-        is expected. This is automatically true if `$First, `$Last or 
+        will be thrown if that's not the case. Use this if multiple matches
+        is expected. This is automatically true if `$First, `$Last or
         `$Number")]
         [Switch]$AllowMultipleMatches,
 
         [Parameter(HelpMessage="The default we assume that the ObjectArray
-        should contain a match, and an exception will be thrown if that's 
+        should contain a match, and an exception will be thrown if that's
         not the case. Use this to allow no match. `$null will be returned
         if no match is found.")]
         [Switch]$AllowNoMatch
     )
-    
+
     try{
         if($First -or $Last -or $Number){
             $AllowMultipleMatches = $true

@@ -1,4 +1,4 @@
-<# 
+<#
  This module provides utility functions for use with DryDeploy.
 
  Copyright (C) 2021  Bjorn Henrik Formo (bjornhenrikformo@gmail.com)
@@ -9,7 +9,7 @@ function Merge-DryUtilsPSObjects{
     [CmdletBinding()]
     param(
         $FirstObject,
-         
+
         $SecondObject,
 
         [Switch]$PreferSecondObjectOnConflict,
@@ -26,12 +26,12 @@ function Merge-DryUtilsPSObjects{
         if(($FirstObject -is [array]) -and ($SecondObject -is [array])){
             $Private:ResultArray+=$FirstObject
             $Private:ResultArray+=$SecondObject
-            return $Private:ResultArray 
+            return $Private:ResultArray
         }
         elseif(($FirstObject -is [string]) -and ($SecondObject -is [string])){
-            # This happens when two identical property names are being merged. By default, the value from 
-            # $FirstObject is returned, unless the switch $PreferSecondObjectOnConflict is passed - then 
-            # the value from $SecondObject is returned. In any case, if the switch $FailOnConflict, 
+            # This happens when two identical property names are being merged. By default, the value from
+            # $FirstObject is returned, unless the switch $PreferSecondObjectOnConflict is passed - then
+            # the value from $SecondObject is returned. In any case, if the switch $FailOnConflict,
             # is passed, throw an error
             if($FailOnConflict){
                 throw "Conflict disallowed!"
@@ -39,7 +39,7 @@ function Merge-DryUtilsPSObjects{
             else{
                 if($PreferSecondObjectOnConflict){
                     return $SecondObject
-                } 
+                }
                 else{
                     return $FirstObject
                 }
@@ -50,19 +50,19 @@ function Merge-DryUtilsPSObjects{
             foreach($Property in $FirstObject | Get-Member -type NoteProperty, Property){
                 # does SecondObject have a matching property name?
                 if($null -eq $SecondObject.$($Property.Name)){
-                    # $SecondObject does not contain the current property from $FirstObject, so 
+                    # $SecondObject does not contain the current property from $FirstObject, so
                     # the property can be added to $Private:Resultobject as it is
                     $Private:Resultobject | Add-Member -MemberType $Property.MemberType -Name $Property.Name -Value $FirstObject.($Property.Name)
                 }
                 else{
-                    # $SecondObject contains the current property from $FirstObject, so 
+                    # $SecondObject contains the current property from $FirstObject, so
                     # the two must be merged. Call Merge-PSObject
                     $Private:Resultobject | Add-Member $Property.MemberType -Name $Property.Name -Value (Merge-DryUtilsPSObjects -FirstObject ($FirstObject.$($Property.Name)) -SecondObject ($SecondObject.$($Property.Name)) -PreferSecondObjectOnConflict:$PreferSecondObjectOnConflict -FailOnConflict:$FailOnConflict)
                     $Private:ProcessedConflictingPropertyNames += $Property.Name
                 }
             }
 
-            # Members in $SecondObject that are not yet processed, has no match in 
+            # Members in $SecondObject that are not yet processed, has no match in
             # $FirstObject, and may be added to the result as is
             foreach($Property in $SecondObject | Get-Member -type NoteProperty, Property){
                 if($Private:ProcessedConflictingPropertyNames -notcontains $Property.Name){
