@@ -1,4 +1,3 @@
-![DryDeploy](./.img/DryDeploy.png)
 ## SYNOPSIS
 DryDeploy is a promiscuous deployment orchestrator - swinging among
 available technologies.
